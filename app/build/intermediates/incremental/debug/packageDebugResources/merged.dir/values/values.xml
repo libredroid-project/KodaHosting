@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="bg_cell">#111111</color>
+    <color name="bg_input">#0A0C10</color>
+    <color name="bg_panel">#0F1115</color>
+    <color name="bg_void">#050510</color>
+    <color name="border_dim">#2D333B</color>
+    <color name="border_mid">#3A4149</color>
+    <color name="border_orange">#62727B</color>
+    <color name="koda_orange">#7A4E8C</color>
+    <color name="koda_orange_10">#1A7A4E8C</color>
+    <color name="koda_orange_dim">#4A5058</color>
+    <color name="koda_orange_glow">#62727B</color>
+    <color name="state_err">#FF3333</color>
+    <color name="state_info">#2277FF</color>
+    <color name="state_offline">#2A2A2A</color>
+    <color name="state_online">#00E676</color>
+    <color name="state_warn">#FFCC00</color>
+    <color name="txt_muted">#4A5058</color>
+    <color name="txt_orange">#D6D6D6</color>
+    <color name="txt_primary">#E0E0E0</color>
+    <color name="txt_secondary">#7A7F88</color>
+    <dimen name="mao_btn_height">44dp</dimen>
+    <dimen name="mao_radius_none">0dp</dimen>
+    <dimen name="mao_space_lg">16dp</dimen>
+    <dimen name="mao_space_md">12dp</dimen>
+    <dimen name="mao_space_sm">8dp</dimen>
+    <dimen name="mao_space_xl">24dp</dimen>
+    <dimen name="mao_space_xs">4dp</dimen>
+    <string name="app_name">KodaHosting</string>
+    <string name="mao_brand_subtitle">THE WIRED NOIR MOBILE</string>
+    <string name="mao_brand_title">KODAHOSTING</string>
+    <style name="KodaButton" parent="Widget.MaterialComponents.Button">
+        <item name="backgroundTint">#7A4E8C</item>
+        <item name="android:textColor">#F2F2F2</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:fontFamily">monospace</item>
+        <item name="android:letterSpacing">0.08</item>
+        <item name="android:textSize">12sp</item>
+        <item name="cornerRadius">0dp</item>
+        <item name="rippleColor">#4A5058</item>
+    </style>
+    <style name="KodaButton.Danger" parent="Widget.MaterialComponents.Button">
+        <item name="backgroundTint">#1A0000</item>
+        <item name="android:textColor">#FF3333</item>
+        <item name="android:fontFamily">monospace</item>
+        <item name="android:letterSpacing">0.08</item>
+        <item name="android:textSize">12sp</item>
+        <item name="cornerRadius">0dp</item>
+        <item name="strokeColor">#FF3333</item>
+        <item name="strokeWidth">1dp</item>
+    </style>
+    <style name="KodaButton.Outline" parent="Widget.MaterialComponents.Button.OutlinedButton">
+        <item name="strokeColor">#62727B</item>
+        <item name="strokeWidth">1dp</item>
+        <item name="android:textColor">#D6D6D6</item>
+        <item name="android:fontFamily">monospace</item>
+        <item name="android:letterSpacing">0.08</item>
+        <item name="android:textSize">12sp</item>
+        <item name="cornerRadius">0dp</item>
+    </style>
+    <style name="MonoTabText" parent="@android:style/TextAppearance">
+        <item name="android:textSize">10sp</item>
+        <item name="android:fontFamily">monospace</item>
+        <item name="android:letterSpacing">0.1</item>
+        <item name="android:textAllCaps">true</item>
+    </style>
+    <style name="Theme.KodaNetwork" parent="Theme.MaterialComponents.NoActionBar">
+        <item name="colorPrimary">#7A4E8C</item>
+        <item name="colorPrimaryVariant">#4A5058</item>
+        <item name="colorSecondary">#62727B</item>
+        <item name="android:colorBackground">#050510</item>
+        <item name="colorSurface">#050510</item>
+        <item name="colorOnPrimary">#000000</item>
+        <item name="colorOnBackground">#E0E0E0</item>
+        <item name="colorOnSurface">#E0E0E0</item>
+        <item name="android:statusBarColor">#050510</item>
+        <item name="android:navigationBarColor">#050510</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:textColor">#E0E0E0</item>
+    </style>
+</resources>

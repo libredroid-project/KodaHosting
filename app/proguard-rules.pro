@@ -1,0 +1,2 @@
+-keep class eu.kodanetwork.mchost.** { *; }
+-keepattributes *Annotation*

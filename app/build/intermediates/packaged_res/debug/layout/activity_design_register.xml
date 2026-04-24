@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/bg_void">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Create account"
+            android:textColor="@color/txt_primary"
+            android:textSize="24sp"
+            android:textStyle="bold" />
+
+        <EditText
+            android:id="@+id/et_email"
+            android:layout_width="match_parent"
+            android:layout_height="44dp"
+            android:layout_marginTop="12dp"
+            android:background="@drawable/input_field"
+            android:hint="Email"
+            android:inputType="textEmailAddress"
+            android:textColor="@color/txt_primary"
+            android:textColorHint="@color/txt_muted"
+            android:paddingHorizontal="10dp" />
+
+        <EditText
+            android:id="@+id/et_username"
+            android:layout_width="match_parent"
+            android:layout_height="44dp"
+            android:layout_marginTop="10dp"
+            android:background="@drawable/input_field"
+            android:hint="Username"
+            android:textColor="@color/txt_primary"
+            android:textColorHint="@color/txt_muted"
+            android:paddingHorizontal="10dp" />
+
+        <EditText
+            android:id="@+id/et_password"
+            android:layout_width="match_parent"
+            android:layout_height="44dp"
+            android:layout_marginTop="10dp"
+            android:background="@drawable/input_field"
+            android:hint="Password"
+            android:inputType="textPassword"
+            android:textColor="@color/txt_primary"
+            android:textColorHint="@color/txt_muted"
+            android:paddingHorizontal="10dp" />
+
+        <EditText
+            android:id="@+id/et_invite"
+            android:layout_width="match_parent"
+            android:layout_height="44dp"
+            android:layout_marginTop="10dp"
+            android:background="@drawable/input_field"
+            android:hint="Invite code (optional)"
+            android:textColor="@color/txt_primary"
+            android:textColorHint="@color/txt_muted"
+            android:paddingHorizontal="10dp" />
+
+        <Button
+            android:id="@+id/btn_create_account"
+            style="@style/KodaButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="14dp"
+            android:text="CREATE ACCOUNT" />
+
+        <TextView
+            android:id="@+id/tv_sign_in"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="Already have an account? Sign in"
+            android:textColor="@color/koda_orange"
+            android:textSize="13sp" />
+    </LinearLayout>
+</ScrollView>

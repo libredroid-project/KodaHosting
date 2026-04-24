@@ -1,0 +1,363 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent" android:layout_height="match_parent"
+    android:orientation="vertical" android:background="#080808">
+
+    <!-- ┌─ HEADER ───────────────────────────────────────────────────────┐ -->
+    <LinearLayout android:layout_width="match_parent" android:layout_height="50dp"
+        android:orientation="horizontal" android:gravity="center_vertical"
+        android:background="#080808" android:paddingStart="8dp" android:paddingEnd="12dp">
+        <ImageButton android:id="@+id/btn_back"
+            android:layout_width="42dp" android:layout_height="42dp"
+            android:src="@android:drawable/ic_media_previous"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:tint="#FF6B00"/>
+        <TextView android:id="@+id/tv_title"
+            android:layout_width="0dp" android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textColor="#E0E0E0" android:textSize="13sp"
+            android:fontFamily="monospace" android:textStyle="bold"
+            android:letterSpacing="0.05"/>
+        <View android:layout_width="6dp" android:layout_height="6dp"
+            android:id="@+id/dot" android:background="@drawable/dot_offline"
+            android:layout_marginEnd="6dp"/>
+        <TextView android:id="@+id/tv_badge"
+            android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:textSize="9sp" android:fontFamily="monospace"
+            android:textStyle="bold" android:letterSpacing="0.08"/>
+    </LinearLayout>
+    <View android:layout_width="match_parent" android:layout_height="1dp"
+        android:background="#FF6B00"/>
+
+    <!-- ┌─ TABS ─────────────────────────────────────────────────────────┐ -->
+    <com.google.android.material.tabs.TabLayout
+        android:id="@+id/tabs"
+        android:layout_width="match_parent" android:layout_height="36dp"
+        android:background="#0C0C0C"
+        app:tabSelectedTextColor="#FF6B00"
+        app:tabTextColor="#2A2A2A"
+        app:tabIndicatorColor="#FF6B00"
+        app:tabIndicatorHeight="1dp"
+        app:tabMode="fixed"
+        app:tabTextAppearance="@style/MonoTabText"/>
+    <View android:layout_width="match_parent" android:layout_height="1dp"
+        android:background="#1A1A1A"/>
+
+    <!-- ══════════ DASHBOARD ══════════ -->
+    <ScrollView android:id="@+id/panel_dash"
+        android:layout_width="match_parent" android:layout_height="0dp"
+        android:layout_weight="1" android:scrollbars="none">
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:orientation="vertical" android:padding="12dp">
+
+            <!-- STATUS CELL -->
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:orientation="vertical" android:background="@drawable/cell_bg"
+                android:padding="12dp" android:layout_marginBottom="8dp">
+
+                <!-- Corner label -->
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:text="┌─ STATUS" android:textColor="#FF6B00"
+                    android:textSize="9sp" android:fontFamily="monospace"
+                    android:letterSpacing="0.1" android:layout_marginBottom="10dp"/>
+
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+                        android:layout_weight="1" android:orientation="vertical">
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                            android:text="UPTIME" android:textColor="#2A2A2A"
+                            android:textSize="8sp" android:fontFamily="monospace" android:letterSpacing="0.1"/>
+                        <TextView android:id="@+id/tv_uptime"
+                            android:layout_width="wrap_content" android:layout_height="wrap_content"
+                            android:text="--:--:--" android:textColor="#FF6B00"
+                            android:textSize="26sp" android:fontFamily="monospace"/>
+                    </LinearLayout>
+                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+                        android:layout_weight="1" android:orientation="vertical">
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                            android:text="ONLINE" android:textColor="#2A2A2A"
+                            android:textSize="8sp" android:fontFamily="monospace" android:letterSpacing="0.1"/>
+                        <TextView android:id="@+id/tv_players"
+                            android:layout_width="wrap_content" android:layout_height="wrap_content"
+                            android:text="0 / 20" android:textColor="#E0E0E0"
+                            android:textSize="26sp" android:fontFamily="monospace"/>
+                    </LinearLayout>
+                </LinearLayout>
+
+                <!-- Divider -->
+                <View android:layout_width="match_parent" android:layout_height="1dp"
+                    android:background="#1A1A1A" android:layout_marginTop="10dp"
+                    android:layout_marginBottom="10dp"/>
+
+                <!-- JOIN -->
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:text="JOIN" android:textColor="#2A2A2A"
+                    android:textSize="8sp" android:fontFamily="monospace" android:letterSpacing="0.1"/>
+                <TextView android:id="@+id/tv_join_addr"
+                    android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:textColor="#FF6B00" android:textSize="12sp"
+                    android:fontFamily="monospace" android:textStyle="bold"
+                    android:layout_marginTop="2dp"/>
+
+                <!-- Info row -->
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:orientation="horizontal" android:layout_marginTop="10dp">
+                    <TextView android:id="@+id/tv_ver_info"
+                        android:layout_width="0dp" android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:textColor="#333333" android:textSize="9sp"
+                        android:fontFamily="monospace"/>
+                    <TextView android:id="@+id/tv_ram_info"
+                        android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:textColor="#333333" android:textSize="9sp"
+                        android:fontFamily="monospace"/>
+                </LinearLayout>
+
+                <!-- Java status -->
+                <TextView android:id="@+id/tv_java_info"
+                    android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:textSize="9sp" android:fontFamily="monospace"
+                    android:layout_marginTop="6dp"/>
+            </LinearLayout>
+
+            <!-- DOWNLOAD PROGRESS (hidden) -->
+            <LinearLayout android:id="@+id/dl_progress"
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:orientation="vertical" android:visibility="gone"
+                android:layout_marginBottom="6dp">
+                <ProgressBar android:layout_width="match_parent" android:layout_height="3dp"
+                    style="?android:attr/progressBarStyleHorizontal"
+                    android:indeterminate="true"
+                    android:indeterminateTint="#FF6B00"/>
+            </LinearLayout>
+            <TextView android:id="@+id/tv_dl_msg"
+                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:textColor="#FF8C42" android:textSize="9sp"
+                android:fontFamily="monospace" android:visibility="gone"
+                android:layout_marginBottom="8dp"/>
+
+            <!-- CONTROLS CELL -->
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:orientation="vertical" android:background="@drawable/cell_bg"
+                android:padding="12dp">
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:text="┌─ CONTROLS" android:textColor="#FF6B00"
+                    android:textSize="9sp" android:fontFamily="monospace"
+                    android:letterSpacing="0.1" android:layout_marginBottom="10dp"/>
+
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:orientation="horizontal" android:layout_marginBottom="6dp">
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btn_start" style="@style/KodaButton"
+                        android:layout_width="0dp" android:layout_height="44dp"
+                        android:layout_weight="1" android:layout_marginEnd="6dp"
+                        android:text="▶ START"/>
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btn_stop" style="@style/KodaButton.Outline"
+                        android:layout_width="0dp" android:layout_height="44dp"
+                        android:layout_weight="1" android:layout_marginStart="6dp"
+                        android:text="■ STOP" android:enabled="false"/>
+                </LinearLayout>
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btn_restart" style="@style/KodaButton.Outline"
+                        android:layout_width="0dp" android:layout_height="38dp"
+                        android:layout_weight="1" android:layout_marginEnd="6dp"
+                        android:text="↺ RESTART" android:enabled="false"/>
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btn_kill" style="@style/KodaButton.Danger"
+                        android:layout_width="0dp" android:layout_height="38dp"
+                        android:layout_weight="1" android:layout_marginStart="6dp"
+                        android:text="✕ KILL" android:enabled="false"/>
+                </LinearLayout>
+            </LinearLayout>
+
+        </LinearLayout>
+    </ScrollView>
+
+    <!-- ══════════ CONSOLE ══════════ -->
+    <LinearLayout android:id="@+id/panel_console"
+        android:layout_width="match_parent" android:layout_height="0dp"
+        android:layout_weight="1" android:orientation="vertical" android:visibility="gone">
+
+        <!-- Quick commands row -->
+        <HorizontalScrollView android:layout_width="match_parent" android:layout_height="34dp"
+            android:scrollbars="none" android:background="#060606"
+            android:paddingStart="8dp" android:paddingEnd="8dp">
+            <LinearLayout android:id="@+id/layout_chips"
+                android:layout_width="wrap_content" android:layout_height="match_parent"
+                android:orientation="horizontal" android:gravity="center_vertical"/>
+        </HorizontalScrollView>
+        <View android:layout_width="match_parent" android:layout_height="1dp"
+            android:background="#111111"/>
+
+        <!-- Log area -->
+        <ScrollView android:id="@+id/scroll_log"
+            android:layout_width="match_parent" android:layout_height="0dp"
+            android:layout_weight="1" android:background="#050505"
+            android:padding="10dp">
+            <TextView android:id="@+id/tv_log"
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:textSize="10sp" android:fontFamily="monospace"
+                android:lineSpacingMultiplier="1.5" android:textIsSelectable="true"/>
+        </ScrollView>
+
+        <!-- Input bar -->
+        <View android:layout_width="match_parent" android:layout_height="1dp"
+            android:background="#1A1A1A"/>
+        <LinearLayout android:layout_width="match_parent" android:layout_height="46dp"
+            android:orientation="horizontal" android:gravity="center_vertical"
+            android:background="#080808" android:paddingStart="10dp" android:paddingEnd="8dp">
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="›_" android:textColor="#FF6B00"
+                android:textSize="14sp" android:fontFamily="monospace"
+                android:layout_marginEnd="8dp"/>
+            <EditText android:id="@+id/et_cmd"
+                android:layout_width="0dp" android:layout_height="match_parent"
+                android:layout_weight="1" android:background="@null"
+                android:textColor="#CCCCCC" android:textSize="11sp"
+                android:fontFamily="monospace" android:hint="enter command…"
+                android:textColorHint="#222222" android:imeOptions="actionSend"
+                android:inputType="text" android:singleLine="true"/>
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_copy_log" style="@style/KodaButton.Outline"
+                android:layout_width="wrap_content" android:layout_height="32dp"
+                android:text="COPY" android:textSize="9sp"
+                android:layout_marginEnd="4dp"/>
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_clear" style="@style/KodaButton.Outline"
+                android:layout_width="wrap_content" android:layout_height="32dp"
+                android:text="CLR" android:textSize="9sp"
+                android:layout_marginEnd="4dp"/>
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_send" style="@style/KodaButton"
+                android:layout_width="wrap_content" android:layout_height="32dp"
+                android:text="EXEC" android:textSize="9sp"/>
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- ══════════ FILES ══════════ -->
+    <LinearLayout android:id="@+id/panel_files"
+        android:layout_width="match_parent" android:layout_height="0dp"
+        android:layout_weight="1" android:orientation="vertical" android:visibility="gone">
+        <LinearLayout android:layout_width="match_parent" android:layout_height="28dp"
+            android:orientation="horizontal" android:gravity="center_vertical"
+            android:background="#0C0C0C" android:paddingStart="12dp" android:paddingEnd="12dp">
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="~/servers/" android:textColor="#FF6B00"
+                android:textSize="9sp" android:fontFamily="monospace"/>
+            <TextView android:id="@+id/tv_files_root"
+                android:layout_width="0dp" android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:textColor="#2A2A2A" android:textSize="9sp"
+                android:fontFamily="monospace" android:singleLine="true"
+                android:ellipsize="middle"/>
+        </LinearLayout>
+        <View android:layout_width="match_parent" android:layout_height="1dp"
+            android:background="#1A1A1A"/>
+        <ScrollView android:layout_width="match_parent" android:layout_height="0dp"
+            android:layout_weight="1">
+            <LinearLayout android:id="@+id/layout_files"
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:orientation="vertical"/>
+        </ScrollView>
+    </LinearLayout>
+
+    <!-- ══════════ SETTINGS ══════════ -->
+    <ScrollView android:id="@+id/panel_settings"
+        android:layout_width="match_parent" android:layout_height="0dp"
+        android:layout_weight="1" android:scrollbars="none" android:visibility="gone">
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:orientation="vertical" android:padding="12dp">
+
+            <!-- INFO CELL -->
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:orientation="vertical" android:background="@drawable/cell_bg"
+                android:padding="12dp" android:layout_marginBottom="8dp">
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:text="┌─ SERVER INFO" android:textColor="#FF6B00"
+                    android:textSize="9sp" android:fontFamily="monospace"
+                    android:letterSpacing="0.1" android:layout_marginBottom="10dp"/>
+                <TextView android:id="@+id/tv_settings_info"
+                    android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:textColor="#444444" android:textSize="10sp"
+                    android:fontFamily="monospace" android:lineSpacingMultiplier="1.8"/>
+            </LinearLayout>
+
+            <!-- GUIDE CELL -->
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:orientation="vertical" android:background="@drawable/cell_orange"
+                android:padding="12dp" android:layout_marginBottom="10dp">
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:text="┌─ SETUP" android:textColor="#FF6B00"
+                    android:textSize="9sp" android:fontFamily="monospace"
+                    android:letterSpacing="0.1" android:layout_marginBottom="8dp"/>
+                <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:text="1) download server.jar below\n2) press ▶ START on dashboard\n3) players connect via address above\n\nTermux java: pkg install openjdk-17"
+                    android:textColor="#7A3300" android:textSize="10sp"
+                    android:fontFamily="monospace" android:lineSpacingMultiplier="1.6"/>
+            </LinearLayout>
+
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:orientation="vertical" android:background="@drawable/cell_bg"
+                android:padding="12dp" android:layout_marginBottom="10dp">
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:text="┌─ TERMUX / TUNNEL / DNS" android:textColor="#FF6B00"
+                    android:textSize="9sp" android:fontFamily="monospace"
+                    android:letterSpacing="0.1" android:layout_marginBottom="8dp"/>
+                <TextView android:id="@+id/tv_termux_status"
+                    android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:textColor="#777777" android:textSize="10sp"
+                    android:fontFamily="monospace" android:text="Termux: checking..."/>
+                <TextView android:id="@+id/tv_tunnel_status"
+                    android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:textColor="#777777" android:textSize="10sp"
+                    android:fontFamily="monospace" android:text="Tunnel: not started"/>
+                <TextView android:id="@+id/tv_domain_status"
+                    android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:textColor="#777777" android:textSize="10sp"
+                    android:fontFamily="monospace" android:text="Domain: not linked"/>
+                <EditText android:id="@+id/et_domain_prefix"
+                    android:layout_width="match_parent" android:layout_height="40dp"
+                    android:layout_marginTop="8dp"
+                    android:background="@drawable/input_field"
+                    android:textColor="#E0E0E0" android:textColorHint="#444444"
+                    android:hint="Subdomain, z.B. survival"
+                    android:fontFamily="monospace" android:paddingStart="10dp"
+                    android:paddingEnd="10dp"/>
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_termux_setup" style="@style/KodaButton.Outline"
+                    android:layout_width="match_parent" android:layout_height="40dp"
+                    android:layout_marginTop="8dp"
+                    android:text="[ SETUP TERMUX + JAVA ]"/>
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_start_tunnel" style="@style/KodaButton.Outline"
+                    android:layout_width="match_parent" android:layout_height="40dp"
+                    android:layout_marginTop="6dp"
+                    android:text="[ START PLAYIT TUNNEL ]"/>
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_link_domain" style="@style/KodaButton"
+                    android:layout_width="match_parent" android:layout_height="40dp"
+                    android:layout_marginTop="6dp"
+                    android:text="[ CREATE IONOS CNAME ]"/>
+            </LinearLayout>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_dl_jar" style="@style/KodaButton"
+                android:layout_width="match_parent" android:layout_height="46dp"
+                android:text="[ DOWNLOAD SERVER.JAR ]"
+                android:layout_marginBottom="8dp"/>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_del_server" style="@style/KodaButton.Danger"
+                android:layout_width="match_parent" android:layout_height="42dp"
+                android:text="[ DELETE SERVER ]"
+                android:layout_marginBottom="32dp"/>
+
+        </LinearLayout>
+    </ScrollView>
+
+</LinearLayout>

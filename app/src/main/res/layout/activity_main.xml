@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent" android:layout_height="match_parent"
+    android:orientation="vertical" android:background="#080808">
+
+    <!-- ┌─ TOP BAR ──────────────────────────────────────────────────────┐ -->
+    <LinearLayout android:layout_width="match_parent" android:layout_height="50dp"
+        android:orientation="horizontal" android:gravity="center_vertical"
+        android:background="#080808" android:paddingStart="16dp" android:paddingEnd="16dp">
+
+        <!-- Corner mark -->
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:text="┌" android:textColor="#FF6B00" android:textSize="16sp"
+            android:fontFamily="monospace" android:layout_marginEnd="8dp"/>
+
+        <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+            android:layout_weight="1" android:orientation="vertical">
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="KODAHOSTING" android:textColor="#FF6B00"
+                android:textSize="16sp" android:fontFamily="monospace"
+                android:textStyle="bold" android:letterSpacing="0.12"/>
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="minecraft server manager v3.0"
+                android:textColor="#2A2A2A" android:textSize="9sp"
+                android:fontFamily="monospace"/>
+        </LinearLayout>
+
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:id="@+id/tv_server_count"
+            android:text="0 SERVERS" android:textColor="#2A2A2A"
+            android:textSize="9sp" android:fontFamily="monospace"
+            android:letterSpacing="0.1"/>
+    </LinearLayout>
+
+    <!-- Orange top border -->
+    <View android:layout_width="match_parent" android:layout_height="1dp"
+        android:background="#FF6B00"/>
+
+    <!-- Subheader row -->
+    <LinearLayout android:layout_width="match_parent" android:layout_height="24dp"
+        android:orientation="horizontal" android:gravity="center_vertical"
+        android:background="#0C0C0C" android:paddingStart="16dp" android:paddingEnd="16dp">
+        <TextView android:layout_width="0dp" android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="NAME" android:textColor="#2A2A2A"
+            android:textSize="8sp" android:fontFamily="monospace" android:letterSpacing="0.15"/>
+        <TextView android:layout_width="60dp" android:layout_height="wrap_content"
+            android:text="TYPE" android:textColor="#2A2A2A"
+            android:textSize="8sp" android:fontFamily="monospace" android:letterSpacing="0.15"/>
+        <TextView android:layout_width="50dp" android:layout_height="wrap_content"
+            android:text="RAM" android:textColor="#2A2A2A"
+            android:textSize="8sp" android:fontFamily="monospace" android:letterSpacing="0.15"/>
+        <TextView android:layout_width="60dp" android:layout_height="wrap_content"
+            android:text="STATUS" android:textColor="#2A2A2A"
+            android:textSize="8sp" android:fontFamily="monospace" android:letterSpacing="0.15"/>
+    </LinearLayout>
+    <View android:layout_width="match_parent" android:layout_height="1dp"
+        android:background="#1A1A1A"/>
+
+    <!-- Server list -->
+    <FrameLayout android:layout_width="match_parent" android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rv"
+            android:layout_width="match_parent" android:layout_height="match_parent"
+            android:clipToPadding="false" android:paddingBottom="72dp"/>
+
+        <!-- Empty state -->
+        <LinearLayout android:id="@+id/tv_empty"
+            android:layout_width="match_parent" android:layout_height="match_parent"
+            android:orientation="vertical" android:gravity="center"
+            android:visibility="gone">
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="┌─────────────────┐" android:textColor="#1A1A1A"
+                android:textSize="13sp" android:fontFamily="monospace"/>
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="│  NO SERVERS YET  │" android:textColor="#2A2A2A"
+                android:textSize="13sp" android:fontFamily="monospace"/>
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="└─────────────────┘" android:textColor="#1A1A1A"
+                android:textSize="13sp" android:fontFamily="monospace"/>
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="tap [+] to create one" android:textColor="#2A2A2A"
+                android:textSize="10sp" android:fontFamily="monospace"
+                android:layout_marginTop="12dp"/>
+        </LinearLayout>
+
+    </FrameLayout>
+
+    <!-- Bottom bar with FAB -->
+    <View android:layout_width="match_parent" android:layout_height="1dp"
+        android:background="#1A1A1A"/>
+    <LinearLayout android:layout_width="match_parent" android:layout_height="52dp"
+        android:orientation="horizontal" android:gravity="center_vertical"
+        android:background="#080808" android:paddingStart="16dp" android:paddingEnd="12dp">
+        <TextView android:layout_width="0dp" android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="kodanetwork.eu" android:textColor="#1F1F1F"
+            android:textSize="9sp" android:fontFamily="monospace"/>
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_debug_log"
+            android:layout_width="wrap_content" android:layout_height="38dp"
+            android:text="DEBUG LOG"
+            android:textSize="9sp" android:fontFamily="monospace"
+            android:layout_marginEnd="8dp"/>
+        <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+            android:id="@+id/fab_add"
+            android:layout_width="wrap_content" android:layout_height="38dp"
+            android:text="[+] NEW SERVER"
+            android:textColor="#000000" android:textStyle="bold"
+            android:fontFamily="monospace" android:letterSpacing="0.08"
+            android:textSize="11sp"
+            app:backgroundTint="#FF6B00"
+            app:cornerRadius="0dp"
+            app:elevation="0dp"/>
+    </LinearLayout>
+
+</LinearLayout>

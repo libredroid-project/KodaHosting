@@ -1,0 +1,122 @@
+package eu.kodanetwork.mchost.network.supabase;
+
+import android.content.Context;
+
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+
+import eu.kodanetwork.mchost.BuildConfig;
+import okhttp3.OkHttpClient;
+import okhttp3.logging.HttpLoggingInterceptor;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
+
+public class SupabaseFunctionsClient {
+    private final SupabaseFunctionApi api;
+    private final String anonKey;
+
+    public SupabaseFunctionsClient(Context context) {
+        String baseUrl = BuildConfig.SUPABASE_URL;
+        if (baseUrl == null || baseUrl.trim().isEmpty()) {
+            throw new IllegalStateException("SUPABASE_URL missing in BuildConfig");
+        }
+        if (!baseUrl.endsWith("/")) baseUrl += "/";
+
+        this.anonKey = BuildConfig.SUPABASE_ANON_KEY;
+        HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
+        logging.setLevel(HttpLoggingInterceptor.Level.BASIC);
+        OkHttpClient okHttpClient = new OkHttpClient.Builder().addInterceptor(logging).build();
+        Retrofit retrofit = new Retrofit.Builder()
+            .baseUrl(baseUrl)
+            .addConverterFactory(GsonConverterFactory.create())
+            .client(okHttpClient)
+            .build();
+        this.api = retrofit.create(SupabaseFunctionApi.class);
+    }
+
+    public ProvisionResponse provisionJava(String userJwt, String arch) throws IOException {
+        Map<String, Object> body = new HashMap<>();
+        body.put("arch", arch);
+        Response<Map<String, Object>> response = api.callFunction(
+            "provision-java",
+            anonKey,
+            withBearer(userJwt),
+            body
+        ).execute();
+        if (!response.isSuccessful() || response.body() == null) {
+            throw new IOException("provision-java failed: HTTP " + response.code());
+        }
+        Map<String, Object> map = response.body();
+        return new ProvisionResponse(
+            str(map.get("signedUrl")),
+            str(map.get("checksum")),
+            str(map.get("objectPath"))
+        );
+    }
+
+    public PlayitBootstrapResponse bootstrapPlayit(String userJwt, String serverId, int port) throws IOException {
+        Map<String, Object> body = new HashMap<>();
+        body.put("serverId", serverId);
+        body.put("port", port);
+        Response<Map<String, Object>> response = api.callFunction(
+            "bootstrap-playit",
+            anonKey,
+            withBearer(userJwt),
+            body
+        ).execute();
+        if (!response.isSuccessful() || response.body() == null) {
+            throw new IOException("bootstrap-playit failed: HTTP " + response.code());
+        }
+        Map<String, Object> map = response.body();
+        return new PlayitBootstrapResponse(str(map.get("token")), str(map.get("mode")));
+    }
+
+    public void createDnsLink(String userJwt, String host, String target, int port) throws IOException {
+        Map<String, Object> body = new HashMap<>();
+        body.put("host", host);
+        body.put("target", target);
+        body.put("port", port);
+        Response<Map<String, Object>> response = api.callFunction(
+            "create-dns-link",
+            anonKey,
+            withBearer(userJwt),
+            body
+        ).execute();
+        if (!response.isSuccessful()) {
+            String errorBody = "";
+            try { errorBody = response.errorBody().string(); } catch (Exception ignored) {}
+            throw new IOException("create-dns-link failed: HTTP " + response.code() + " " + errorBody);
+        }
+    }
+
+    private String withBearer(String jwt) {
+        if (jwt == null || jwt.isEmpty()) return "Bearer " + anonKey;
+        return "Bearer " + jwt;
+    }
+
+    private static String str(Object value) {
+        return value == null ? "" : String.valueOf(value);
+    }
+
+    public static class ProvisionResponse {
+        public final String signedUrl;
+        public final String checksum;
+        public final String objectPath;
+        public ProvisionResponse(String signedUrl, String checksum, String objectPath) {
+            this.signedUrl = signedUrl;
+            this.checksum = checksum;
+            this.objectPath = objectPath;
+        }
+    }
+
+    public static class PlayitBootstrapResponse {
+        public final String token;
+        public final String mode;
+        public PlayitBootstrapResponse(String token, String mode) {
+            this.token = token;
+            this.mode = mode;
+        }
+    }
+}
