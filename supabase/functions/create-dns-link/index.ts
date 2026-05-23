@@ -7,7 +7,7 @@ Deno.serve(async (req) => {
   try {
     const body = await req.json();
     const host = String(body.host ?? "").toLowerCase();
-    const target = String(body.target ?? "").toLowerCase();
+    const target = String(body.target ?? "").toLowerCase(); // VPS IP
     const port = Number(body.port ?? 0);
 
     if (!host || !target || !port) {
@@ -19,13 +19,6 @@ Deno.serve(async (req) => {
 
     const apiKeyPrefix = Deno.env.get("IONOS_API_PREFIX") ?? "";
     const apiSecret = Deno.env.get("IONOS_API_SECRET") ?? "";
-    if (!apiKeyPrefix || !apiSecret) {
-      return new Response(JSON.stringify({ error: "missing_ionos_credentials" }), {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
     const fullApiKey = `${apiKeyPrefix}.${apiSecret}`;
     const domain = "kodanetwork.eu";
     
@@ -33,94 +26,55 @@ Deno.serve(async (req) => {
     const zonesRes = await fetch("https://api.hosting.ionos.com/dns/v1/zones", {
       headers: { "X-API-Key": fullApiKey }
     });
-    if (!zonesRes.ok) throw new Error("Failed to fetch zones: " + await zonesRes.text());
-    
     const zonesData = await zonesRes.json();
     const zone = (zonesData as any[])?.find((z: any) => z.name === domain);
     if (!zone) throw new Error("Zone kodanetwork.eu not found");
     const zoneId = zone.id;
 
+    // Use absolute FQDNs for IONOS API
     const fqdn = `${host}.${domain}`;
-    const srvName = `_minecraft._tcp.${host}`;
-    const finalTarget = target.endsWith(".") ? target : target + ".";
+    const srvFqdn = `_minecraft._tcp.${fqdn}`;
 
-    // 2. Clean up old CNAME records to avoid conflict
-    const cnameRes = await fetch(`https://api.hosting.ionos.com/dns/v1/zones/${zoneId}/records?recordName=${fqdn}&recordType=CNAME`, {
-      headers: { "X-API-Key": fullApiKey }
-    });
-    if (cnameRes.ok) {
-      const existing = await cnameRes.json();
-      for (const rec of (existing as any[]) || []) {
-        await fetch(`https://api.hosting.ionos.com/dns/v1/zones/${zoneId}/records/${rec.id}`, {
-          method: "DELETE",
-          headers: { "X-API-Key": fullApiKey }
-        });
-      }
-    }
+    // We no longer blindly delete existing records. If the record exists, the POST will fail and that is the desired behavior to prevent subdomain stealing.
 
-    // 3. Clean up old SRV records
-    const srvRes = await fetch(`https://api.hosting.ionos.com/dns/v1/zones/${zoneId}/records?recordName=${srvName}.${domain}&recordType=SRV`, {
-      headers: { "X-API-Key": fullApiKey }
-    });
-    if (srvRes.ok) {
-      const existing = await srvRes.json();
-      for (const rec of (existing as any[]) || []) {
-        await fetch(`https://api.hosting.ionos.com/dns/v1/zones/${zoneId}/records/${rec.id}`, {
-          method: "DELETE",
-          headers: { "X-API-Key": fullApiKey }
-        });
-      }
-    }
-
-    // 4. Create new CNAME and SRV records
-    const cnamePayload = [{
-      name: fqdn,
-      type: "CNAME",
-      content: finalTarget,
-      ttl: 3600,
-      disabled: false
-    }];
-
-    const srvPayload = [{
-      name: srvName + "." + domain,
-      type: "SRV",
-      content: `0 ${port} ${finalTarget}`,
-      ttl: 3600,
-      prio: 0,
-      disabled: false
-    }];
-
-    const createCnameRes = await fetch(`https://api.hosting.ionos.com/dns/v1/zones/${zoneId}/records`, {
+    // 3. Create A-Record (Points subdomain to VPS IP)
+    const createARes = await fetch(`https://api.hosting.ionos.com/dns/v1/zones/${zoneId}/records`, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "X-API-Key": fullApiKey
-      },
-      body: JSON.stringify(cnamePayload)
+      headers: { "Content-Type": "application/json", "X-API-Key": fullApiKey },
+      body: JSON.stringify([{
+        name: fqdn,
+        type: "A",
+        content: target, // VPS IP
+        ttl: 3600,
+        disabled: false
+      }])
     });
 
-    if (!createCnameRes.ok) {
-      const errorText = await createCnameRes.text();
-      console.error("IONOS CNAME Error:", errorText);
-      throw new Error(`Failed to create CNAME: HTTP ${createCnameRes.status} - ${errorText}`);
+    if (!createARes.ok) {
+        const errText = await createARes.text();
+        throw new Error("A-Record creation failed: " + errText);
     }
 
+    // 4. Create SRV record (Points to the A-Record with the Minecraft Port)
     const createSrvRes = await fetch(`https://api.hosting.ionos.com/dns/v1/zones/${zoneId}/records`, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "X-API-Key": fullApiKey
-      },
-      body: JSON.stringify(srvPayload)
+      headers: { "Content-Type": "application/json", "X-API-Key": fullApiKey },
+      body: JSON.stringify([{
+        name: srvFqdn,
+        type: "SRV",
+        content: `0 ${port} ${fqdn}.`,
+        ttl: 3600,
+        prio: 0,
+        disabled: false
+      }])
     });
 
     if (!createSrvRes.ok) {
-      const errorText = await createSrvRes.text();
-      console.error("IONOS SRV Error:", errorText);
-      throw new Error(`Failed to create SRV: HTTP ${createSrvRes.status} - ${errorText}`);
+        const errText = await createSrvRes.text();
+        throw new Error("SRV-Record creation failed: " + errText);
     }
 
-    return new Response(JSON.stringify({ ok: true, host, target, port }), {
+    return new Response(JSON.stringify({ ok: true, host, vps: target, port }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
 

@@ -2,60 +2,64 @@
 <resources>
 
     <style name="Theme.KodaNetwork" parent="Theme.MaterialComponents.NoActionBar">
-        <item name="colorPrimary">#7A4E8C</item>
-        <item name="colorPrimaryVariant">#4A5058</item>
-        <item name="colorSecondary">#62727B</item>
-        <item name="android:colorBackground">#050510</item>
-        <item name="colorSurface">#050510</item>
-        <item name="colorOnPrimary">#000000</item>
-        <item name="colorOnBackground">#E0E0E0</item>
-        <item name="colorOnSurface">#E0E0E0</item>
-        <item name="android:statusBarColor">#050510</item>
-        <item name="android:navigationBarColor">#050510</item>
+        <item name="colorPrimary">#FF6B00</item>
+        <item name="colorPrimaryVariant">#CC5500</item>
+        <item name="colorSecondary">#FF8C38</item>
+        <item name="android:colorBackground">#0A0A0F</item>
+        <item name="android:windowBackground">#0A0A0F</item>
+        <item name="colorSurface">#12121A</item>
+        <item name="colorOnPrimary">#FFFFFF</item>
+        <item name="colorOnBackground">#F0F0F0</item>
+        <item name="colorOnSurface">#F0F0F0</item>
+        <item name="android:statusBarColor">#00000000</item>
+        <item name="android:navigationBarColor">#00000000</item>
+        <item name="android:windowTranslucentStatus">true</item>
+        <item name="android:windowTranslucentNavigation">true</item>
+        <item name="android:windowLayoutInDisplayCutoutMode">shortEdges</item>
         <item name="android:windowLightStatusBar">false</item>
-        <item name="android:textColor">#E0E0E0</item>
+        <item name="android:textColor">#F0F0F0</item>
     </style>
 
-    <!-- Primary orange filled, sharp corners -->
+    <!-- Primary orange filled button, rounded corners -->
     <style name="KodaButton" parent="Widget.MaterialComponents.Button">
-        <item name="backgroundTint">#7A4E8C</item>
-        <item name="android:textColor">#F2F2F2</item>
+        <item name="backgroundTint">#FF6B00</item>
+        <item name="android:textColor">#FFFFFF</item>
         <item name="android:textStyle">bold</item>
-        <item name="android:fontFamily">monospace</item>
-        <item name="android:letterSpacing">0.08</item>
-        <item name="android:textSize">12sp</item>
-        <item name="cornerRadius">0dp</item>
-        <item name="rippleColor">#4A5058</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:letterSpacing">0.04</item>
+        <item name="android:textSize">13sp</item>
+        <item name="cornerRadius">12dp</item>
+        <item name="rippleColor">#CC5500</item>
     </style>
 
-    <!-- Outlined orange, sharp corners -->
+    <!-- Outlined orange button, rounded corners -->
     <style name="KodaButton.Outline" parent="Widget.MaterialComponents.Button.OutlinedButton">
-        <item name="strokeColor">#62727B</item>
+        <item name="strokeColor">#FF6B0088</item>
         <item name="strokeWidth">1dp</item>
-        <item name="android:textColor">#D6D6D6</item>
-        <item name="android:fontFamily">monospace</item>
-        <item name="android:letterSpacing">0.08</item>
-        <item name="android:textSize">12sp</item>
-        <item name="cornerRadius">0dp</item>
+        <item name="android:textColor">#FF8C38</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:letterSpacing">0.04</item>
+        <item name="android:textSize">13sp</item>
+        <item name="cornerRadius">12dp</item>
     </style>
 
-    <!-- Danger red, sharp corners -->
+    <!-- Danger red button, rounded corners -->
     <style name="KodaButton.Danger" parent="Widget.MaterialComponents.Button">
         <item name="backgroundTint">#1A0000</item>
-        <item name="android:textColor">#FF3333</item>
-        <item name="android:fontFamily">monospace</item>
-        <item name="android:letterSpacing">0.08</item>
-        <item name="android:textSize">12sp</item>
-        <item name="cornerRadius">0dp</item>
-        <item name="strokeColor">#FF3333</item>
+        <item name="android:textColor">#FF3344</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:letterSpacing">0.04</item>
+        <item name="android:textSize">13sp</item>
+        <item name="cornerRadius">12dp</item>
+        <item name="strokeColor">#FF334488</item>
         <item name="strokeWidth">1dp</item>
     </style>
 
     <!-- Tab text style -->
     <style name="MonoTabText" parent="@android:style/TextAppearance">
-        <item name="android:textSize">10sp</item>
-        <item name="android:fontFamily">monospace</item>
-        <item name="android:letterSpacing">0.1</item>
+        <item name="android:textSize">11sp</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:letterSpacing">0.06</item>
         <item name="android:textAllCaps">true</item>
     </style>
 

@@ -1,180 +1,251 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:fitsSystemWindows="true"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent" android:layout_height="match_parent"
-    android:orientation="vertical" android:background="#080808">
+    android:orientation="vertical" android:background="#0A0A0F">
 
     <!-- ┌─ HEADER ───────────────────────────────────────────────────────┐ -->
-    <LinearLayout android:layout_width="match_parent" android:layout_height="50dp"
+    <LinearLayout android:layout_width="match_parent" android:layout_height="56dp"
         android:orientation="horizontal" android:gravity="center_vertical"
-        android:background="#080808" android:paddingStart="8dp" android:paddingEnd="12dp">
+        android:background="#0A0A0F" android:paddingStart="12dp" android:paddingEnd="16dp"
+        android:elevation="4dp">
         <ImageButton android:id="@+id/btn_back"
-            android:layout_width="42dp" android:layout_height="42dp"
+            android:layout_width="40dp" android:layout_height="40dp"
             android:src="@android:drawable/ic_media_previous"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:tint="#FF6B00"/>
-        <TextView android:id="@+id/tv_title"
-            android:layout_width="0dp" android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:textColor="#E0E0E0" android:textSize="13sp"
-            android:fontFamily="monospace" android:textStyle="bold"
-            android:letterSpacing="0.05"/>
-        <View android:layout_width="6dp" android:layout_height="6dp"
-            android:id="@+id/dot" android:background="@drawable/dot_offline"
-            android:layout_marginEnd="6dp"/>
-        <TextView android:id="@+id/tv_badge"
-            android:layout_width="wrap_content" android:layout_height="wrap_content"
-            android:textSize="9sp" android:fontFamily="monospace"
-            android:textStyle="bold" android:letterSpacing="0.08"/>
+        
+        <LinearLayout android:id="@+id/layout_header_normal"
+            android:layout_width="0dp" android:layout_height="match_parent"
+            android:layout_weight="1" android:orientation="horizontal" android:gravity="center_vertical">
+            <TextView android:id="@+id/tv_title"
+                android:layout_width="0dp" android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:textColor="#F0F0F0" android:textSize="16sp"
+                android:fontFamily="sans-serif-medium" android:textStyle="bold"
+                android:letterSpacing="0.02"
+                android:paddingStart="8dp"
+                android:singleLine="true" android:ellipsize="end"/>
+            <View android:layout_width="8dp" android:layout_height="8dp"
+                android:id="@+id/dot" android:background="@drawable/dot_offline"
+                android:layout_marginEnd="8dp"/>
+            <TextView android:id="@+id/tv_badge"
+                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:textSize="11sp" android:fontFamily="sans-serif-medium"
+                android:textStyle="bold" android:letterSpacing="0.04"/>
+        </LinearLayout>
+
+        <LinearLayout android:id="@+id/layout_header_restart"
+            android:layout_width="0dp" android:layout_height="match_parent"
+            android:layout_weight="1" android:orientation="horizontal" android:gravity="center_vertical"
+            android:visibility="gone">
+            <TextView android:layout_width="0dp" android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Plugin installiert! Neustart nötig."
+                android:textColor="#FFCC00" android:textSize="13sp"
+                android:fontFamily="sans-serif-medium" android:paddingStart="8dp"
+                android:singleLine="true" android:ellipsize="end"/>
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_header_restart"
+                android:layout_width="wrap_content" android:layout_height="36dp"
+                android:text="NEUSTART" app:backgroundTint="#FFCC00" android:textColor="#000000"
+                android:textSize="11sp" app:cornerRadius="6dp" android:insetTop="0dp" android:insetBottom="0dp"/>
+        </LinearLayout>
     </LinearLayout>
-    <View android:layout_width="match_parent" android:layout_height="1dp"
-        android:background="#FF6B00"/>
+    <View android:layout_width="match_parent" android:layout_height="2dp"
+        android:background="#FF6B00" android:alpha="0.6"/>
 
     <!-- ┌─ TABS ─────────────────────────────────────────────────────────┐ -->
     <com.google.android.material.tabs.TabLayout
         android:id="@+id/tabs"
-        android:layout_width="match_parent" android:layout_height="36dp"
-        android:background="#0C0C0C"
+        android:layout_width="match_parent" android:layout_height="44dp"
+        android:background="#0E0E14"
         app:tabSelectedTextColor="#FF6B00"
-        app:tabTextColor="#2A2A2A"
+        app:tabTextColor="#8A8A9A"
         app:tabIndicatorColor="#FF6B00"
-        app:tabIndicatorHeight="1dp"
-        app:tabMode="fixed"
-        app:tabTextAppearance="@style/MonoTabText"/>
+        app:tabIndicatorHeight="3dp"
+        app:tabMode="scrollable"
+        app:tabGravity="center"
+        app:tabTextAppearance="@style/MonoTabText"
+        app:tabRippleColor="#22FF6B00"/>
     <View android:layout_width="match_parent" android:layout_height="1dp"
-        android:background="#1A1A1A"/>
+        android:background="#1A1A24"/>
 
     <!-- ══════════ DASHBOARD ══════════ -->
     <ScrollView android:id="@+id/panel_dash"
         android:layout_width="match_parent" android:layout_height="0dp"
         android:layout_weight="1" android:scrollbars="none">
         <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
-            android:orientation="vertical" android:padding="12dp">
+            android:orientation="vertical" android:padding="16dp">
 
-            <!-- STATUS CELL -->
+            <!-- STATUS CARD -->
             <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
                 android:orientation="vertical" android:background="@drawable/cell_bg"
-                android:padding="12dp" android:layout_marginBottom="8dp">
+                android:padding="18dp" android:layout_marginBottom="12dp">
 
-                <!-- Corner label -->
+                <!-- Section title -->
                 <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                    android:text="┌─ STATUS" android:textColor="#FF6B00"
-                    android:textSize="9sp" android:fontFamily="monospace"
-                    android:letterSpacing="0.1" android:layout_marginBottom="10dp"/>
+                    android:text="STATUS" android:textColor="#F0F0F0"
+                    android:textSize="11sp" android:fontFamily="sans-serif-medium"
+                    android:letterSpacing="0.12" android:textStyle="bold"
+                    android:layout_marginBottom="14dp"/>
 
                 <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
                     android:orientation="horizontal">
                     <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
                         android:layout_weight="1" android:orientation="vertical">
                         <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                            android:text="UPTIME" android:textColor="#2A2A2A"
-                            android:textSize="8sp" android:fontFamily="monospace" android:letterSpacing="0.1"/>
+                            android:text="UPTIME" android:textColor="#555566"
+                            android:textSize="9sp" android:fontFamily="sans-serif-medium"
+                            android:letterSpacing="0.1" android:layout_marginBottom="4dp"/>
                         <TextView android:id="@+id/tv_uptime"
                             android:layout_width="wrap_content" android:layout_height="wrap_content"
-                            android:text="--:--:--" android:textColor="#FF6B00"
-                            android:textSize="26sp" android:fontFamily="monospace"/>
+                            android:text="--:--:--" android:textColor="#F0F0F0"
+                            android:textSize="14sp" android:fontFamily="sans-serif"/>
                     </LinearLayout>
-                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
-                        android:layout_weight="1" android:orientation="vertical">
+                    <LinearLayout android:id="@+id/card_players"
+                        android:layout_width="0dp" android:layout_height="wrap_content"
+                        android:layout_weight="1" android:orientation="vertical"
+                        android:background="?attr/selectableItemBackground"
+                        android:clickable="true" android:focusable="true">
                         <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                            android:text="ONLINE" android:textColor="#2A2A2A"
-                            android:textSize="8sp" android:fontFamily="monospace" android:letterSpacing="0.1"/>
+                            android:text="ONLINE" android:textColor="#555566"
+                            android:textSize="9sp" android:fontFamily="sans-serif-medium"
+                            android:letterSpacing="0.1" android:layout_marginBottom="4dp"/>
                         <TextView android:id="@+id/tv_players"
                             android:layout_width="wrap_content" android:layout_height="wrap_content"
-                            android:text="0 / 20" android:textColor="#E0E0E0"
-                            android:textSize="26sp" android:fontFamily="monospace"/>
+                            android:text="0 / 20 Spieler" android:textColor="#F0F0F0"
+                            android:textSize="14sp" android:fontFamily="sans-serif"
+                            android:paddingEnd="8dp"/>
                     </LinearLayout>
                 </LinearLayout>
 
                 <!-- Divider -->
                 <View android:layout_width="match_parent" android:layout_height="1dp"
-                    android:background="#1A1A1A" android:layout_marginTop="10dp"
-                    android:layout_marginBottom="10dp"/>
+                    android:background="#1A1A24" android:layout_marginTop="14dp"
+                    android:layout_marginBottom="14dp"/>
 
                 <!-- JOIN -->
                 <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                    android:text="JOIN" android:textColor="#2A2A2A"
-                    android:textSize="8sp" android:fontFamily="monospace" android:letterSpacing="0.1"/>
+                    android:text="JOIN ADDRESS" android:textColor="#555566"
+                    android:textSize="9sp" android:fontFamily="sans-serif-medium"
+                    android:letterSpacing="0.1" android:layout_marginBottom="4dp"/>
                 <TextView android:id="@+id/tv_join_addr"
                     android:layout_width="wrap_content" android:layout_height="wrap_content"
-                    android:textColor="#FF6B00" android:textSize="12sp"
-                    android:fontFamily="monospace" android:textStyle="bold"
+                    android:textColor="#F0F0F0" android:textSize="15sp"
+                    android:fontFamily="sans-serif-medium" android:textStyle="bold"
                     android:layout_marginTop="2dp"/>
 
                 <!-- Info row -->
                 <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
-                    android:orientation="horizontal" android:layout_marginTop="10dp">
+                    android:orientation="horizontal" android:layout_marginTop="14dp">
                     <TextView android:id="@+id/tv_ver_info"
                         android:layout_width="0dp" android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:textColor="#333333" android:textSize="9sp"
-                        android:fontFamily="monospace"/>
+                        android:textColor="#8A8A9A" android:textSize="12sp"
+                        android:fontFamily="sans-serif"
+                        android:singleLine="true" android:ellipsize="end"/>
                     <TextView android:id="@+id/tv_ram_info"
                         android:layout_width="wrap_content" android:layout_height="wrap_content"
-                        android:textColor="#333333" android:textSize="9sp"
-                        android:fontFamily="monospace"/>
+                        android:textColor="#8A8A9A" android:textSize="12sp"
+                        android:fontFamily="sans-serif"/>
                 </LinearLayout>
 
-                <!-- Java status -->
                 <TextView android:id="@+id/tv_java_info"
                     android:layout_width="wrap_content" android:layout_height="wrap_content"
-                    android:textSize="9sp" android:fontFamily="monospace"
-                    android:layout_marginTop="6dp"/>
+                    android:textSize="11sp" android:fontFamily="sans-serif"
+                    android:layout_marginTop="8dp"
+                    android:singleLine="true" android:ellipsize="end"/>
             </LinearLayout>
 
             <!-- DOWNLOAD PROGRESS (hidden) -->
-            <LinearLayout android:id="@+id/dl_progress"
+            <!-- Interactive Physics Loader -->
+        <FrameLayout android:id="@+id/layout_physics_container"
+            android:layout_width="match_parent" android:layout_height="300dp"
+            android:visibility="gone"
+            android:background="#0A0A0F">
+            <eu.kodanetwork.mchost.ui.PhysicsLoadingView
+                android:id="@+id/physics_view"
+                android:layout_width="match_parent" android:layout_height="match_parent"/>
+            <TextView android:id="@+id/tv_physics_msg"
+                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal|bottom"
+                android:layout_marginBottom="24dp"
+                android:text="INSTALLING..."
+                android:textColor="#F0F0F0"
+                android:fontFamily="sans-serif-medium"
+                android:textStyle="bold"
+                android:letterSpacing="0.08"
+                android:textSize="13sp"/>
+        </FrameLayout>
+
+        <LinearLayout android:id="@+id/dl_progress"
                 android:layout_width="match_parent" android:layout_height="wrap_content"
                 android:orientation="vertical" android:visibility="gone"
-                android:layout_marginBottom="6dp">
-                <ProgressBar android:layout_width="match_parent" android:layout_height="3dp"
+                android:layout_marginBottom="8dp">
+                <ProgressBar android:layout_width="match_parent" android:layout_height="4dp"
                     style="?android:attr/progressBarStyleHorizontal"
                     android:indeterminate="true"
                     android:indeterminateTint="#FF6B00"/>
             </LinearLayout>
             <TextView android:id="@+id/tv_dl_msg"
                 android:layout_width="wrap_content" android:layout_height="wrap_content"
-                android:textColor="#FF8C42" android:textSize="9sp"
-                android:fontFamily="monospace" android:visibility="gone"
-                android:layout_marginBottom="8dp"/>
+                android:textColor="#FF8C38" android:textSize="11sp"
+                android:fontFamily="sans-serif" android:visibility="gone"
+                android:layout_marginBottom="10dp"/>
 
-            <!-- CONTROLS CELL -->
+            <!-- CONTROLS CARD -->
             <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
                 android:orientation="vertical" android:background="@drawable/cell_bg"
-                android:padding="12dp">
+                android:padding="18dp">
                 <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                    android:text="┌─ CONTROLS" android:textColor="#FF6B00"
-                    android:textSize="9sp" android:fontFamily="monospace"
-                    android:letterSpacing="0.1" android:layout_marginBottom="10dp"/>
+                    android:text="CONTROLS" android:textColor="#F0F0F0"
+                    android:textSize="11sp" android:fontFamily="sans-serif-medium"
+                    android:letterSpacing="0.12" android:textStyle="bold"
+                    android:layout_marginBottom="14dp"/>
 
                 <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
-                    android:orientation="horizontal" android:layout_marginBottom="6dp">
+                    android:orientation="horizontal" android:layout_marginBottom="8dp">
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/btn_start" style="@style/KodaButton"
-                        android:layout_width="0dp" android:layout_height="44dp"
-                        android:layout_weight="1" android:layout_marginEnd="6dp"
-                        android:text="▶ START"/>
+                        android:layout_width="0dp" android:layout_height="48dp"
+                        android:layout_weight="1" android:layout_marginEnd="8dp"
+                        android:text="START"
+                        android:fontFamily="sans-serif-medium"
+                        android:textSize="13sp"
+                        app:cornerRadius="12dp"/>
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/btn_stop" style="@style/KodaButton.Outline"
-                        android:layout_width="0dp" android:layout_height="44dp"
-                        android:layout_weight="1" android:layout_marginStart="6dp"
-                        android:text="■ STOP" android:enabled="false"/>
+                        android:layout_width="0dp" android:layout_height="48dp"
+                        android:layout_weight="1" android:layout_marginStart="8dp"
+                        android:text="STOP" android:enabled="false"
+                        android:fontFamily="sans-serif-medium"
+                        android:textSize="13sp"
+                        app:cornerRadius="12dp"/>
                 </LinearLayout>
                 <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
                     android:orientation="horizontal">
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/btn_restart" style="@style/KodaButton.Outline"
-                        android:layout_width="0dp" android:layout_height="38dp"
-                        android:layout_weight="1" android:layout_marginEnd="6dp"
-                        android:text="↺ RESTART" android:enabled="false"/>
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/btn_kill" style="@style/KodaButton.Danger"
-                        android:layout_width="0dp" android:layout_height="38dp"
-                        android:layout_weight="1" android:layout_marginStart="6dp"
-                        android:text="✕ KILL" android:enabled="false"/>
+                        android:layout_width="0dp" android:layout_height="44dp"
+                        android:layout_weight="1" android:text="RESTART" android:enabled="false"
+                        android:fontFamily="sans-serif-medium"
+                        android:textSize="13sp"
+                        app:cornerRadius="12dp"/>
                 </LinearLayout>
-            </LinearLayout>
 
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_kill" style="@style/KodaButton.Outline"
+                    android:layout_width="match_parent" android:layout_height="44dp"
+                    android:layout_marginTop="12dp"
+                    android:text="⚠ HARD RESET" app:strokeColor="#FF3344" android:textColor="#FF3344"
+                    android:fontFamily="sans-serif-medium"
+                    android:textSize="12sp"
+                    app:cornerRadius="12dp"
+                    android:background="@drawable/btn_kill_bg"/>
+
+                </LinearLayout>
         </LinearLayout>
     </ScrollView>
 
@@ -184,86 +255,136 @@
         android:layout_weight="1" android:orientation="vertical" android:visibility="gone">
 
         <!-- Quick commands row -->
-        <HorizontalScrollView android:layout_width="match_parent" android:layout_height="34dp"
-            android:scrollbars="none" android:background="#060606"
-            android:paddingStart="8dp" android:paddingEnd="8dp">
+        <HorizontalScrollView android:layout_width="match_parent" android:layout_height="40dp"
+            android:scrollbars="none" android:background="#0E0E14"
+            android:paddingStart="12dp" android:paddingEnd="12dp">
             <LinearLayout android:id="@+id/layout_chips"
                 android:layout_width="wrap_content" android:layout_height="match_parent"
                 android:orientation="horizontal" android:gravity="center_vertical"/>
         </HorizontalScrollView>
         <View android:layout_width="match_parent" android:layout_height="1dp"
-            android:background="#111111"/>
+            android:background="#1A1A24"/>
 
         <!-- Log area -->
         <ScrollView android:id="@+id/scroll_log"
             android:layout_width="match_parent" android:layout_height="0dp"
-            android:layout_weight="1" android:background="#050505"
-            android:padding="10dp">
+            android:layout_weight="1" android:background="#08080E"
+            android:padding="8dp"
+            android:fillViewport="true">
             <TextView android:id="@+id/tv_log"
                 android:layout_width="match_parent" android:layout_height="wrap_content"
-                android:textSize="10sp" android:fontFamily="monospace"
-                android:lineSpacingMultiplier="1.5" android:textIsSelectable="true"/>
+                android:background="#08080E"
+                android:textColor="#CCCCCC" android:textSize="12sp"
+                android:fontFamily="monospace"
+                android:lineSpacingMultiplier="1.3"
+                android:textIsSelectable="true"
+                android:paddingBottom="8dp"/>
         </ScrollView>
 
         <!-- Input bar -->
         <View android:layout_width="match_parent" android:layout_height="1dp"
-            android:background="#1A1A1A"/>
-        <LinearLayout android:layout_width="match_parent" android:layout_height="46dp"
+            android:background="#1A1A24"/>
+        <LinearLayout android:layout_width="match_parent" android:layout_height="52dp"
             android:orientation="horizontal" android:gravity="center_vertical"
-            android:background="#080808" android:paddingStart="10dp" android:paddingEnd="8dp">
+            android:background="#0E0E14" android:paddingStart="14dp" android:paddingEnd="10dp">
             <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                android:text="›_" android:textColor="#FF6B00"
-                android:textSize="14sp" android:fontFamily="monospace"
-                android:layout_marginEnd="8dp"/>
+                android:text="›" android:textColor="#FF6B00"
+                android:textSize="18sp" android:fontFamily="sans-serif-medium"
+                android:textStyle="bold"
+                android:layout_marginEnd="10dp"/>
             <EditText android:id="@+id/et_cmd"
-                android:layout_width="0dp" android:layout_height="match_parent"
-                android:layout_weight="1" android:background="@null"
-                android:textColor="#CCCCCC" android:textSize="11sp"
-                android:fontFamily="monospace" android:hint="enter command…"
-                android:textColorHint="#222222" android:imeOptions="actionSend"
-                android:inputType="text" android:singleLine="true"/>
+                android:layout_width="0dp" android:layout_height="36dp"
+                android:layout_weight="1" android:background="@drawable/input_console_bg"
+                android:textColor="#F0F0F0" android:textSize="13sp"
+                android:fontFamily="sans-serif" android:hint="enter command…"
+                android:textColorHint="#555566" android:imeOptions="actionSend"
+                android:inputType="text" android:singleLine="true"
+                android:paddingStart="14dp" android:paddingEnd="14dp"/>
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btn_copy_log" style="@style/KodaButton.Outline"
-                android:layout_width="wrap_content" android:layout_height="32dp"
-                android:text="COPY" android:textSize="9sp"
-                android:layout_marginEnd="4dp"/>
+                android:layout_width="wrap_content" android:layout_height="34dp"
+                android:text="COPY" android:textSize="10sp"
+                android:layout_marginStart="6dp"
+                android:fontFamily="sans-serif-medium"
+                app:cornerRadius="10dp"/>
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btn_clear" style="@style/KodaButton.Outline"
-                android:layout_width="wrap_content" android:layout_height="32dp"
-                android:text="CLR" android:textSize="9sp"
-                android:layout_marginEnd="4dp"/>
+                android:layout_width="wrap_content" android:layout_height="34dp"
+                android:text="CLR" android:textSize="10sp"
+                android:layout_marginStart="4dp"
+                android:fontFamily="sans-serif-medium"
+                app:cornerRadius="10dp"/>
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btn_send" style="@style/KodaButton"
-                android:layout_width="wrap_content" android:layout_height="32dp"
-                android:text="EXEC" android:textSize="9sp"/>
+                android:layout_width="wrap_content" android:layout_height="34dp"
+                android:text="EXEC" android:textSize="10sp"
+                android:layout_marginStart="4dp"
+                android:fontFamily="sans-serif-medium"
+                app:cornerRadius="10dp"/>
         </LinearLayout>
     </LinearLayout>
 
     <!-- ══════════ FILES ══════════ -->
     <LinearLayout android:id="@+id/panel_files"
         android:layout_width="match_parent" android:layout_height="0dp"
-        android:layout_weight="1" android:orientation="vertical" android:visibility="gone">
-        <LinearLayout android:layout_width="match_parent" android:layout_height="28dp"
+        android:layout_weight="1" android:orientation="vertical" android:visibility="gone"
+        android:padding="12dp">
+        <LinearLayout android:layout_width="match_parent" android:layout_height="36dp"
             android:orientation="horizontal" android:gravity="center_vertical"
-            android:background="#0C0C0C" android:paddingStart="12dp" android:paddingEnd="12dp">
+            android:background="@drawable/files_path_bg"
+            android:paddingStart="16dp" android:paddingEnd="16dp">
             <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
                 android:text="~/servers/" android:textColor="#FF6B00"
-                android:textSize="9sp" android:fontFamily="monospace"/>
+                android:textSize="12sp" android:fontFamily="sans-serif-medium"/>
             <TextView android:id="@+id/tv_files_root"
                 android:layout_width="0dp" android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:textColor="#2A2A2A" android:textSize="9sp"
-                android:fontFamily="monospace" android:singleLine="true"
+                android:textColor="#8A8A9A" android:textSize="12sp"
+                android:fontFamily="sans-serif" android:singleLine="true"
                 android:ellipsize="middle"/>
         </LinearLayout>
         <View android:layout_width="match_parent" android:layout_height="1dp"
-            android:background="#1A1A1A"/>
+            android:background="#1A1A24"/>
         <ScrollView android:layout_width="match_parent" android:layout_height="0dp"
-            android:layout_weight="1">
+            android:layout_weight="1"
+            android:background="#0E0E14">
             <LinearLayout android:id="@+id/layout_files"
                 android:layout_width="match_parent" android:layout_height="wrap_content"
-                android:orientation="vertical"/>
+                android:orientation="vertical"
+                android:padding="4dp"/>
         </ScrollView>
+    </LinearLayout>
+    <!-- ══════════ PLUGINS/MODS ══════════ -->
+    <LinearLayout android:id="@+id/panel_plugins"
+        android:layout_width="match_parent" android:layout_height="0dp"
+        android:layout_weight="1" android:orientation="vertical" android:visibility="gone"
+        android:padding="12dp">
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:orientation="horizontal" android:gravity="center_vertical"
+            android:background="@drawable/input_bg"
+            android:padding="4dp">
+            <EditText android:id="@+id/et_plugin_search"
+                android:layout_width="0dp" android:layout_height="wrap_content"
+                android:layout_weight="1" android:background="@null"
+                android:padding="12dp" android:hint="Search Modrinth..."
+                android:textColorHint="#5A5A6A" android:textColor="#F0F0F0"
+                android:textSize="14sp" android:fontFamily="sans-serif"/>
+            <ImageButton android:id="@+id/btn_plugin_search"
+                android:layout_width="48dp" android:layout_height="48dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:src="@android:drawable/ic_menu_search"
+                app:tint="#FF6B00"/>
+        </LinearLayout>
+        
+        <ProgressBar android:id="@+id/pb_plugins"
+            android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:layout_gravity="center" android:layout_marginTop="20dp"
+            android:visibility="gone"/>
+
+        <androidx.recyclerview.widget.RecyclerView android:id="@+id/rv_plugins"
+            android:layout_width="match_parent" android:layout_height="match_parent"
+            android:layout_marginTop="12dp"
+            android:clipToPadding="false" android:paddingBottom="20dp"/>
     </LinearLayout>
 
     <!-- ══════════ SETTINGS ══════════ -->
@@ -271,93 +392,243 @@
         android:layout_width="match_parent" android:layout_height="0dp"
         android:layout_weight="1" android:scrollbars="none" android:visibility="gone">
         <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
-            android:orientation="vertical" android:padding="12dp">
+            android:orientation="vertical" android:padding="16dp">
 
-            <!-- INFO CELL -->
+            <!-- INFO CARD -->
             <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
                 android:orientation="vertical" android:background="@drawable/cell_bg"
-                android:padding="12dp" android:layout_marginBottom="8dp">
+                android:padding="18dp" android:layout_marginBottom="12dp">
                 <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                    android:text="┌─ SERVER INFO" android:textColor="#FF6B00"
-                    android:textSize="9sp" android:fontFamily="monospace"
-                    android:letterSpacing="0.1" android:layout_marginBottom="10dp"/>
+                    android:text="SERVER INFO" android:textColor="#F0F0F0"
+                    android:textSize="11sp" android:fontFamily="sans-serif-medium"
+                    android:letterSpacing="0.12" android:textStyle="bold"
+                    android:layout_marginBottom="12dp"/>
                 <TextView android:id="@+id/tv_settings_info"
                     android:layout_width="match_parent" android:layout_height="wrap_content"
-                    android:textColor="#444444" android:textSize="10sp"
-                    android:fontFamily="monospace" android:lineSpacingMultiplier="1.8"/>
+                    android:textColor="#8A8A9A" android:textSize="12sp"
+                    android:fontFamily="sans-serif" android:lineSpacingMultiplier="1.6"/>
             </LinearLayout>
 
-            <!-- GUIDE CELL -->
-            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
-                android:orientation="vertical" android:background="@drawable/cell_orange"
-                android:padding="12dp" android:layout_marginBottom="10dp">
-                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                    android:text="┌─ SETUP" android:textColor="#FF6B00"
-                    android:textSize="9sp" android:fontFamily="monospace"
-                    android:letterSpacing="0.1" android:layout_marginBottom="8dp"/>
-                <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
-                    android:text="1) download server.jar below\n2) press ▶ START on dashboard\n3) players connect via address above\n\nTermux java: pkg install openjdk-17"
-                    android:textColor="#7A3300" android:textSize="10sp"
-                    android:fontFamily="monospace" android:lineSpacingMultiplier="1.6"/>
-            </LinearLayout>
-
+            <!-- RAM CONFIGURATION CARD -->
             <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
                 android:orientation="vertical" android:background="@drawable/cell_bg"
-                android:padding="12dp" android:layout_marginBottom="10dp">
+                android:padding="18dp" android:layout_marginBottom="14dp">
                 <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                    android:text="┌─ TERMUX / TUNNEL / DNS" android:textColor="#FF6B00"
-                    android:textSize="9sp" android:fontFamily="monospace"
-                    android:letterSpacing="0.1" android:layout_marginBottom="8dp"/>
-                <TextView android:id="@+id/tv_termux_status"
+                    android:text="RAM ALLOCATION" android:textColor="#F0F0F0"
+                    android:textSize="11sp" android:fontFamily="sans-serif-medium"
+                    android:letterSpacing="0.12" android:textStyle="bold"
+                    android:layout_marginBottom="10dp"/>
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:orientation="horizontal" android:gravity="center_vertical"
+                    android:layout_marginBottom="12dp">
+                    <TextView android:layout_width="0dp" android:layout_height="wrap_content"
+                        android:layout_weight="1" android:text="Allocated RAM"
+                        android:textColor="#F0F0F0" android:textSize="13sp" android:fontFamily="sans-serif-medium"/>
+                    <TextView android:id="@+id/tv_settings_ram" android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:text="1024MB" android:textColor="#FF6B00" android:textSize="14sp" android:fontFamily="sans-serif-medium" android:textStyle="bold"/>
+                </LinearLayout>
+                <SeekBar android:id="@+id/seek_settings_ram"
                     android:layout_width="match_parent" android:layout_height="wrap_content"
-                    android:textColor="#777777" android:textSize="10sp"
-                    android:fontFamily="monospace" android:text="Termux: checking..."/>
-                <TextView android:id="@+id/tv_tunnel_status"
-                    android:layout_width="match_parent" android:layout_height="wrap_content"
-                    android:textColor="#777777" android:textSize="10sp"
-                    android:fontFamily="monospace" android:text="Tunnel: not started"/>
-                <TextView android:id="@+id/tv_domain_status"
-                    android:layout_width="match_parent" android:layout_height="wrap_content"
-                    android:textColor="#777777" android:textSize="10sp"
-                    android:fontFamily="monospace" android:text="Domain: not linked"/>
-                <EditText android:id="@+id/et_domain_prefix"
-                    android:layout_width="match_parent" android:layout_height="40dp"
-                    android:layout_marginTop="8dp"
-                    android:background="@drawable/input_field"
-                    android:textColor="#E0E0E0" android:textColorHint="#444444"
-                    android:hint="Subdomain, z.B. survival"
-                    android:fontFamily="monospace" android:paddingStart="10dp"
-                    android:paddingEnd="10dp"/>
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btn_termux_setup" style="@style/KodaButton.Outline"
-                    android:layout_width="match_parent" android:layout_height="40dp"
-                    android:layout_marginTop="8dp"
-                    android:text="[ SETUP TERMUX + JAVA ]"/>
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btn_start_tunnel" style="@style/KodaButton.Outline"
-                    android:layout_width="match_parent" android:layout_height="40dp"
-                    android:layout_marginTop="6dp"
-                    android:text="[ START PLAYIT TUNNEL ]"/>
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btn_link_domain" style="@style/KodaButton"
-                    android:layout_width="match_parent" android:layout_height="40dp"
-                    android:layout_marginTop="6dp"
-                    android:text="[ CREATE IONOS CNAME ]"/>
+                    android:progressTint="#FF6B00" android:thumbTint="#FF6B00"/>
+            </LinearLayout>
+
+            <!-- NETWORK & AUTOMATION CARD -->
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:orientation="vertical" android:background="@drawable/cell_bg"
+                android:padding="18dp" android:layout_marginBottom="14dp">
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:text="NETWORK &amp; AUTOMATION" android:textColor="#F0F0F0"
+                    android:textSize="11sp" android:fontFamily="sans-serif-medium"
+                    android:letterSpacing="0.12" android:textStyle="bold"
+                    android:layout_marginBottom="10dp"/>
+
+                <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:text="Alle Netzwerk-Konfigurationen (Tunnels, DNS, Ports) passieren mittlerweile vollautomatisch im Hintergrund sobald der Server startet.\n\nManuelle Tunnel- oder DNS-Einstellungen sind nicht mehr nötig."
+                    android:textColor="#8A8A9A" android:textSize="12sp"
+                    android:fontFamily="sans-serif" android:lineSpacingMultiplier="1.4"/>
+
+
+                <!-- Bedrock Toggle -->
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:orientation="horizontal" android:gravity="center_vertical"
+                    android:layout_marginTop="16dp">
+                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+                        android:layout_weight="1" android:orientation="vertical">
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                            android:text="Bedrock Support"
+                            android:textColor="#F0F0F0" android:textSize="13sp" android:fontFamily="sans-serif-medium"
+                            android:textStyle="bold"/>
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                            android:text="Geyser &amp; Floodgate (Auto-Install)"
+                            android:textColor="#8A8A9A" android:textSize="11sp" android:fontFamily="sans-serif"
+                            android:layout_marginTop="2dp"/>
+                    </LinearLayout>
+                    <com.google.android.material.switchmaterial.SwitchMaterial
+                        android:id="@+id/sw_bedrock"
+                        android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:enabled="true"
+                        app:thumbTint="#FF6B00" app:trackTint="#33FF6B00"/>
+                </LinearLayout>
+
+                <!-- Divider -->
+                <View android:layout_width="match_parent" android:layout_height="1dp"
+                    android:background="#1A1A24" android:layout_marginTop="16dp"
+                    android:layout_marginBottom="4dp"/>
+
+                <!-- Voicechat Toggle -->
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:orientation="horizontal" android:gravity="center_vertical"
+                    android:layout_marginTop="16dp">
+                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+                        android:layout_weight="1" android:orientation="vertical">
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                            android:text="Voicechat Support"
+                            android:textColor="#F0F0F0" android:textSize="13sp" android:fontFamily="sans-serif-medium"
+                            android:textStyle="bold"/>
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                            android:text="Simple Voicechat (Auto-Install)"
+                            android:textColor="#8A8A9A" android:textSize="11sp" android:fontFamily="sans-serif"
+                            android:layout_marginTop="2dp"/>
+                    </LinearLayout>
+                    <com.google.android.material.switchmaterial.SwitchMaterial
+                        android:id="@+id/sw_voicechat"
+                        android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:enabled="true"
+                        app:thumbTint="#FF6B00" app:trackTint="#33FF6B00"/>
+                </LinearLayout>
+
+                <!-- Divider -->
+                <View android:layout_width="match_parent" android:layout_height="1dp"
+                    android:background="#1A1A24" android:layout_marginTop="16dp"
+                    android:layout_marginBottom="16dp"/>
+
+                <!-- Custom Domain UI -->
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:orientation="vertical">
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:text="Eigene Domain nutzen"
+                        android:textColor="#F0F0F0" android:textSize="13sp" android:fontFamily="sans-serif-medium"
+                        android:textStyle="bold" android:layout_marginBottom="4dp"/>
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:text="Wenn du deine eigene Domain (z.B. play.deinname.de) nutzen möchtest, erstelle bei deinem Domain-Anbieter (z.B. Cloudflare) einen CNAME Record, der auf diese KodaNetwork Addresse zeigt:"
+                        android:textColor="#8A8A9A" android:textSize="11sp" android:fontFamily="sans-serif"
+                        android:layout_marginBottom="8dp"/>
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:orientation="horizontal" android:gravity="center_vertical"
+                        android:background="#111118" android:padding="12dp">
+                        <TextView android:id="@+id/tv_custom_domain_target"
+                            android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content"
+                            android:text="Lädt..." android:textColor="#FF6B00" android:fontFamily="monospace"
+                            android:textSize="12sp" android:textIsSelectable="true"/>
+                        <ImageButton android:id="@+id/btn_copy_domain"
+                            android:layout_width="32dp" android:layout_height="32dp"
+                            android:background="?selectableItemBackgroundBorderless"
+                            android:src="?android:attr/actionModeCopyDrawable" app:tint="#8A8A9A"/>
+                    </LinearLayout>
+                </LinearLayout>
             </LinearLayout>
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btn_dl_jar" style="@style/KodaButton"
-                android:layout_width="match_parent" android:layout_height="46dp"
-                android:text="[ DOWNLOAD SERVER.JAR ]"
-                android:layout_marginBottom="8dp"/>
+                android:layout_width="match_parent" android:layout_height="50dp"
+                android:text="DOWNLOAD SERVER.JAR"
+                android:fontFamily="sans-serif-medium"
+                android:textSize="13sp"
+                android:layout_marginBottom="10dp"
+                app:cornerRadius="12dp"/>
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btn_del_server" style="@style/KodaButton.Danger"
-                android:layout_width="match_parent" android:layout_height="42dp"
-                android:text="[ DELETE SERVER ]"
-                android:layout_marginBottom="32dp"/>
+                android:layout_width="match_parent" android:layout_height="48dp"
+                android:text="DELETE SERVER"
+                android:fontFamily="sans-serif-medium"
+                android:textSize="13sp"
+                android:layout_marginBottom="32dp"
+                app:cornerRadius="12dp"/>
+
+            <!-- Hidden compat views for legacy code -->
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:orientation="vertical" android:visibility="gone">
+                <TextView android:id="@+id/tv_termux_status"
+                    android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:textColor="#8A8A9A" android:textSize="12sp"/>
+                <TextView android:id="@+id/tv_tunnel_status"
+                    android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:textColor="#8A8A9A" android:textSize="12sp"/>
+                <TextView android:id="@+id/tv_domain_status"
+                    android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:textColor="#8A8A9A" android:textSize="12sp"/>
+                <EditText android:id="@+id/et_domain_prefix"
+                    android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:textColor="#F0F0F0" android:textSize="12sp"/>
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_termux_setup"
+                    android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:text="Termux Setup" style="@style/KodaButton"
+                    android:visibility="gone"/>
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_start_tunnel"
+                    android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:text="Start Tunnel" style="@style/KodaButton"/>
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_link_domain"
+                    android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:text="Link Domain" style="@style/KodaButton"/>
+            </LinearLayout>
 
         </LinearLayout>
     </ScrollView>
+
+    <!-- FULLSCREEN LOADING OVERLAY (for Auto-Setup & Design) -->
+    <FrameLayout android:id="@+id/layout_full_loading"
+        android:layout_width="match_parent" android:layout_height="match_parent"
+        android:background="#E60A0A0F" android:visibility="gone"
+        android:elevation="100dp" android:clickable="true" android:focusable="true">
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:orientation="vertical" android:gravity="center" android:layout_gravity="center"
+            android:padding="32dp">
+            <ProgressBar android:layout_width="64dp" android:layout_height="64dp"
+                android:indeterminateTint="#FF6B00"/>
+            <TextView android:id="@+id/tv_full_loading_msg"
+                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:layout_marginTop="28dp" android:text="INITIALIZING AUTO-SETUP..."
+                android:textColor="#F0F0F0" android:textSize="14sp"
+                android:fontFamily="sans-serif-medium" android:gravity="center"
+                android:letterSpacing="0.06"/>
+            <TextView android:id="@+id/tv_full_loading_sub"
+                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:layout_marginTop="10dp" android:text="KodaNetwork Orchestrator v3.0"
+                android:textColor="#555566" android:textSize="11sp"
+                android:fontFamily="sans-serif"/>
+
+            <!-- Success State (Hidden by default) -->
+            <LinearLayout android:id="@+id/layout_success_feedback"
+                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:orientation="vertical" android:gravity="center"
+                android:visibility="gone" android:layout_marginTop="24dp">
+                <ImageView android:layout_width="80dp" android:layout_height="80dp"
+                    android:src="@android:drawable/checkbox_on_background"
+                    android:contentDescription="Success"
+                    app:tint="#00E676"/>
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:text="SETUP ERFOLGREICH!" android:textColor="#00E676"
+                    android:textSize="16sp" android:textStyle="bold" android:fontFamily="sans-serif-medium"
+                    android:layout_marginTop="12dp"
+                    android:letterSpacing="0.04"/>
+            </LinearLayout>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_close_loading"
+                style="@style/KodaButton.Outline"
+                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:layout_marginTop="44dp"
+                android:text="LADEBILDCHIRM SCHLIESSEN"
+                android:textSize="11sp"
+                android:textColor="#F0F0F0"
+                android:fontFamily="sans-serif-medium"
+                app:strokeColor="#FF6B00"
+                app:cornerRadius="12dp"/>
+        </LinearLayout>
+    </FrameLayout>
 
 </LinearLayout>

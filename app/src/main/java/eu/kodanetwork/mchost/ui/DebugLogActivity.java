@@ -37,6 +37,8 @@ public class DebugLogActivity extends AppCompatActivity {
 
         tvLog.setText(AppLogger.getAllLogs());
         AppLogger.addListener(logListener);
+
+        eu.kodanetwork.mchost.util.ThemeHelper.apply(this);
     }
 
     @Override

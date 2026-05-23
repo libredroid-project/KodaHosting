@@ -10,6 +10,8 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import eu.kodanetwork.mchost.model.ServerInstance;
 
@@ -67,6 +69,18 @@ public class JarDownloader {
             case FABRIC:
                 post(cb,2,"Building Fabric URL…");
                 return "https://meta.fabricmc.net/v2/versions/loader/"+srv.getVersion()+"/stable/stable/server/jar";
+            case FORGE:
+                post(cb,2,"Building Forge URL…");
+                return forge(srv.getVersion(), cb);
+            case NEOFORGE:
+                post(cb,2,"Building NeoForge URL…");
+                return neoforge(srv.getVersion(), cb);
+            case FOLIA:
+                post(cb,2,"Checking Folia API…");
+                return folia(srv.getVersion(), cb);
+            case VELOCITY:
+                post(cb,2,"Checking Velocity API…");
+                return velocity(srv.getVersion(), cb);
             default:
                 main.post(() -> cb.onError("Manual install required for "+srv.getType().name()+
                     ".\nPlace server.jar in: "+srv.getServerDir()));
@@ -75,12 +89,50 @@ public class JarDownloader {
     }
 
     private String paper(String ver, Cb cb) throws Exception {
-        String j = fetch("https://api.papermc.io/v2/projects/paper/versions/"+ver+"/builds");
-        int build = lastInt(j,"\"build\":");
-        if (build<0) throw new Exception("No Paper builds found for "+ver);
+        String j = fetch("https://api.papermc.io/v2/projects/paper/versions/"+ver);
+        org.json.JSONObject obj = new org.json.JSONObject(j);
+        org.json.JSONArray builds = obj.getJSONArray("builds");
+        if (builds.length() == 0) throw new Exception("No Paper builds found for "+ver);
+        int build = builds.getInt(builds.length() - 1);
         post(cb,4,"Found build #"+build);
         return "https://api.papermc.io/v2/projects/paper/versions/"+ver+"/builds/"+build+
                "/downloads/paper-"+ver+"-"+build+".jar";
+    }
+
+    private String folia(String ver, Cb cb) throws Exception {
+        String j = fetch("https://api.papermc.io/v2/projects/folia/versions/"+ver);
+        org.json.JSONObject obj = new org.json.JSONObject(j);
+        org.json.JSONArray builds = obj.getJSONArray("builds");
+        if (builds.length() == 0) throw new Exception("No Folia builds found for "+ver);
+        int build = builds.getInt(builds.length() - 1);
+        post(cb,4,"Found Folia build #"+build);
+        return "https://api.papermc.io/v2/projects/folia/versions/"+ver+"/builds/"+build+
+               "/downloads/folia-"+ver+"-"+build+".jar";
+    }
+
+    private String velocity(String ver, Cb cb) throws Exception {
+        String j = fetch("https://api.papermc.io/v2/projects/velocity/versions/"+ver);
+        org.json.JSONObject obj = new org.json.JSONObject(j);
+        org.json.JSONArray builds = obj.getJSONArray("builds");
+        if (builds.length() == 0) throw new Exception("No Velocity builds found for "+ver);
+        int build = builds.getInt(builds.length() - 1);
+        post(cb,4,"Found Velocity build #"+build);
+        return "https://api.papermc.io/v2/projects/velocity/versions/"+ver+"/builds/"+build+
+               "/downloads/velocity-"+ver+"-"+build+".jar";
+    }
+
+    private String forge(String mcVer, Cb cb) throws Exception {
+        String xml = fetch("https://maven.minecraftforge.net/net/minecraftforge/forge/maven-metadata.xml");
+        // Forge versions are like 1.20.1-47.3.0. We search for mcVer-[digits]
+        Pattern p = Pattern.compile("<version>(" + mcVer.replace(".", "\\.") + "-[0-9.]+)</version>");
+        java.util.regex.Matcher m = p.matcher(xml);
+        String latest = null;
+        while (m.find()) latest = m.group(1);
+        
+        if (latest == null) throw new Exception("No Forge build found for Minecraft " + mcVer);
+        post(cb, 4, "Found Forge " + latest);
+        
+        return "https://maven.minecraftforge.net/net/minecraftforge/forge/" + latest + "/forge-" + latest + "-installer.jar";
     }
 
     private String vanilla(String ver, Cb cb) throws Exception {
@@ -95,6 +147,24 @@ public class JarDownloader {
         return vj.substring(ss, vj.indexOf("\"",ss));
     }
 
+    private String neoforge(String mcVer, Cb cb) throws Exception {
+        // NeoForge usually follows mcVer.build format. We need to find the latest build for that MC version.
+        // For simplicity, we use the maven metadata or a search API.
+        // This is a complex one, let's try a direct approach for common versions if possible.
+        // For now, let's use the official maven metadata.
+        String xml = fetch("https://maven.neoforged.net/releases/net/neoforged/neoforge/maven-metadata.xml");
+        Pattern p = Pattern.compile("<version>(" + mcVer.replace(".", "\\.") + "\\.[0-9]+)</version>");
+        java.util.regex.Matcher m = p.matcher(xml);
+        String latest = null;
+        while (m.find()) latest = m.group(1); // Get the last one in the list (usually latest)
+        
+        if (latest == null) throw new Exception("No NeoForge build found for Minecraft " + mcVer);
+        post(cb, 4, "Found NeoForge " + latest);
+        
+        // Return the installer jar URL
+        return "https://maven.neoforged.net/releases/net/neoforged/neoforge/" + latest + "/neoforge-" + latest + "-installer.jar";
+    }
+
     private void dl(String urlStr, File dest, Cb cb) throws Exception {
         HttpURLConnection c = (HttpURLConnection) new URL(urlStr).openConnection();
         c.setInstanceFollowRedirects(true);
@@ -105,12 +175,17 @@ public class JarDownloader {
         long total = c.getContentLengthLong();
         try (InputStream is=c.getInputStream(); FileOutputStream fo=new FileOutputStream(dest)) {
             byte[] buf=new byte[16384]; long done=0; int r;
+            long lastPostTime = 0;
             while((r=is.read(buf))!=-1){
                 fo.write(buf,0,r); done+=r;
                 if(total>0){
-                    int pct=(int)(done*100/total);
-                    String msg="Downloading… "+done/1024/1024+" / "+total/1024/1024+" MB";
-                    post(cb,pct,msg);
+                    long now = System.currentTimeMillis();
+                    if (now - lastPostTime > 250 || done == total) {
+                        lastPostTime = now;
+                        int pct=(int)(done*100/total);
+                        String msg="Downloading… "+done/1024/1024+" / "+total/1024/1024+" MB";
+                        post(cb,pct,msg);
+                    }
                 }
             }
         }

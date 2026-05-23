@@ -60,8 +60,8 @@ public class ServerRepo {
             eu.kodanetwork.mchost.util.AppLogger.log("ServerRepo", "Saving " + list.size() + " servers...");
             JSONArray a = new JSONArray();
             for (ServerInstance s : list) a.put(s.toJson());
-            boolean ok = sp.edit().putString("servers", a.toString()).commit();
-            eu.kodanetwork.mchost.util.AppLogger.log("ServerRepo", "Persistence result: " + ok);
+            sp.edit().putString("servers", a.toString()).apply();
+            eu.kodanetwork.mchost.util.AppLogger.log("ServerRepo", "Persistence requested asynchronously");
         } catch (JSONException e) {
             eu.kodanetwork.mchost.util.AppLogger.log("ServerRepo", "Save failed: " + e.getMessage());
         }

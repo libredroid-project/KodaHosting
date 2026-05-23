@@ -11,16 +11,29 @@ public final class TermuxScriptInstaller {
     private TermuxScriptInstaller() {}
 
     public static File ensureSetupScript(Context context) throws IOException {
+        String publicDir = "/sdcard/Documents/KodaNetwork";
         String script = 
             "#!/data/data/com.termux/files/usr/bin/bash\n" +
             "echo '--- KodaNetwork Setup Start ---'\n" +
+            "termux-setup-storage\n" +
+            "mkdir -p " + publicDir + "\n" +
+            "rm -f " + publicDir + "/.setup_ready\n" +
             "pkg update -y\n" +
-            "pkg install -y curl openjdk-21\n" +
-            "echo 'Installing FRP Tunnel (TCP+UDP Support)...'\n" +
-            "curl -L https://github.com/fatedier/frp/releases/download/v0.61.1/frp_0.61.1_android_arm64.tar.gz | tar -xz -C /data/data/com.termux/files/usr/bin/ --strip-components=1\n" +
+            "pkg install -y curl openjdk-21 unzip\n" +
+            "echo 'Installing FRP Tunnel...'\n" +
+            "curl -L https://github.com/fatedier/frp/releases/download/v0.56.0/frp_0.56.0_linux_arm64.tar.gz -o /data/data/com.termux/files/home/frp.tar.gz\n" +
+            "tar -xzf /data/data/com.termux/files/home/frp.tar.gz -C /data/data/com.termux/files/home/\n" +
+            "mv /data/data/com.termux/files/home/frp_0.56.0_linux_arm64/frpc /data/data/com.termux/files/usr/bin/frpc\n" +
             "chmod +x /data/data/com.termux/files/usr/bin/frpc\n" +
+            "rm -rf /data/data/com.termux/files/home/frp*\n" +
+            "touch " + publicDir + "/.setup_ready\n" +
             "echo '--- Setup Complete! ---'\n";
         return writeScript(context, "termux_setup.sh", script);
+    }
+
+    public static boolean isSetupReady() {
+        File f = new File(android.os.Environment.getExternalStoragePublicDirectory(android.os.Environment.DIRECTORY_DOCUMENTS), "KodaNetwork/.setup_ready");
+        return f.exists();
     }
 
     public static File ensureServerStartScript(Context context) throws IOException {

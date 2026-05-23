@@ -7,8 +7,13 @@
     <dimen name="mao_space_xl">24dp</dimen>
 
     <dimen name="mao_radius_none">0dp</dimen>
-    <dimen name="mao_btn_height">44dp</dimen>
+    <dimen name="mao_radius_sm">8dp</dimen>
+    <dimen name="mao_radius_md">12dp</dimen>
+    <dimen name="mao_radius_lg">16dp</dimen>
+    <dimen name="mao_radius_xl">24dp</dimen>
+
+    <dimen name="mao_btn_height">48dp</dimen>
 
     <string name="mao_brand_title">KODAHOSTING</string>
-    <string name="mao_brand_subtitle">THE WIRED NOIR MOBILE</string>
+    <string name="mao_brand_subtitle">MOBILE SERVER HOSTING</string>
 </resources>

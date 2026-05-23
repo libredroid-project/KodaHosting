@@ -91,6 +91,46 @@ public class SupabaseFunctionsClient {
         }
     }
 
+    public String deleteDnsLink(String userJwt, String host) throws IOException {
+        Map<String, Object> body = new HashMap<>();
+        body.put("host", host);
+        Response<Map<String, Object>> response = api.callFunction(
+            "delete-dns-link",
+            anonKey,
+            withBearer(userJwt),
+            body
+        ).execute();
+        
+        String result = "HTTP " + response.code();
+        if (response.body() != null) {
+            result += " Body: " + response.body().toString();
+        }
+        
+        if (!response.isSuccessful()) {
+            String errorBody = "";
+            try { errorBody = response.errorBody().string(); } catch (Exception ignored) {}
+            throw new IOException("delete-dns-link failed: HTTP " + response.code() + " " + errorBody);
+        }
+        return result;
+    }
+
+    public boolean checkServerName(String userJwt, String host) throws IOException {
+        Map<String, Object> body = new HashMap<>();
+        body.put("host", host);
+        Response<Map<String, Object>> response = api.callFunction(
+            "check-server-name",
+            anonKey,
+            withBearer(userJwt),
+            body
+        ).execute();
+        
+        if (!response.isSuccessful() || response.body() == null) {
+            throw new IOException("check-server-name failed: HTTP " + response.code());
+        }
+        Map<String, Object> map = response.body();
+        return "taken".equals(map.get("status"));
+    }
+
     private String withBearer(String jwt) {
         if (jwt == null || jwt.isEmpty()) return "Bearer " + anonKey;
         return "Bearer " + jwt;

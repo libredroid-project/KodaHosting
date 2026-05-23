@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:fitsSystemWindows="true"
     android:layout_width="match_parent" android:layout_height="match_parent"
     android:orientation="vertical" android:background="#080808">
 
@@ -23,15 +24,45 @@
             android:text="SAVE" android:textSize="10sp"/>
     </LinearLayout>
 
-    <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#FF6B00"/>
+    <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#1A1A1A"/>
 
-    <EditText android:id="@+id/et_editor"
-        android:layout_width="match_parent" android:layout_height="match_parent"
-        android:background="@null" android:gravity="top"
-        android:padding="12dp" android:textColor="#E0E0E0"
-        android:textSize="12sp" android:fontFamily="monospace"
-        android:scrollbars="vertical" android:scrollHorizontally="true"
-        android:inputType="textMultiLine|textNoSuggestions"
-        android:imeOptions="flagNoExtractUi"/>
+    <!-- Search Bar -->
+    <LinearLayout android:layout_width="match_parent" android:layout_height="40dp"
+        android:orientation="horizontal" android:background="#0A0A0A" android:paddingStart="10dp" android:paddingEnd="10dp" android:gravity="center_vertical">
+        <EditText android:id="@+id/et_search"
+            android:layout_width="0dp" android:layout_height="30dp"
+            android:layout_weight="1" android:background="#151515"
+            android:hint="Search..." android:textColor="#888888" android:textSize="10sp"
+            android:paddingStart="10dp" android:fontFamily="monospace"
+            android:singleLine="true"/>
+        <ImageButton android:id="@+id/btn_search_next"
+            android:layout_width="30dp" android:layout_height="30dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@android:drawable/ic_menu_search" android:tint="#888888"/>
+    </LinearLayout>
+
+    <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#1A1A1A"/>
+
+    <!-- Editor Container -->
+    <LinearLayout android:layout_width="match_parent" android:layout_height="match_parent"
+        android:orientation="horizontal">
+        
+        <TextView android:id="@+id/tv_line_numbers"
+            android:layout_width="0dp" android:layout_height="match_parent"
+            android:visibility="gone"/>
+
+        <EditText android:id="@+id/et_editor"
+            android:layout_width="match_parent" android:layout_height="match_parent"
+            android:background="@null" android:gravity="top"
+            android:padding="12dp" android:textColor="#D4D4D4"
+            android:textSize="12sp" android:fontFamily="monospace"
+            android:scrollbars="vertical" android:verticalScrollbarPosition="right"
+            android:overScrollMode="always"
+            android:nestedScrollingEnabled="true"
+            android:inputType="textMultiLine|textNoSuggestions"
+            android:lineSpacingMultiplier="1.2"
+            android:imeOptions="flagNoExtractUi"/>
+    </LinearLayout>
 
 </LinearLayout>
+

@@ -26,6 +26,7 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.chip.Chip;
@@ -60,7 +61,7 @@ public class ServerDetailActivity extends AppCompatActivity {
 
     // Tabs
     private TabLayout tabs;
-    private View pDash, pConsole, pFiles, pSettings;
+    private View pDash, pConsole, pFiles, pSettings, pPlugins;
 
     // Dashboard
     private TextView tvBadge, tvUptime, tvPlayers, tvJoinAddr, tvRamInfo, tvVerInfo, tvJavaInfo;
@@ -87,24 +88,43 @@ public class ServerDetailActivity extends AppCompatActivity {
     private MaterialButton btnDlJar, btnDelServer;
     private MaterialButton btnTermuxSetup, btnStartTunnel, btnLinkDomain;
     private final ExecutorService io = Executors.newSingleThreadExecutor();
+    private android.view.View layoutFullLoading;
+    private TextView tvFullLoadingMsg;
+
+    private TermuxServerService.StateCallback stateCb;
+    private TermuxServerService.LogCallback logCb;
 
     private final ServiceConnection conn = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName n, IBinder b) {
             svc = ((TermuxServerService.LocalBinder) b).get();
             bound = true;
-            svc.addStateCb((id, s) -> {
-                if (id.equals(server.getId())) runOnUiThread(() -> updateDash());
-            });
-            svc.addLogCb((id, line) -> {
-                if (id.equals(server.getId())) runOnUiThread(() -> appendLog(line));
-            });
+            stateCb = (id, s) -> {
+                if (id.equals(server.getId())) runOnUiThread(() -> {
+                    if (s == ServerInstance.State.CRASHED && layoutFullLoading != null) {
+                        layoutFullLoading.setVisibility(View.GONE);
+                    }
+                    updateDash();
+                });
+            };
+            logCb = (id, line) -> {
+                if (id.equals(server.getId())) runOnUiThread(() -> {
+                    appendLog(line);
+                    if ((line.contains("SETUP_COMPLETE_SUCCESS") || line.contains("DESIGN_APPLIED") || line.contains("KodaNetwork Error")) && layoutFullLoading != null) {
+                        layoutFullLoading.setVisibility(View.GONE);
+                    }
+                });
+            };
+            svc.addStateCb(stateCb);
+            svc.addLogCb(logCb);
             for (String l : svc.getLog(server.getId())) appendLog(l);
             updateDash();
         }
         @Override
         public void onServiceDisconnected(ComponentName n) {
             bound = false;
+            if (svc != null && stateCb != null) svc.removeStateCb(stateCb);
+            if (svc != null && logCb != null) svc.removeLogCb(logCb);
             svc = null;
         }
     };
@@ -128,6 +148,7 @@ public class ServerDetailActivity extends AppCompatActivity {
         setupTabs();
         setupDashButtons();
         setupConsole();
+        setupPlugins();
         setupSettings();
 
         Intent si = new Intent(this, TermuxServerService.class);
@@ -137,8 +158,18 @@ public class ServerDetailActivity extends AppCompatActivity {
         startTicker();
 
         if (getIntent().getBooleanExtra("auto_setup", false)) {
+            if (layoutFullLoading != null) {
+                layoutFullLoading.setVisibility(android.view.View.VISIBLE);
+                if (tvFullLoadingMsg != null) tvFullLoadingMsg.setText("DOWNLOADING SERVER...");
+            }
             new Handler(Looper.getMainLooper()).postDelayed(this::downloadJar, 500);
         }
+    }
+
+    @Override
+    public void onUserInteraction() {
+        super.onUserInteraction();
+        eu.kodanetwork.mchost.App.resetAfkTimer();
     }
 
     private void bindViews() {
@@ -147,6 +178,7 @@ public class ServerDetailActivity extends AppCompatActivity {
         pConsole  = findViewById(R.id.panel_console);
         pFiles    = findViewById(R.id.panel_files);
         pSettings = findViewById(R.id.panel_settings);
+        pPlugins  = findViewById(R.id.panel_plugins);
 
         tvBadge   = findViewById(R.id.tv_badge);
         tvUptime  = findViewById(R.id.tv_uptime);
@@ -162,6 +194,15 @@ public class ServerDetailActivity extends AppCompatActivity {
         dlProgress = findViewById(R.id.dl_progress);
         dot = findViewById(R.id.dot);
         tvDlMsg    = findViewById(R.id.tv_dl_msg);
+        
+        View cardPlayers = findViewById(R.id.card_players);
+        View tvPlayers = findViewById(R.id.tv_players);
+        if (cardPlayers != null) {
+            cardPlayers.setOnClickListener(v -> showPlayerActions());
+        }
+        if (tvPlayers != null) {
+            tvPlayers.setOnClickListener(v -> showPlayerActions());
+        }
 
         tvLog       = findViewById(R.id.tv_log);
         scrollLog   = findViewById(R.id.scroll_log);
@@ -170,6 +211,15 @@ public class ServerDetailActivity extends AppCompatActivity {
 
         layoutFileList = findViewById(R.id.layout_files);
         tvFilesRoot    = findViewById(R.id.tv_files_root);
+
+        layoutFullLoading = findViewById(R.id.layout_full_loading);
+        tvFullLoadingMsg = findViewById(R.id.tv_full_loading_msg);
+        android.view.View btnCloseLoading = findViewById(R.id.btn_close_loading);
+        if (btnCloseLoading != null) {
+            btnCloseLoading.setOnClickListener(v -> {
+                if (layoutFullLoading != null) layoutFullLoading.setVisibility(View.GONE);
+            });
+        }
 
         tvSettingsInfo = findViewById(R.id.tv_settings_info);
         tvTermuxStatus = findViewById(R.id.tv_termux_status);
@@ -181,6 +231,23 @@ public class ServerDetailActivity extends AppCompatActivity {
         btnTermuxSetup = findViewById(R.id.btn_termux_setup);
         btnStartTunnel = findViewById(R.id.btn_start_tunnel);
         btnLinkDomain = findViewById(R.id.btn_link_domain);
+
+        TextView tvCustomDomainTarget = findViewById(R.id.tv_custom_domain_target);
+        ImageButton btnCopyDomain = findViewById(R.id.btn_copy_domain);
+        
+        if (tvCustomDomainTarget != null && btnCopyDomain != null) {
+            String playitAddress = server.getPlayitAddress() != null && !server.getPlayitAddress().isEmpty() 
+                                   ? server.getPlayitAddress() 
+                                   : "Address noch nicht verfügbar (Starte den Server)";
+            tvCustomDomainTarget.setText(playitAddress);
+            
+            btnCopyDomain.setOnClickListener(v -> {
+                android.content.ClipboardManager clipboard = (android.content.ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+                android.content.ClipData clip = android.content.ClipData.newPlainText("KodaNetwork Address", playitAddress);
+                clipboard.setPrimaryClip(clip);
+                Toast.makeText(this, "Addresse in die Zwischenablage kopiert", Toast.LENGTH_SHORT).show();
+            });
+        }
 
         // Static info
         tvJoinAddr.setText(server.getJoinAddress());
@@ -197,13 +264,8 @@ public class ServerDetailActivity extends AppCompatActivity {
                     tvJavaInfo.setText("✓ " + JavaFinder.version(this));
                     tvJavaInfo.setTextColor(Color.parseColor("#00E676"));
                 } else {
-                    if (TermuxBridge.isTermuxInstalled(this)) {
-                        tvJavaInfo.setText("◌ Java wird beim Start automatisch (OpenJDK 17) installiert");
-                        tvJavaInfo.setTextColor(Color.parseColor("#FFCC00"));
-                    } else {
-                        tvJavaInfo.setText("✗ kein Java / kein Termux. Installiere Termux (F-Droid).");
-                        tvJavaInfo.setTextColor(Color.parseColor("#FF4444"));
-                    }
+                    tvJavaInfo.setText("◌ Java wird beim Start automatisch installiert (JDK 25)");
+                    tvJavaInfo.setTextColor(Color.parseColor("#FFCC00"));
                 }
             });
         }).start();
@@ -215,6 +277,7 @@ public class ServerDetailActivity extends AppCompatActivity {
         tabs.addTab(tabs.newTab().setText("Dashboard"));
         tabs.addTab(tabs.newTab().setText("Console"));
         tabs.addTab(tabs.newTab().setText("Files"));
+        tabs.addTab(tabs.newTab().setText("Plugins"));
         tabs.addTab(tabs.newTab().setText("Settings"));
         tabs.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override public void onTabSelected(TabLayout.Tab t)   { showTab(t.getPosition()); }
@@ -224,11 +287,191 @@ public class ServerDetailActivity extends AppCompatActivity {
         showTab(0);
     }
 
+    private void showPlayerActions() {
+        com.google.android.material.bottomsheet.BottomSheetDialog sheet = 
+            new com.google.android.material.bottomsheet.BottomSheetDialog(this);
+        
+        android.widget.LinearLayout container = new android.widget.LinearLayout(this);
+        container.setOrientation(android.widget.LinearLayout.VERTICAL);
+        container.setBackgroundColor(0xFF0E0E14);
+        container.setPadding(0, 0, 0, 48);
+
+        TextView tvTitle = new TextView(this);
+        tvTitle.setText("SPIELER VERWALTEN");
+        tvTitle.setTextColor(0xFFFF6B00);
+        tvTitle.setTextSize(13);
+        tvTitle.setTypeface(android.graphics.Typeface.DEFAULT_BOLD);
+        tvTitle.setLetterSpacing(0.12f);
+        tvTitle.setPadding(48, 40, 48, 24);
+        container.addView(tvTitle);
+
+        View div = new View(this);
+        div.setBackgroundColor(0xFF222230);
+        div.setLayoutParams(new android.widget.LinearLayout.LayoutParams(android.widget.LinearLayout.LayoutParams.MATCH_PARENT, 1));
+        container.addView(div);
+
+        java.util.Set<String> shown = new java.util.HashSet<>();
+        int pad = (int)(16 * getResources().getDisplayMetrics().density);
+
+        java.util.List<String> onlineList = new java.util.ArrayList<>();
+        if (server.onlinePlayerNames != null) {
+            try { onlineList.addAll(server.onlinePlayerNames); } catch (Exception ignored) {}
+        }
+        
+        if (!onlineList.isEmpty()) {
+            TextView header = new TextView(this);
+            header.setText("ONLINE");
+            header.setTextColor(Color.parseColor("#00E676"));
+            header.setTextSize(12);
+            header.setPadding(48, pad, 48, pad/2);
+            container.addView(header);
+
+            for (String p : onlineList) {
+                container.addView(createPlayerRow(p, true, pad, sheet));
+                shown.add(p);
+            }
+        }
+
+        java.util.List<String> offlineList = new java.util.ArrayList<>();
+        if (server.knownPlayers != null) {
+            try { offlineList.addAll(server.knownPlayers); } catch (Exception ignored) {}
+        }
+        
+        boolean hasOffline = false;
+        for (String p : offlineList) {
+            if (!shown.contains(p)) hasOffline = true;
+        }
+
+        if (hasOffline) {
+            TextView header2 = new TextView(this);
+            header2.setText("OFFLINE (Bekannt)");
+            header2.setTextColor(Color.GRAY);
+            header2.setTextSize(12);
+            header2.setPadding(48, shown.isEmpty() ? pad : pad*2, 48, pad/2);
+            container.addView(header2);
+
+            for (String p : offlineList) {
+                if (!shown.contains(p)) {
+                    container.addView(createPlayerRow(p, false, pad, sheet));
+                }
+            }
+        }
+
+        if (container.getChildCount() == 2) { // Only Title and Divider
+            TextView empty = new TextView(this);
+            empty.setText("Noch keine Spieler bekannt.");
+            empty.setTextColor(Color.GRAY);
+            empty.setPadding(48, pad, 48, pad);
+            container.addView(empty);
+        }
+
+        android.widget.ScrollView sv = new android.widget.ScrollView(this);
+        sv.addView(container);
+        sheet.setContentView(sv);
+        
+        android.view.Window w = sheet.getWindow();
+        if (w != null) {
+            w.setNavigationBarColor(0xFF0D0D14);
+            w.setStatusBarColor(0xFF0D0D14);
+        }
+        sheet.show();
+    }
+
+    private android.widget.LinearLayout createPlayerRow(String p, boolean isOnline, int pad, com.google.android.material.bottomsheet.BottomSheetDialog parentSheet) {
+        android.widget.LinearLayout row = new android.widget.LinearLayout(this);
+        row.setOrientation(android.widget.LinearLayout.HORIZONTAL);
+        row.setGravity(android.view.Gravity.CENTER_VERTICAL);
+        row.setPadding(48, pad/2, 48, pad/2);
+
+        TextView tv = new TextView(this);
+        tv.setText(p);
+        tv.setTextSize(16);
+        tv.setTextColor(isOnline ? Color.WHITE : Color.GRAY);
+        android.widget.LinearLayout.LayoutParams lpTv = new android.widget.LinearLayout.LayoutParams(0, android.view.ViewGroup.LayoutParams.WRAP_CONTENT, 1f);
+        row.addView(tv, lpTv);
+
+        TextView btn = new TextView(this);
+        btn.setText("VERWALTEN");
+        btn.setTextSize(12);
+        btn.setTextColor(0xFFFF6B00);
+        btn.setPadding(pad, pad/4, 0, pad/4);
+        android.util.TypedValue outValue = new android.util.TypedValue();
+        getTheme().resolveAttribute(android.R.attr.selectableItemBackgroundBorderless, outValue, true);
+        btn.setBackgroundResource(outValue.resourceId);
+        btn.setClickable(true);
+        btn.setFocusable(true);
+        
+        btn.setOnClickListener(v -> {
+            showPlayerActionSheet(p, isOnline);
+            parentSheet.dismiss();
+        });
+        row.addView(btn);
+        return row;
+    }
+
+    private void showPlayerActionSheet(String player, boolean isOnline) {
+        com.google.android.material.bottomsheet.BottomSheetDialog sheet = 
+            new com.google.android.material.bottomsheet.BottomSheetDialog(this);
+        
+        android.widget.LinearLayout container = new android.widget.LinearLayout(this);
+        container.setOrientation(android.widget.LinearLayout.VERTICAL);
+        container.setBackgroundColor(0xFF0E0E14);
+        container.setPadding(0, 0, 0, 48);
+
+        TextView tvTitle = new TextView(this);
+        tvTitle.setText("AKTION FÜR: " + player);
+        tvTitle.setTextColor(0xFFFF6B00);
+        tvTitle.setTextSize(13);
+        tvTitle.setTypeface(android.graphics.Typeface.DEFAULT_BOLD);
+        tvTitle.setLetterSpacing(0.12f);
+        tvTitle.setPadding(48, 40, 48, 24);
+        container.addView(tvTitle);
+
+        View div = new View(this);
+        div.setBackgroundColor(0xFF222230);
+        div.setLayoutParams(new android.widget.LinearLayout.LayoutParams(android.widget.LinearLayout.LayoutParams.MATCH_PARENT, 1));
+        container.addView(div);
+
+        if (isOnline) addPlayerActionBtn(container, sheet, "Kick", "kick " + player, 0xFFF0F0F0);
+        addPlayerActionBtn(container, sheet, "Ban", "ban " + player, 0xFFFF4444);
+        addPlayerActionBtn(container, sheet, "Pardon (Entbannen)", "pardon " + player, 0xFF00E676);
+        addPlayerActionBtn(container, sheet, "OP geben", "op " + player, 0xFF44AAFF);
+        addPlayerActionBtn(container, sheet, "OP entfernen", "deop " + player, 0xFFFFCC00);
+
+        sheet.setContentView(container);
+        android.view.Window w = sheet.getWindow();
+        if (w != null) {
+            w.setNavigationBarColor(0xFF0D0D14);
+            w.setStatusBarColor(0xFF0D0D14);
+        }
+        sheet.show();
+    }
+
+    private void addPlayerActionBtn(android.widget.LinearLayout container, com.google.android.material.bottomsheet.BottomSheetDialog sheet, String text, String cmd, int color) {
+        TextView btn = new TextView(ServerDetailActivity.this);
+        btn.setText(text);
+        btn.setTextColor(color);
+        btn.setTextSize(15);
+        btn.setPadding(48, 40, 48, 40);
+        btn.setClickable(true);
+        
+        android.util.TypedValue tv2 = new android.util.TypedValue();
+        getTheme().resolveAttribute(android.R.attr.selectableItemBackground, tv2, true);
+        btn.setForeground(ContextCompat.getDrawable(ServerDetailActivity.this, tv2.resourceId));
+        
+        btn.setOnClickListener(v -> {
+            if (svc != null) svc.sendCmd(server.getId(), cmd);
+            sheet.dismiss();
+        });
+        container.addView(btn);
+    }
+
     private void showTab(int i) {
         pDash    .setVisibility(i == 0 ? View.VISIBLE : View.GONE);
         pConsole .setVisibility(i == 1 ? View.VISIBLE : View.GONE);
         pFiles   .setVisibility(i == 2 ? View.VISIBLE : View.GONE);
-        pSettings.setVisibility(i == 3 ? View.VISIBLE : View.GONE);
+        if (pPlugins != null) pPlugins.setVisibility(i == 3 ? View.VISIBLE : View.GONE);
+        pSettings.setVisibility(i == 4 ? View.VISIBLE : View.GONE);
         if (i == 2) refreshFiles();
     }
 
@@ -247,11 +490,11 @@ public class ServerDetailActivity extends AppCompatActivity {
             if (jars == null || jars.length == 0) {
                 eu.kodanetwork.mchost.util.AppLogger.log("UI", "No .jar file found in " + serverDir.getAbsolutePath());
                 Toast.makeText(this, "Bitte zuerst die Server .jar herunterladen (Settings-Tab)", Toast.LENGTH_LONG).show();
-                tabs.selectTab(tabs.getTabAt(3));
+                tabs.selectTab(tabs.getTabAt(4));
                 return;
             }
             eu.kodanetwork.mchost.util.AppLogger.log("UI", "Found jar: " + jars[0].getName() + ". Binding and starting service...");
-            autoStartAll();
+            checkEulaAndStart();
         });
         btnStop   .setOnClickListener(v -> sendAction(TermuxServerService.ACTION_STOP));
         btnRestart.setOnClickListener(v -> sendAction(TermuxServerService.ACTION_RESTART));
@@ -264,6 +507,97 @@ public class ServerDetailActivity extends AppCompatActivity {
                 .show());
     }
 
+    private void checkEulaAndStart() {
+        android.content.SharedPreferences prefs = getSharedPreferences("koda_eula", MODE_PRIVATE);
+        if (prefs.getBoolean("eula_" + server.getId(), false)) {
+            autoStartAll();
+            return;
+        }
+
+        // Hide loading screen so user can actually see and interact with the EULA dialog
+        if (layoutFullLoading != null) layoutFullLoading.setVisibility(View.GONE);
+
+        // Build custom EULA dialog
+        LinearLayout root = new LinearLayout(this);
+        root.setOrientation(LinearLayout.VERTICAL);
+        root.setBackgroundColor(0xFF0A0A0F);
+        root.setPadding(60, 60, 60, 40);
+
+        TextView tvTitle = new TextView(this);
+        tvTitle.setText("MINECRAFT EULA");
+        tvTitle.setTextColor(0xFFFF6B00);
+        tvTitle.setTextSize(20);
+        tvTitle.setTypeface(android.graphics.Typeface.DEFAULT_BOLD);
+        tvTitle.setGravity(android.view.Gravity.CENTER);
+        tvTitle.setLetterSpacing(0.1f);
+        root.addView(tvTitle);
+
+        View divider = new View(this);
+        divider.setBackgroundColor(0xFF333333);
+        divider.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 2));
+        LinearLayout.LayoutParams divLp = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 2);
+        divLp.topMargin = 24; divLp.bottomMargin = 24;
+        divider.setLayoutParams(divLp);
+        root.addView(divider);
+
+        TextView tvBody = new TextView(this);
+        tvBody.setText("Durch das Starten dieses Minecraft-Servers akzeptierst du die Mojang/Microsoft EULA.\n\n" +
+            "Dies beinhaltet:\n" +
+            "• Du darfst keinen Zugang zu Gameplay-Features verkaufen\n" +
+            "• Du darfst keine Minecraft-Inhalte umverteilen\n" +
+            "• Server müssen den EULA-Richtlinien entsprechen\n\n" +
+            "Vollständige EULA:\nhttps://aka.ms/MinecraftEULA");
+        tvBody.setTextColor(0xFFCCCCDD);
+        tvBody.setTextSize(14);
+        tvBody.setLineSpacing(6, 1);
+        root.addView(tvBody);
+
+        androidx.appcompat.app.AlertDialog dialog = new androidx.appcompat.app.AlertDialog.Builder(this)
+            .setView(root)
+            .setCancelable(false)
+            .create();
+
+        // Buttons
+        LinearLayout btnRow = new LinearLayout(this);
+        btnRow.setOrientation(LinearLayout.HORIZONTAL);
+        btnRow.setGravity(android.view.Gravity.CENTER);
+        LinearLayout.LayoutParams rowLp = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        rowLp.topMargin = 40;
+        btnRow.setLayoutParams(rowLp);
+
+        MaterialButton btnDecline = new MaterialButton(this, null, com.google.android.material.R.attr.materialButtonOutlinedStyle);
+        btnDecline.setText("ABLEHNEN");
+        btnDecline.setTextColor(0xFFFF4444);
+        btnDecline.setStrokeColorResource(android.R.color.darker_gray);
+        btnDecline.setBackgroundColor(0x00000000);
+        btnDecline.setOnClickListener(v -> dialog.dismiss());
+        btnRow.addView(btnDecline, new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1));
+
+        MaterialButton btnAccept = new MaterialButton(this);
+        btnAccept.setText("AKZEPTIEREN");
+        btnAccept.setTextColor(0xFF000000);
+        btnAccept.setBackgroundColor(0xFFFF6B00);
+        btnAccept.setOnClickListener(v -> {
+            prefs.edit().putBoolean("eula_" + server.getId(), true).apply();
+            dialog.dismiss();
+            if (layoutFullLoading != null) {
+                layoutFullLoading.setVisibility(View.VISIBLE);
+                if (tvFullLoadingMsg != null) tvFullLoadingMsg.setText("AUTO-SETUP RUNNING...");
+            }
+            autoStartAll();
+        });
+        LinearLayout.LayoutParams accLp = new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1);
+        accLp.setMarginStart(16);
+        btnRow.addView(btnAccept, accLp);
+
+        root.addView(btnRow);
+
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(0xFF0A0A0F));
+        }
+        dialog.show();
+    }
+
     private void autoStartAll() {
         io.execute(() -> {
             StartOrchestrator orchestrator = new StartOrchestrator(this, new StartOrchestrator.Callback() {
@@ -274,7 +608,7 @@ public class ServerDetailActivity extends AppCompatActivity {
                             case PREPARE:
                             case JAVA_DOWNLOAD:
                             case JAVA_INSTALL:
-                                tvTermuxStatus.setText("Termux: " + message);
+                                if (tvFullLoadingMsg != null) tvFullLoadingMsg.setText(message);
                                 break;
                             case SERVER_START:
                             case TUNNEL_START:
@@ -338,14 +672,21 @@ public class ServerDetailActivity extends AppCompatActivity {
         switch (st) {
             case ONLINE:     label = "● ONLINE";     col = 0xFF00E676; break;
             case STARTING:   label = "◌ STARTING…";  col = 0xFFFFCC00; break;
-            case STOPPING:   label = "◌ STOPPING…";  col = 0xFFFF8800; break;
+            case STOPPING:   label = "◌ STOPPING…";  col = 0xFFFF8800;
+                if (tvBadge != null) {
+                    tvBadge.animate().alpha(0.3f).setDuration(400).withEndAction(() ->
+                        tvBadge.animate().alpha(1f).setDuration(400).start()
+                    ).start();
+                }
+                break;
             case CRASHED:    label = "✕ CRASHED";    col = 0xFFFF4444; break;
             case INSTALLING: label = "⬇ LADEN…";     col = 0xFF44AAFF; break;
             default:         label = "○ OFFLINE";    col = 0xFF888888; break;
         }
         tvBadge.setText(label);
         tvBadge.setTextColor(col);
-        tvPlayers.setText(server.onlinePlayers + " / " + server.getMaxPlayers() + " Spieler");
+        int playerCount = server.onlinePlayerNames != null ? server.onlinePlayerNames.size() : server.onlinePlayers;
+        tvPlayers.setText(playerCount + " / " + server.getMaxPlayers() + " Spieler");
 
         boolean running = server.isRunning();
         btnStart  .setEnabled(!running && st != ServerInstance.State.INSTALLING);
@@ -364,6 +705,9 @@ public class ServerDetailActivity extends AppCompatActivity {
                 default:       dotDrw = R.drawable.dot_offline; break;
             }
             dot.setBackground(getDrawable(dotDrw));
+        }
+        if (st == ServerInstance.State.CRASHED || (st == ServerInstance.State.OFFLINE && !server.isAutoSetup())) {
+            if (layoutFullLoading != null) layoutFullLoading.setVisibility(View.GONE);
         }
     }
 
@@ -407,31 +751,48 @@ public class ServerDetailActivity extends AppCompatActivity {
         if (etCmd.getText() == null) return;
         String cmd = etCmd.getText().toString().trim();
         if (cmd.isEmpty()) return;
+        etCmd.setText("");
+        sendCmd(cmd);
+    }
+
+    private void sendCmd(String cmd) {
         if (bound && svc != null) svc.sendCmd(server.getId(), cmd);
         else appendLog("Service nicht verbunden.");
-        etCmd.setText("");
     }
+
+    private long lastScrollTime = 0;
 
     private void appendLog(String raw) {
         if (raw == null || raw.isEmpty()) return;
         
-        // Strip ANSI escape codes (e.g., [33;1m)
-        raw = raw.replaceAll("\\\u001B\\[[;\\d]*[ -/]*[@-~]", "");
-        // Also strip the [m codes and similar
-        raw = raw.replaceAll("\\[[0-9;]*m", "");
+        String[] lines = raw.split("\n");
+        android.text.SpannableStringBuilder ssb = new android.text.SpannableStringBuilder();
+        
+        for (String line : lines) {
+            if (line.isEmpty()) continue;
+            // Strip ANSI escape codes
+            line = line.replaceAll("\\\u001B\\[[;\\d]*[ -/]*[@-~]", "").replaceAll("\\[[0-9;]*m", "");
 
-        int col;
-        if (raw.contains("ERROR") || raw.contains("Exception"))   col = Color.parseColor("#FF5555");
-        else if (raw.contains("WARN"))                            col = Color.parseColor("#FFCC00");
-        else if (raw.startsWith(">") || raw.contains("KodaNet"))  col = Color.parseColor("#FF6B00");
-        else if (raw.contains("Done (") || raw.contains("✓"))    col = Color.parseColor("#00E676");
-        else if (raw.startsWith("  ─") || raw.startsWith("  🍊")) col = Color.parseColor("#FF8C42");
-        else                                                       col = Color.parseColor("#CCCCCC");
+            int col;
+            if (line.contains("ERROR") || line.contains("Exception"))   col = Color.parseColor("#FF5555");
+            else if (line.contains("WARN"))                            col = Color.parseColor("#FFCC00");
+            else if (line.startsWith(">") || line.contains("KodaNet"))  col = Color.parseColor("#FF6B00");
+            else if (line.contains("Done (") || line.contains("✓"))    col = Color.parseColor("#00E676");
+            else if (line.startsWith("  ─") || line.startsWith("  🍊")) col = Color.parseColor("#FF8C42");
+            else                                                       col = Color.parseColor("#CCCCCC");
 
-        SpannableString sp = new SpannableString(raw + "\n");
-        sp.setSpan(new ForegroundColorSpan(col), 0, sp.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-        tvLog.append(sp);
-        scrollLog.post(() -> scrollLog.fullScroll(View.FOCUS_DOWN));
+            int start = ssb.length();
+            ssb.append(line).append("\n");
+            ssb.setSpan(new ForegroundColorSpan(col), start, ssb.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+        }
+        
+        tvLog.append(ssb);
+        
+        long now = System.currentTimeMillis();
+        if (now - lastScrollTime > 250) {
+            lastScrollTime = now;
+            scrollLog.post(() -> scrollLog.fullScroll(View.FOCUS_DOWN));
+        }
     }
 
     // ── Files ─────────────────────────────────────────────────────────────────
@@ -470,6 +831,9 @@ public class ServerDetailActivity extends AppCompatActivity {
         }
     }
 
+    private File clipFile;
+    private boolean clipCut;
+
     private void addFRow(String text, File file) {
         TextView tv = new TextView(this);
         tv.setText(text);
@@ -488,6 +852,71 @@ public class ServerDetailActivity extends AppCompatActivity {
                     openFileEditor(file);
                 }
             });
+            
+            // File Manager Actions
+            tv.setOnLongClickListener(v -> {
+                if (text.startsWith("..")) {
+                    if (clipFile != null) {
+                        new AlertDialog.Builder(this)
+                            .setTitle("Aktion: Einfügen")
+                            .setPositiveButton("Einfügen (" + clipFile.getName() + ")", (d, w) -> {
+                                try {
+                                    File dest = new File(currentDir, clipFile.getName());
+                                    if (clipCut) {
+                                        clipFile.renameTo(dest);
+                                        clipFile = null;
+                                    } else {
+                                        try (java.io.InputStream in = new java.io.FileInputStream(clipFile);
+                                             java.io.OutputStream out = new java.io.FileOutputStream(dest)) {
+                                            byte[] buf = new byte[1024];
+                                            int len;
+                                            while ((len = in.read(buf)) > 0) out.write(buf, 0, len);
+                                        }
+                                    }
+                                    refreshFiles();
+                                } catch (Exception e) { Toast.makeText(this, "Fehler: " + e.getMessage(), Toast.LENGTH_SHORT).show(); }
+                            })
+                            .setNegativeButton("Abbrechen", null)
+                            .show();
+                    }
+                    return true;
+                }
+                
+                String[] actions = {"Umbenennen", "Kopieren", "Ausschneiden", "Löschen"};
+                new AlertDialog.Builder(this)
+                    .setTitle(file.getName())
+                    .setItems(actions, (d, which) -> {
+                        if (which == 0) { // Umbenennen
+                            final android.widget.EditText input = new android.widget.EditText(this);
+                            input.setText(file.getName());
+                            new AlertDialog.Builder(this)
+                                .setTitle("Umbenennen")
+                                .setView(input)
+                                .setPositiveButton("OK", (d2, w2) -> {
+                                    file.renameTo(new File(file.getParent(), input.getText().toString()));
+                                    refreshFiles();
+                                })
+                                .setNegativeButton("Abbrechen", null).show();
+                        } else if (which == 1) { // Kopieren
+                            clipFile = file;
+                            clipCut = false;
+                            Toast.makeText(this, "Kopiert. Gehe in einen Ordner und halte '..' gedrückt zum Einfügen.", Toast.LENGTH_LONG).show();
+                        } else if (which == 2) { // Ausschneiden
+                            clipFile = file;
+                            clipCut = true;
+                            Toast.makeText(this, "Ausgeschnitten. Gehe in einen Ordner und halte '..' gedrückt zum Einfügen.", Toast.LENGTH_LONG).show();
+                        } else if (which == 3) { // Löschen
+                            if (file.isDirectory()) {
+                                deleteRecursive(file);
+                            } else {
+                                file.delete();
+                            }
+                            refreshFiles();
+                        }
+                    })
+                    .show();
+                return true;
+            });
         }
 
         layoutFileList.addView(tv);
@@ -496,6 +925,16 @@ public class ServerDetailActivity extends AppCompatActivity {
         div.setLayoutParams(new LinearLayout.LayoutParams(
             LinearLayout.LayoutParams.MATCH_PARENT, 1));
         layoutFileList.addView(div);
+    }
+    
+    private void deleteRecursive(File fileOrDirectory) {
+        if (fileOrDirectory.isDirectory()) {
+            File[] children = fileOrDirectory.listFiles();
+            if (children != null) {
+                for (File child : children) deleteRecursive(child);
+            }
+        }
+        fileOrDirectory.delete();
     }
 
     private void openFileEditor(File f) {
@@ -527,25 +966,95 @@ public class ServerDetailActivity extends AppCompatActivity {
         );
         etDomainPrefix.setText(server.getSubdomain());
         updateIntegrationStatus();
+        
+        // RAM Slider
+        android.widget.SeekBar seekRam = findViewById(R.id.seek_settings_ram);
+        TextView tvSettingsRam = findViewById(R.id.tv_settings_ram);
+        if (seekRam != null && tvSettingsRam != null) {
+            final int[] RAM_STEPS = { 1024, 1536, 2048, 2560, 3072, 4096, 5120, 6144, 8192 };
+            int currentMb = server.getRamMB();
+            int targetIndex = 0;
+            for (int i = 0; i < RAM_STEPS.length; i++) {
+                if (RAM_STEPS[i] <= currentMb) targetIndex = i;
+            }
+            seekRam.setMax(RAM_STEPS.length - 1);
+            seekRam.setProgress(targetIndex);
+            tvSettingsRam.setText(currentMb >= 1024 ? (currentMb / 1024) + "GB" : currentMb + "MB");
+            
+            seekRam.setOnSeekBarChangeListener(new android.widget.SeekBar.OnSeekBarChangeListener() {
+                @Override public void onProgressChanged(android.widget.SeekBar sb, int p, boolean fromUser) {
+                    if (fromUser) {
+                        int mb = RAM_STEPS[p];
+                        tvSettingsRam.setText(mb >= 1024 ? (mb / 1024) + "GB" : mb + "MB");
+                        server.setRamMB(mb);
+                        repo.update(server);
+                    }
+                }
+                @Override public void onStartTrackingTouch(android.widget.SeekBar sb) {}
+                @Override public void onStopTrackingTouch(android.widget.SeekBar sb) {}
+            });
+        }
 
         btnDlJar.setOnClickListener(v -> downloadJar());
-        btnTermuxSetup.setOnClickListener(v -> runTermuxSetup());
+        btnTermuxSetup.setVisibility(android.view.View.GONE);
         btnStartTunnel.setOnClickListener(v -> startTunnel());
         btnLinkDomain.setOnClickListener(v -> linkDomain());
+
+        android.widget.CompoundButton swBedrock = findViewById(R.id.sw_bedrock);
+        if (swBedrock != null) {
+            swBedrock.setChecked(server.isBedrockSupport());
+            swBedrock.setOnCheckedChangeListener((btnView, isChecked) -> {
+                server.setBedrockSupport(isChecked);
+                repo.update(server);
+                triggerAddonRestart();
+            });
+        }
+
+        android.widget.CompoundButton swVoicechat = findViewById(R.id.sw_voicechat);
+        if (swVoicechat != null) {
+            swVoicechat.setChecked(server.isVoicechat());
+            swVoicechat.setOnCheckedChangeListener((btnView, isChecked) -> {
+                server.setVoicechat(isChecked);
+                repo.update(server);
+                triggerAddonRestart();
+            });
+        }
+
         btnDelServer.setOnClickListener(v ->
             new AlertDialog.Builder(this)
                 .setTitle("\"" + server.getName() + "\" löschen?")
                 .setMessage("Entfernt den Eintrag. Dateien auf dem Gerät werden NICHT gelöscht.")
-                .setPositiveButton("Löschen", (d, w) -> { repo.delete(server.getId()); finish(); })
+                .setPositiveButton("Löschen", (d, w) -> {
+                    new Thread(() -> {
+                        try {
+                            new eu.kodanetwork.mchost.network.supabase.SupabaseFunctionsClient(ServerDetailActivity.this).deleteDnsLink("", server.getSubdomain());
+                        } catch (Exception ignored) {}
+                    }).start();
+                    repo.delete(server.getId()); 
+                    finish(); 
+                })
                 .setNegativeButton("Abbrechen", null)
                 .show());
     }
+    
+    private void triggerAddonRestart() {
+        if (server.state == ServerInstance.State.ONLINE || server.state == ServerInstance.State.STARTING) {
+            if (layoutFullLoading != null) {
+                layoutFullLoading.setVisibility(View.VISIBLE);
+                if (tvFullLoadingMsg != null) tvFullLoadingMsg.setText("APPLYING ADDON & RESTARTING...");
+            }
+            if (bound && svc != null) {
+                svc.sendCmd(server.getId(), "stop");
+                new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
+                    svc.startServer(server);
+                    if (layoutFullLoading != null) layoutFullLoading.setVisibility(View.GONE);
+                }, 8000); // give it 8 seconds to stop before starting again
+            }
+        }
+    }
 
     private void updateIntegrationStatus() {
-        boolean termuxInstalled = TermuxBridge.isTermuxInstalled(this);
-        tvTermuxStatus.setText(termuxInstalled
-            ? "Termux: installed"
-            : "Termux: missing (install from F-Droid)");
+        tvTermuxStatus.setText("Native Mode: Active");
         if (server.getPlayitAddress().isEmpty()) {
             tvTunnelStatus.setText("Tunnel: not assigned");
         } else {
@@ -558,27 +1067,102 @@ public class ServerDetailActivity extends AppCompatActivity {
         }
     }
 
-    private void runTermuxSetup() {
-        io.execute(() -> {
-            try {
-                java.io.File setup = eu.kodanetwork.mchost.integration.TermuxScriptInstaller.ensureSetupScript(this);
-                eu.kodanetwork.mchost.util.AppLogger.log("UI", "Triggering Termux Setup via script: " + setup.getAbsolutePath());
-                boolean started = eu.kodanetwork.mchost.integration.TermuxBridge.runScript(this, setup);
-                eu.kodanetwork.mchost.util.JavaFinder.clearCache();
-                runOnUiThread(() -> {
-                    if (started) {
-                        tvTermuxStatus.setText("Termux: setup script started");
-                        Toast.makeText(this, "Termux Setup läuft! Bitte warte, bis es in Termux FERTIG ist, bevor du START drückst.", Toast.LENGTH_LONG).show();
-                    } else {
-                        tvTermuxStatus.setText("Termux: setup failed to start");
-                        Toast.makeText(this, "Konnte Termux nicht erreichen!", Toast.LENGTH_LONG).show();
-                    }
-                });
-            } catch (Exception e) {
-                eu.kodanetwork.mchost.util.AppLogger.log("UI", "Setup Error: " + e.getMessage());
-                runOnUiThread(() -> Toast.makeText(this, "Fehler: " + e.getMessage(), Toast.LENGTH_LONG).show());
+    // ── Plugins (Modrinth) ────────────────────────────────────────────────────
+
+    private void setupPlugins() {
+        EditText etSearch = findViewById(R.id.et_plugin_search);
+        android.widget.ImageButton btnSearch = findViewById(R.id.btn_plugin_search);
+        android.widget.ProgressBar pbPlugins = findViewById(R.id.pb_plugins);
+        androidx.recyclerview.widget.RecyclerView rvPlugins = findViewById(R.id.rv_plugins);
+        if (etSearch == null || rvPlugins == null) return;
+
+        java.util.List<eu.kodanetwork.mchost.util.ModrinthHelper.ModrinthProject> pluginList = new java.util.ArrayList<>();
+        androidx.recyclerview.widget.RecyclerView.Adapter<?> pluginAdapter = new androidx.recyclerview.widget.RecyclerView.Adapter<androidx.recyclerview.widget.RecyclerView.ViewHolder>() {
+            @Override public androidx.recyclerview.widget.RecyclerView.ViewHolder onCreateViewHolder(android.view.ViewGroup parent, int viewType) {
+                View v = getLayoutInflater().inflate(R.layout.item_modrinth_project, parent, false);
+                return new androidx.recyclerview.widget.RecyclerView.ViewHolder(v) {};
             }
+            @Override public void onBindViewHolder(androidx.recyclerview.widget.RecyclerView.ViewHolder holder, int position) {
+                eu.kodanetwork.mchost.util.ModrinthHelper.ModrinthProject p = pluginList.get(position);
+                TextView tvTitle = holder.itemView.findViewById(R.id.tv_project_title);
+                TextView tvAuthor = holder.itemView.findViewById(R.id.tv_project_author);
+                TextView tvDesc = holder.itemView.findViewById(R.id.tv_project_desc);
+                android.widget.ImageView ivIcon = holder.itemView.findViewById(R.id.iv_project_icon);
+                android.widget.ImageButton btnDl = holder.itemView.findViewById(R.id.btn_project_download);
+                android.widget.ProgressBar pbDl = holder.itemView.findViewById(R.id.pb_project_download);
+                tvTitle.setText(p.title);
+                tvAuthor.setText("by " + p.author);
+                tvDesc.setText(p.description);
+                eu.kodanetwork.mchost.util.ModrinthHelper.loadIcon(p.iconUrl, ivIcon);
+                btnDl.setOnClickListener(v -> {
+                    btnDl.setVisibility(View.GONE);
+                    pbDl.setVisibility(View.VISIBLE);
+                    eu.kodanetwork.mchost.util.ModrinthHelper.autoDownload(p.id, server, new eu.kodanetwork.mchost.util.ModrinthHelper.DownloadCallback() {
+                        @Override public void onProgress(int percent) {}
+                        @Override public void onSuccess(java.io.File file) {
+                            pbDl.setVisibility(View.GONE);
+                            btnDl.setVisibility(View.VISIBLE);
+                            
+                            View headerNormal = findViewById(R.id.layout_header_normal);
+                            View headerRestart = findViewById(R.id.layout_header_restart);
+                            android.view.View btnRestart = findViewById(R.id.btn_header_restart);
+                            
+                            if (headerNormal != null && headerRestart != null && btnRestart != null) {
+                                headerNormal.setVisibility(View.GONE);
+                                headerRestart.setVisibility(View.VISIBLE);
+                                btnRestart.setOnClickListener(v2 -> {
+                                    if (bound && svc != null) svc.sendCmd(server.getId(), "stop");
+                                    headerRestart.setVisibility(View.GONE);
+                                    headerNormal.setVisibility(View.VISIBLE);
+                                });
+                                
+                                new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
+                                    if (headerRestart.getVisibility() == View.VISIBLE) {
+                                        headerRestart.setVisibility(View.GONE);
+                                        headerNormal.setVisibility(View.VISIBLE);
+                                    }
+                                }, 30000);
+                            } else {
+                                Toast.makeText(ServerDetailActivity.this, "✓ " + file.getName() + " installiert!", Toast.LENGTH_SHORT).show();
+                            }
+                        }
+                        @Override public void onError(String err) {
+                            pbDl.setVisibility(View.GONE);
+                            btnDl.setVisibility(View.VISIBLE);
+                            Toast.makeText(ServerDetailActivity.this, "✗ " + err, Toast.LENGTH_LONG).show();
+                        }
+                    });
+                });
+            }
+            @Override public int getItemCount() { return pluginList.size(); }
+        };
+        rvPlugins.setLayoutManager(new androidx.recyclerview.widget.LinearLayoutManager(this));
+        rvPlugins.setAdapter(pluginAdapter);
+
+        Runnable doSearch = () -> {
+            String q = etSearch.getText().toString().trim();
+            if (pbPlugins != null) pbPlugins.setVisibility(View.VISIBLE);
+            eu.kodanetwork.mchost.util.ModrinthHelper.search(q, server.getType(), new eu.kodanetwork.mchost.util.ModrinthHelper.SearchCallback() {
+                @Override public void onResult(java.util.List<eu.kodanetwork.mchost.util.ModrinthHelper.ModrinthProject> results) {
+                    if (pbPlugins != null) pbPlugins.setVisibility(View.GONE);
+                    pluginList.clear();
+                    pluginList.addAll(results);
+                    pluginAdapter.notifyDataSetChanged();
+                }
+                @Override public void onError(String err) {
+                    if (pbPlugins != null) pbPlugins.setVisibility(View.GONE);
+                    Toast.makeText(ServerDetailActivity.this, "Search error: " + err, Toast.LENGTH_LONG).show();
+                }
+            });
+        };
+        if (btnSearch != null) btnSearch.setOnClickListener(v -> doSearch.run());
+        etSearch.setOnEditorActionListener((v, actionId, event) -> {
+            doSearch.run();
+            return true;
         });
+
+        // Trigger initial search to load popular plugins
+        doSearch.run();
     }
     private void startTunnel() {
         io.execute(() -> {
@@ -667,7 +1251,11 @@ public class ServerDetailActivity extends AppCompatActivity {
                 Toast.makeText(ServerDetailActivity.this, "✓ Download abgeschlossen!", Toast.LENGTH_SHORT).show();
                 if (getIntent().getBooleanExtra("auto_setup", false)) {
                     getIntent().removeExtra("auto_setup");
-                    runTermuxSetup();
+                    if (layoutFullLoading != null) {
+                        layoutFullLoading.setVisibility(android.view.View.VISIBLE);
+                        if (tvFullLoadingMsg != null) tvFullLoadingMsg.setText("AUTO-SETUP RUNNING...");
+                    }
+                    checkEulaAndStart();
                 }
             }
             @Override public void onError(String e) {
@@ -699,7 +1287,13 @@ public class ServerDetailActivity extends AppCompatActivity {
         super.onDestroy();
         h.removeCallbacks(ticker);
         io.shutdownNow();
-        if (bound) unbindService(conn);
+        if (bound) {
+            if (svc != null) {
+                if (stateCb != null) svc.removeStateCb(stateCb);
+                if (logCb != null) svc.removeLogCb(logCb);
+            }
+            unbindService(conn);
+            bound = false;
+        }
     }
 }
- 
