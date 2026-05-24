@@ -25,15 +25,35 @@ public class RegisterPageActivity extends AppCompatActivity {
         TextView tvSignIn = findViewById(R.id.tv_sign_in);
 
         btnCreate.setOnClickListener(v -> {
-            if (etEmail.getText().toString().trim().isEmpty()
-                || etUsername.getText().toString().trim().isEmpty()
-                || etPassword.getText().toString().trim().isEmpty()) {
+            String email = etEmail.getText().toString().trim();
+            String pwd = etPassword.getText().toString().trim();
+            if (email.isEmpty() || etUsername.getText().toString().trim().isEmpty() || pwd.isEmpty()) {
                 Toast.makeText(this, "Bitte Pflichtfelder ausfüllen", Toast.LENGTH_SHORT).show();
                 return;
             }
-            Toast.makeText(this, "Account erstellt (Supabase Auth Hook)", Toast.LENGTH_SHORT).show();
-            startActivity(new Intent(this, CompleteSetupPageActivity.class)
-                .putExtra("inviteCode", etInvite.getText().toString().trim()));
+            
+            btnCreate.setEnabled(false);
+            btnCreate.setText("Lade...");
+            
+            eu.kodanetwork.mchost.network.supabase.SupabaseAuth.signUp(this, email, pwd, new eu.kodanetwork.mchost.network.supabase.SupabaseAuth.AuthCallback() {
+                @Override
+                public void onSuccess() {
+                    runOnUiThread(() -> {
+                        Toast.makeText(RegisterPageActivity.this, "Account erfolgreich erstellt!", Toast.LENGTH_SHORT).show();
+                        startActivity(new Intent(RegisterPageActivity.this, eu.kodanetwork.mchost.ui.MainActivity.class));
+                        finishAffinity();
+                    });
+                }
+                
+                @Override
+                public void onError(String message) {
+                    runOnUiThread(() -> {
+                        btnCreate.setEnabled(true);
+                        btnCreate.setText("Account Erstellen");
+                        Toast.makeText(RegisterPageActivity.this, "Fehler: " + message, Toast.LENGTH_LONG).show();
+                    });
+                }
+            });
         });
 
         tvSignIn.setOnClickListener(v -> startActivity(new Intent(this, LoginPageActivity.class)));

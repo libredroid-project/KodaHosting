@@ -34,10 +34,28 @@ public class FileEditorActivity extends AppCompatActivity {
     private File targetFile;
     private int lastSearchIndex = 0;
 
+    private String lastTheme = "modern";
+    private String lastThemeMode = "dark";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_file_editor);
+
+        android.content.SharedPreferences prefs = getSharedPreferences("koda_settings", MODE_PRIVATE);
+        lastTheme = prefs.getString("app_theme", "modern");
+        lastThemeMode = prefs.getString("theme_mode", "dark");
+
+        // Apply light mode background early
+        if (eu.kodanetwork.mchost.util.ThemeHelper.isLightMode(this)) {
+            findViewById(android.R.id.content).setBackgroundColor(0xFFF5F5F5);
+            if (android.os.Build.VERSION.SDK_INT >= 23) {
+                getWindow().setStatusBarColor(0xFFF5F5F5);
+                getWindow().getDecorView().setSystemUiVisibility(
+                    android.view.View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR | android.view.View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR);
+                getWindow().setNavigationBarColor(0xFFF5F5F5);
+            }
+        }
 
         String path = getIntent().getStringExtra("path");
         if (path == null) { finish(); return; }
@@ -64,6 +82,19 @@ public class FileEditorActivity extends AppCompatActivity {
 
         loadFile();
         eu.kodanetwork.mchost.util.ThemeHelper.apply(this);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        android.content.SharedPreferences prefs = getSharedPreferences("koda_settings", MODE_PRIVATE);
+        String currentTheme = prefs.getString("app_theme", "modern");
+        String currentMode = prefs.getString("theme_mode", "dark");
+        if (!currentTheme.equals(lastTheme) || !currentMode.equals(lastThemeMode)) {
+            lastTheme = currentTheme;
+            lastThemeMode = currentMode;
+            recreate();
+        }
     }
 
     private void syntaxHighlight() {

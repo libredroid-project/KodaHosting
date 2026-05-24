@@ -10,8 +10,8 @@ android {
         applicationId "eu.kodanetwork.mchost"
         minSdk 26
         targetSdk 28
-        versionCode 4
-        versionName "0.1.231beta"
+        versionCode 8472
+        versionName "1.8472bta"
         buildConfigField "String", "IONOS_API_KEY", "\"\""
         buildConfigField "String", "IONOS_API_SECRET", "\"\""
         buildConfigField "String", "SUPABASE_URL", "\"https://scsezpfrrmpyuapblbxk.supabase.co\""
@@ -64,4 +64,5 @@ dependencies {
     implementation 'org.json:json:20231013'
     implementation 'org.tukaani:xz:1.9'
     implementation 'org.apache.commons:commons-compress:1.21'
+    implementation 'com.google.android.gms:play-services-auth:20.7.0'
 }

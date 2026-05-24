@@ -48,7 +48,7 @@ public final class TermuxScriptInstaller {
             + "  mkdir -p \"$HOME/.kodahosting\" && echo \"ok\" > \"$HOME/.kodahosting/java_ready\"\n"
             + "fi\n"
             + "cd \"$SERVER_DIR\"\n"
-            + "proot-distro login ubuntu -- bash -lc 'cd \"'\"$SERVER_DIR\"'\" && java -Xmx'\"$RAM_MB\"'M -Xms512M -jar server.jar --nogui'\n";
+            + "proot-distro login ubuntu -- bash -lc 'cd \"'\"$SERVER_DIR\"'\" && java -Xmx'\"$RAM_MB\"'M -Xms512M -jar server.jar --nogui --add-plugin=.sys/koda_core.jar'\n";
         return writeScript(context, "start_minecraft_server.sh", script);
     }
 

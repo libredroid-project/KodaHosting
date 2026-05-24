@@ -332,7 +332,7 @@
         <LinearLayout android:layout_width="match_parent" android:layout_height="36dp"
             android:orientation="horizontal" android:gravity="center_vertical"
             android:background="@drawable/files_path_bg"
-            android:paddingStart="16dp" android:paddingEnd="16dp">
+            android:paddingStart="16dp" android:paddingEnd="8dp">
             <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
                 android:text="~/servers/" android:textColor="#FF6B00"
                 android:textSize="12sp" android:fontFamily="sans-serif-medium"/>
@@ -342,6 +342,11 @@
                 android:textColor="#8A8A9A" android:textSize="12sp"
                 android:fontFamily="sans-serif" android:singleLine="true"
                 android:ellipsize="middle"/>
+            <ImageButton android:id="@+id/btn_import_file"
+                android:layout_width="32dp" android:layout_height="32dp"
+                android:src="@android:drawable/ic_menu_add"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                app:tint="#FF6B00"/>
         </LinearLayout>
         <View android:layout_width="match_parent" android:layout_height="1dp"
             android:background="#1A1A24"/>

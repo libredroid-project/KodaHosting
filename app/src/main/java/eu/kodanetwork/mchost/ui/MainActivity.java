@@ -75,9 +75,25 @@ public class MainActivity extends AppCompatActivity {
         
         android.content.SharedPreferences prefs = getSharedPreferences("koda_settings", MODE_PRIVATE);
         lastTheme = prefs.getString("app_theme", "modern");
+        lastThemeMode = prefs.getString("theme_mode", "dark");
         boolean isCyber = "cyber".equals(lastTheme);
 
+        if (prefs.getString("app_uuid", null) == null) {
+            prefs.edit().putString("app_uuid", java.util.UUID.randomUUID().toString()).apply();
+        }
+
         setContentView(R.layout.activity_main);
+
+        // Apply light mode background early
+        if (ThemeHelper.isLightMode(this)) {
+            findViewById(android.R.id.content).setBackgroundColor(0xFFF5F5F5);
+            if (android.os.Build.VERSION.SDK_INT >= 23) {
+                getWindow().setStatusBarColor(0xFFF5F5F5);
+                getWindow().getDecorView().setSystemUiVisibility(
+                    android.view.View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR | android.view.View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR);
+                getWindow().setNavigationBarColor(0xFFF5F5F5);
+            }
+        }
         
         permLauncher = registerForActivityResult(new ActivityResultContracts.RequestMultiplePermissions(), r -> {});
         storageLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), r -> {});
@@ -98,10 +114,16 @@ public class MainActivity extends AppCompatActivity {
             }
 
             View btnDebug = findViewById(R.id.btn_debug_log);
-            if (btnDebug != null) btnDebug.setOnClickListener(v -> startActivity(new Intent(this, DebugLogActivity.class)));
+            if (btnDebug != null) {
+                btnDebug.setOnClickListener(v -> startActivity(new Intent(this, DebugLogActivity.class)));
+            }
 
             View btnSettings = findViewById(R.id.btn_settings);
-            if (btnSettings != null) btnSettings.setOnClickListener(v -> startActivity(new Intent(this, SettingsActivity.class)));
+            if (btnSettings != null) {
+                btnSettings.setOnClickListener(v -> startActivity(new Intent(this, SettingsActivity.class)));
+            }
+
+
 
             repo.addListener(this::refresh);
             requestPerms();
@@ -193,13 +215,17 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private String lastTheme = "modern";
+    private String lastThemeMode = "dark";
 
     @Override
     protected void onResume() {
         super.onResume();
-        String currentTheme = getSharedPreferences("koda_settings", MODE_PRIVATE).getString("app_theme", "modern");
-        if (!currentTheme.equals(lastTheme)) {
+        android.content.SharedPreferences prefs = getSharedPreferences("koda_settings", MODE_PRIVATE);
+        String currentTheme = prefs.getString("app_theme", "modern");
+        String currentMode = prefs.getString("theme_mode", "dark");
+        if (!currentTheme.equals(lastTheme) || !currentMode.equals(lastThemeMode)) {
             lastTheme = currentTheme;
+            lastThemeMode = currentMode;
             recreate();
             return;
         }

@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">KodaHosting</string>
+    <string name="default_web_client_id" translatable="false">558083145632-fbhjb8j1k4m8r14ui97shd9dnng0rlum.apps.googleusercontent.com</string>
 </resources>

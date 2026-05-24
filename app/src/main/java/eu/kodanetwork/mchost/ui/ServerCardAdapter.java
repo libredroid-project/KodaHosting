@@ -57,9 +57,17 @@ public class ServerCardAdapter extends RecyclerView.Adapter<ServerCardAdapter.VH
 
         void bind(ServerInstance s) {
             android.content.SharedPreferences prefs = ctx.getSharedPreferences("koda_settings", Context.MODE_PRIVATE);
+            boolean isLight = eu.kodanetwork.mchost.util.ThemeHelper.isLightMode(ctx);
             boolean isCyber = "cyber".equals(prefs.getString("app_theme", "modern"));
 
-            if (isCyber) {
+            if (isLight) {
+                itemView.setBackgroundColor(0xFFEDEDED); // LIGHT_CELL
+                name.setTextColor(0xFF1A1A1A); // LIGHT_TEXT
+                type.setTextColor(0xFF555555); // LIGHT_TEXT_SEC
+                name.setTypeface(Typeface.DEFAULT);
+                type.setTypeface(Typeface.DEFAULT);
+                addr.setTextColor(0xFF555555);
+            } else if (isCyber) {
                 itemView.setBackgroundResource(R.drawable.cell_cyber_bg);
                 name.setTypeface(Typeface.MONOSPACE);
                 name.setLetterSpacing(0.1f);
@@ -81,6 +89,7 @@ public class ServerCardAdapter extends RecyclerView.Adapter<ServerCardAdapter.VH
                 type.setTextColor(0xFF444444);
                 name.setTypeface(Typeface.DEFAULT);
                 type.setTypeface(Typeface.DEFAULT);
+                addr.setTextColor(0xFF8A8A9A); // default hint
             }
 
             name.setText(s.getName());

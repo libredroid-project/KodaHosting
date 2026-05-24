@@ -58,6 +58,7 @@ public class ServerDetailActivity extends AppCompatActivity {
     private boolean bound = false;
     private final Handler h = new Handler(Looper.getMainLooper());
     private Runnable ticker;
+    private static final int REQ_IMPORT_FILE = 9912;
 
     // Tabs
     private TabLayout tabs;
@@ -133,6 +134,21 @@ public class ServerDetailActivity extends AppCompatActivity {
     protected void onCreate(Bundle b) {
         super.onCreate(b);
         setContentView(R.layout.activity_server_detail);
+
+        // Apply light mode background early
+        if (eu.kodanetwork.mchost.util.ThemeHelper.isLightMode(this)) {
+            findViewById(android.R.id.content).setBackgroundColor(0xFFF5F5F5);
+            if (android.os.Build.VERSION.SDK_INT >= 23) {
+                getWindow().setStatusBarColor(0xFFF5F5F5);
+                getWindow().getDecorView().setSystemUiVisibility(
+                    View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR | View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR);
+                getWindow().setNavigationBarColor(0xFFF5F5F5);
+            }
+        }
+        
+        android.content.SharedPreferences prefs = getSharedPreferences("koda_settings", MODE_PRIVATE);
+        lastTheme = prefs.getString("app_theme", "modern");
+        lastThemeMode = prefs.getString("theme_mode", "dark");
 
         String id = getIntent().getStringExtra("id");
         repo = ServerRepo.get(this);
@@ -211,6 +227,16 @@ public class ServerDetailActivity extends AppCompatActivity {
 
         layoutFileList = findViewById(R.id.layout_files);
         tvFilesRoot    = findViewById(R.id.tv_files_root);
+        ImageButton btnImport = findViewById(R.id.btn_import_file);
+        if (btnImport != null) {
+            btnImport.setOnClickListener(v -> {
+                Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+                intent.setType("*/*");
+                intent.addCategory(Intent.CATEGORY_OPENABLE);
+                intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
+                startActivityForResult(Intent.createChooser(intent, "Import Files"), REQ_IMPORT_FILE);
+            });
+        }
 
         layoutFullLoading = findViewById(R.id.layout_full_loading);
         tvFullLoadingMsg = findViewById(R.id.tv_full_loading_msg);
@@ -277,7 +303,13 @@ public class ServerDetailActivity extends AppCompatActivity {
         tabs.addTab(tabs.newTab().setText("Dashboard"));
         tabs.addTab(tabs.newTab().setText("Console"));
         tabs.addTab(tabs.newTab().setText("Files"));
-        tabs.addTab(tabs.newTab().setText("Plugins"));
+        String pluginTabName = "Plugins";
+        if (server != null && (server.getType() == eu.kodanetwork.mchost.model.ServerInstance.Type.FABRIC || 
+                               server.getType() == eu.kodanetwork.mchost.model.ServerInstance.Type.FORGE || 
+                               server.getType() == eu.kodanetwork.mchost.model.ServerInstance.Type.NEOFORGE)) {
+            pluginTabName = "Mods";
+        }
+        tabs.addTab(tabs.newTab().setText(pluginTabName));
         tabs.addTab(tabs.newTab().setText("Settings"));
         tabs.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override public void onTabSelected(TabLayout.Tab t)   { showTab(t.getPosition()); }
@@ -1028,6 +1060,18 @@ public class ServerDetailActivity extends AppCompatActivity {
                     new Thread(() -> {
                         try {
                             new eu.kodanetwork.mchost.network.supabase.SupabaseFunctionsClient(ServerDetailActivity.this).deleteDnsLink("", server.getSubdomain());
+                            // Delete from Supabase koda_servers table by host
+                            java.net.URL url = new java.net.URL("https://scsezpfrrmpyuapblbxk.supabase.co/rest/v1/koda_servers?host=eq." + server.getSubdomain());
+                            java.net.HttpURLConnection conn = (java.net.HttpURLConnection) url.openConnection();
+                            conn.setRequestMethod("DELETE");
+                            String anonKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNjc2V6cGZycm1weXVhcGJsYnhrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY5NDE4MjYsImV4cCI6MjA5MjUxNzgyNn0.rHro6kQpXHAnxEaFxozYzsKY8IHIUlot-7-Q4LNbZT8";
+                            conn.setRequestProperty("apikey", anonKey);
+                            
+                            android.content.SharedPreferences prefs = getSharedPreferences("koda_settings", MODE_PRIVATE);
+                            String token = prefs.getString("koda_session_token", null);
+                            conn.setRequestProperty("Authorization", token != null ? "Bearer " + token : "Bearer " + anonKey);
+                            
+                            conn.getResponseCode();
                         } catch (Exception ignored) {}
                     }).start();
                     repo.delete(server.getId()); 
@@ -1273,6 +1317,26 @@ public class ServerDetailActivity extends AppCompatActivity {
 
     // ── Uptime Ticker ─────────────────────────────────────────────────────────
 
+    private String lastTheme = "modern";
+    private String lastThemeMode = "dark";
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        android.content.SharedPreferences prefs = getSharedPreferences("koda_settings", MODE_PRIVATE);
+        String currentTheme = prefs.getString("app_theme", "modern");
+        String currentMode = prefs.getString("theme_mode", "dark");
+        if (lastTheme.equals("modern") && lastThemeMode.equals("dark")) {
+            // First run init check since it might not be explicitly initialized in onCreate
+        }
+        
+        if (!currentTheme.equals(lastTheme) || !currentMode.equals(lastThemeMode)) {
+            lastTheme = currentTheme;
+            lastThemeMode = currentMode;
+            recreate();
+        }
+    }
+
     private void startTicker() {
         ticker = new Runnable() {
             @Override public void run() {
@@ -1281,6 +1345,88 @@ public class ServerDetailActivity extends AppCompatActivity {
             }
         };
         h.post(ticker);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == REQ_IMPORT_FILE && resultCode == RESULT_OK && data != null) {
+            java.util.List<android.net.Uri> uris = new java.util.ArrayList<>();
+            if (data.getClipData() != null) {
+                for (int i = 0; i < data.getClipData().getItemCount(); i++) {
+                    uris.add(data.getClipData().getItemAt(i).getUri());
+                }
+            } else if (data.getData() != null) {
+                uris.add(data.getData());
+            }
+            if (!uris.isEmpty()) {
+                importFilesToCurrentDir(uris);
+            }
+        }
+    }
+
+    private String getFileNameFromUri(android.net.Uri uri) {
+        String name = "imported_file";
+        android.database.Cursor cursor = getContentResolver().query(uri, null, null, null, null);
+        if (cursor != null && cursor.moveToFirst()) {
+            int idx = cursor.getColumnIndex(android.provider.OpenableColumns.DISPLAY_NAME);
+            if (idx != -1) name = cursor.getString(idx);
+            cursor.close();
+        }
+        return name;
+    }
+
+    private void importFilesToCurrentDir(java.util.List<android.net.Uri> uris) {
+        if (currentDir == null) return;
+        // Check for duplicates first
+        java.util.List<String> duplicates = new java.util.ArrayList<>();
+        java.util.Map<android.net.Uri, String> uriNames = new java.util.LinkedHashMap<>();
+        for (android.net.Uri uri : uris) {
+            String name = getFileNameFromUri(uri);
+            uriNames.put(uri, name);
+            if (new File(currentDir, name).exists()) {
+                duplicates.add(name);
+            }
+        }
+        if (!duplicates.isEmpty()) {
+            new AlertDialog.Builder(this)
+                .setTitle("File(s) already exist")
+                .setMessage("The following files already exist:\n\n• " + String.join("\n• ", duplicates) + "\n\nOverwrite them?")
+                .setPositiveButton("Overwrite", (d, w) -> doImport(uriNames))
+                .setNegativeButton("Cancel", null)
+                .show();
+        } else {
+            doImport(uriNames);
+        }
+    }
+
+    private void doImport(java.util.Map<android.net.Uri, String> uriNames) {
+        new Thread(() -> {
+            int success = 0;
+            int failed = 0;
+            for (java.util.Map.Entry<android.net.Uri, String> entry : uriNames.entrySet()) {
+                try {
+                    File dest = new File(currentDir, entry.getValue());
+                    java.io.InputStream in = getContentResolver().openInputStream(entry.getKey());
+                    java.io.OutputStream out = new java.io.FileOutputStream(dest);
+                    byte[] buf = new byte[8192];
+                    int len;
+                    while ((len = in.read(buf)) > 0) out.write(buf, 0, len);
+                    in.close();
+                    out.close();
+                    success++;
+                } catch (Exception e) {
+                    failed++;
+                }
+            }
+            final int s = success, f = failed;
+            runOnUiThread(() -> {
+                String msg = "Imported " + s + " file" + (s != 1 ? "s" : "");
+                if (f > 0) msg += " (" + f + " failed)";
+                Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
+                refreshFiles();
+            });
+        }).start();
     }
 
     @Override protected void onDestroy() {

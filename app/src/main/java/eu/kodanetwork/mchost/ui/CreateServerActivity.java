@@ -122,6 +122,19 @@ public class CreateServerActivity extends AppCompatActivity {
             findViewById(android.R.id.content).getRootView().setBackgroundResource(R.drawable.bg_cyber_grid);
         }
 
+        // Apply light mode background early
+        if (eu.kodanetwork.mchost.util.ThemeHelper.isLightMode(this)) {
+            findViewById(android.R.id.content).setBackgroundColor(0xFFF5F5F5);
+            if (android.os.Build.VERSION.SDK_INT >= 23) {
+                getWindow().setStatusBarColor(0xFFF5F5F5);
+                getWindow().getDecorView().setSystemUiVisibility(
+                    android.view.View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR | android.view.View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR);
+                getWindow().setNavigationBarColor(0xFFF5F5F5);
+            }
+        }
+        
+        lastThemeMode = prefs.getString("theme_mode", "dark");
+
         etName          = findViewById(R.id.et_name);
         seekRam         = findViewById(R.id.seek_ram);
         tvRamValue      = findViewById(R.id.tv_ram_value);
@@ -865,12 +878,20 @@ public class CreateServerActivity extends AppCompatActivity {
         }
     }
 
+    private String lastThemeMode = "dark";
+
     @Override
     protected void onResume() {
         super.onResume();
-        String currentTheme = getSharedPreferences("koda_settings", MODE_PRIVATE).getString("app_theme", "modern");
-        if (!currentTheme.equals(lastTheme)) {
+        android.content.SharedPreferences prefs = getSharedPreferences("koda_settings", MODE_PRIVATE);
+        String currentTheme = prefs.getString("app_theme", "modern");
+        String currentMode = prefs.getString("theme_mode", "dark");
+        if (lastThemeMode.equals("dark") && lastTheme.equals("modern")) {
+            // First run check
+        }
+        if (!currentTheme.equals(lastTheme) || !currentMode.equals(lastThemeMode)) {
             lastTheme = currentTheme;
+            lastThemeMode = currentMode;
             recreate();
         }
     }

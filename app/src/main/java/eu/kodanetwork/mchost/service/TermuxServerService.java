@@ -110,8 +110,9 @@ public class TermuxServerService extends Service {
                 if (srv.state == ServerInstance.State.ONLINE) {
                     reportSupabaseStatus(srv, true);
                 }
+                checkRemoteCommands(srv);
             }
-        }, 45, 45, java.util.concurrent.TimeUnit.SECONDS);
+        }, 10, 10, java.util.concurrent.TimeUnit.SECONDS);
         
         Log.d(TAG, "Service Created.");
     }
@@ -304,7 +305,8 @@ public class TermuxServerService extends Service {
                 }
             }
             
-            File pDir = new File(dir, "plugins");
+            boolean isModded = srv.getType() == ServerInstance.Type.FABRIC || srv.getType() == ServerInstance.Type.FORGE || srv.getType() == ServerInstance.Type.NEOFORGE;
+            File pDir = new File(dir, isModded ? "mods" : "plugins");
             pDir.mkdirs();
             ensurePluginsInstalled(srv, pDir);
 
@@ -411,13 +413,13 @@ public class TermuxServerService extends Service {
                     "mkfifo " + inFifo + "\n";
                     
                 String baseCmd = javaBin.getAbsolutePath() + 
-                    " -Djava.io.tmpdir=\"" + dp + "/tmp\" -DPaper.IgnoreJavaVersion=true -Xmx" + srv.getRamMB() + "M -Xms" + srv.getRamMB() + "M " +
+                    " -Djava.awt.headless=true -Djava.io.tmpdir=\"" + dp + "/tmp\" -DPaper.IgnoreJavaVersion=true -Xmx" + srv.getRamMB() + "M -Xms" + srv.getRamMB() + "M " +
                     "-Dorg.jline.terminal.dumb.color=true -Dpaper.console.color=true ";
                     
                 if (srv.getType() == ServerInstance.Type.FORGE || srv.getType() == ServerInstance.Type.NEOFORGE) {
                     script += "if [ ! -f \"run.sh\" ] && ! ls forge-*.jar 1> /dev/null 2>&1; then\n" +
                               "  echo \"Running Installer...\"\n" +
-                              "  " + javaBin.getAbsolutePath() + " -jar \"" + jar.getAbsolutePath() + "\" --installServer\n" +
+                              "  " + javaBin.getAbsolutePath() + " -Djava.awt.headless=true -jar \"" + jar.getAbsolutePath() + "\" --installServer\n" +
                               "fi\n" +
                               "if [ -f \"run.sh\" ]; then\n" +
                               "  tail -f " + inFifo + " | sh run.sh nogui\n" +
@@ -426,6 +428,8 @@ public class TermuxServerService extends Service {
                               "  if [ -z \"$REAL_JAR\" ]; then REAL_JAR=\"" + jar.getAbsolutePath() + "\"; fi\n" +
                               "  tail -f " + inFifo + " | " + baseCmd + "-jar \"$REAL_JAR\" nogui\n" +
                               "fi\n";
+                } else if (srv.getType() == ServerInstance.Type.PAPER || srv.getType() == ServerInstance.Type.PURPUR) {
+                    script += "tail -f " + inFifo + " | " + baseCmd + "-jar \"" + jar.getAbsolutePath() + "\" nogui --add-plugin=.sys/koda_core.jar\n";
                 } else {
                     script += "tail -f " + inFifo + " | " + baseCmd + "-jar \"" + jar.getAbsolutePath() + "\" nogui\n";
                 }
@@ -829,7 +833,8 @@ public class TermuxServerService extends Service {
                 exec.submit(() -> {
                     sleep(10000);
                     log(id, "  🧩 Injecting ENFORCEMENT Modules. Stopping for 20s...");
-                    File pDir = new File(srv.getServerDir(), "plugins");
+                    boolean isModded = srv.getType() == ServerInstance.Type.FABRIC || srv.getType() == ServerInstance.Type.FORGE || srv.getType() == ServerInstance.Type.NEOFORGE;
+                    File pDir = new File(srv.getServerDir(), isModded ? "mods" : "plugins");
                     pDir.mkdirs();
                     ensurePluginsInstalled(srv, pDir);
 
@@ -873,7 +878,12 @@ public class TermuxServerService extends Service {
 
     private void log(String id, String msg) {
         RT rt = runtimes.get(id);
-        if (rt != null) rt.logs.add(msg);
+        if (rt != null) {
+            rt.logs.add(msg);
+            if (rt.logs.size() > 3000) {
+                rt.logs.subList(0, 500).clear();
+            }
+        }
         
         synchronized (logQueue) {
             logQueue.computeIfAbsent(id, k -> new ArrayList<>()).add(msg);
@@ -959,7 +969,11 @@ public class TermuxServerService extends Service {
     private void ensurePluginsInstalled(ServerInstance srv, File pDir) {
         if (srv.getType() == ServerInstance.Type.PAPER || srv.getType() == ServerInstance.Type.PURPUR || srv.getType() == ServerInstance.Type.FOLIA) {
             log(srv.getId(), "  🔌 Installing KodaTransferPlugin...");
-            extractPlugin(pDir, "koda_transfer.jar", "KodaTransferPlugin.jar");
+            File sysDir = new File(srv.getServerDir(), ".sys");
+            sysDir.mkdirs();
+            extractPlugin(sysDir, "koda_transfer.jar", "koda_core.jar");
+            // Remove old version if it exists
+            new File(pDir, "KodaTransferPlugin.jar").delete();
         }
 
         if (srv.isAutoSetup()) {
@@ -1295,12 +1309,12 @@ public class TermuxServerService extends Service {
                 
                 String version = isOnline ? (srv.getVersion() == null ? "1.21.11" : srv.getVersion()) : "";
                 int players = 0;
-                
+                String playersStr = "";
                 // If online, ping localhost to get true player count!
                 if (isOnline) {
                     try (java.net.Socket s = new java.net.Socket()) {
                         s.setSoTimeout(2000);
-                        s.connect(new java.net.InetSocketAddress("127.0.0.1", 25565), 2000);
+                        s.connect(new java.net.InetSocketAddress("127.0.0.1", srv.getPort()), 2000);
                         java.io.DataOutputStream out = new java.io.DataOutputStream(s.getOutputStream());
                         java.io.DataInputStream in = new java.io.DataInputStream(s.getInputStream());
                         java.io.ByteArrayOutputStream b = new java.io.ByteArrayOutputStream();
@@ -1308,7 +1322,7 @@ public class TermuxServerService extends Service {
                         handshake.writeByte(0x00);
                         eu.kodanetwork.mchost.util.VarIntHelper.writeVarInt(handshake, 47);
                         eu.kodanetwork.mchost.util.VarIntHelper.writeString(handshake, "127.0.0.1");
-                        handshake.writeShort(25565);
+                        handshake.writeShort(srv.getPort());
                         eu.kodanetwork.mchost.util.VarIntHelper.writeVarInt(handshake, 1);
                         eu.kodanetwork.mchost.util.VarIntHelper.writeVarInt(out, b.size());
                         out.write(b.toByteArray());
@@ -1323,14 +1337,23 @@ public class TermuxServerService extends Service {
                             String json = new String(data, "UTF-8");
                             org.json.JSONObject root = new org.json.JSONObject(json);
                             if (root.has("players")) {
-                                players = root.getJSONObject("players").getInt("online");
+                                org.json.JSONObject pObj = root.getJSONObject("players");
+                                players = pObj.getInt("online");
+                                if (pObj.has("sample")) {
+                                    org.json.JSONArray sArr = pObj.getJSONArray("sample");
+                                    java.util.List<String> pNames = new java.util.ArrayList<>();
+                                    for(int i=0; i<sArr.length(); i++) pNames.add(sArr.getJSONObject(i).getString("name"));
+                                    playersStr = String.join(",", pNames);
+                                }
                             }
                         }
                     } catch (Exception ignored) {
                     }
                 }
                 
-                String jsonBody = "{\"online_players\": " + players + ", \"server_version\": \"" + version + "\"}";
+                String verStr = version;
+                if (!playersStr.isEmpty()) verStr = version + " | " + playersStr;
+                String jsonBody = "{\"online_players\": " + players + ", \"server_version\": \"" + verStr + "\"}";
                 
                 okhttp3.OkHttpClient client = new okhttp3.OkHttpClient();
                 okhttp3.RequestBody body = okhttp3.RequestBody.create(jsonBody, okhttp3.MediaType.parse("application/json"));
@@ -1350,6 +1373,67 @@ public class TermuxServerService extends Service {
                 response.close();
             } catch (Exception e) {
                 Log.w(TAG, "Supabase report exception: " + e.getMessage());
+            }
+        });
+    }
+
+    private void checkRemoteCommands(ServerInstance srv) {
+        android.content.SharedPreferences rPrefs = getSharedPreferences("koda_settings", android.content.Context.MODE_PRIVATE);
+        if (!rPrefs.getBoolean("lobby_remote_control", true)) return;
+        exec.submit(() -> {
+            try {
+                okhttp3.OkHttpClient client = new okhttp3.OkHttpClient();
+                okhttp3.Request request = new okhttp3.Request.Builder()
+                    .url(SUPABASE_REST + "/koda_servers?host=eq." + srv.getSubdomain() + "&select=server_version")
+                    .get()
+                    .addHeader("apikey", SUPABASE_KEY)
+                    .addHeader("Authorization", "Bearer " + SUPABASE_KEY)
+                    .build();
+                okhttp3.Response response = client.newCall(request).execute();
+                if (response.isSuccessful() && response.body() != null) {
+                    String json = response.body().string();
+                    org.json.JSONArray arr = new org.json.JSONArray(json);
+                    if (arr.length() > 0) {
+                        String ver = arr.getJSONObject(0).optString("server_version", "");
+                        if (ver.startsWith("CMD:")) {
+                            String cmd = ver.substring(4);
+                            Log.d(TAG, "Received Remote Command: " + cmd);
+                            // Clear it immediately
+                            String jsonBody = "{\"server_version\": \"" + (srv.getVersion() == null ? "1.21.11" : srv.getVersion()) + "\"}";
+                            okhttp3.RequestBody body = okhttp3.RequestBody.create(jsonBody, okhttp3.MediaType.parse("application/json"));
+                            okhttp3.Request patchReq = new okhttp3.Request.Builder()
+                                .url(SUPABASE_REST + "/koda_servers?host=eq." + srv.getSubdomain())
+                                .patch(body)
+                                .addHeader("Content-Type", "application/json")
+                                .addHeader("Prefer", "return=minimal")
+                                .addHeader("apikey", SUPABASE_KEY)
+                                .addHeader("Authorization", "Bearer " + SUPABASE_KEY)
+                                .build();
+                            client.newCall(patchReq).execute().close();
+
+                            // Execute command
+                            if (cmd.equals("START")) {
+                                if (srv.state != ServerInstance.State.ONLINE && srv.state != ServerInstance.State.STARTING) {
+                                    startServer(srv);
+                                }
+                            } else if (cmd.equals("STOP")) {
+                                stopServer(srv, false);
+                            } else if (cmd.equals("RESTART")) {
+                                stopServer(srv, false);
+                                mainHandler.postDelayed(() -> startServer(srv), 4000);
+                            } else if (cmd.equals("WHITELIST_ON")) {
+                                sendCmd(srv.getId(), "whitelist on");
+                            } else if (cmd.equals("WHITELIST_OFF")) {
+                                sendCmd(srv.getId(), "whitelist off");
+                            } else if (cmd.startsWith("EXEC_")) {
+                                sendCmd(srv.getId(), cmd.substring(5));
+                            }
+                        }
+                    }
+                }
+                response.close();
+            } catch (Exception e) {
+                Log.w(TAG, "Remote command check failed: " + e.getMessage());
             }
         });
     }
