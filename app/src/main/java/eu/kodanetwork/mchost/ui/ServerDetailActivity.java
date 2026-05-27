@@ -65,7 +65,7 @@ public class ServerDetailActivity extends AppCompatActivity {
     private View pDash, pConsole, pFiles, pSettings, pPlugins;
 
     // Dashboard
-    private TextView tvBadge, tvUptime, tvPlayers, tvJoinAddr, tvRamInfo, tvVerInfo, tvJavaInfo;
+    private TextView tvBadge, tvUptime, tvPlayers, tvJoinAddr, tvRamInfo, tvVerInfo, tvJavaInfo, tvBedrockPortDash;
     private MaterialButton btnStart, btnStop, btnRestart, btnKill;
     private View dlProgress;
     private View dot;
@@ -134,6 +134,8 @@ public class ServerDetailActivity extends AppCompatActivity {
     protected void onCreate(Bundle b) {
         super.onCreate(b);
         setContentView(R.layout.activity_server_detail);
+        
+        eu.kodanetwork.mchost.util.ThemeHelper.apply(this);
 
         // Apply light mode background early
         if (eu.kodanetwork.mchost.util.ThemeHelper.isLightMode(this)) {
@@ -201,8 +203,16 @@ public class ServerDetailActivity extends AppCompatActivity {
         tvPlayers = findViewById(R.id.tv_players);
         tvJoinAddr = findViewById(R.id.tv_join_addr);
         tvRamInfo  = findViewById(R.id.tv_ram_info);
-        tvVerInfo  = findViewById(R.id.tv_ver_info);
+        tvVerInfo = findViewById(R.id.tv_ver_info);
         tvJavaInfo = findViewById(R.id.tv_java_info);
+        tvBedrockPortDash = findViewById(R.id.tv_bedrock_port_dash);
+
+        tvJoinAddr.setOnClickListener(v -> copyToClipboard("Join Address", server.getJoinAddress()));
+        tvBedrockPortDash.setOnClickListener(v -> {
+            if (server.isBedrockSupport() && server.getBedrockPort() > 0) {
+                copyToClipboard("Bedrock Port", String.valueOf(server.getBedrockPort()));
+            }
+        });
         btnStart   = findViewById(R.id.btn_start);
         btnStop    = findViewById(R.id.btn_stop);
         btnRestart = findViewById(R.id.btn_restart);
@@ -223,7 +233,7 @@ public class ServerDetailActivity extends AppCompatActivity {
         tvLog       = findViewById(R.id.tv_log);
         scrollLog   = findViewById(R.id.scroll_log);
         etCmd       = findViewById(R.id.et_cmd);
-        layoutChips = findViewById(R.id.layout_chips);
+        layoutChips = null;
 
         layoutFileList = findViewById(R.id.layout_files);
         tvFilesRoot    = findViewById(R.id.tv_files_root);
@@ -277,6 +287,17 @@ public class ServerDetailActivity extends AppCompatActivity {
 
         // Static info
         tvJoinAddr.setText(server.getJoinAddress());
+        
+        View layoutBedrockPort = findViewById(R.id.layout_bedrock_port);
+        if (layoutBedrockPort != null && tvBedrockPortDash != null) {
+            if (server.isBedrockSupport() && server.getBedrockPort() > 0) {
+                layoutBedrockPort.setVisibility(View.VISIBLE);
+                tvBedrockPortDash.setText(String.valueOf(server.getBedrockPort()));
+            } else {
+                layoutBedrockPort.setVisibility(View.GONE);
+            }
+        }
+
         tvRamInfo.setText(server.getRamMB() + " MB RAM");
         tvVerInfo.setText(server.getType().name() + " " + server.getVersion());
 
@@ -312,9 +333,26 @@ public class ServerDetailActivity extends AppCompatActivity {
         tabs.addTab(tabs.newTab().setText(pluginTabName));
         tabs.addTab(tabs.newTab().setText("Settings"));
         tabs.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
-            @Override public void onTabSelected(TabLayout.Tab t)   { showTab(t.getPosition()); }
+            @Override public void onTabSelected(TabLayout.Tab t) {
+                if (t.getPosition() == 1 && server != null && server.state == ServerInstance.State.OFFLINE) {
+                    // Block opening console when offline
+                    android.content.Intent w = new android.content.Intent(ServerDetailActivity.this, PraetorWarningActivity.class);
+                    w.putExtra(PraetorWarningActivity.EXTRA_REASON, "Die Konsole kann nicht geöffnet werden, während der Server offline ist. Bitte starte den Server zuerst.");
+                    w.putExtra(PraetorWarningActivity.EXTRA_ACTION, "ZURÜCK");
+                    startActivity(w);
+                    
+                    // Switch back to Dashboard (index 0)
+                    tabs.selectTab(tabs.getTabAt(0));
+                    return;
+                }
+                showTab(t.getPosition());
+            }
             @Override public void onTabUnselected(TabLayout.Tab t) {}
-            @Override public void onTabReselected(TabLayout.Tab t) {}
+            @Override public void onTabReselected(TabLayout.Tab t) {
+                if (t.getPosition() == 1 && server != null && server.state == ServerInstance.State.OFFLINE) {
+                    tabs.selectTab(tabs.getTabAt(0));
+                }
+            }
         });
         showTab(0);
     }
@@ -631,6 +669,7 @@ public class ServerDetailActivity extends AppCompatActivity {
     }
 
     private void autoStartAll() {
+        btnStart.setEnabled(false);
         io.execute(() -> {
             StartOrchestrator orchestrator = new StartOrchestrator(this, new StartOrchestrator.Callback() {
                 @Override
@@ -677,7 +716,13 @@ public class ServerDetailActivity extends AppCompatActivity {
 
                 @Override
                 public void requestServerStartIntent() {
-                    runOnUiThread(() -> sendAction(TermuxServerService.ACTION_START));
+                    runOnUiThread(() -> {
+                        if (eu.kodanetwork.mchost.security.PraetorSystem.checkRamForStart(ServerDetailActivity.this, server)) {
+                            server.state = ServerInstance.State.STARTING;
+                            eu.kodanetwork.mchost.model.ServerRepo.get(ServerDetailActivity.this).update(server);
+                            sendAction(TermuxServerService.ACTION_START);
+                        }
+                    });
                 }
             });
             try {
@@ -689,14 +734,15 @@ public class ServerDetailActivity extends AppCompatActivity {
             }
         });
     }
-
     private void sendAction(String action) {
-        Intent i = new Intent(this, TermuxServerService.class);
+        android.content.Intent i = new android.content.Intent(this, eu.kodanetwork.mchost.service.TermuxServerService.class);
         i.setAction(action);
-        i.putExtra(TermuxServerService.EXTRA_ID, server.getId());
-        if (Build.VERSION.SDK_INT >= 26) startForegroundService(i);
+        i.putExtra(eu.kodanetwork.mchost.service.TermuxServerService.EXTRA_ID, server.getId());
+        if (android.os.Build.VERSION.SDK_INT >= 26) startForegroundService(i);
         else startService(i);
     }
+
+    private Runnable autoCloseRunnable;
 
     private void updateDash() {
         ServerInstance.State st = server.state;
@@ -736,8 +782,25 @@ public class ServerDetailActivity extends AppCompatActivity {
                 case CRASHED:  dotDrw = R.drawable.dot_err;    break;
                 default:       dotDrw = R.drawable.dot_offline; break;
             }
-            dot.setBackground(getDrawable(dotDrw));
+            dot.setBackgroundResource(dotDrw);
         }
+
+        if (st == ServerInstance.State.OFFLINE) {
+            if (autoCloseRunnable == null) {
+                autoCloseRunnable = () -> {
+                    if (server.state == ServerInstance.State.OFFLINE && !isFinishing()) {
+                        finish();
+                    }
+                };
+                h.postDelayed(autoCloseRunnable, 20000); // 20 seconds auto-close
+            }
+        } else {
+            if (autoCloseRunnable != null) {
+                h.removeCallbacks(autoCloseRunnable);
+                autoCloseRunnable = null;
+            }
+        }
+        
         if (st == ServerInstance.State.CRASHED || (st == ServerInstance.State.OFFLINE && !server.isAutoSetup())) {
             if (layoutFullLoading != null) layoutFullLoading.setVisibility(View.GONE);
         }
@@ -746,9 +809,9 @@ public class ServerDetailActivity extends AppCompatActivity {
     // ── Console ───────────────────────────────────────────────────────────────
 
     private void setupConsole() {
-        MaterialButton btnSend  = findViewById(R.id.btn_send);
-        MaterialButton btnClear = findViewById(R.id.btn_clear);
-        MaterialButton btnCopy  = findViewById(R.id.btn_copy_log);
+        View btnSend  = findViewById(R.id.btn_send);
+        View btnClear = findViewById(R.id.btn_clear);
+        View btnCopy  = findViewById(R.id.btn_copy_log);
         btnSend .setOnClickListener(v -> sendCmd());
         btnClear.setOnClickListener(v -> tvLog.setText(""));
         btnCopy .setOnClickListener(v -> {
@@ -766,16 +829,24 @@ public class ServerDetailActivity extends AppCompatActivity {
         });
 
         String[] cmds = {
-            "list", "tps", "say Hallo!", "time set day", "weather clear",
-            "op <Spieler>", "save-all", "whitelist list", "gamemode creative @a"
+            "/stop", "/help", "/list", "/tps", "/say", "/time set day", "/weather clear", "/op"
         };
         for (String c : cmds) {
             Chip chip = new Chip(this);
             chip.setText(c);
-            chip.setTextColor(0xFFFF6B00);
-            chip.setChipBackgroundColor(android.content.res.ColorStateList.valueOf(0xFF101010));
-            chip.setOnClickListener(v -> etCmd.setText(c));
-            layoutChips.addView(chip);
+            if (c.equals("/stop")) {
+                chip.setTextColor(0xFFFF5252);
+                chip.setChipStrokeColor(android.content.res.ColorStateList.valueOf(0xFFFF5252));
+            } else {
+                chip.setTextColor(0xFFF0F0F0);
+                chip.setChipStrokeColor(android.content.res.ColorStateList.valueOf(0xFF8A8A9A));
+            }
+            chip.setChipStrokeWidth(3f);
+            chip.setChipBackgroundColor(android.content.res.ColorStateList.valueOf(Color.TRANSPARENT));
+            chip.setOnClickListener(v -> etCmd.setText(c.replace("/", "")));
+            if (layoutChips != null) {
+                layoutChips.addView(chip);
+            }
         }
     }
 
@@ -819,6 +890,11 @@ public class ServerDetailActivity extends AppCompatActivity {
         }
         
         tvLog.append(ssb);
+        
+        android.text.Editable editable = tvLog.getEditableText();
+        if (editable != null && editable.length() > 25000) {
+            editable.delete(0, editable.length() - 20000);
+        }
         
         long now = System.currentTimeMillis();
         if (now - lastScrollTime > 250) {
@@ -1052,35 +1128,66 @@ public class ServerDetailActivity extends AppCompatActivity {
             });
         }
 
-        btnDelServer.setOnClickListener(v ->
+        btnDelServer.setOnClickListener(v -> {
+            if (!eu.kodanetwork.mchost.security.PraetorSystem.checkNetwork(this)) return;
             new AlertDialog.Builder(this)
                 .setTitle("\"" + server.getName() + "\" löschen?")
                 .setMessage("Entfernt den Eintrag. Dateien auf dem Gerät werden NICHT gelöscht.")
                 .setPositiveButton("Löschen", (d, w) -> {
                     new Thread(() -> {
                         try {
-                            new eu.kodanetwork.mchost.network.supabase.SupabaseFunctionsClient(ServerDetailActivity.this).deleteDnsLink("", server.getSubdomain());
-                            // Delete from Supabase koda_servers table by host
-                            java.net.URL url = new java.net.URL("https://scsezpfrrmpyuapblbxk.supabase.co/rest/v1/koda_servers?host=eq." + server.getSubdomain());
-                            java.net.HttpURLConnection conn = (java.net.HttpURLConnection) url.openConnection();
-                            conn.setRequestMethod("DELETE");
                             String anonKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNjc2V6cGZycm1weXVhcGJsYnhrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY5NDE4MjYsImV4cCI6MjA5MjUxNzgyNn0.rHro6kQpXHAnxEaFxozYzsKY8IHIUlot-7-Q4LNbZT8";
-                            conn.setRequestProperty("apikey", anonKey);
-                            
                             android.content.SharedPreferences prefs = getSharedPreferences("koda_settings", MODE_PRIVATE);
                             String token = prefs.getString("koda_session_token", null);
-                            conn.setRequestProperty("Authorization", token != null ? "Bearer " + token : "Bearer " + anonKey);
+                            String authHeader = token != null ? "Bearer " + token : "Bearer " + anonKey;
                             
-                            conn.getResponseCode();
-                        } catch (Exception ignored) {}
+                            // 1. Delete DNS Link
+                            try {
+                                if (server.getSubdomain() != null && !server.getSubdomain().isEmpty()) {
+                                    new eu.kodanetwork.mchost.network.supabase.SupabaseFunctionsClient(ServerDetailActivity.this)
+                                        .deleteDnsLink("", server.getSubdomain());
+                                }
+                            } catch (Exception e) {
+                                android.util.Log.e("ServerDetail", "Failed to delete DNS link", e);
+                            }
+                            
+                            // 2. PATCH to change host and server_version to hide it from lobby (bypasses RLS DELETE restrictions for anon users)
+                            try {
+                                java.net.HttpURLConnection patchConn = (java.net.HttpURLConnection) new java.net.URL("https://scsezpfrrmpyuapblbxk.supabase.co/rest/v1/koda_servers?host=eq." + server.getSubdomain()).openConnection();
+                                patchConn.setRequestMethod("PATCH");
+                                patchConn.setRequestProperty("apikey", anonKey);
+                                patchConn.setRequestProperty("Authorization", "Bearer " + anonKey);
+                                patchConn.setRequestProperty("Content-Type", "application/json");
+                                patchConn.setDoOutput(true);
+                                String jsonPatch = "{\"host\": \"deleted_" + server.getSubdomain() + "\", \"server_version\": \"DELETED\"}";
+                                patchConn.getOutputStream().write(jsonPatch.getBytes());
+                                patchConn.getResponseCode();
+                            } catch (Exception e) {
+                                android.util.Log.e("ServerDetail", "Failed to patch server", e);
+                            }
+                            
+                            // 3. Try to actually DELETE the row (now targets the deleted_ host)
+                            try {
+                                java.net.URL url = new java.net.URL("https://scsezpfrrmpyuapblbxk.supabase.co/rest/v1/koda_servers?host=eq.deleted_" + server.getSubdomain());
+                                java.net.HttpURLConnection conn = (java.net.HttpURLConnection) url.openConnection();
+                                conn.setRequestMethod("DELETE");
+                                conn.setRequestProperty("apikey", anonKey);
+                                conn.setRequestProperty("Authorization", "Bearer " + anonKey);
+                                conn.getResponseCode();
+                            } catch (Exception e) {
+                                android.util.Log.e("ServerDetail", "Failed to delete server", e);
+                            }
+                        } catch (Exception e) {
+                            android.util.Log.e("ServerDetail", "Critical error during deletion", e);
+                        }
                     }).start();
                     repo.delete(server.getId()); 
                     finish(); 
                 })
                 .setNegativeButton("Abbrechen", null)
-                .show());
+                .show();
+        });
     }
-    
     private void triggerAddonRestart() {
         if (server.state == ServerInstance.State.ONLINE || server.state == ServerInstance.State.STARTING) {
             if (layoutFullLoading != null) {
@@ -1242,7 +1349,7 @@ public class ServerDetailActivity extends AppCompatActivity {
             return;
         }
         if (server.getPlayitAddress().isEmpty()) {
-            Toast.makeText(this, "Start playit tunnel first", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, "Start playit tunnel first", Toast.LENGTH_SHORT).show();
             return;
         }
         io.execute(() -> {
@@ -1252,7 +1359,7 @@ public class ServerDetailActivity extends AppCompatActivity {
                 String target = parts[0];
                 int port = parts.length > 1 ? Integer.parseInt(parts[1]) : server.getPort();
                 
-                client.createDnsLink("", host, target, port);
+                client.createDnsLink("", host, target, port, "tcp");
                 
                 String domain = host + ".kodanetwork.eu";
                 server.setSubdomain(host);
@@ -1432,6 +1539,7 @@ public class ServerDetailActivity extends AppCompatActivity {
     @Override protected void onDestroy() {
         super.onDestroy();
         h.removeCallbacks(ticker);
+        h.removeCallbacks(autoCloseRunnable);
         io.shutdownNow();
         if (bound) {
             if (svc != null) {
@@ -1441,5 +1549,13 @@ public class ServerDetailActivity extends AppCompatActivity {
             unbindService(conn);
             bound = false;
         }
+    }
+
+    private void copyToClipboard(String label, String text) {
+        android.content.ClipboardManager clipboard = (android.content.ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+        android.content.ClipData clip = android.content.ClipData.newPlainText(label, text);
+        clipboard.setPrimaryClip(clip);
+        eu.kodanetwork.mchost.util.HapticUtil.forceVibrate(this, 30);
+        android.widget.Toast.makeText(this, label + " copied!", android.widget.Toast.LENGTH_SHORT).show();
     }
 }

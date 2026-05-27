@@ -32,8 +32,9 @@ Deno.serve(async (req) => {
     const zoneId = zone.id;
 
     // Use absolute FQDNs for IONOS API
+    const type = String(body.type ?? "tcp").toLowerCase();
     const fqdn = `${host}.${domain}`;
-    const srvFqdn = `_minecraft._tcp.${fqdn}`;
+    const srvFqdn = `_minecraft._${type}.${fqdn}`;
 
     // We no longer blindly delete existing records. If the record exists, the POST will fail and that is the desired behavior to prevent subdomain stealing.
 

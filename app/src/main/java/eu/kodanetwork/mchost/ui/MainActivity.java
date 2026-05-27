@@ -85,6 +85,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         // Apply light mode background early
+        eu.kodanetwork.mchost.util.NetworkMonitorManager.init(this);
         if (ThemeHelper.isLightMode(this)) {
             findViewById(android.R.id.content).setBackgroundColor(0xFFF5F5F5);
             if (android.os.Build.VERSION.SDK_INT >= 23) {
@@ -110,17 +111,26 @@ public class MainActivity extends AppCompatActivity {
             ExtendedFloatingActionButton fab = findViewById(R.id.fab_add);
             if (fab != null) {
                 fab.setText(LocaleHelper.t(this, "[+] NEW SERVER", "[+] NEUER SERVER"));
-                fab.setOnClickListener(v -> startActivity(new Intent(this, CreateServerActivity.class)));
+                fab.setOnClickListener(v -> {
+                    eu.kodanetwork.mchost.util.HapticUtil.forceVibrate(this, 80);
+                    startActivity(new Intent(this, CreateServerActivity.class));
+                });
             }
 
             View btnDebug = findViewById(R.id.btn_debug_log);
             if (btnDebug != null) {
-                btnDebug.setOnClickListener(v -> startActivity(new Intent(this, DebugLogActivity.class)));
+                btnDebug.setOnClickListener(v -> {
+                    eu.kodanetwork.mchost.util.HapticUtil.forceVibrate(this, 80);
+                    startActivity(new Intent(this, DebugLogActivity.class));
+                });
             }
 
             View btnSettings = findViewById(R.id.btn_settings);
             if (btnSettings != null) {
-                btnSettings.setOnClickListener(v -> startActivity(new Intent(this, SettingsActivity.class)));
+                btnSettings.setOnClickListener(v -> {
+                    eu.kodanetwork.mchost.util.HapticUtil.forceVibrate(this, 80);
+                    startActivity(new Intent(this, SettingsActivity.class));
+                });
             }
 
 
@@ -132,6 +142,7 @@ public class MainActivity extends AppCompatActivity {
             startPeriodicRefresh();
 
             ThemeHelper.apply(this);
+            eu.kodanetwork.mchost.util.HapticUtil.applyHaptics(this);
             Log.d(TAG, "MainActivity created");
         } catch (Exception e) {
             Log.e(TAG, "Error in onCreate", e);
@@ -145,6 +156,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void openServer(ServerInstance s) {
+
         Intent i = new Intent(this, ServerDetailActivity.class);
         i.putExtra("id", s.getId());
         startActivity(i);

@@ -11,11 +11,25 @@ android {
         minSdk 26
         targetSdk 28
         versionCode 8472
-        versionName "1.8472bta"
+        versionName "0.8472beta"
+        ndkVersion "27.0.12077973"
         buildConfigField "String", "IONOS_API_KEY", "\"\""
         buildConfigField "String", "IONOS_API_SECRET", "\"\""
         buildConfigField "String", "SUPABASE_URL", "\"https://scsezpfrrmpyuapblbxk.supabase.co\""
         buildConfigField "String", "SUPABASE_ANON_KEY", "\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNjc2V6cGZycm1weXVhcGJsYnhrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY5NDE4MjYsImV4cCI6MjA5MjUxNzgyNn0.rHro6kQpXHAnxEaFxozYzsKY8IHIUlot-7-Q4LNbZT8\""
+        externalNativeBuild {
+            cmake {
+                cppFlags "-std=c++17"
+                arguments "-DANDROID_STL=c++_shared"
+            }
+        }
+    }
+
+    externalNativeBuild {
+        cmake {
+            path "src/main/cpp/CMakeLists.txt"
+            version "3.22.1"
+        }
     }
 
     buildTypes {

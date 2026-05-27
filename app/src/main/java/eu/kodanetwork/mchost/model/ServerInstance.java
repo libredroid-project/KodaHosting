@@ -31,6 +31,7 @@ public class ServerInstance {
     public long       startTime  = 0;
     public int        onlinePlayers = 0;
     public transient int ramUsageMB = 0;
+    public transient float currentTps = 20.0f;
     public transient java.util.List<String> onlinePlayerNames = new java.util.ArrayList<>();
     public java.util.List<String> knownPlayers = new java.util.ArrayList<>();
 
@@ -40,6 +41,7 @@ public class ServerInstance {
     private boolean   useNative     = true;  // Always use native flow (Termux removed)
     private String    themeColor    = "#FF6B00"; 
     private boolean   autoSetup     = true;
+    private String    aiPrompt      = "";
     private boolean   bedrockSupport = false;
     private int       bedrockPort    = 0;
     private boolean   voicechat      = false;
@@ -88,6 +90,7 @@ public class ServerInstance {
         j.put("useNative", useNative);
         j.put("themeColor", themeColor);
         j.put("autoSetup", autoSetup);
+        j.put("aiPrompt", aiPrompt);
         
         JSONArray kp = new JSONArray();
         for (String p : knownPlayers) kp.put(p);
@@ -118,6 +121,7 @@ public class ServerInstance {
         s.useNative      = j.optBoolean("useNative", true);  // default true
         s.themeColor     = j.optString("themeColor", "#FF6B00");
         s.autoSetup      = j.optBoolean("autoSetup", true);
+        s.aiPrompt       = j.optString("aiPrompt", "");
         s.bedrockSupport = j.optBoolean("bedrockSupport", false);
         s.voicechat      = j.optBoolean("voicechat", false);
 
@@ -166,6 +170,8 @@ public class ServerInstance {
     public void   setThemeColor(String v)      { themeColor = v; }
     public boolean isAutoSetup()               { return autoSetup; }
     public void   setAutoSetup(boolean v)      { autoSetup = v; }
+    public String getAiPrompt()                { return aiPrompt == null ? "" : aiPrompt; }
+    public void   setAiPrompt(String v)        { aiPrompt = v; }
     public boolean isBedrockSupport()          { return bedrockSupport; }
     public void   setBedrockSupport(boolean v) { bedrockSupport = v; }
     public int    getBedrockPort()             { return bedrockPort; }

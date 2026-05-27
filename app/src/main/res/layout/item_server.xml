@@ -1,61 +1,144 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent" android:layout_height="wrap_content"
-    android:orientation="horizontal" android:gravity="center_vertical"
-    android:background="@drawable/server_card_bg"
-    android:paddingStart="16dp" android:paddingEnd="16dp"
-    android:paddingTop="14dp" android:paddingBottom="14dp"
-    android:layout_marginBottom="6dp"
-    android:layout_marginStart="4dp" android:layout_marginEnd="4dp">
+    android:orientation="vertical"
+    android:background="#0A0807"
+    android:padding="16dp">
 
-    <!-- Status dot -->
-    <View android:id="@+id/dot"
-        android:layout_width="8dp" android:layout_height="8dp"
-        android:background="@drawable/dot_offline"
-        android:layout_marginEnd="14dp"/>
-
-    <!-- Name + address -->
-    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
-        android:layout_weight="1" android:orientation="vertical">
-        <TextView android:id="@+id/tv_name"
-            android:layout_width="wrap_content" android:layout_height="wrap_content"
-            android:textColor="#F0F0F0" android:textSize="14sp"
-            android:fontFamily="sans-serif-medium" android:textStyle="bold"/>
-        <TextView android:id="@+id/tv_addr"
-            android:layout_width="wrap_content" android:layout_height="wrap_content"
-            android:textColor="#555566" android:textSize="11sp"
-            android:fontFamily="sans-serif" android:layout_marginTop="2dp"
-            android:singleLine="true"/>
+    <!-- Top Row: Dot, Status, Address -->
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:orientation="horizontal" android:gravity="center_vertical"
+        android:layout_marginBottom="16dp">
+        <View android:id="@+id/dot"
+            android:layout_width="10dp" android:layout_height="10dp"
+            android:background="@drawable/dot_offline"
+            android:layout_marginEnd="8dp"/>
+        <TextView android:id="@+id/tv_badge"
+            android:layout_width="0dp" android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="ONLINE" android:textColor="#F0F0F0"
+            android:textSize="12sp" android:fontFamily="sans-serif-medium"
+            android:textStyle="bold" android:letterSpacing="0.05"/>
+        <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:background="@drawable/pill_address_bg"
+            android:paddingStart="12dp" android:paddingEnd="12dp"
+            android:paddingTop="8dp" android:paddingBottom="8dp"
+            android:orientation="horizontal" android:gravity="center_vertical">
+            <ImageView android:layout_width="14dp" android:layout_height="14dp"
+                android:src="@android:drawable/ic_menu_sort_by_size" app:tint="#8A8A9A"
+                android:layout_marginEnd="6dp"/> <!-- Link icon placeholder -->
+            <TextView android:id="@+id/tv_addr"
+                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="elite-bee-17.arm-mc.com" android:textColor="#8A8A9A"
+                android:textSize="12sp" android:fontFamily="sans-serif-medium"/>
+        </LinearLayout>
     </LinearLayout>
 
-    <!-- Type -->
-    <TextView android:id="@+id/tv_type"
-        android:layout_width="wrap_content" android:layout_height="wrap_content"
-        android:textColor="#F0F0F0" android:textSize="10sp"
-        android:fontFamily="sans-serif-medium"
-        android:background="@drawable/type_badge_bg"
-        android:paddingStart="8dp" android:paddingEnd="8dp"
-        android:paddingTop="3dp" android:paddingBottom="3dp"
-        android:layout_marginEnd="10dp"/>
+    <!-- Middle Row: Icon, Title, Subtitle -->
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:orientation="horizontal" android:gravity="center_vertical"
+        android:layout_marginBottom="20dp">
+        <!-- Icon -->
+        <ImageView android:id="@+id/iv_server_icon"
+            android:layout_width="48dp" android:layout_height="48dp"
+            android:background="@drawable/server_icon_bg"
+            android:scaleType="centerCrop"
+            android:layout_marginEnd="12dp" />
+        
+        <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+            android:layout_weight="1" android:orientation="vertical">
+            <TextView android:id="@+id/tv_name"
+                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="Survival with friends" android:textColor="#F0F0F0"
+                android:textSize="20sp" android:fontFamily="sans-serif-medium"
+                android:textStyle="bold"/>
+            <TextView android:id="@+id/tv_ver"
+                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="Pumpkin 1.21.11 • 5 players" android:textColor="#8A8A9A"
+                android:textSize="13sp" android:fontFamily="sans-serif"
+                android:layout_marginTop="2dp"/>
+            <!-- Hidden views to prevent crash -->
+            <TextView android:id="@+id/tv_type" android:layout_width="0dp" android:layout_height="0dp"/>
+            <TextView android:id="@+id/tv_players" android:layout_width="0dp" android:layout_height="0dp"/>
+        </LinearLayout>
+    </LinearLayout>
 
-    <!-- RAM -->
-    <TextView android:id="@+id/tv_ram"
-        android:layout_width="50dp" android:layout_height="wrap_content"
-        android:textColor="#8A8A9A" android:textSize="11sp"
-        android:fontFamily="sans-serif"/>
+    <!-- Stats Row -->
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:orientation="horizontal" android:gravity="center_vertical"
+        android:background="@drawable/stats_card_bg"
+        android:padding="12dp" android:layout_marginBottom="12dp">
+        <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+            android:layout_weight="1" android:orientation="vertical"
+            android:layout_marginEnd="16dp">
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="SERVER RAM USAGE" android:textColor="#8A8A9A"
+                android:textSize="10sp" android:fontFamily="sans-serif-medium"
+                android:letterSpacing="0.05" android:layout_marginBottom="6dp"/>
+            <TextView android:id="@+id/tv_ram"
+                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="1.3GB / 1.9GB" android:textColor="#F0F0F0"
+                android:textSize="14sp" android:fontFamily="sans-serif-medium"
+                android:textStyle="bold" android:layout_marginBottom="10dp"/>
+            <ProgressBar android:id="@+id/pb_ram"
+                style="?android:attr/progressBarStyleHorizontal"
+                android:layout_width="match_parent" android:layout_height="4dp"
+                android:progressDrawable="@drawable/custom_progress_bar"
+                android:progress="68" android:max="100"/>
+        </LinearLayout>
+        <!-- TPS Indicator -->
+        <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:orientation="vertical" android:gravity="center"
+            android:layout_marginEnd="20dp">
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="TPS" android:textColor="#8A8A9A"
+                android:textSize="10sp" android:fontFamily="sans-serif-medium"
+                android:letterSpacing="0.05" android:layout_marginBottom="4dp"/>
+            <TextView android:id="@+id/tv_tps"
+                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="20.0" android:textColor="#00E676"
+                android:textSize="16sp" android:fontFamily="sans-serif-medium"
+                android:textStyle="bold"/>
+        </LinearLayout>
 
-    <!-- Status badge -->
-    <TextView android:id="@+id/tv_badge"
-        android:layout_width="60dp" android:layout_height="wrap_content"
-        android:textSize="10sp" android:fontFamily="sans-serif-medium"
-        android:textStyle="bold" android:letterSpacing="0.03"/>
+        <!-- Circular indicator -->
+        <FrameLayout android:layout_width="52dp" android:layout_height="52dp">
+            <ProgressBar
+                android:id="@+id/pb_battery"
+                style="?android:attr/progressBarStyleHorizontal"
+                android:layout_width="match_parent" android:layout_height="match_parent"
+                android:progressDrawable="@drawable/circular_progress"
+                android:progress="50" android:max="100"/>
+            <LinearLayout android:layout_width="match_parent" android:layout_height="match_parent"
+                android:orientation="vertical" android:gravity="center">
+                <ImageView android:layout_width="12dp" android:layout_height="12dp"
+                    android:src="@android:drawable/ic_lock_idle_charging" app:tint="#FF6B00"
+                    android:layout_marginBottom="2dp"/>
+                <TextView android:id="@+id/tv_battery"
+                    android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:text="50%" android:textColor="#F0F0F0"
+                    android:textSize="10sp" android:fontFamily="sans-serif-medium"
+                    android:textStyle="bold"/>
+            </LinearLayout>
+        </FrameLayout>
+    </LinearLayout>
 
-    <!-- Hidden views for compat -->
-    <TextView android:id="@+id/tv_ver"
-        android:layout_width="0dp" android:layout_height="wrap_content"
-        android:visibility="gone"/>
-    <TextView android:id="@+id/tv_players"
-        android:layout_width="0dp" android:layout_height="wrap_content"
-        android:visibility="gone"/>
+    <!-- Bottom Row -->
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:orientation="horizontal" android:gravity="center_vertical">
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_action"
+            android:layout_width="0dp" android:layout_height="48dp"
+            android:layout_weight="1" android:text="STOP"
+            android:textColor="#111111" android:textSize="15sp"
+            android:fontFamily="sans-serif-medium" android:textStyle="bold"
+            app:backgroundTint="#FF5252" app:cornerRadius="28dp"
+            android:insetTop="0dp" android:insetBottom="0dp"/>
+    </LinearLayout>
 
+    <!-- Divider for next server -->
+    <View android:layout_width="match_parent" android:layout_height="1dp"
+        android:background="#222222"
+        android:layout_marginTop="16dp" />
 </LinearLayout>

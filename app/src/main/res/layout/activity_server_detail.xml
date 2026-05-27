@@ -79,85 +79,143 @@
         <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
             android:orientation="vertical" android:padding="16dp">
 
-            <!-- STATUS CARD -->
-            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
-                android:orientation="vertical" android:background="@drawable/cell_bg"
-                android:padding="18dp" android:layout_marginBottom="12dp">
-
-                <!-- Section title -->
-                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                    android:text="STATUS" android:textColor="#F0F0F0"
-                    android:textSize="11sp" android:fontFamily="sans-serif-medium"
-                    android:letterSpacing="0.12" android:textStyle="bold"
-                    android:layout_marginBottom="14dp"/>
+            <!-- CARD 1: STATUS & INFO -->
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:layout_marginBottom="12dp"
+                app:cardBackgroundColor="#241C18"
+                app:cardCornerRadius="12dp" app:cardElevation="0dp">
 
                 <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
-                    android:orientation="horizontal">
-                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
-                        android:layout_weight="1" android:orientation="vertical">
-                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                            android:text="UPTIME" android:textColor="#555566"
-                            android:textSize="9sp" android:fontFamily="sans-serif-medium"
-                            android:letterSpacing="0.1" android:layout_marginBottom="4dp"/>
-                        <TextView android:id="@+id/tv_uptime"
-                            android:layout_width="wrap_content" android:layout_height="wrap_content"
-                            android:text="--:--:--" android:textColor="#F0F0F0"
-                            android:textSize="14sp" android:fontFamily="sans-serif"/>
+                    android:orientation="vertical" android:padding="16dp">
+
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:text="STATUS &amp; INFO" android:textColor="#FF6B00"
+                        android:textSize="11sp" android:fontFamily="sans-serif-medium"
+                        android:letterSpacing="0.1" android:textStyle="bold"
+                        android:layout_marginBottom="14dp"/>
+
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+                        <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+                            android:layout_weight="1" android:orientation="vertical">
+                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                                android:text="UPTIME" android:textColor="#888899"
+                                android:textSize="9sp" android:fontFamily="sans-serif-medium"
+                                android:letterSpacing="0.1" android:layout_marginBottom="4dp"/>
+                            <TextView android:id="@+id/tv_uptime"
+                                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                                android:text="--:--:--" android:textColor="#FFFFFF"
+                                android:textSize="14sp" android:fontFamily="sans-serif"/>
+                        </LinearLayout>
+                        <LinearLayout android:id="@+id/card_players"
+                            android:layout_width="0dp" android:layout_height="wrap_content"
+                            android:layout_weight="1" android:orientation="vertical"
+                            android:background="?attr/selectableItemBackground"
+                            android:clickable="true" android:focusable="true">
+                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                                android:text="ONLINE" android:textColor="#888899"
+                                android:textSize="9sp" android:fontFamily="sans-serif-medium"
+                                android:letterSpacing="0.1" android:layout_marginBottom="4dp"/>
+                            <TextView android:id="@+id/tv_players"
+                                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                                android:text="0 / 20 Spieler" android:textColor="#FFFFFF"
+                                android:textSize="14sp" android:fontFamily="sans-serif"
+                                android:paddingEnd="8dp"/>
+                        </LinearLayout>
                     </LinearLayout>
-                    <LinearLayout android:id="@+id/card_players"
-                        android:layout_width="0dp" android:layout_height="wrap_content"
-                        android:layout_weight="1" android:orientation="vertical"
-                        android:background="?attr/selectableItemBackground"
-                        android:clickable="true" android:focusable="true">
-                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                            android:text="ONLINE" android:textColor="#555566"
-                            android:textSize="9sp" android:fontFamily="sans-serif-medium"
-                            android:letterSpacing="0.1" android:layout_marginBottom="4dp"/>
-                        <TextView android:id="@+id/tv_players"
+
+                    <View android:layout_width="match_parent" android:layout_height="1dp"
+                        android:background="#2E241E" android:layout_marginTop="14dp"
+                        android:layout_marginBottom="14dp"/>
+
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+                        <TextView android:id="@+id/tv_ver_info"
+                            android:layout_width="0dp" android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:textColor="#AAAAAA" android:textSize="13sp"
+                            android:fontFamily="sans-serif"
+                            android:singleLine="true" android:ellipsize="end"/>
+                        <TextView android:id="@+id/tv_ram_info"
                             android:layout_width="wrap_content" android:layout_height="wrap_content"
-                            android:text="0 / 20 Spieler" android:textColor="#F0F0F0"
-                            android:textSize="14sp" android:fontFamily="sans-serif"
-                            android:paddingEnd="8dp"/>
+                            android:textColor="#AAAAAA" android:textSize="13sp"
+                            android:fontFamily="sans-serif"/>
                     </LinearLayout>
-                </LinearLayout>
 
-                <!-- Divider -->
-                <View android:layout_width="match_parent" android:layout_height="1dp"
-                    android:background="#1A1A24" android:layout_marginTop="14dp"
-                    android:layout_marginBottom="14dp"/>
-
-                <!-- JOIN -->
-                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                    android:text="JOIN ADDRESS" android:textColor="#555566"
-                    android:textSize="9sp" android:fontFamily="sans-serif-medium"
-                    android:letterSpacing="0.1" android:layout_marginBottom="4dp"/>
-                <TextView android:id="@+id/tv_join_addr"
-                    android:layout_width="wrap_content" android:layout_height="wrap_content"
-                    android:textColor="#F0F0F0" android:textSize="15sp"
-                    android:fontFamily="sans-serif-medium" android:textStyle="bold"
-                    android:layout_marginTop="2dp"/>
-
-                <!-- Info row -->
-                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
-                    android:orientation="horizontal" android:layout_marginTop="14dp">
-                    <TextView android:id="@+id/tv_ver_info"
-                        android:layout_width="0dp" android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:textColor="#8A8A9A" android:textSize="12sp"
-                        android:fontFamily="sans-serif"
-                        android:singleLine="true" android:ellipsize="end"/>
-                    <TextView android:id="@+id/tv_ram_info"
+                    <TextView android:id="@+id/tv_java_info"
                         android:layout_width="wrap_content" android:layout_height="wrap_content"
-                        android:textColor="#8A8A9A" android:textSize="12sp"
-                        android:fontFamily="sans-serif"/>
+                        android:textColor="#888899" android:textSize="12sp"
+                        android:fontFamily="sans-serif"
+                        android:layout_marginTop="8dp"
+                        android:singleLine="true" android:ellipsize="end"/>
                 </LinearLayout>
+            </androidx.cardview.widget.CardView>
 
-                <TextView android:id="@+id/tv_java_info"
-                    android:layout_width="wrap_content" android:layout_height="wrap_content"
-                    android:textSize="11sp" android:fontFamily="sans-serif"
-                    android:layout_marginTop="8dp"
-                    android:singleLine="true" android:ellipsize="end"/>
-            </LinearLayout>
+            <!-- CARD 2: CONNECTION -->
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                app:cardBackgroundColor="#241C18"
+                app:cardCornerRadius="12dp" app:cardElevation="0dp">
+
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:orientation="vertical" android:padding="16dp">
+
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:text="CONNECTION" android:textColor="#FF6B00"
+                        android:textSize="11sp" android:fontFamily="sans-serif-medium"
+                        android:letterSpacing="0.1" android:textStyle="bold"
+                        android:layout_marginBottom="14dp"/>
+
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:text="JOIN ADDRESS (JAVA)" android:textColor="#888899"
+                        android:textSize="9sp" android:fontFamily="sans-serif-medium"
+                        android:letterSpacing="0.1" android:layout_marginBottom="4dp"/>
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:orientation="horizontal" android:gravity="center_vertical">
+                        <TextView android:id="@+id/tv_join_addr"
+                            android:layout_width="0dp" android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:textColor="#FFFFFF" android:textSize="18sp"
+                            android:fontFamily="sans-serif-medium" android:textStyle="bold"
+                            android:background="?attr/selectableItemBackground"
+                            android:clickable="true" android:focusable="true"
+                            android:padding="4dp" android:layout_marginStart="-4dp"
+                            android:layout_marginTop="2dp" android:layout_marginBottom="12dp"/>
+                        <ImageView android:layout_width="20dp" android:layout_height="20dp"
+                            android:src="@android:drawable/ic_menu_share"
+                            app:tint="#888899" android:layout_marginEnd="8dp"/>
+                    </LinearLayout>
+
+                    <LinearLayout android:id="@+id/layout_bedrock_port"
+                        android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:orientation="vertical" android:visibility="gone">
+                        <View android:layout_width="match_parent" android:layout_height="1dp"
+                            android:background="#2E241E" android:layout_marginBottom="12dp"/>
+
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                            android:text="BEDROCK PORT" android:textColor="#888899"
+                            android:textSize="9sp" android:fontFamily="sans-serif-medium"
+                            android:letterSpacing="0.1" android:layout_marginBottom="4dp"/>
+                        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                            android:orientation="horizontal" android:gravity="center_vertical">
+                            <TextView android:id="@+id/tv_bedrock_port_dash"
+                                android:layout_width="0dp" android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:textColor="#FFFFFF" android:textSize="18sp"
+                                android:fontFamily="sans-serif-medium" android:textStyle="bold"
+                                android:background="?attr/selectableItemBackground"
+                                android:clickable="true" android:focusable="true"
+                                android:padding="4dp" android:layout_marginStart="-4dp"
+                                android:layout_marginTop="2dp"/>
+                            <ImageView android:layout_width="20dp" android:layout_height="20dp"
+                                android:src="@android:drawable/ic_menu_share"
+                                app:tint="#888899" android:layout_marginEnd="8dp"/>
+                        </LinearLayout>
+                    </LinearLayout>
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
 
             <!-- DOWNLOAD PROGRESS (hidden) -->
             <!-- Interactive Physics Loader -->
@@ -196,84 +254,110 @@
                 android:layout_marginBottom="10dp"/>
 
             <!-- CONTROLS CARD -->
-            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
-                android:orientation="vertical" android:background="@drawable/cell_bg"
-                android:padding="18dp">
-                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                    android:text="CONTROLS" android:textColor="#F0F0F0"
-                    android:textSize="11sp" android:fontFamily="sans-serif-medium"
-                    android:letterSpacing="0.12" android:textStyle="bold"
-                    android:layout_marginBottom="14dp"/>
-
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                app:cardBackgroundColor="#241C18"
+                app:cardCornerRadius="12dp" app:cardElevation="0dp">
                 <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
-                    android:orientation="horizontal" android:layout_marginBottom="8dp">
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/btn_start" style="@style/KodaButton"
-                        android:layout_width="0dp" android:layout_height="48dp"
-                        android:layout_weight="1" android:layout_marginEnd="8dp"
-                        android:text="START"
-                        android:fontFamily="sans-serif-medium"
-                        android:textSize="13sp"
-                        app:cornerRadius="12dp"/>
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/btn_stop" style="@style/KodaButton.Outline"
-                        android:layout_width="0dp" android:layout_height="48dp"
-                        android:layout_weight="1" android:layout_marginStart="8dp"
-                        android:text="STOP" android:enabled="false"
-                        android:fontFamily="sans-serif-medium"
-                        android:textSize="13sp"
-                        app:cornerRadius="12dp"/>
-                </LinearLayout>
-                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
-                    android:orientation="horizontal">
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/btn_restart" style="@style/KodaButton.Outline"
-                        android:layout_width="0dp" android:layout_height="44dp"
-                        android:layout_weight="1" android:text="RESTART" android:enabled="false"
-                        android:fontFamily="sans-serif-medium"
-                        android:textSize="13sp"
-                        app:cornerRadius="12dp"/>
-                </LinearLayout>
+                    android:orientation="vertical" android:padding="16dp" android:gravity="center">
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:text="CONTROLS" android:textColor="#FF6B00"
+                        android:textSize="11sp" android:fontFamily="sans-serif-medium"
+                        android:letterSpacing="0.12" android:textStyle="bold"
+                        android:layout_marginBottom="14dp" android:layout_gravity="start"/>
 
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btn_kill" style="@style/KodaButton.Outline"
-                    android:layout_width="match_parent" android:layout_height="44dp"
-                    android:layout_marginTop="12dp"
-                    android:text="⚠ HARD RESET" app:strokeColor="#FF3344" android:textColor="#FF3344"
-                    android:fontFamily="sans-serif-medium"
-                    android:textSize="12sp"
-                    app:cornerRadius="12dp"
-                    android:background="@drawable/btn_kill_bg"/>
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:orientation="horizontal" android:layout_marginBottom="8dp" android:gravity="center">
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btn_start" style="@style/KodaButton"
+                            android:layout_width="140dp" android:layout_height="48dp"
+                            android:layout_marginEnd="8dp"
+                            android:text="START"
+                            android:fontFamily="sans-serif-medium"
+                            android:textSize="13sp"
+                            app:cornerRadius="12dp"/>
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btn_stop" style="@style/KodaButton.Outline"
+                            android:layout_width="140dp" android:layout_height="48dp"
+                            android:layout_marginStart="8dp"
+                            android:text="STOP" android:enabled="false"
+                            android:fontFamily="sans-serif-medium"
+                            android:textSize="13sp"
+                            app:cornerRadius="12dp"/>
+                    </LinearLayout>
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:orientation="horizontal" android:gravity="center">
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btn_restart" style="@style/KodaButton.Outline"
+                            android:layout_width="140dp" android:layout_height="44dp"
+                            android:text="RESTART" android:enabled="false"
+                            android:fontFamily="sans-serif-medium"
+                            android:textSize="13sp"
+                            app:cornerRadius="12dp"/>
+                    </LinearLayout>
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btn_kill" style="@style/KodaButton.Outline"
+                        android:layout_width="200dp" android:layout_height="44dp"
+                        android:layout_marginTop="16dp"
+                        android:text="⚠ HARD RESET" app:strokeColor="#FF3344" android:textColor="#FF3344"
+                        android:fontFamily="sans-serif-medium"
+                        android:textSize="12sp"
+                        app:cornerRadius="12dp"
+                        android:background="@drawable/btn_kill_bg"/>
 
                 </LinearLayout>
+            </androidx.cardview.widget.CardView>
         </LinearLayout>
     </ScrollView>
 
     <!-- ══════════ CONSOLE ══════════ -->
     <LinearLayout android:id="@+id/panel_console"
         android:layout_width="match_parent" android:layout_height="0dp"
-        android:layout_weight="1" android:orientation="vertical" android:visibility="gone">
+        android:layout_weight="1" android:orientation="vertical" android:visibility="gone"
+        android:background="#0A0807">
 
-        <!-- Quick commands row -->
-        <HorizontalScrollView android:layout_width="match_parent" android:layout_height="40dp"
-            android:scrollbars="none" android:background="#0E0E14"
-            android:paddingStart="12dp" android:paddingEnd="12dp">
-            <LinearLayout android:id="@+id/layout_chips"
-                android:layout_width="wrap_content" android:layout_height="match_parent"
-                android:orientation="horizontal" android:gravity="center_vertical"/>
-        </HorizontalScrollView>
-        <View android:layout_width="match_parent" android:layout_height="1dp"
-            android:background="#1A1A24"/>
+        <!-- Console Header Tools -->
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:orientation="horizontal" android:gravity="end|center_vertical"
+            android:paddingStart="12dp" android:paddingEnd="12dp"
+            android:paddingTop="12dp" android:paddingBottom="8dp">
 
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_copy_log"
+                android:layout_width="wrap_content" android:layout_height="40dp"
+                android:text="COPY LOG"
+                android:textColor="#FFFFFF"
+                app:backgroundTint="#241C18"
+                app:cornerRadius="8dp"
+                android:textSize="10sp"
+                android:fontFamily="sans-serif-medium"
+                app:icon="@android:drawable/ic_menu_share"
+                app:iconTint="#FFFFFF"
+                android:layout_marginEnd="8dp"/>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_clear"
+                android:layout_width="wrap_content" android:layout_height="40dp"
+                android:text="CLEAR"
+                android:textColor="#FF3344"
+                app:backgroundTint="#241C18"
+                app:cornerRadius="8dp"
+                android:textSize="10sp"
+                android:fontFamily="sans-serif-medium"
+                app:icon="@android:drawable/ic_menu_delete"
+                app:iconTint="#FF3344"/>
+        </LinearLayout>
+
+        <!-- LIVE OUTPUT Divider removed -->
         <!-- Log area -->
         <ScrollView android:id="@+id/scroll_log"
             android:layout_width="match_parent" android:layout_height="0dp"
-            android:layout_weight="1" android:background="#08080E"
+            android:layout_weight="1"
             android:padding="8dp"
             android:fillViewport="true">
             <TextView android:id="@+id/tv_log"
                 android:layout_width="match_parent" android:layout_height="wrap_content"
-                android:background="#08080E"
                 android:textColor="#CCCCCC" android:textSize="12sp"
                 android:fontFamily="monospace"
                 android:lineSpacingMultiplier="1.3"
@@ -281,46 +365,32 @@
                 android:paddingBottom="8dp"/>
         </ScrollView>
 
-        <!-- Input bar -->
-        <View android:layout_width="match_parent" android:layout_height="1dp"
-            android:background="#1A1A24"/>
-        <LinearLayout android:layout_width="match_parent" android:layout_height="52dp"
+        <!-- Input bar (Floating) -->
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
             android:orientation="horizontal" android:gravity="center_vertical"
-            android:background="#0E0E14" android:paddingStart="14dp" android:paddingEnd="10dp">
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                android:text="›" android:textColor="#FF6B00"
-                android:textSize="18sp" android:fontFamily="sans-serif-medium"
-                android:textStyle="bold"
-                android:layout_marginEnd="10dp"/>
-            <EditText android:id="@+id/et_cmd"
-                android:layout_width="0dp" android:layout_height="36dp"
-                android:layout_weight="1" android:background="@drawable/input_console_bg"
-                android:textColor="#F0F0F0" android:textSize="13sp"
-                android:fontFamily="sans-serif" android:hint="enter command…"
-                android:textColorHint="#555566" android:imeOptions="actionSend"
-                android:inputType="text" android:singleLine="true"
-                android:paddingStart="14dp" android:paddingEnd="14dp"/>
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btn_copy_log" style="@style/KodaButton.Outline"
-                android:layout_width="wrap_content" android:layout_height="34dp"
-                android:text="COPY" android:textSize="10sp"
-                android:layout_marginStart="6dp"
-                android:fontFamily="sans-serif-medium"
-                app:cornerRadius="10dp"/>
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btn_clear" style="@style/KodaButton.Outline"
-                android:layout_width="wrap_content" android:layout_height="34dp"
-                android:text="CLR" android:textSize="10sp"
-                android:layout_marginStart="4dp"
-                android:fontFamily="sans-serif-medium"
-                app:cornerRadius="10dp"/>
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btn_send" style="@style/KodaButton"
-                android:layout_width="wrap_content" android:layout_height="34dp"
-                android:text="EXEC" android:textSize="10sp"
-                android:layout_marginStart="4dp"
-                android:fontFamily="sans-serif-medium"
-                app:cornerRadius="10dp"/>
+            android:paddingStart="16dp" android:paddingEnd="16dp" android:paddingTop="8dp" android:paddingBottom="16dp"
+            android:clipToPadding="false">
+            
+            <LinearLayout android:layout_width="0dp" android:layout_height="64dp"
+                android:layout_weight="1" android:orientation="horizontal"
+                android:gravity="center_vertical" android:background="@drawable/server_card_bg"
+                android:paddingStart="16dp" android:paddingEnd="8dp"
+                android:elevation="4dp">
+                
+                <EditText android:id="@+id/et_cmd"
+                    android:layout_width="0dp" android:layout_height="match_parent"
+                    android:layout_weight="1" android:background="@null"
+                    android:textColor="#F0F0F0" android:textSize="16sp"
+                    android:fontFamily="sans-serif" android:hint="Enter a command..."
+                    android:textColorHint="#666677" android:imeOptions="actionSend"
+                    android:inputType="text" android:singleLine="true" android:tag="true"/>
+                
+                <ImageButton
+                    android:id="@+id/btn_send" 
+                    android:layout_width="48dp" android:layout_height="48dp"
+                    android:src="@android:drawable/ic_media_play"
+                    app:tint="#FF6B00" android:background="?attr/selectableItemBackgroundBorderless"/>
+            </LinearLayout>
         </LinearLayout>
     </LinearLayout>
 

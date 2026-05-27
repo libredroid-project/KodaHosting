@@ -3,12 +3,12 @@
     android:fitsSystemWindows="true"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent" android:layout_height="match_parent"
-    android:orientation="vertical" android:background="#0A0A0F">
+    android:orientation="vertical" android:background="#0A0807">
 
     <!-- ┌─ TOP BAR ─────────────────────────────────────────────────────┐ -->
     <LinearLayout android:layout_width="match_parent" android:layout_height="64dp"
         android:orientation="horizontal" android:gravity="center_vertical"
-        android:background="@drawable/header_bg"
+        android:background="#0A0807"
         android:paddingStart="20dp" android:paddingEnd="20dp"
         android:elevation="4dp">
 
@@ -52,7 +52,7 @@
     <!-- Subheader row -->
     <LinearLayout android:layout_width="match_parent" android:layout_height="36dp"
         android:orientation="horizontal" android:gravity="center_vertical"
-        android:background="#0E0E16" android:paddingStart="20dp" android:paddingEnd="20dp">
+        android:background="#16110D" android:paddingStart="20dp" android:paddingEnd="20dp">
         <TextView android:layout_width="0dp" android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="SERVER NAME" android:textColor="#555566"
@@ -117,7 +117,7 @@
         android:background="#1A1A24"/>
     <LinearLayout android:layout_width="match_parent" android:layout_height="60dp"
         android:orientation="horizontal" android:gravity="center_vertical"
-        android:background="#0E0E16" android:paddingStart="20dp" android:paddingEnd="16dp">
+        android:background="#16110D" android:paddingStart="20dp" android:paddingEnd="16dp">
         <TextView android:layout_width="0dp" android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="kodanetwork.eu" android:textColor="#2A2A35"

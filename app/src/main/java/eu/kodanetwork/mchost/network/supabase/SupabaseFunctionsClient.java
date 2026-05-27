@@ -73,11 +73,12 @@ public class SupabaseFunctionsClient {
         return new PlayitBootstrapResponse(str(map.get("token")), str(map.get("mode")));
     }
 
-    public void createDnsLink(String userJwt, String host, String target, int port) throws IOException {
+    public void createDnsLink(String userJwt, String host, String target, int port, String type) throws IOException {
         Map<String, Object> body = new HashMap<>();
         body.put("host", host);
         body.put("target", target);
         body.put("port", port);
+        body.put("type", type);
         Response<Map<String, Object>> response = api.callFunction(
             "create-dns-link",
             anonKey,

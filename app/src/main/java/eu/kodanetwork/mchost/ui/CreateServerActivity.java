@@ -84,6 +84,11 @@ public class CreateServerActivity extends AppCompatActivity {
 
     private int ramMB = 1024;
     private int selectedTypeIndex = 0;
+    
+    // AI Chat State
+    private org.json.JSONArray aiChatHistory = new org.json.JSONArray();
+    private org.json.JSONArray aiSelectedPlugins = new org.json.JSONArray();
+    private String aiSelectedTheme = "#FF6B00";
 
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
@@ -149,7 +154,9 @@ public class CreateServerActivity extends AppCompatActivity {
         btnImport       = findViewById(R.id.btn_import);
         btnImportZip    = findViewById(R.id.btn_import_zip);
         btnBack         = findViewById(R.id.btn_back);
-        swUseNative     = findViewById(R.id.sw_use_native);
+        swUseNative = findViewById(R.id.sw_use_native);
+        swUseNative.setChecked(true);
+        swUseNative.setVisibility(android.view.View.GONE);
         rgSetupType     = findViewById(R.id.rg_setup_type);
         layoutThemeColor= findViewById(R.id.layout_theme_color);
 
@@ -174,11 +181,22 @@ public class CreateServerActivity extends AppCompatActivity {
         setupNameWatcher();
         setupThemeColors();
         
+        String email = getSharedPreferences("koda_settings", MODE_PRIVATE).getString("account_email", "");
+        if ("karolbrz11212@gmail.com".equalsIgnoreCase(email)) {
+            android.widget.RadioButton rbAi = findViewById(R.id.rb_setup_ai);
+            if (rbAi != null) rbAi.setVisibility(View.VISIBLE);
+        }
+
         rgSetupType.setOnCheckedChangeListener((g, id) -> {
-            layoutThemeColor.setVisibility(id == R.id.rb_setup_koda ? View.VISIBLE : View.GONE);
+            layoutThemeColor.setVisibility((id == R.id.rb_setup_koda || id == R.id.rb_setup_ai) ? View.VISIBLE : View.GONE);
+            View aiPrompt = findViewById(R.id.layout_ai_prompt);
+            if (aiPrompt != null) {
+                aiPrompt.setVisibility(id == R.id.rb_setup_ai ? View.VISIBLE : View.GONE);
+            }
         });
 
         loadVersionsForType(0);
+        setupAiChat();
         btnCreate.setOnClickListener(v -> createServer());
         eu.kodanetwork.mchost.util.ThemeHelper.apply(this, selectedColor);
         
@@ -486,7 +504,10 @@ public class CreateServerActivity extends AppCompatActivity {
             npServerType.setDisplayedValues(TYPE_NAMES);
             npServerType.setValue(0);
             npServerType.setWrapSelectorWheel(true);
-            npServerType.setOnValueChangedListener((picker, oldVal, newVal) -> selectType(newVal));
+            npServerType.setOnValueChangedListener((picker, oldVal, newVal) -> {
+                eu.kodanetwork.mchost.util.HapticUtil.forceVibrate(this, 80);
+                selectType(newVal);
+            });
         }
     }
 
@@ -640,6 +661,7 @@ public class CreateServerActivity extends AppCompatActivity {
 
         // Update description on scroll
         picker.setOnValueChangedListener((p, oldVal, newVal) -> {
+            eu.kodanetwork.mchost.util.HapticUtil.forceVibrate(this, 80);
             String ver = currentVersions.get(newVal);
             String d = descriptions.getOrDefault(ver, "Standard Version ohne spezifische Beschreibung. Bietet allgemeine Stabilität und Kompatibilität für deinen Server.");
             tvDesc.setText(d);
@@ -671,6 +693,7 @@ public class CreateServerActivity extends AppCompatActivity {
             w.setStatusBarColor(0xFF0D0D14);
         }
         sheet.show();
+        eu.kodanetwork.mchost.util.HapticUtil.applyHapticsToView(scrollView, this);
     }
 
     private List<String> fetchPurpurVersions() {
@@ -745,8 +768,237 @@ public class CreateServerActivity extends AppCompatActivity {
         if (sub.isEmpty()) sub = "yourserver";
         tvAddressPreview.setText(sub + ".kodanetwork.eu");
     }
+    
+    private void setupAiChat() {
+        android.widget.EditText etPrompt = findViewById(R.id.et_ai_prompt);
+        View btnSend = findViewById(R.id.btn_ai_send);
+        android.widget.LinearLayout llChat = findViewById(R.id.ll_ai_chat);
+        android.widget.ScrollView svChat = findViewById(R.id.sv_ai_chat);
+        if (etPrompt == null || btnSend == null || llChat == null) return;
+        
+        View btnFullscreen = findViewById(R.id.btn_ai_fullscreen);
+        View btnApprove = findViewById(R.id.btn_ai_approve);
+        
+        if (btnApprove != null) {
+            btnApprove.setOnClickListener(v -> {
+                android.widget.RadioGroup rg = findViewById(R.id.rg_setup_type);
+                if (rg != null) rg.check(R.id.rb_setup_ai);
+                
+                String currentName = etName.getText().toString().trim();
+                if (currentName.isEmpty()) {
+                    etName.setText("AI-Server-" + new java.util.Random().nextInt(1000));
+                }
+                
+                if (svChat.getLayoutParams().height == 0) {
+                    btnFullscreen.performClick(); // Exit fullscreen automatically
+                }
+                
+                createServer();
+            });
+        }
+        
+        if (btnFullscreen != null) {
+            btnFullscreen.setOnClickListener(v -> {
+                boolean isFs = (svChat.getLayoutParams().height == android.widget.LinearLayout.LayoutParams.MATCH_PARENT);
+                android.widget.LinearLayout rootLayout = findViewById(R.id.root_layout);
+                android.widget.ScrollView mainScroll = findViewById(R.id.main_scroll);
+                View aiLayout = findViewById(R.id.layout_ai_prompt);
+                
+                if (!isFs) {
+                    // Go fullscreen
+                    if (rootLayout != null) {
+                        for (int i=0; i<rootLayout.getChildCount(); i++) {
+                            View c = rootLayout.getChildAt(i);
+                            if (c != mainScroll) c.setVisibility(View.GONE);
+                        }
+                    }
+                    android.widget.LinearLayout scrollContent = (android.widget.LinearLayout) mainScroll.getChildAt(0);
+                    for (int i=0; i<scrollContent.getChildCount(); i++) {
+                        View c = scrollContent.getChildAt(i);
+                        if (c != aiLayout) c.setVisibility(View.GONE);
+                    }
+                    mainScroll.setFillViewport(true);
+                    
+                    android.widget.LinearLayout.LayoutParams aiLp = (android.widget.LinearLayout.LayoutParams) aiLayout.getLayoutParams();
+                    aiLp.height = android.widget.LinearLayout.LayoutParams.MATCH_PARENT;
+                    aiLayout.setLayoutParams(aiLp);
+                    
+                    android.widget.LinearLayout.LayoutParams chatLp = (android.widget.LinearLayout.LayoutParams) svChat.getLayoutParams();
+                    chatLp.height = 0;
+                    chatLp.weight = 1.0f;
+                    svChat.setLayoutParams(chatLp);
+                } else {
+                    // Exit fullscreen
+                    if (rootLayout != null) {
+                        for (int i=0; i<rootLayout.getChildCount(); i++) {
+                            rootLayout.getChildAt(i).setVisibility(View.VISIBLE);
+                        }
+                    }
+                    android.widget.LinearLayout scrollContent = (android.widget.LinearLayout) mainScroll.getChildAt(0);
+                    for (int i=0; i<scrollContent.getChildCount(); i++) {
+                        scrollContent.getChildAt(i).setVisibility(View.VISIBLE);
+                    }
+                    mainScroll.setFillViewport(false);
+                    
+                    android.widget.LinearLayout.LayoutParams aiLp = (android.widget.LinearLayout.LayoutParams) aiLayout.getLayoutParams();
+                    aiLp.height = android.widget.LinearLayout.LayoutParams.WRAP_CONTENT;
+                    aiLayout.setLayoutParams(aiLp);
+                    
+                    android.widget.LinearLayout.LayoutParams chatLp = (android.widget.LinearLayout.LayoutParams) svChat.getLayoutParams();
+                    chatLp.height = (int)(200 * getResources().getDisplayMetrics().density);
+                    chatLp.weight = 0.0f;
+                    svChat.setLayoutParams(chatLp);
+                }
+                svChat.requestLayout();
+                aiLayout.requestLayout();
+            });
+        }
+        
+        btnSend.setOnClickListener(v -> {
+            String text = etPrompt.getText().toString().trim();
+            if (text.isEmpty()) return;
+            etPrompt.setText("");
+            
+            try {
+                org.json.JSONObject userMsg = new org.json.JSONObject();
+                userMsg.put("role", "user");
+                userMsg.put("parts", new org.json.JSONArray().put(new org.json.JSONObject().put("text", text)));
+                aiChatHistory.put(userMsg);
+            } catch (Exception ignored) {}
+            
+            addChatBubble(llChat, "You: " + text, true);
+            svChat.post(() -> svChat.fullScroll(View.FOCUS_DOWN));
+            btnSend.performHapticFeedback(android.view.HapticFeedbackConstants.KEYBOARD_TAP);
+            
+            TextView typingLabel = addChatBubble(llChat, "Gemini is typing...", false);
+            svChat.post(() -> svChat.fullScroll(View.FOCUS_DOWN));
+            
+            String apiKey = getSharedPreferences("koda_settings", MODE_PRIVATE).getString("gemini_api_key", "");
+            if (apiKey.isEmpty()) {
+                llChat.removeView(typingLabel);
+                addChatBubble(llChat, "Error: No Gemini API Key set in Settings.", false);
+                return;
+            }
+            
+            new Thread(() -> {
+                try {
+                    String urlStr = "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key=" + apiKey;
+                    java.net.HttpURLConnection conn = (java.net.HttpURLConnection) new java.net.URL(urlStr).openConnection();
+                    conn.setRequestMethod("POST");
+                    conn.setRequestProperty("Content-Type", "application/json");
+                    conn.setDoOutput(true);
+                    
+                    org.json.JSONObject payload = new org.json.JSONObject();
+                    
+                    org.json.JSONObject sysInst = new org.json.JSONObject();
+                    String serverType = TYPE_VALS[selectedTypeIndex].name();
+                    String generatedIp = ((EditText) findViewById(R.id.et_name)).getText().toString().trim().replaceAll("[^a-zA-Z0-9-]", "").toLowerCase() + ".kodanetwork.eu";
+                    if (generatedIp.equals(".kodanetwork.eu")) generatedIp = "play.kodanetwork.eu";
+
+                    String promptText = "You are a Minecraft server expert building a comprehensive server. " +
+                        "The server is running " + serverType + " version " + selectedVersion + ". The server IP is " + generatedIp + ". " +
+                        "Phase 1: Discuss the server idea with the user. DO NOT output plugins yet. Keep plugins array empty. Set current_phase to 1. " +
+                        "Phase 2: When the user is happy, list all the necessary plugins for a REAL, full production server (30 to 90 plugins!). Set current_phase to 2. " +
+                        "CRITICAL: When choosing plugins in Phase 2, you MUST explicitly include ALL required dependencies in the 'plugins' array (e.g. ProtocolLib, Vault, PlaceholderAPI, LuckPerms), otherwise the server will crash! " +
+                        "ONLY suggest Modrinth project IDs that are strictly compatible with " + serverType + " " + selectedVersion + ". " +
+                        "You must ALWAYS output valid JSON matching this schema exactly: " +
+                        "{\"current_phase\": 1 or 2, \"chat_reply\": \"your message to the user\", \"theme_color\": \"#HEXCODE\", \"plugins\": [\"modrinth_project_id_1\", ...]}";
+                    sysInst.put("parts", new org.json.JSONArray().put(new org.json.JSONObject().put("text", promptText)));
+                    payload.put("systemInstruction", sysInst);
+                    
+                    payload.put("contents", aiChatHistory);
+                    
+                    org.json.JSONObject genConfig = new org.json.JSONObject();
+                    genConfig.put("responseMimeType", "application/json");
+                    payload.put("generationConfig", genConfig);
+                    
+                    java.io.OutputStream os = conn.getOutputStream();
+                    os.write(payload.toString().getBytes());
+                    os.flush(); os.close();
+                    
+                    final int code = conn.getResponseCode();
+                    if (code == 200) {
+                        java.io.InputStreamReader r = new java.io.InputStreamReader(conn.getInputStream());
+                        StringBuilder sb = new StringBuilder();
+                        int c; while ((c = r.read()) != -1) sb.append((char) c);
+                        r.close();
+                        
+                        org.json.JSONObject root = new org.json.JSONObject(sb.toString());
+                        String resText = root.getJSONArray("candidates").getJSONObject(0).getJSONObject("content").getJSONArray("parts").getJSONObject(0).getString("text");
+                        
+                        try {
+                            org.json.JSONObject modelMsg = new org.json.JSONObject();
+                            modelMsg.put("role", "model");
+                            modelMsg.put("parts", new org.json.JSONArray().put(new org.json.JSONObject().put("text", resText)));
+                            aiChatHistory.put(modelMsg);
+                        } catch (Exception ignored) {}
+                        
+                        org.json.JSONObject resJson = new org.json.JSONObject(resText);
+                        String reply = resJson.optString("chat_reply", "I have updated the design!");
+                        String theme = resJson.optString("theme_color", "#FF6B00");
+                        org.json.JSONArray plugins = resJson.optJSONArray("plugins");
+                        if (plugins == null) plugins = new org.json.JSONArray();
+                        int phase = resJson.optInt("current_phase", 1);
+                        
+                        aiSelectedTheme = theme;
+                        aiSelectedPlugins = plugins;
+                        
+                        runOnUiThread(() -> {
+                            llChat.removeView(typingLabel);
+                            addChatBubble(llChat, "Gemini: " + reply, false);
+                            svChat.post(() -> svChat.fullScroll(View.FOCUS_DOWN));
+                            try {
+                                android.os.Vibrator vib = (android.os.Vibrator) getSystemService(android.content.Context.VIBRATOR_SERVICE);
+                                if (vib != null && vib.hasVibrator()) vib.vibrate(android.os.VibrationEffect.createOneShot(30, android.os.VibrationEffect.DEFAULT_AMPLITUDE));
+                            } catch (Exception ignored) {}
+                            
+                            if (btnApprove != null) {
+                                btnApprove.setVisibility(phase == 2 ? View.VISIBLE : View.GONE);
+                                TextView hint = findViewById(R.id.tv_ai_chat_hint);
+                                if (hint != null) hint.setVisibility(phase == 2 ? View.VISIBLE : View.GONE);
+                            }
+                        });
+                    } else {
+                        runOnUiThread(() -> {
+                            llChat.removeView(typingLabel);
+                            addChatBubble(llChat, "Error communicating with Gemini (Code: " + code + ")", false);
+                        });
+                    }
+                } catch (Exception e) {
+                    runOnUiThread(() -> {
+                        llChat.removeView(typingLabel);
+                        addChatBubble(llChat, "Error: " + e.getMessage(), false);
+                    });
+                }
+            }).start();
+        });
+    }
+
+    private TextView addChatBubble(LinearLayout parent, String text, boolean isUser) {
+        TextView tv = new TextView(this);
+        tv.setText(text);
+        tv.setTextColor(android.graphics.Color.WHITE);
+        tv.setTextSize(14f);
+        tv.setPadding(32, 24, 32, 24);
+        
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        lp.setMargins(0, 0, 0, 16);
+        lp.gravity = isUser ? android.view.Gravity.END : android.view.Gravity.START;
+        tv.setLayoutParams(lp);
+        
+        android.graphics.drawable.GradientDrawable gd = new android.graphics.drawable.GradientDrawable();
+        gd.setCornerRadius(24f);
+        gd.setColor(isUser ? android.graphics.Color.parseColor("#FF6B00") : android.graphics.Color.parseColor("#2A2A35"));
+        tv.setBackground(gd);
+        
+        parent.addView(tv);
+        return tv;
+    }
 
     private void createServer() {
+        if (!eu.kodanetwork.mchost.security.PraetorSystem.checkNetwork(this)) return;
+        if (!eu.kodanetwork.mchost.security.PraetorSystem.checkConcurrentServer(this)) return;
+
         String name = etName.getText().toString().trim(); if (name.isEmpty()) { etName.setError("Required"); return; }
         int port = 30000 + new java.util.Random().nextInt(10000);
         String version = selectedVersion != null && !selectedVersion.isEmpty() ? selectedVersion : "1.21.4";
@@ -756,7 +1008,19 @@ public class CreateServerActivity extends AppCompatActivity {
         String dir = useNative ? new File(getFilesDir(), "servers/" + id).getAbsolutePath() : android.os.Environment.getExternalStoragePublicDirectory(android.os.Environment.DIRECTORY_DOCUMENTS) + "/KodaNetwork/servers/" + id;
 
         ServerInstance s = new ServerInstance(id, name, type, version, ramMB, port, dir);
-        s.setUseNative(useNative); s.setThemeColor(selectedColor); s.setAutoSetup(rgSetupType.getCheckedRadioButtonId() == R.id.rb_setup_koda);
+        int checkedId = rgSetupType.getCheckedRadioButtonId();
+        s.setUseNative(useNative);
+        s.setAutoSetup(checkedId == R.id.rb_setup_koda || checkedId == R.id.rb_setup_ai);
+        if (checkedId == R.id.rb_setup_ai) {
+            s.setThemeColor(aiSelectedTheme);
+            s.setAiPrompt(aiSelectedPlugins.toString());
+            try {
+                android.os.Vibrator vib = (android.os.Vibrator) getSystemService(android.content.Context.VIBRATOR_SERVICE);
+                if (vib != null && vib.hasVibrator()) vib.vibrate(android.os.VibrationEffect.createOneShot(50, android.os.VibrationEffect.DEFAULT_AMPLITUDE));
+            } catch (Exception ignored) {}
+        } else {
+            s.setThemeColor(selectedColor);
+        }
         
         android.widget.FrameLayout loadingOverlay = findViewById(R.id.layout_java_extract);
         android.widget.TextView loadingText = findViewById(R.id.tv_extract_msg);
@@ -804,7 +1068,7 @@ public class CreateServerActivity extends AppCompatActivity {
                     // DnsLink creation runs asynchronously because we already secured the name availability check
                     new Thread(() -> {
                         try {
-                            new eu.kodanetwork.mchost.network.supabase.SupabaseFunctionsClient(this).createDnsLink("", s.getSubdomain(), "85.215.180.87", s.getPort());
+                            new eu.kodanetwork.mchost.network.supabase.SupabaseFunctionsClient(this).createDnsLink("", s.getSubdomain(), "85.215.180.87", s.getPort(), "tcp");
                         } catch (Exception ignored) {}
                         try {
                             String appUuid = getSharedPreferences("koda_settings", MODE_PRIVATE).getString("app_uuid", "unknown");
@@ -894,6 +1158,7 @@ public class CreateServerActivity extends AppCompatActivity {
             lastThemeMode = currentMode;
             recreate();
         }
+        eu.kodanetwork.mchost.util.HapticUtil.applyHaptics(this);
     }
 
     @Override
