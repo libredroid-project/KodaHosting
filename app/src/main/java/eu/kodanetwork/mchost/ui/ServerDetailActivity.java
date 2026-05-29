@@ -799,19 +799,10 @@ public class ServerDetailActivity extends AppCompatActivity {
             dot.setBackgroundResource(dotDrw);
         }
 
-        if (st == ServerInstance.State.OFFLINE) {
-            if (autoCloseRunnable == null) {
-                autoCloseRunnable = () -> {
-                    if (server.state == ServerInstance.State.OFFLINE && !isFinishing()) {
-                        finish();
-                    }
-                };
-                h.postDelayed(autoCloseRunnable, 20000); // 20 seconds auto-close
-            }
-        } else {
-            if (autoCloseRunnable != null) {
-                h.removeCallbacks(autoCloseRunnable);
-                autoCloseRunnable = null;
+        // If the server goes offline while we are in the Console tab (tab 1), kick to Dashboard (tab 0)
+        if (st == ServerInstance.State.OFFLINE || st == ServerInstance.State.CRASHED) {
+            if (tabs != null && tabs.getSelectedTabPosition() == 1) {
+                tabs.selectTab(tabs.getTabAt(0));
             }
         }
         

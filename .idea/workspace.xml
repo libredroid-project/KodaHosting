@@ -22,14 +22,11 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="1c7b5403-826e-4eb8-9d43-ed80980da5f9" name="Changes" comment="Seucrity update, possibility for google play">
-      <change beforePath="$PROJECT_DIR$/.gradle/8.5/checksums/checksums.lock" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/8.5/checksums/checksums.lock" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gradle/8.5/checksums/sha1-checksums.bin" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/8.5/checksums/sha1-checksums.bin" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gradle/8.5/executionHistory/executionHistory.bin" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/8.5/executionHistory/executionHistory.bin" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gradle/8.5/executionHistory/executionHistory.lock" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/8.5/executionHistory/executionHistory.lock" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gradle/8.5/fileHashes/fileHashes.bin" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/8.5/fileHashes/fileHashes.bin" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gradle/8.5/fileHashes/fileHashes.lock" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/8.5/fileHashes/fileHashes.lock" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gradle/8.5/fileHashes/resourceHashesCache.bin" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/8.5/fileHashes/resourceHashesCache.bin" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gradle/8.7/checksums/checksums.lock" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/8.7/checksums/checksums.lock" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gradle/8.7/executionHistory/executionHistory.bin" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/8.7/executionHistory/executionHistory.bin" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gradle/8.7/executionHistory/executionHistory.lock" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/8.7/executionHistory/executionHistory.lock" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gradle/8.7/fileHashes/fileHashes.bin" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/8.7/fileHashes/fileHashes.bin" afterDir="false" />
@@ -39,27 +36,8 @@
       <change beforePath="$PROJECT_DIR$/.gradle/buildOutputCleanup/cache.properties" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/buildOutputCleanup/cache.properties" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gradle/buildOutputCleanup/outputFiles.bin" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/buildOutputCleanup/outputFiles.bin" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gradle/file-system.probe" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/file-system.probe" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/caches/deviceStreaming.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/caches/deviceStreaming.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/app/build.gradle" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/AndroidManifest.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/AndroidManifest.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/assets/jre17.tar.xz" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/eu/kodanetwork/mchost/model/ServerInstance.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/eu/kodanetwork/mchost/model/ServerInstance.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/eu/kodanetwork/mchost/model/ServerRepo.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/eu/kodanetwork/mchost/model/ServerRepo.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/eu/kodanetwork/mchost/network/JarDownloader.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/eu/kodanetwork/mchost/network/JarDownloader.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/eu/kodanetwork/mchost/network/supabase/SupabaseFunctionsClient.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/eu/kodanetwork/mchost/network/supabase/SupabaseFunctionsClient.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/eu/kodanetwork/mchost/orchestration/StartOrchestrator.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/eu/kodanetwork/mchost/orchestration/StartOrchestrator.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/eu/kodanetwork/mchost/security/SecureConfigStore.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/eu/kodanetwork/mchost/security/SecureConfigStore.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/eu/kodanetwork/mchost/service/BootReceiver.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/eu/kodanetwork/mchost/service/BootReceiver.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/eu/kodanetwork/mchost/service/TermuxServerService.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/eu/kodanetwork/mchost/service/TermuxServerService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/eu/kodanetwork/mchost/ui/CreateServerActivity.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/eu/kodanetwork/mchost/ui/CreateServerActivity.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/eu/kodanetwork/mchost/ui/DebugLogActivity.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/eu/kodanetwork/mchost/ui/DebugLogActivity.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/eu/kodanetwork/mchost/ui/FileEditorActivity.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/eu/kodanetwork/mchost/ui/FileEditorActivity.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/eu/kodanetwork/mchost/ui/MainActivity.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/eu/kodanetwork/mchost/ui/MainActivity.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/eu/kodanetwork/mchost/ui/ServerCardAdapter.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/eu/kodanetwork/mchost/ui/ServerCardAdapter.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/java/eu/kodanetwork/mchost/ui/ServerDetailActivity.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/eu/kodanetwork/mchost/ui/ServerDetailActivity.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/eu/kodanetwork/mchost/ui/design/LoginPageActivity.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/eu/kodanetwork/mchost/ui/design/LoginPageActivity.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/eu/kodanetwork/mchost/util/JavaFinder.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/eu/kodanetwork/mchost/util/JavaFinder.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -243,7 +221,15 @@
       <option name="project" value="LOCAL" />
       <updated>1779916723245</updated>
     </task>
-    <option name="localTasksCounter" value="4" />
+    <task id="LOCAL-00004" summary="Seucrity update, possibility for google play">
+      <option name="closed" value="true" />
+      <created>1780067151383</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1780067151383</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
