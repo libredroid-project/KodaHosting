@@ -38,7 +38,7 @@ public class LoginPageActivity extends AppCompatActivity {
                 public void onSuccess() {
                     runOnUiThread(() -> {
                         if (getIntent().getBooleanExtra("from_link_button", false)) {
-                            android.content.SharedPreferences prefs = getSharedPreferences("koda_settings", android.content.Context.MODE_PRIVATE);
+                            android.content.SharedPreferences prefs = eu.kodanetwork.mchost.App.getPrefs(LoginPageActivity.this);
                             prefs.edit().putBoolean("auto_generate_code", true).apply();
                         } else {
                             startActivity(new Intent(LoginPageActivity.this, eu.kodanetwork.mchost.ui.MainActivity.class));
@@ -89,7 +89,7 @@ public class LoginPageActivity extends AppCompatActivity {
                         public void onSuccess() {
                             runOnUiThread(() -> {
                                 if (getIntent().getBooleanExtra("from_link_button", false)) {
-                                    android.content.SharedPreferences prefs = getSharedPreferences("koda_settings", android.content.Context.MODE_PRIVATE);
+                                    android.content.SharedPreferences prefs = eu.kodanetwork.mchost.App.getPrefs(LoginPageActivity.this);
                                     prefs.edit().putBoolean("auto_generate_code", true).apply();
                                 } else {
                                     startActivity(new Intent(LoginPageActivity.this, eu.kodanetwork.mchost.ui.MainActivity.class));

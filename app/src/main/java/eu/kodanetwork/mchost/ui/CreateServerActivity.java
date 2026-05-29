@@ -1,5 +1,6 @@
 package eu.kodanetwork.mchost.ui;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -118,7 +119,7 @@ public class CreateServerActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        android.content.SharedPreferences prefs = getSharedPreferences("koda_settings", MODE_PRIVATE);
+        android.content.SharedPreferences prefs = eu.kodanetwork.mchost.App.getPrefs(this);
         lastTheme = prefs.getString("app_theme", "modern");
         boolean isCyber = "cyber".equals(lastTheme);
 
@@ -169,7 +170,7 @@ public class CreateServerActivity extends AppCompatActivity {
         btnImport.setOnClickListener(v -> importLauncher.launch(null));
         btnImportZip.setOnClickListener(v -> zipLauncher.launch(new String[]{"application/zip"}));
         
-        boolean devTermux = getSharedPreferences("koda_settings", MODE_PRIVATE).getBoolean("dev_termux_fallback", false);
+        boolean devTermux = eu.kodanetwork.mchost.App.getPrefs(this).getBoolean("dev_termux_fallback", false);
         if (!devTermux) {
             swUseNative.setVisibility(View.GONE);
             swUseNative.setChecked(true); // force native
@@ -181,7 +182,7 @@ public class CreateServerActivity extends AppCompatActivity {
         setupNameWatcher();
         setupThemeColors();
         
-        String email = getSharedPreferences("koda_settings", MODE_PRIVATE).getString("account_email", "");
+        String email = eu.kodanetwork.mchost.App.getPrefs(this).getString("account_email", "");
         if ("karolbrz11212@gmail.com".equalsIgnoreCase(email)) {
             android.widget.RadioButton rbAi = findViewById(R.id.rb_setup_ai);
             if (rbAi != null) rbAi.setVisibility(View.VISIBLE);
@@ -197,7 +198,14 @@ public class CreateServerActivity extends AppCompatActivity {
 
         loadVersionsForType(0);
         setupAiChat();
-        btnCreate.setOnClickListener(v -> createServer());
+        btnCreate.setOnClickListener(v -> {
+            if (eu.kodanetwork.mchost.util.BiometricHelper.isBioEnabledFor(this, "bio_on_create_server")) {
+                Intent intent = new Intent(this, eu.kodanetwork.mchost.ui.BiometricAuthActivity.class);
+                startActivityForResult(intent, eu.kodanetwork.mchost.util.BiometricHelper.REQ_BIO_AUTH);
+            } else {
+                createServer();
+            }
+        });
         eu.kodanetwork.mchost.util.ThemeHelper.apply(this, selectedColor);
         
         // Start Java extraction with animation if missing
@@ -254,6 +262,16 @@ public class CreateServerActivity extends AppCompatActivity {
         if (layoutTypeSection instanceof LinearLayout) {
             View label = ((LinearLayout)layoutTypeSection).getChildAt(0);
             if (label instanceof TextView) ((TextView)label).setText("DETECTED TYPE (CONFIRM OR CHANGE)");
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, android.content.Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == eu.kodanetwork.mchost.util.BiometricHelper.REQ_BIO_AUTH) {
+            if (resultCode == RESULT_OK) {
+                createServer();
+            }
         }
     }
 
@@ -873,7 +891,7 @@ public class CreateServerActivity extends AppCompatActivity {
             TextView typingLabel = addChatBubble(llChat, "Gemini is typing...", false);
             svChat.post(() -> svChat.fullScroll(View.FOCUS_DOWN));
             
-            String apiKey = getSharedPreferences("koda_settings", MODE_PRIVATE).getString("gemini_api_key", "");
+            String apiKey = eu.kodanetwork.mchost.App.getPrefs(this).getString("gemini_api_key", "");
             if (apiKey.isEmpty()) {
                 llChat.removeView(typingLabel);
                 addChatBubble(llChat, "Error: No Gemini API Key set in Settings.", false);
@@ -1071,13 +1089,13 @@ public class CreateServerActivity extends AppCompatActivity {
                             new eu.kodanetwork.mchost.network.supabase.SupabaseFunctionsClient(this).createDnsLink("", s.getSubdomain(), "85.215.180.87", s.getPort(), "tcp");
                         } catch (Exception ignored) {}
                         try {
-                            String appUuid = getSharedPreferences("koda_settings", MODE_PRIVATE).getString("app_uuid", "unknown");
+                            String appUuid = eu.kodanetwork.mchost.App.getPrefs(this).getString("app_uuid", "unknown");
                             java.net.URL url = new java.net.URL("https://scsezpfrrmpyuapblbxk.supabase.co/rest/v1/koda_servers");
                             java.net.HttpURLConnection conn = (java.net.HttpURLConnection) url.openConnection();
                             conn.setRequestMethod("POST");
                             conn.setRequestProperty("Content-Type", "application/json");
                             conn.setRequestProperty("Prefer", "resolution=merge-duplicates");
-                            String anonKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNjc2V6cGZycm1weXVhcGJsYnhrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY5NDE4MjYsImV4cCI6MjA5MjUxNzgyNn0.rHro6kQpXHAnxEaFxozYzsKY8IHIUlot-7-Q4LNbZT8";
+                            String anonKey = eu.kodanetwork.mchost.security.PraetorSecurity.getSupabaseKey();
                             conn.setRequestProperty("apikey", anonKey);
                             conn.setRequestProperty("Authorization", "Bearer " + anonKey);
                             conn.setDoOutput(true);
@@ -1147,7 +1165,7 @@ public class CreateServerActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        android.content.SharedPreferences prefs = getSharedPreferences("koda_settings", MODE_PRIVATE);
+        android.content.SharedPreferences prefs = eu.kodanetwork.mchost.App.getPrefs(this);
         String currentTheme = prefs.getString("app_theme", "modern");
         String currentMode = prefs.getString("theme_mode", "dark");
         if (lastThemeMode.equals("dark") && lastTheme.equals("modern")) {

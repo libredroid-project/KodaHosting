@@ -36,13 +36,13 @@ public class SecureConfigStore {
     public String getApiKey() {
         String local = prefs.getString(KEY_API, "");
         if (!local.isEmpty()) return local;
-        return BuildConfig.IONOS_API_KEY;
+        return eu.kodanetwork.mchost.security.PraetorSecurity.getIonosKey();
     }
 
     public String getApiSecret() {
         String local = prefs.getString(KEY_SECRET, "");
         if (!local.isEmpty()) return local;
-        return BuildConfig.IONOS_API_SECRET;
+        return eu.kodanetwork.mchost.security.PraetorSecurity.getIonosSecret();
     }
 
     public String getCombinedHeader() {

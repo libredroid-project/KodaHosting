@@ -21,12 +21,15 @@
     <option name="autoReloadType" value="NONE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="1c7b5403-826e-4eb8-9d43-ed80980da5f9" name="Changes" comment="Added a in game server menu on the lobby server (kodanetwork.eu), added a linking logic">
+    <list default="true" id="1c7b5403-826e-4eb8-9d43-ed80980da5f9" name="Changes" comment="Seucrity update, possibility for google play">
+      <change beforePath="$PROJECT_DIR$/.gradle/8.5/checksums/checksums.lock" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/8.5/checksums/checksums.lock" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gradle/8.5/checksums/sha1-checksums.bin" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/8.5/checksums/sha1-checksums.bin" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gradle/8.5/executionHistory/executionHistory.bin" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/8.5/executionHistory/executionHistory.bin" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gradle/8.5/executionHistory/executionHistory.lock" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/8.5/executionHistory/executionHistory.lock" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gradle/8.5/fileHashes/fileHashes.bin" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/8.5/fileHashes/fileHashes.bin" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gradle/8.5/fileHashes/fileHashes.lock" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/8.5/fileHashes/fileHashes.lock" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gradle/8.5/fileHashes/resourceHashesCache.bin" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/8.5/fileHashes/resourceHashesCache.bin" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gradle/8.7/checksums/checksums.lock" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/8.7/checksums/checksums.lock" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gradle/8.7/executionHistory/executionHistory.bin" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/8.7/executionHistory/executionHistory.bin" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gradle/8.7/executionHistory/executionHistory.lock" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/8.7/executionHistory/executionHistory.lock" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gradle/8.7/fileHashes/fileHashes.bin" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/8.7/fileHashes/fileHashes.bin" afterDir="false" />
@@ -37,30 +40,26 @@
       <change beforePath="$PROJECT_DIR$/.gradle/buildOutputCleanup/outputFiles.bin" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/buildOutputCleanup/outputFiles.bin" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gradle/file-system.probe" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/file-system.probe" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/caches/deviceStreaming.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/caches/deviceStreaming.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/deploymentTargetSelector.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/deploymentTargetSelector.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/app/build.gradle" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/AndroidManifest.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/AndroidManifest.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/assets/jre17.tar.xz" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/java/eu/kodanetwork/mchost/model/ServerInstance.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/eu/kodanetwork/mchost/model/ServerInstance.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/eu/kodanetwork/mchost/model/ServerRepo.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/eu/kodanetwork/mchost/model/ServerRepo.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/eu/kodanetwork/mchost/network/JarDownloader.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/eu/kodanetwork/mchost/network/JarDownloader.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/java/eu/kodanetwork/mchost/network/supabase/SupabaseFunctionsClient.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/eu/kodanetwork/mchost/network/supabase/SupabaseFunctionsClient.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/eu/kodanetwork/mchost/orchestration/StartOrchestrator.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/eu/kodanetwork/mchost/orchestration/StartOrchestrator.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/eu/kodanetwork/mchost/security/SecureConfigStore.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/eu/kodanetwork/mchost/security/SecureConfigStore.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/eu/kodanetwork/mchost/service/BootReceiver.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/eu/kodanetwork/mchost/service/BootReceiver.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/java/eu/kodanetwork/mchost/service/TermuxServerService.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/eu/kodanetwork/mchost/service/TermuxServerService.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/java/eu/kodanetwork/mchost/ui/CreateServerActivity.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/eu/kodanetwork/mchost/ui/CreateServerActivity.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/eu/kodanetwork/mchost/ui/DebugLogActivity.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/eu/kodanetwork/mchost/ui/DebugLogActivity.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/eu/kodanetwork/mchost/ui/FileEditorActivity.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/eu/kodanetwork/mchost/ui/FileEditorActivity.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/java/eu/kodanetwork/mchost/ui/MainActivity.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/eu/kodanetwork/mchost/ui/MainActivity.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/java/eu/kodanetwork/mchost/ui/ServerCardAdapter.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/eu/kodanetwork/mchost/ui/ServerCardAdapter.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/java/eu/kodanetwork/mchost/ui/ServerDetailActivity.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/eu/kodanetwork/mchost/ui/ServerDetailActivity.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/res/layout/activity_create_server.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/layout/activity_create_server.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/res/layout/activity_main.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/layout/activity_main.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/res/layout/activity_server_detail.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/layout/activity_server_detail.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/res/layout/item_server.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/layout/item_server.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/res/mipmap-hdpi/ic_launcher.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/res/mipmap-hdpi/ic_launcher_round.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/res/mipmap-xhdpi/ic_launcher.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/res/mipmap-xhdpi/ic_launcher_round.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/res/mipmap-xxhdpi/ic_launcher.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/res/mipmap-xxhdpi/ic_launcher_round.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/res/mipmap-xxxhdpi/ic_launcher.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/res/mipmap-xxxhdpi/ic_launcher_round.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/supabase/functions/create-dns-link/index.ts" beforeDir="false" afterPath="$PROJECT_DIR$/supabase/functions/create-dns-link/index.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/eu/kodanetwork/mchost/ui/design/LoginPageActivity.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/eu/kodanetwork/mchost/ui/design/LoginPageActivity.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/eu/kodanetwork/mchost/util/JavaFinder.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/eu/kodanetwork/mchost/util/JavaFinder.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -70,7 +69,7 @@
   <component name="ClangdSettings">
     <option name="formatViaClangd" value="false" />
   </component>
-  <component name="ExecutionTargetManager" SELECTED_TARGET="device_and_snapshot_combo_box_target[DeviceId(pluginId=PhysicalDevice, isTemplate=false, identifier=serial=5c81f65d)]" />
+  <component name="ExecutionTargetManager" SELECTED_TARGET="device_and_snapshot_combo_box_target[DeviceId(pluginId=PhysicalDevice, isTemplate=false, identifier=serial=45d368fb)]" />
   <component name="ExternalProjectsData">
     <projectState path="$PROJECT_DIR$">
       <ProjectState />
@@ -236,7 +235,15 @@
       <option name="project" value="LOCAL" />
       <updated>1779638160309</updated>
     </task>
-    <option name="localTasksCounter" value="3" />
+    <task id="LOCAL-00003" summary="Added a JNI Embedded mode to be ale to run the app on android devvices that eighter havva stock android a low modified version and the possibility to update to SDK 35">
+      <option name="closed" value="true" />
+      <created>1779916723245</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1779916723245</updated>
+    </task>
+    <option name="localTasksCounter" value="4" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -253,19 +260,34 @@
   <component name="VcsManagerConfiguration">
     <MESSAGE value="Updated UI, Java is Nativ now." />
     <MESSAGE value="Added a in game server menu on the lobby server (kodanetwork.eu), added a linking logic" />
-    <option name="LAST_COMMIT_MESSAGE" value="Added a in game server menu on the lobby server (kodanetwork.eu), added a linking logic" />
+    <MESSAGE value="Added a JNI Embedded mode to be ale to run the app on android devvices that eighter havva stock android a low modified version and the possibility to update to SDK 35" />
+    <MESSAGE value="Seucrity update, possibility for google play" />
+    <option name="LAST_COMMIT_MESSAGE" value="Seucrity update, possibility for google play" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <breakpoint enabled="true" type="OCSymbolicBreakpointType">
+          <properties>
+            <option name="moduleName" value="libart.so" />
+            <option name="symbolPattern" value="art_sigbus_fault" />
+          </properties>
+          <option name="timeStamp" value="2" />
+        </breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
   <component name="play_dynamic_filters_status">
     <option name="appIdToCheckInfo">
       <map>
         <entry key="eu.kodanetwork.mchost">
           <value>
-            <CheckInfo lastCheckTimestamp="1779798504613" />
+            <CheckInfo lastCheckTimestamp="1780066238131" />
           </value>
         </entry>
         <entry key="eu.kodanetwork.mchost.test">
           <value>
-            <CheckInfo lastCheckTimestamp="1779798504625" />
+            <CheckInfo lastCheckTimestamp="1780066238133" />
           </value>
         </entry>
       </map>

@@ -18,13 +18,13 @@ public class SupabaseFunctionsClient {
     private final String anonKey;
 
     public SupabaseFunctionsClient(Context context) {
-        String baseUrl = BuildConfig.SUPABASE_URL;
+        String baseUrl = eu.kodanetwork.mchost.security.PraetorSecurity.getSupabaseUrl();
         if (baseUrl == null || baseUrl.trim().isEmpty()) {
             throw new IllegalStateException("SUPABASE_URL missing in BuildConfig");
         }
         if (!baseUrl.endsWith("/")) baseUrl += "/";
 
-        this.anonKey = BuildConfig.SUPABASE_ANON_KEY;
+        this.anonKey = eu.kodanetwork.mchost.security.PraetorSecurity.getSupabaseKey();
         HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
         logging.setLevel(HttpLoggingInterceptor.Level.BASIC);
         OkHttpClient okHttpClient = new OkHttpClient.Builder().addInterceptor(logging).build();

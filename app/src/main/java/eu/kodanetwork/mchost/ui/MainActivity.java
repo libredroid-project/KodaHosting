@@ -73,7 +73,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         
-        android.content.SharedPreferences prefs = getSharedPreferences("koda_settings", MODE_PRIVATE);
+        android.content.SharedPreferences prefs = eu.kodanetwork.mchost.App.getPrefs(this);
         lastTheme = prefs.getString("app_theme", "modern");
         lastThemeMode = prefs.getString("theme_mode", "dark");
         boolean isCyber = "cyber".equals(lastTheme);
@@ -141,6 +141,14 @@ public class MainActivity extends AppCompatActivity {
             refresh();
             startPeriodicRefresh();
 
+            String autoStartId = getIntent().getStringExtra("auto_start_server");
+            if (autoStartId != null && !autoStartId.isEmpty()) {
+                Intent startSvc = new Intent(this, TermuxServerService.class);
+                startSvc.setAction(TermuxServerService.ACTION_START);
+                startSvc.putExtra("id", autoStartId);
+                startService(startSvc);
+            }
+
             ThemeHelper.apply(this);
             eu.kodanetwork.mchost.util.HapticUtil.applyHaptics(this);
             Log.d(TAG, "MainActivity created");
@@ -155,11 +163,33 @@ public class MainActivity extends AppCompatActivity {
         eu.kodanetwork.mchost.App.resetAfkTimer();
     }
 
-    private void openServer(ServerInstance s) {
+    private ServerInstance pendingServerOpen;
 
+    private void openServer(ServerInstance s) {
+        if (eu.kodanetwork.mchost.util.BiometricHelper.isBioEnabledFor(this, "bio_on_server_click")) {
+            pendingServerOpen = s;
+            Intent intent = new Intent(this, eu.kodanetwork.mchost.ui.BiometricAuthActivity.class);
+            startActivityForResult(intent, eu.kodanetwork.mchost.util.BiometricHelper.REQ_BIO_AUTH);
+        } else {
+            proceedOpenServer(s);
+        }
+    }
+
+    private void proceedOpenServer(ServerInstance s) {
         Intent i = new Intent(this, ServerDetailActivity.class);
         i.putExtra("id", s.getId());
         startActivity(i);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == eu.kodanetwork.mchost.util.BiometricHelper.REQ_BIO_AUTH) {
+            if (resultCode == RESULT_OK && pendingServerOpen != null) {
+                proceedOpenServer(pendingServerOpen);
+            }
+            pendingServerOpen = null;
+        }
     }
 
     private void refresh() {
@@ -232,7 +262,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        android.content.SharedPreferences prefs = getSharedPreferences("koda_settings", MODE_PRIVATE);
+        android.content.SharedPreferences prefs = eu.kodanetwork.mchost.App.getPrefs(this);
         String currentTheme = prefs.getString("app_theme", "modern");
         String currentMode = prefs.getString("theme_mode", "dark");
         if (!currentTheme.equals(lastTheme) || !currentMode.equals(lastThemeMode)) {

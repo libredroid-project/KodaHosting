@@ -20,6 +20,7 @@
     <uses-permission android:name="android.permission.VIBRATE"/>
     <uses-permission android:name="com.termux.permission.RUN_COMMAND"/>
     <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS"/>
+    <uses-permission android:name="android.permission.USE_BIOMETRIC"/>
 
     <application
         android:name=".App"
@@ -122,11 +123,25 @@
             android:exported="false"
             android:screenOrientation="portrait"/>
 
+        <activity android:name=".ui.LegacyModeWarningActivity"
+            android:exported="false"
+            android:screenOrientation="portrait"/>
+
+        <activity android:name=".ui.BiometricAuthActivity"
+            android:exported="false"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar"
+            android:screenOrientation="portrait"/>
+
 
         <service
             android:name=".service.TermuxServerService"
             android:exported="false"
             android:foregroundServiceType="dataSync"/>
+
+        <service
+            android:name=".service.IsolatedJvmService"
+            android:exported="false"
+            android:process=":jvm_process"/>
 
         <receiver
             android:name=".service.BootReceiver"

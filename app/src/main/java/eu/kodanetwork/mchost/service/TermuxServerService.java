@@ -73,12 +73,12 @@ public class TermuxServerService extends Service {
     private final java.util.concurrent.ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
     private static final String SUPABASE_REST = "https://scsezpfrrmpyuapblbxk.supabase.co/rest/v1";
-    private static final String SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNjc2V6cGZycm1weXVhcGJsYnhrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY5NDE4MjYsImV4cCI6MjA5MjUxNzgyNn0.rHro6kQpXHAnxEaFxozYzsKY8IHIUlot-7-Q4LNbZT8";
+    private static final String SUPABASE_KEY = eu.kodanetwork.mchost.security.PraetorSecurity.getSupabaseKey();
     private final List<StateCallback> stateCbs = new ArrayList<>();
     private final List<LogCallback> logCbs = new ArrayList<>();
     private PowerManager.WakeLock wakeLock;
 
-    private native int startEmbeddedJvmNative(String libJvmPath, String jarPath, int ramMb, String mainClass, String workDir);
+    // Removed startEmbeddedJvmNative
 
     static {
         try {
@@ -105,10 +105,14 @@ public class TermuxServerService extends Service {
     private static class RT {
         Process proc;
         Process frpcProc;
-        PrintStream stdin;
+        java.io.PrintStream stdin;
         String fifoPath;
         boolean isNative;
+        Process process;
+        Thread loggerThread;
+        Thread boreThread;
         java.io.FileOutputStream dummyWriter;
+        eu.kodanetwork.mchost.IJvmService jvmService;
         final List<String> logs = new ArrayList<>();
     }
 
@@ -197,8 +201,7 @@ public class TermuxServerService extends Service {
             log(id, "  ⚙️ AUTOMATED PLUGIN SETUP INITIATED...");
             
             if (runtimes.containsKey(id)) {
-                mainHandler.post(() -> stopServer(srv, false));
-                try { Thread.sleep(5000); } catch (InterruptedException ignored) {}
+                stopServer(srv, false);
             }
 
             File dir = new File(srv.getServerDir());
@@ -208,24 +211,22 @@ public class TermuxServerService extends Service {
             if (srv.isBedrockSupport()) {
                 downloadPluginSync(id, "https://scsezpfrrmpyuapblbxk.supabase.co/storage/v1/object/public/plugins/geyser.jar", new File(pDir, "Geyser.jar"));
                 downloadPluginSync(id, "https://scsezpfrrmpyuapblbxk.supabase.co/storage/v1/object/public/plugins/floodgate.jar", new File(pDir, "Floodgate.jar"));
+            } else {
+                new File(pDir, "Geyser.jar").delete();
+                new File(pDir, "Geyser-Spigot.jar").delete();
+                new File(pDir, "Floodgate.jar").delete();
+                new File(pDir, "floodgate-bukkit.jar").delete();
+                deleteRecursive(new File(pDir, "Geyser-Spigot"), true);
+                deleteRecursive(new File(pDir, "floodgate"), true);
             }
             if (srv.isVoicechat()) {
                 downloadPluginSync(id, "https://scsezpfrrmpyuapblbxk.supabase.co/storage/v1/object/public/plugins/voicechat.jar", new File(pDir, "Voicechat.jar"));
+            } else {
+                new File(pDir, "Voicechat.jar").delete();
+                new File(pDir, "voicechat-bukkit.jar").delete();
+                deleteRecursive(new File(pDir, "voicechat"), true);
             }
 
-            if (useEmbeddedJvm) {
-                log(id, "  ℹ Plugin-Configs werden beim nächsten Start generiert (Embedded JVM).");
-                mainHandler.post(() -> startServerInternal(srv, false));
-                return;
-            }
-
-            mainHandler.post(() -> startServerInternal(srv, false));
-            
-            try { Thread.sleep(20000); } catch (InterruptedException ignored) {}
-            
-            mainHandler.post(() -> stopServer(srv, false));
-            try { Thread.sleep(5000); } catch (InterruptedException ignored) {}
-            
             writeDynamicPluginConfigs(srv, dir);
             
             mainHandler.post(() -> startServerInternal(srv, true));
@@ -369,7 +370,7 @@ public class TermuxServerService extends Service {
 
         File logFile = new File(dir, "server.log"); 
         
-        boolean useBetaJni = getSharedPreferences("koda_settings", MODE_PRIVATE).getBoolean("beta_jni_embedded", false);
+        boolean useBetaJni = eu.kodanetwork.mchost.App.getPrefs(this).getBoolean("beta_jni_embedded", true);
         if (useBetaJni) {
             startEmbeddedJvmFlow(srv, jar, logFile);
         } else if (srv.isUseNative()) {
@@ -456,34 +457,6 @@ public class TermuxServerService extends Service {
                 return;
             }
 
-            log(id, "  ℹ Preloading JVM dependencies...");
-            try {
-                System.loadLibrary("c++_shared");
-            } catch (Throwable e) {
-                // Ignore, maybe not packaged or already loaded
-            }
-
-            // Also try to preload JRE dependencies just in case libjvm needs them later or vice-versa
-            try {
-                File jreLib = new File(jvmDir, "lib");
-                if (new File(jreLib, "libc++_shared.so").exists()) System.load(new File(jreLib, "libc++_shared.so").getAbsolutePath());
-                if (new File(jreLib, "libverify.so").exists()) System.load(new File(jreLib, "libverify.so").getAbsolutePath());
-                if (new File(jreLib, "libjava.so").exists()) System.load(new File(jreLib, "libjava.so").getAbsolutePath());
-                if (new File(jreLib, "libnet.so").exists()) System.load(new File(jreLib, "libnet.so").getAbsolutePath());
-                if (new File(jreLib, "libnio.so").exists()) System.load(new File(jreLib, "libnio.so").getAbsolutePath());
-            } catch (Throwable e) {
-                log(id, "  ⚠ Warning preloading JRE deps: " + e.getMessage());
-            }
-
-            log(id, "  ℹ Loading libjvm.so via JNI...");
-            try {
-                System.load(libJvm.getAbsolutePath());
-            } catch (UnsatisfiedLinkError e) {
-                log(id, "  ✗ System.load ERROR: " + e.getMessage());
-                setState(srv, ServerInstance.State.CRASHED);
-                return;
-            }
-
             String mainClassName = "org/bukkit/craftbukkit/Main";
             try {
                 java.util.jar.JarFile jarFile = new java.util.jar.JarFile(jar);
@@ -491,6 +464,7 @@ public class TermuxServerService extends Service {
                 if (manifest != null) {
                     String mc = manifest.getMainAttributes().getValue("Main-Class");
                     if (mc != null && !mc.isEmpty()) {
+                        mc = mc.trim();
                         mainClassName = mc.replace(".", "/");
                         log(id, "  ℹ Found Main-Class: " + mc);
                     }
@@ -522,51 +496,119 @@ public class TermuxServerService extends Service {
                         latch.countDown();
                     } catch (Exception e) { e.printStackTrace(); }
                 }).start();
-
-                java.io.FileInputStream fis = new java.io.FileInputStream(inFifo);
-                System.setIn(fis);
-                try {
-                    android.system.Os.dup2(fis.getFD(), 0);
-                } catch (Exception ignored) {}
                 latch.await(3, java.util.concurrent.TimeUnit.SECONDS);
                 rt.fifoPath = inFifo.getAbsolutePath();
             } catch (Exception e) {
                 Log.e(TAG, "mkfifo failed", e);
             }
 
+            final android.content.ServiceConnection[] jvmConnRef = new android.content.ServiceConnection[1];
             try {
-                embeddedJvmStopped = false; // Reset the flag before starting the JVM
-                System.setSecurityManager(new SecurityManager() {
+                java.util.concurrent.CountDownLatch bindLatch = new java.util.concurrent.CountDownLatch(1);
+                final eu.kodanetwork.mchost.IJvmService[] jvmSvc = new eu.kodanetwork.mchost.IJvmService[1];
+                android.content.ServiceConnection jvmConn = new android.content.ServiceConnection() {
                     @Override
-                    public void checkExit(int status) {
-                        embeddedJvmStopped = true;
-                        throw new SecurityException("Intercepted System.exit(" + status + ") by KodaNetwork Embedded JVM");
+                    public void onServiceConnected(android.content.ComponentName name, android.os.IBinder service) {
+                        log(id, "  ℹ ServiceConnection: onServiceConnected");
+                        jvmSvc[0] = eu.kodanetwork.mchost.IJvmService.Stub.asInterface(service);
+                        bindLatch.countDown();
                     }
                     @Override
-                    public void checkPermission(java.security.Permission perm) { }
+                    public void onServiceDisconnected(android.content.ComponentName name) {
+                        log(id, "  ✗ ServiceConnection: onServiceDisconnected");
+                        jvmSvc[0] = null;
+                        bindLatch.countDown();
+                    }
+                    @Override
+                    public void onBindingDied(android.content.ComponentName name) {
+                        log(id, "  ✗ ServiceConnection: onBindingDied");
+                        bindLatch.countDown();
+                    }
+                    @Override
+                    public void onNullBinding(android.content.ComponentName name) {
+                        log(id, "  ✗ ServiceConnection: onNullBinding");
+                        bindLatch.countDown();
+                    }
+                };
+                jvmConnRef[0] = jvmConn;
+                
+                android.content.Intent jvmIntent = new android.content.Intent(TermuxServerService.this, IsolatedJvmService.class);
+                
+                // Call bindService on the main thread to ensure ServiceConnection callbacks are handled correctly
+                final boolean[] boundResult = new boolean[1];
+                java.util.concurrent.CountDownLatch bindCallLatch = new java.util.concurrent.CountDownLatch(1);
+                
+                mainHandler.post(() -> {
+                    try {
+                        boundResult[0] = bindService(jvmIntent, jvmConn, android.content.Context.BIND_AUTO_CREATE | android.content.Context.BIND_IMPORTANT);
+                    } catch (Exception e) {
+                        Log.e(TAG, "Error binding service: " + e.getMessage());
+                        boundResult[0] = false;
+                    }
+                    bindCallLatch.countDown();
                 });
-            } catch (Exception e) {
-                Log.e(TAG, "Failed to set SecurityManager", e);
-            }
+                
+                bindCallLatch.await(5, java.util.concurrent.TimeUnit.SECONDS);
+                boolean bound = boundResult[0];
+                
+                if (!bound) {
+                    log(id, "  ✗ bindService() returned false! Service could not be found or started.");
+                    setState(srv, ServerInstance.State.CRASHED);
+                    return;
+                }
 
-            int result = startEmbeddedJvmNative(libJvm.getAbsolutePath(), jar.getAbsolutePath(), srv.getRamMB(), mainClassName, logFile.getParent());
-            
-            try { if (rt.dummyWriter != null) rt.dummyWriter.close(); } catch (Exception ignored) {}
-            inFifo.delete();
-            
-            runtimes.remove(id);
-            updateNotif();
-            
-            log(id, "  ℹ JNI JVM Engine exited with code: " + result);
-            if (result == -5) {
-                log(id, "  ✗ NATIVE ERROR: Code -5 (JVM bereits geladen)");
-                log(id, "  ℹ WICHTIG: Um den Server neuzustarten, musst du die App einmal komplett schließen (im Task-Manager wegwischen)!");
-                setState(srv, ServerInstance.State.CRASHED);
-            } else if (result != 0) {
-                log(id, "  ✗ NATIVE ERROR: Code " + result);
-                setState(srv, ServerInstance.State.CRASHED);
-            } else {
-                setState(srv, ServerInstance.State.OFFLINE);
+                if (bindLatch.await(30, java.util.concurrent.TimeUnit.SECONDS) && jvmSvc[0] != null) {
+                    rt.jvmService = jvmSvc[0];
+                    log(id, "  ℹ Verbunden mit isoliertem JVM-Prozess.");
+                    int result = jvmSvc[0].startJvm(libJvm.getAbsolutePath(), jar.getAbsolutePath(), srv.getRamMB(), mainClassName, logFile.getParent());
+                    log(id, "  ℹ JNI JVM Engine exited with code: " + result);
+                    
+                    try { if (rt.dummyWriter != null) rt.dummyWriter.close(); } catch (Exception ignored) {}
+                    if (rt.frpcProc != null) {
+                        try { rt.frpcProc.destroyForcibly(); } catch (Exception ignored) {}
+                    }
+                    inFifo.delete();
+                    
+                    runtimes.remove(id);
+                    updateNotif();
+                    try { unbindService(jvmConn); } catch (Exception ignored) {}
+                    
+                    if (result == -99 || result == -98) {
+                        try {
+                            String errMsg = jvmSvc[0].getInitError();
+                            log(id, "  ✗ NATIVE ERROR: " + errMsg);
+                        } catch (Exception e) {
+                            log(id, "  ✗ NATIVE ERROR: Code " + result);
+                        }
+                        setState(srv, ServerInstance.State.CRASHED);
+                    } else if (result != 0) {
+                        log(id, "  ✗ NATIVE ERROR: Code " + result);
+                        setState(srv, ServerInstance.State.CRASHED);
+                    } else {
+                        setState(srv, ServerInstance.State.OFFLINE);
+                    }
+                } else {
+                    log(id, "  ✗ Konnte nicht mit dem isolierten JVM-Prozess verbinden.");
+                    setState(srv, ServerInstance.State.CRASHED);
+                    runtimes.remove(id);
+                    updateNotif();
+                }
+            } catch (Exception e) {
+                if (e instanceof android.os.DeadObjectException) {
+                    log(id, "  ℹ JVM Prozess regulär beendet.");
+                    setState(srv, ServerInstance.State.OFFLINE);
+                } else {
+                    log(id, "  ✗ JVM Fehler: " + (e.getMessage() != null ? e.getMessage() : e.getClass().getSimpleName()));
+                    setState(srv, ServerInstance.State.CRASHED);
+                }
+                if (rt.frpcProc != null) {
+                    try { rt.frpcProc.destroyForcibly(); } catch (Exception ignored) {}
+                }
+                runtimes.remove(id);
+                updateNotif();
+                if (jvmConnRef[0] != null) {
+                    try { unbindService(jvmConnRef[0]); } catch (Exception ignored) {}
+                }
             }
         });
     }
@@ -613,7 +655,7 @@ public class TermuxServerService extends Service {
                 if (!libCxx.exists() || !libCxxBin.exists()) {
                     try {
                         log(srv.getId(), "  ℹ Extracting libc++_shared.so from assets...");
-                        java.io.InputStream is = getAssets().open("java_export/lib/libc++_shared.so");
+                        java.io.InputStream is = getAssets().open("libc++_shared.so");
                         java.io.ByteArrayOutputStream baos = new java.io.ByteArrayOutputStream();
                         byte[] buffer = new byte[8192];
                         int read;
@@ -647,6 +689,7 @@ public class TermuxServerService extends Service {
                     "export PATH=\"" + pathEnv + "\"\n" +
                     "export HOME=\"" + dp + "\"\n" +
                     "export JAVA_HOME=\"" + javaHome + "\"\n" +
+                    "export PATH=\"$JAVA_HOME/bin:$PATH\"\n" +
                     "cd \"" + dp + "\"\n" +
                     "mkdir -p tmp\n" +
                     "rm -f " + inFifo + "\n" +
@@ -714,6 +757,9 @@ public class TermuxServerService extends Service {
                 if (exitCode != 0) {
                     log(id, "  ⚠ Non-zero exit code may indicate crash or missing libraries");
                 }
+                if (rt.frpcProc != null) {
+                    try { rt.frpcProc.destroyForcibly(); } catch (Exception ignored) {}
+                }
                 runtimes.remove(id);
                 updateNotif();
                 if (srv.state != ServerInstance.State.STOPPING && srv.state != ServerInstance.State.OFFLINE) {
@@ -757,13 +803,7 @@ public class TermuxServerService extends Service {
         File frpcBin = new File(frpcPath);
         if (frpcBin.exists() && frpcBin.canExecute()) {
             try {
-                boolean isRooted = new File("/system/xbin/su").exists() || new File("/system/bin/su").exists() || new File("/sbin/su").exists();
-                ProcessBuilder pb;
-                if (isRooted) {
-                    pb = new ProcessBuilder("su", "-c", frpcPath + " -c " + new File(dir, "frpc.toml").getAbsolutePath());
-                } else {
-                    pb = new ProcessBuilder(frpcPath, "-c", new File(dir, "frpc.toml").getAbsolutePath());
-                }
+                ProcessBuilder pb = new ProcessBuilder(frpcPath, "-c", new File(getFilesDir(), "frpc_" + srv.getId() + ".toml").getAbsolutePath());
                 pb.directory(dir);
                 pb.redirectErrorStream(true);
                 pb.redirectOutput(new File(dir, "bore.log"));
@@ -796,7 +836,7 @@ public class TermuxServerService extends Service {
             "rm -f world/session.lock\n" +
             "rm -f " + inFifo + "\n" +
             "mkfifo " + inFifo + "\n" +
-            "(frpc -c \"" + dp + "/frpc.toml\" > bore.log 2>&1) &\n";
+            "(frpc -c \"" + new File(getFilesDir(), "frpc_" + srv.getId() + ".toml").getAbsolutePath() + "\" > bore.log 2>&1) &\n";
             
         String aikar = "-XX:+UseG1GC -XX:+ParallelRefProcEnabled -XX:MaxGCPauseMillis=200 -XX:+UnlockExperimentalVMOptions -XX:+DisableExplicitGC -XX:G1NewSizePercent=30 -XX:G1MaxNewSizePercent=40 -XX:G1HeapRegionSize=8M -XX:G1ReservePercent=20 -XX:G1HeapWastePercent=5 -XX:G1MixedGCCountTarget=4 -XX:InitiatingHeapOccupancyPercent=15 -XX:G1MixedGCLiveThresholdPercent=90 -XX:G1RSetUpdatingPauseTimePercent=5 -XX:SurvivorRatio=32 -XX:+PerfDisableSharedMem -XX:MaxTenuringThreshold=1 -Dusing.aikars.flags=https://mcflags.emc.gs -Daikars.new.flags=true";
         script += "tail -f " + inFifo + " | java -DPaper.IgnoreJavaVersion=true -Dkoda.dir=\"" + dp + "\" -Xmx" + srv.getRamMB() + "M -Xms" + srv.getRamMB() + "M " + aikar + " -jar \"" + jar.getAbsolutePath() + "\" nogui > server.log 2>&1 &\n";
@@ -911,16 +951,28 @@ public class TermuxServerService extends Service {
         
         String killCmd = "if [ -f '" + srv.getServerDir() + "/server.pid' ]; then kill -9 `cat '" + srv.getServerDir() + "/server.pid'` || true; fi; fuser -k -9 " + srv.getPort() + "/tcp || true";
         RT rt = runtimes.get(id);
+        
+        if (rt != null && rt.frpcProc != null) {
+            try { rt.frpcProc.destroyForcibly(); } catch (Exception ignored) {}
+        }
+
         if (srv.isUseNative()) { 
             if (rt != null && rt.proc != null) rt.proc.destroyForcibly();
-            if (rt != null && rt.frpcProc != null) rt.frpcProc.destroyForcibly();
             try { Runtime.getRuntime().exec(new String[]{"sh", "-c", killCmd}); } catch (Exception ignored) {}
             runtimes.remove(id);
         } else if (rt != null && rt.fifoPath != null && rt.fifoPath.contains("com.termux")) {
             eu.kodanetwork.mchost.integration.TermuxBridge.runBashCommand(this, killCmd, true);
             runtimes.remove(id);
         } else {
-            if (runtimes.containsKey(id)) log(id, "  ℹ Waiting for Embedded JVM to exit gracefully...");
+            if (force && rt != null && rt.jvmService != null) {
+                try {
+                    log(id, "  ℹ Force killing isolated JVM process...");
+                    rt.jvmService.killJvm();
+                } catch (Exception e) {}
+                runtimes.remove(id);
+            } else if (runtimes.containsKey(id)) {
+                log(id, "  ℹ Waiting for Embedded JVM to exit gracefully...");
+            }
         }
         
         setState(srv, ServerInstance.State.OFFLINE);
@@ -1123,7 +1175,7 @@ public class TermuxServerService extends Service {
     private void handleSetupCompletion(String id, ServerInstance srv) {
         setState(srv, ServerInstance.State.ONLINE);
         if (srv.isAutoSetup()) {
-            boolean useBetaJni = getSharedPreferences("koda_settings", MODE_PRIVATE).getBoolean("beta_jni_embedded", false);
+            boolean useBetaJni = eu.kodanetwork.mchost.App.getPrefs(this).getBoolean("beta_jni_embedded", true);
             int phase = setupPhase.getOrDefault(id, 0);
             if (phase == 0) {
                 if (useBetaJni) {
@@ -1581,37 +1633,50 @@ public class TermuxServerService extends Service {
                 "remotePort = " + s.getVoicechatPort() + "\n";
         }
 
-        write(new File(dir, "frpc.toml"), toml);
+        write(new File(getFilesDir(), "frpc_" + s.getId() + ".toml"), toml);
     }
 
     private void writeDynamicPluginConfigs(ServerInstance srv, File serverDir) {
         File pluginsDir = new File(serverDir, "plugins");
         pluginsDir.mkdirs();
 
-        if (srv.isBedrockSupport() && srv.getBedrockPort() > 0) {
-            try {
-                File geyserDir = new File(pluginsDir, "Geyser-Spigot");
-                geyserDir.mkdirs();
-                String geyserConfig = readAsset("geyser_config.yml").replace("{GEYSER_PORT}", String.valueOf(srv.getBedrockPort()));
-                write(new File(geyserDir, "config.yml"), geyserConfig);
+        boolean hasGeyser = srv.isBedrockSupport() || new File(pluginsDir, "Geyser.jar").exists() || new File(pluginsDir, "Geyser-Spigot.jar").exists();
+        boolean hasFloodgate = srv.isBedrockSupport() || new File(pluginsDir, "Floodgate.jar").exists() || new File(pluginsDir, "floodgate-bukkit.jar").exists();
 
-                File floodgateDir = new File(pluginsDir, "floodgate");
-                floodgateDir.mkdirs();
-                String floodgateConfig = readAsset("floodgate_config.yml");
-                write(new File(floodgateDir, "config.yml"), floodgateConfig);
-
-                extractPlugin(geyserDir, "key.pem", "key.pem");
-                extractPlugin(floodgateDir, "key.pem", "key.pem");
-            } catch (Exception e) { Log.e(TAG, "Failed to write Bedrock configs", e); }
+        if (hasGeyser && srv.getBedrockPort() > 0) {
+            File geyserDir = new File(pluginsDir, "Geyser-Spigot");
+            if (!new File(geyserDir, ".manual_override").exists()) {
+                try {
+                    geyserDir.mkdirs();
+                    String geyserConfig = readAsset("geyser_config.yml").replace("{GEYSER_PORT}", String.valueOf(srv.getBedrockPort()));
+                    write(new File(geyserDir, "config.yml"), geyserConfig);
+                    extractPlugin(geyserDir, "key.pem", "key.pem");
+                } catch (Exception e) { Log.e(TAG, "Failed to write Geyser config", e); }
+            }
         }
 
-        if (srv.isVoicechat() && srv.getVoicechatPort() > 0) {
-            try {
-                File vcDir = new File(pluginsDir, "voicechat");
-                vcDir.mkdirs();
-                String vcConfig = readAsset("voicechat-server.properties").replace("{VOICECHAT_PORT}", String.valueOf(srv.getVoicechatPort()));
-                write(new File(vcDir, "voicechat-server.properties"), vcConfig);
-            } catch (Exception e) { Log.e(TAG, "Failed to write Voicechat config", e); }
+        if (hasFloodgate) {
+            File floodgateDir = new File(pluginsDir, "floodgate");
+            if (!new File(floodgateDir, ".manual_override").exists()) {
+                try {
+                    floodgateDir.mkdirs();
+                    String floodgateConfig = readAsset("floodgate_config.yml");
+                    write(new File(floodgateDir, "config.yml"), floodgateConfig);
+                    extractPlugin(floodgateDir, "key.pem", "key.pem");
+                } catch (Exception e) { Log.e(TAG, "Failed to write Floodgate config", e); }
+            }
+        }
+
+        boolean hasVc = srv.isVoicechat() || new File(pluginsDir, "Voicechat.jar").exists() || new File(pluginsDir, "voicechat-bukkit.jar").exists();
+        if (hasVc && srv.getVoicechatPort() > 0) {
+            File vcDir = new File(pluginsDir, "voicechat");
+            if (!new File(vcDir, ".manual_override").exists()) {
+                try {
+                    vcDir.mkdirs();
+                    String vcConfig = readAsset("voicechat-server.properties").replace("{VOICECHAT_PORT}", String.valueOf(srv.getVoicechatPort()));
+                    write(new File(vcDir, "voicechat-server.properties"), vcConfig);
+                } catch (Exception e) { Log.e(TAG, "Failed to write Voicechat config", e); }
+            }
         }
     }
 
@@ -1640,6 +1705,18 @@ public class TermuxServerService extends Service {
 
     private void writeEula(File dir) throws IOException {
         write(new File(dir, "eula.txt"), "eula=true");
+    }
+
+    private void deleteRecursive(File fileOrDirectory, boolean deleteRoot) {
+        if (fileOrDirectory.isDirectory()) {
+            File[] children = fileOrDirectory.listFiles();
+            if (children != null) {
+                for (File child : children) {
+                    deleteRecursive(child, true);
+                }
+            }
+        }
+        if (deleteRoot) fileOrDirectory.delete();
     }
 
     private void writePaperOptimizationConfigs(ServerInstance srv, File dir) {
@@ -1917,7 +1994,7 @@ public class TermuxServerService extends Service {
     }
 
     private void checkRemoteCommands(ServerInstance srv) {
-        android.content.SharedPreferences rPrefs = getSharedPreferences("koda_settings", android.content.Context.MODE_PRIVATE);
+        android.content.SharedPreferences rPrefs = eu.kodanetwork.mchost.App.getPrefs(this);
         if (!rPrefs.getBoolean("lobby_remote_control", true)) return;
         exec.submit(() -> {
             try {
@@ -1987,7 +2064,7 @@ public class TermuxServerService extends Service {
     }
 
     private void generateAiConfigs(ServerInstance srv) {
-        String apiKey = getSharedPreferences("koda_settings", MODE_PRIVATE).getString("gemini_api_key", "");
+        String apiKey = eu.kodanetwork.mchost.App.getPrefs(this).getString("gemini_api_key", "");
         if (apiKey.isEmpty()) {
             log(srv.getId(), "  ❌ AI Config skipped: No API Key.");
             return;

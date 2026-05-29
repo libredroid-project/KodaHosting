@@ -9,14 +9,10 @@ android {
     defaultConfig {
         applicationId "eu.kodanetwork.mchost"
         minSdk 26
-        targetSdk 28
+        targetSdk 34
         versionCode 8472
         versionName "0.8472beta"
         ndkVersion "27.0.12077973"
-        buildConfigField "String", "IONOS_API_KEY", "\"\""
-        buildConfigField "String", "IONOS_API_SECRET", "\"\""
-        buildConfigField "String", "SUPABASE_URL", "\"https://scsezpfrrmpyuapblbxk.supabase.co\""
-        buildConfigField "String", "SUPABASE_ANON_KEY", "\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNjc2V6cGZycm1weXVhcGJsYnhrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY5NDE4MjYsImV4cCI6MjA5MjUxNzgyNn0.rHro6kQpXHAnxEaFxozYzsKY8IHIUlot-7-Q4LNbZT8\""
         externalNativeBuild {
             cmake {
                 cppFlags "-std=c++17"
@@ -34,7 +30,7 @@ android {
 
     buildTypes {
         release {
-            minifyEnabled false
+            minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
@@ -47,6 +43,7 @@ android {
     buildFeatures {
         viewBinding true
         buildConfig true
+        aidl true
     }
 
     aaptOptions {
@@ -79,4 +76,6 @@ dependencies {
     implementation 'org.tukaani:xz:1.9'
     implementation 'org.apache.commons:commons-compress:1.21'
     implementation 'com.google.android.gms:play-services-auth:20.7.0'
+    implementation 'androidx.biometric:biometric:1.1.0'
+    implementation 'androidx.lifecycle:lifecycle-process:2.7.0'
 }

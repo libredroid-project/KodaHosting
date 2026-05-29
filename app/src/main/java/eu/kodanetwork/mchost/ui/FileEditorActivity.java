@@ -42,7 +42,7 @@ public class FileEditorActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_file_editor);
 
-        android.content.SharedPreferences prefs = getSharedPreferences("koda_settings", MODE_PRIVATE);
+        android.content.SharedPreferences prefs = eu.kodanetwork.mchost.App.getPrefs(this);
         lastTheme = prefs.getString("app_theme", "modern");
         lastThemeMode = prefs.getString("theme_mode", "dark");
 
@@ -87,7 +87,7 @@ public class FileEditorActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        android.content.SharedPreferences prefs = getSharedPreferences("koda_settings", MODE_PRIVATE);
+        android.content.SharedPreferences prefs = eu.kodanetwork.mchost.App.getPrefs(this);
         String currentTheme = prefs.getString("app_theme", "modern");
         String currentMode = prefs.getString("theme_mode", "dark");
         if (!currentTheme.equals(lastTheme) || !currentMode.equals(lastThemeMode)) {

@@ -64,7 +64,7 @@ public class ServerCardAdapter extends RecyclerView.Adapter<ServerCardAdapter.VH
         }
 
         void bind(ServerInstance s) {
-            android.content.SharedPreferences prefs = ctx.getSharedPreferences("koda_settings", Context.MODE_PRIVATE);
+            android.content.SharedPreferences prefs = eu.kodanetwork.mchost.App.getPrefs(ctx);
             boolean isLight = eu.kodanetwork.mchost.util.ThemeHelper.isLightMode(ctx);
             boolean isCyber = "cyber".equals(prefs.getString("app_theme", "modern"));
 

@@ -148,7 +148,7 @@ public class ServerDetailActivity extends AppCompatActivity {
             }
         }
         
-        android.content.SharedPreferences prefs = getSharedPreferences("koda_settings", MODE_PRIVATE);
+        android.content.SharedPreferences prefs = eu.kodanetwork.mchost.App.getPrefs(this);
         lastTheme = prefs.getString("app_theme", "modern");
         lastThemeMode = prefs.getString("theme_mode", "dark");
 
@@ -181,6 +181,20 @@ public class ServerDetailActivity extends AppCompatActivity {
                 if (tvFullLoadingMsg != null) tvFullLoadingMsg.setText("DOWNLOADING SERVER...");
             }
             new Handler(Looper.getMainLooper()).postDelayed(this::downloadJar, 500);
+        }
+
+        String autoStartId = getIntent().getStringExtra("auto_start_server");
+        if (autoStartId != null && !autoStartId.isEmpty() && svc != null) {
+            new Handler(Looper.getMainLooper()).postDelayed(() -> {
+                if (svc != null) svc.startServer(server);
+            }, 1000);
+        } else if (autoStartId != null && !autoStartId.isEmpty()) {
+            new Handler(Looper.getMainLooper()).postDelayed(() -> {
+                Intent startSvc = new Intent(this, TermuxServerService.class);
+                startSvc.setAction(TermuxServerService.ACTION_START);
+                startSvc.putExtra("id", autoStartId);
+                startService(startSvc);
+            }, 500);
         }
     }
 
@@ -905,6 +919,59 @@ public class ServerDetailActivity extends AppCompatActivity {
 
     // ── Files ─────────────────────────────────────────────────────────────────
 
+    private File getProtectedOverrideFile(File target) {
+        String path = target.getAbsolutePath().replace('\\', '/');
+        if (path.contains("/plugins/Geyser-Spigot")) {
+            return new File(path.substring(0, path.indexOf("/plugins/Geyser-Spigot") + 22), ".manual_override");
+        }
+        if (path.contains("/plugins/floodgate")) {
+            return new File(path.substring(0, path.indexOf("/plugins/floodgate") + 18), ".manual_override");
+        }
+        if (path.contains("/plugins/voicechat")) {
+            return new File(path.substring(0, path.indexOf("/plugins/voicechat") + 18), ".manual_override");
+        }
+        return null;
+    }
+
+    private void addProtectedHeader(File currentDir) {
+        File overrideFile = getProtectedOverrideFile(currentDir);
+        if (overrideFile == null) return;
+        
+        // Only show the header if we are exactly at the root of the protected folder, to avoid spamming subdirs
+        String p = currentDir.getAbsolutePath().replace('\\', '/');
+        if (!p.endsWith("/plugins/Geyser-Spigot") && !p.endsWith("/plugins/floodgate") && !p.endsWith("/plugins/voicechat")) return;
+
+        android.widget.Button btn = new android.widget.Button(this);
+        if (!overrideFile.exists()) {
+            btn.setText("UNLOCK MANUAL EDITING (PRAETOR)");
+            btn.setTextColor(0xFFFFFFFF);
+            btn.setBackgroundColor(0xFFFF4444);
+            btn.setOnClickListener(v -> {
+                Intent i = new Intent(this, PraetorWarningActivity.class);
+                i.putExtra("target_folder_path", currentDir.getAbsolutePath());
+                startActivityForResult(i, 9001); // 9001 = Praetor Override
+            });
+        } else {
+            btn.setText("RESTORE AUTO-CONFIG");
+            btn.setTextColor(0xFF000000);
+            btn.setBackgroundColor(0xFF00E676);
+            btn.setOnClickListener(v -> {
+                overrideFile.delete();
+                Toast.makeText(this, "Auto-Config restored.", Toast.LENGTH_SHORT).show();
+                refreshFiles();
+            });
+        }
+        
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        lp.setMargins(16, 16, 16, 16);
+        layoutFileList.addView(btn, lp);
+        
+        View div = new View(this);
+        div.setBackgroundColor(0xFF222222);
+        div.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 2));
+        layoutFileList.addView(div);
+    }
+
     private void refreshFiles() {
         layoutFileList.removeAllViews();
         String rootPath = new File(server.getServerDir()).getAbsolutePath();
@@ -916,6 +983,8 @@ public class ServerDetailActivity extends AppCompatActivity {
             addFRow("(noch nicht heruntergeladen)", null);
             return;
         }
+
+        addProtectedHeader(currentDir);
 
         // Back button if not in root
         if (!currentDir.getAbsolutePath().equals(rootPath)) {
@@ -957,7 +1026,12 @@ public class ServerDetailActivity extends AppCompatActivity {
                     currentDir = file;
                     refreshFiles();
                 } else {
-                    openFileEditor(file);
+                    File overrideFile = getProtectedOverrideFile(file);
+                    if (overrideFile != null && !overrideFile.exists()) {
+                        Toast.makeText(this, "Manual editing locked! Click 'Unlock Manual Editing' at the top of the plugin folder.", Toast.LENGTH_LONG).show();
+                    } else {
+                        openFileEditor(file);
+                    }
                 }
             });
             
@@ -1114,6 +1188,15 @@ public class ServerDetailActivity extends AppCompatActivity {
             swBedrock.setOnCheckedChangeListener((btnView, isChecked) -> {
                 server.setBedrockSupport(isChecked);
                 repo.update(server);
+                
+                View layoutBedrockPort = findViewById(R.id.layout_bedrock_port);
+                if (isChecked && layoutBedrockPort != null && tvBedrockPortDash != null) {
+                    layoutBedrockPort.setVisibility(View.VISIBLE);
+                    tvBedrockPortDash.setText(String.valueOf(server.getBedrockPort()));
+                } else if (!isChecked && layoutBedrockPort != null) {
+                    layoutBedrockPort.setVisibility(View.GONE);
+                }
+                
                 triggerAddonRestart();
             });
         }
@@ -1136,8 +1219,8 @@ public class ServerDetailActivity extends AppCompatActivity {
                 .setPositiveButton("Löschen", (d, w) -> {
                     new Thread(() -> {
                         try {
-                            String anonKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNjc2V6cGZycm1weXVhcGJsYnhrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY5NDE4MjYsImV4cCI6MjA5MjUxNzgyNn0.rHro6kQpXHAnxEaFxozYzsKY8IHIUlot-7-Q4LNbZT8";
-                            android.content.SharedPreferences prefs = getSharedPreferences("koda_settings", MODE_PRIVATE);
+                            String anonKey = eu.kodanetwork.mchost.security.PraetorSecurity.getSupabaseKey();
+                            android.content.SharedPreferences prefs = eu.kodanetwork.mchost.App.getPrefs(this);
                             String token = prefs.getString("koda_session_token", null);
                             String authHeader = token != null ? "Bearer " + token : "Bearer " + anonKey;
                             
@@ -1430,7 +1513,7 @@ public class ServerDetailActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        android.content.SharedPreferences prefs = getSharedPreferences("koda_settings", MODE_PRIVATE);
+        android.content.SharedPreferences prefs = eu.kodanetwork.mchost.App.getPrefs(this);
         String currentTheme = prefs.getString("app_theme", "modern");
         String currentMode = prefs.getString("theme_mode", "dark");
         if (lastTheme.equals("modern") && lastThemeMode.equals("dark")) {
@@ -1457,7 +1540,9 @@ public class ServerDetailActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == REQ_IMPORT_FILE && resultCode == RESULT_OK && data != null) {
+        if (requestCode == 9001 && resultCode == RESULT_OK) {
+            refreshFiles();
+        } else if (requestCode == REQ_IMPORT_FILE && resultCode == RESULT_OK && data != null) {
             java.util.List<android.net.Uri> uris = new java.util.ArrayList<>();
             if (data.getClipData() != null) {
                 for (int i = 0; i < data.getClipData().getItemCount(); i++) {
