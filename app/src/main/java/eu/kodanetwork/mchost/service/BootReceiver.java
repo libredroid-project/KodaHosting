@@ -8,7 +8,7 @@ import android.os.Build;
 public class BootReceiver extends BroadcastReceiver {
     public void onReceive(Context ctx, Intent intent) {
         if (Intent.ACTION_BOOT_COMPLETED.equals(intent.getAction())) {
-            Intent si = new Intent(ctx, TermuxServerService.class);
+            Intent si = new Intent(ctx, KodaServerService.class);
             try {
                 ctx.startService(si);
             } catch (Exception e) {

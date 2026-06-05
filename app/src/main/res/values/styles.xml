@@ -11,13 +11,23 @@
         <item name="colorOnPrimary">#FFFFFF</item>
         <item name="colorOnBackground">#F0F0F0</item>
         <item name="colorOnSurface">#F0F0F0</item>
-        <item name="android:statusBarColor">#00000000</item>
-        <item name="android:navigationBarColor">#00000000</item>
-        <item name="android:windowTranslucentStatus">true</item>
-        <item name="android:windowTranslucentNavigation">true</item>
+        <item name="android:statusBarColor">#0A0A0F</item>
+        <item name="android:navigationBarColor">#0A0A0F</item>
+        <item name="android:windowTranslucentStatus">false</item>
+        <item name="android:windowTranslucentNavigation">false</item>
         <item name="android:windowLayoutInDisplayCutoutMode">shortEdges</item>
         <item name="android:windowLightStatusBar">false</item>
         <item name="android:textColor">#F0F0F0</item>
+    </style>
+
+    <style name="Theme.KodaNetwork.Translucent" parent="Theme.KodaNetwork">
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:colorBackgroundCacheHint">@null</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowIsFloating">false</item>
+        <item name="android:backgroundDimEnabled">false</item>
     </style>
 
     <!-- Primary orange filled button, rounded corners -->

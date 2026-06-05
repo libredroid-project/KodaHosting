@@ -1,5 +1,134 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">KodaHosting</string>
     <string name="default_web_client_id" translatable="false">558083145632-fbhjb8j1k4m8r14ui97shd9dnng0rlum.apps.googleusercontent.com</string>
+    <string name="app_name">KodaHosting</string>
+    <string name="settings">Settings</string>
+    <string name="language">Language</string>
+    <string name="system_default">System Default</string>
+    <string name="danger_zone">DANGER ZONE</string>
+    <string name="export_as_zip">EXPORT AS ZIP</string>
+    <string name="hibernate">HIBERNATE</string>
+    <string name="wake_up">WAKE UP</string>
+    <string name="status_online">ONLINE</string>
+    <string name="status_offline">OFFLINE</string>
+    <string name="status_starting">STARTING</string>
+    <string name="status_stopping">STOPPING</string>
+    <string name="status_restarting">RESTARTING</string>
+    <string name="status_setting_up">SETTING UP</string>
+    <string name="status_crashed">CRASHED</string>
+    <string name="status_installing">INSTALLING</string>
+    <string name="status_hibernated">HIBERNATED</string>
+    <string name="players">players</string>
+    <string name="start">START</string>
+    <string name="stop">STOP</string>
+<string name="minecraft_account">MINECRAFT ACCOUNT</string>
+<string name="select_language">SELECT LANGUAGE</string><string name="link_minecraft_instructions">Link your Minecraft account to enable /join</string><string name="not_linked">Not linked</string><string name="link_steps">1. Click \'Link Account\'\n2. Join lobby.kodanetwork.eu\n3. Type /link &lt;code&gt;</string><string name="link_new_account">Link New Account</string><string name="appearance">APPEARANCE</string><string name="theme_mode">Theme Mode</string>    <string name="theme_dark">Dark</string>
+    <string name="theme_light">Light</string>
+    <string name="theme_light_purple">Light Custom</string>
+    <string name="theme_auto">Auto</string><string name="haptic_feedback">Haptic Feedback</string><string name="on">ON</string><string name="off">OFF</string><string name="screensaver">SCREENSAVER</string><string name="style">Style</string><string name="squares">Squares</string><string name="black">Black</string><string name="afk_timeout">AFK Timeout</string><string name="min_1">1 Min</string><string name="min_2">2 Min</string><string name="min_5">5 Min</string><string name="network_security">NETWORK &amp; SECURITY</string><string name="network_alarm_off">Network Alarm: OFF</string><string name="lobby_remote_on">Lobby Remote: ON</string><string name="beta_jni_off">Beta: JNI Embedded JVM: OFF</string><string name="twofa_disabled">2FA Status: Disabled</string><string name="enable_2fa">Enable 2FA</string><string name="set_2fa_password">Set 2FA Password</string><string name="biometrics">BIOMETRICS</string><string name="enable_biometric">Enable Biometric Unlock</string><string name="bio_resume">On App Resume / Screen Unlock</string><string name="bio_cold_start">On App Cold Start</string><string name="bio_server_click">Before Opening a Server</string><string name="bio_create_server">Before Creating a Server</string><string name="account">ACCOUNT</string><string name="loading">Loading...</string>
+    <string name="dl_resolving_url">Resolving URL…</string>
+    <string name="dl_connecting">Connecting…</string>
+    <string name="dl_checking_api">Checking %1$s API…</string>
+    <string name="dl_checking_mojang">Checking Mojang manifest…</string>
+    <string name="dl_building_url">Building %1$s URL…</string>
+    <string name="dl_found_build">Found %1$s build #%2$s</string>
+    <string name="dl_found_version">Found %1$s %2$s</string>
+    <string name="dl_downloading">Downloading… %1$s / %2$s MB</string>
+    <string name="dl_done">✓ Server .jar downloaded! Press START now.</string>
+    <string name="dl_manual_required">Manual install required for %1$s.\nPlace server.jar in: %2$s</string>
+    <string name="dl_error_no_builds">No %1$s builds found for %2$s</string>
+    <string name="dl_error_mojang">Version %1$s not found in Mojang manifest</string>
+    <string name="dl_error_http">HTTP error %1$d</string>
+
+    <string name="logout">Log Out</string>
+    <string name="device_info">DEVICE &amp; APP INFO</string>
+    <string name="danger_zone_desc">These actions cannot be undone</string>
+    <string name="clear_docs">Clear Documents</string>
+    <string name="clear_app_data">Clear App Data</string>
+
+    <string name="mc_server_manager">Minecraft Server Manager</string>
+    <string name="log_button">LOG</string>
+    <string name="server_name_header">SERVER NAME</string>
+    <string name="type_header">TYPE</string>
+    <string name="ram_header">RAM</string>
+    <string name="status_header">STATUS</string>
+    <string name="no_servers_yet">No Servers Yet</string>
+    <string name="create_first_server_desc">Tap the button below to create your first server</string>
+    <string name="new_server_btn">＋ NEW SERVER</string>
+    <string name="server_singular">\u0020SERVER</string>
+    <string name="server_plural">\u0020SERVERS</string>
+
+    <string name="plugin_installed_restart_needed">Plugin installed! Restart required.</string>
+    <string name="restart">RESTART</string>
+    <string name="status_info">STATUS &amp; INFO</string>
+    <string name="uptime">UPTIME</string>
+    <string name="online">ONLINE</string>
+    <string name="connection">CONNECTION</string>
+    <string name="join_address_java">JOIN ADDRESS (JAVA)</string>
+    <string name="bedrock_port">BEDROCK PORT</string>
+    <string name="installing">INSTALLING...</string>
+    <string name="controls">CONTROLS</string>
+    <string name="hard_reset">⚠ HARD RESET</string>
+    <string name="copy_log">COPY LOG</string>
+    <string name="clear">CLEAR</string>
+    <string name="server_info">SERVER INFO</string>
+    <string name="ram_allocation">RAM ALLOCATION</string>
+    <string name="allocated_ram">Allocated RAM</string>
+    <string name="network_automation">NETWORK &amp; AUTOMATION</string>
+    <string name="network_automation_desc">All network configurations happen fully automatically in the background as soon as the server starts.\n\nManual tunnel or DNS settings are no longer necessary, with the exception of an optional custom domain.</string>
+    <string name="custom_domain">Custom Domain</string>
+    <string name="custom_domain_desc">Connect a custom domain (e.g. play.yourdomain.com).</string>
+    <string name="set_domain">Set Domain</string>
+    <string name="dns_record_desc">Please set the following DNS record:</string>
+    <string name="verify_configuration">Verify Configuration</string>
+    <string name="unverified">Unverified</string>
+    <string name="bedrock_support">Bedrock Support</string>
+    <string name="geyser_floodgate">Geyser &amp; Floodgate (Auto-Install)</string>
+    <string name="voicechat_support">Voicechat Support</string>
+    <string name="simple_voice_chat">Simple Voice Chat (Auto-Install)</string>
+    <string name="gameplay_settings">GAMEPLAY SETTINGS</string>
+    <string name="max_players">Max Players</string>
+    <string name="difficulty">Difficulty</string>
+    <string name="view_distance">View Distance</string>
+    <string name="simulation_distance">Simulation Distance</string>
+    <string name="online_mode_premium">Online Mode (Premium)</string>
+
+    <string name="tab_dashboard">Dashboard</string>
+    <string name="tab_console">Console</string>
+    <string name="tab_files">Files</string>
+    <string name="tab_settings">Settings</string>
+
+    <string name="players_manage_title">MANAGE PLAYERS</string>
+    <string name="players_online">ONLINE</string>
+    <string name="players_offline_known">OFFLINE (Known)</string>
+    <string name="players_none_known">No players known yet.</string>
+    <string name="players_manage">MANAGE</string>
+
+    <string name="eula_title">MINECRAFT EULA</string>
+    <string name="eula_decline">DECLINE</string>
+    <string name="eula_accept">ACCEPT</string>
+
+    <string name="praetor_title">P.R.A.E.T.O.R.</string>
+    <string name="praetor_subtitle">PROTOCOL FOR RISK ASSESSMENT,\nENFORCEMENT &amp; TOTAL OVERSIGHT RESPONSE</string>
+    <string name="praetor_action_fix">FIX ISSUE</string>
+    <string name="praetor_action_auto_ram">AUTO-ADJUST RAM</string>
+    <string name="praetor_action_start_anyway">START ANYWAY (RISK)</string>
+    <string name="praetor_action_cancel">CANCEL</string>
+    <string name="praetor_hibernate_warning">WARNING: Server Hibernation mode is being initiated. DNS entries will be deleted and the server will be compressed.</string>
+    <string name="praetor_hibernate_long_explanation">LONG EXPLANATION</string>
+    <string name="praetor_hibernate_confirm">HIBERNATE</string>
+    <string name="praetor_hibernate_cancel">CANCEL</string>
+    <string name="praetor_reason_ram_conflict">The server needs %3$d MB of RAM. However, this exceeds your device\'s safe available RAM. Your device has %1$d MB total RAM, but with Android OS and other apps running, allocating this much will likely crash your phone or the server.</string>
+    <string name="praetor_reason_console_offline">The console cannot be opened while the server is offline. Please start the server first.</string>
+    <string name="praetor_action_back">BACK</string>
+    <string name="praetor_reason_delete_server">Are you ABSOLUTELY sure you want to permanently delete this server? All data, worlds, and plugins will be irretrievably lost!</string>
+    <string name="praetor_security_violation">A security violation has been detected.</string>
+    <string name="praetor_action_delete">DELETE</string>
+    <string name="praetor_reason_dns_occupied">The join address \'%1$s\' has been taken by another user in the meantime.\n\nPlease change your join address to continue.</string>
+    <string name="praetor_action_understood">UNDERSTOOD</string>
+    <string name="praetor_reason_manual_override">Warning: Manual Override!\n\nAuto-Config will be disabled for this folder.\nIncorrect settings may break server connectivity.</string>
+    <string name="praetor_action_proceed">PROCEED</string>
+    <string name="queue_checking">Checking Capacity...</string>
+    <string name="queue_waiting">Queue (%1$d/%2$d)\nPlease wait...</string>
+    <string name="watchdog_limit_reached">🚨 Your server was stopped because the global network limit (%1$d/%1$d) has been reached. Please restart to join the queue.</string>
 </resources>

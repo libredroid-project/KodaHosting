@@ -3,12 +3,13 @@
     android:fitsSystemWindows="true"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent" android:layout_height="match_parent"
-    android:orientation="vertical" android:background="#0A0A0F">
+    android:orientation="vertical" android:background="#0A0807">
 
     <!-- ┌─ HEADER ───────────────────────────────────────────────────────┐ -->
-    <LinearLayout android:layout_width="match_parent" android:layout_height="56dp"
+    <LinearLayout android:id="@+id/app_top_bar"
+        android:layout_width="match_parent" android:layout_height="56dp"
         android:orientation="horizontal" android:gravity="center_vertical"
-        android:background="#0A0A0F" android:paddingStart="12dp" android:paddingEnd="16dp"
+        android:background="#0A0807" android:paddingStart="12dp" android:paddingEnd="16dp"
         android:elevation="4dp">
         <ImageButton android:id="@+id/btn_back"
             android:layout_width="40dp" android:layout_height="40dp"
@@ -42,14 +43,14 @@
             android:visibility="gone">
             <TextView android:layout_width="0dp" android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="Plugin installiert! Neustart nötig."
+                android:text="@string/plugin_installed_restart_needed"
                 android:textColor="#FFCC00" android:textSize="13sp"
                 android:fontFamily="sans-serif-medium" android:paddingStart="8dp"
                 android:singleLine="true" android:ellipsize="end"/>
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btn_header_restart"
                 android:layout_width="wrap_content" android:layout_height="36dp"
-                android:text="NEUSTART" app:backgroundTint="#FFCC00" android:textColor="#000000"
+                android:text="@string/restart" app:backgroundTint="#FFCC00" android:textColor="#000000"
                 android:textSize="11sp" app:cornerRadius="6dp" android:insetTop="0dp" android:insetBottom="0dp"/>
         </LinearLayout>
     </LinearLayout>
@@ -90,7 +91,7 @@
                     android:orientation="vertical" android:padding="16dp">
 
                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                        android:text="STATUS &amp; INFO" android:textColor="#FF6B00"
+                        android:text="@string/status_info" android:textColor="#FF6B00"
                         android:textSize="11sp" android:fontFamily="sans-serif-medium"
                         android:letterSpacing="0.1" android:textStyle="bold"
                         android:layout_marginBottom="14dp"/>
@@ -100,7 +101,7 @@
                         <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
                             android:layout_weight="1" android:orientation="vertical">
                             <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                                android:text="UPTIME" android:textColor="#888899"
+                                android:text="@string/uptime" android:textColor="#888899"
                                 android:textSize="9sp" android:fontFamily="sans-serif-medium"
                                 android:letterSpacing="0.1" android:layout_marginBottom="4dp"/>
                             <TextView android:id="@+id/tv_uptime"
@@ -114,7 +115,7 @@
                             android:background="?attr/selectableItemBackground"
                             android:clickable="true" android:focusable="true">
                             <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                                android:text="ONLINE" android:textColor="#888899"
+                                android:text="@string/online" android:textColor="#888899"
                                 android:textSize="9sp" android:fontFamily="sans-serif-medium"
                                 android:letterSpacing="0.1" android:layout_marginBottom="4dp"/>
                             <TextView android:id="@+id/tv_players"
@@ -163,13 +164,13 @@
                     android:orientation="vertical" android:padding="16dp">
 
                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                        android:text="CONNECTION" android:textColor="#FF6B00"
+                        android:text="@string/connection" android:textColor="#FF6B00"
                         android:textSize="11sp" android:fontFamily="sans-serif-medium"
                         android:letterSpacing="0.1" android:textStyle="bold"
                         android:layout_marginBottom="14dp"/>
 
                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                        android:text="JOIN ADDRESS (JAVA)" android:textColor="#888899"
+                        android:text="@string/join_address_java" android:textColor="#888899"
                         android:textSize="9sp" android:fontFamily="sans-serif-medium"
                         android:letterSpacing="0.1" android:layout_marginBottom="4dp"/>
                     <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
@@ -195,7 +196,7 @@
                             android:background="#2E241E" android:layout_marginBottom="12dp"/>
 
                         <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                            android:text="BEDROCK PORT" android:textColor="#888899"
+                            android:text="@string/bedrock_port" android:textColor="#888899"
                             android:textSize="9sp" android:fontFamily="sans-serif-medium"
                             android:letterSpacing="0.1" android:layout_marginBottom="4dp"/>
                         <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
@@ -230,7 +231,7 @@
                 android:layout_width="wrap_content" android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal|bottom"
                 android:layout_marginBottom="24dp"
-                android:text="INSTALLING..."
+                android:text="@string/installing"
                 android:textColor="#F0F0F0"
                 android:fontFamily="sans-serif-medium"
                 android:textStyle="bold"
@@ -253,15 +254,37 @@
                 android:fontFamily="sans-serif" android:visibility="gone"
                 android:layout_marginBottom="10dp"/>
 
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_wake_up_dash"
+                android:layout_width="match_parent" android:layout_height="64dp"
+                android:text="@string/wake_up"
+                android:textColor="#44AAFF"
+                android:textSize="16sp"
+                android:fontFamily="sans-serif-medium"
+                android:textStyle="bold"
+                app:backgroundTint="#1B1512"
+                app:cornerRadius="12dp"
+                android:visibility="gone"
+                android:layout_marginBottom="8dp"/>
+                
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_change_dns_hibernated"
+                android:layout_width="match_parent" android:layout_height="56dp"
+                style="@style/KodaButton.Outline"
+                android:text="CHANGE JOIN ADDRESS"
+                android:visibility="gone"
+                android:layout_marginBottom="16dp"/>
+
             <!-- CONTROLS CARD -->
             <androidx.cardview.widget.CardView
+                android:id="@+id/card_controls"
                 android:layout_width="match_parent" android:layout_height="wrap_content"
                 app:cardBackgroundColor="#241C18"
                 app:cardCornerRadius="12dp" app:cardElevation="0dp">
                 <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
                     android:orientation="vertical" android:padding="16dp" android:gravity="center">
                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                        android:text="CONTROLS" android:textColor="#FF6B00"
+                        android:text="@string/controls" android:textColor="#FF6B00"
                         android:textSize="11sp" android:fontFamily="sans-serif-medium"
                         android:letterSpacing="0.12" android:textStyle="bold"
                         android:layout_marginBottom="14dp" android:layout_gravity="start"/>
@@ -272,7 +295,7 @@
                             android:id="@+id/btn_start" style="@style/KodaButton"
                             android:layout_width="140dp" android:layout_height="48dp"
                             android:layout_marginEnd="8dp"
-                            android:text="START"
+                            android:text="@string/start"
                             android:fontFamily="sans-serif-medium"
                             android:textSize="13sp"
                             app:cornerRadius="12dp"/>
@@ -280,7 +303,7 @@
                             android:id="@+id/btn_stop" style="@style/KodaButton.Outline"
                             android:layout_width="140dp" android:layout_height="48dp"
                             android:layout_marginStart="8dp"
-                            android:text="STOP" android:enabled="false"
+                            android:text="@string/stop" android:enabled="false"
                             android:fontFamily="sans-serif-medium"
                             android:textSize="13sp"
                             app:cornerRadius="12dp"/>
@@ -290,7 +313,7 @@
                         <com.google.android.material.button.MaterialButton
                             android:id="@+id/btn_restart" style="@style/KodaButton.Outline"
                             android:layout_width="140dp" android:layout_height="44dp"
-                            android:text="RESTART" android:enabled="false"
+                            android:text="@string/restart" android:enabled="false"
                             android:fontFamily="sans-serif-medium"
                             android:textSize="13sp"
                             app:cornerRadius="12dp"/>
@@ -300,7 +323,7 @@
                         android:id="@+id/btn_kill" style="@style/KodaButton.Outline"
                         android:layout_width="200dp" android:layout_height="44dp"
                         android:layout_marginTop="16dp"
-                        android:text="⚠ HARD RESET" app:strokeColor="#FF3344" android:textColor="#FF3344"
+                        android:text="@string/hard_reset" app:strokeColor="#FF3344" android:textColor="#FF3344"
                         android:fontFamily="sans-serif-medium"
                         android:textSize="12sp"
                         app:cornerRadius="12dp"
@@ -326,7 +349,7 @@
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btn_copy_log"
                 android:layout_width="wrap_content" android:layout_height="40dp"
-                android:text="COPY LOG"
+                android:text="@string/copy_log"
                 android:textColor="#FFFFFF"
                 app:backgroundTint="#241C18"
                 app:cornerRadius="8dp"
@@ -339,7 +362,7 @@
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btn_clear"
                 android:layout_width="wrap_content" android:layout_height="40dp"
-                android:text="CLEAR"
+                android:text="@string/clear"
                 android:textColor="#FF3344"
                 app:backgroundTint="#241C18"
                 app:cornerRadius="8dp"
@@ -470,185 +493,360 @@
             android:orientation="vertical" android:padding="16dp">
 
             <!-- INFO CARD -->
-            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
-                android:orientation="vertical" android:background="@drawable/cell_bg"
-                android:padding="18dp" android:layout_marginBottom="12dp">
-                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                    android:text="SERVER INFO" android:textColor="#F0F0F0"
-                    android:textSize="11sp" android:fontFamily="sans-serif-medium"
-                    android:letterSpacing="0.12" android:textStyle="bold"
-                    android:layout_marginBottom="12dp"/>
-                <TextView android:id="@+id/tv_settings_info"
-                    android:layout_width="match_parent" android:layout_height="wrap_content"
-                    android:textColor="#8A8A9A" android:textSize="12sp"
-                    android:fontFamily="sans-serif" android:lineSpacingMultiplier="1.6"/>
-            </LinearLayout>
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                app:cardBackgroundColor="#241C18"
+                app:cardCornerRadius="12dp" app:cardElevation="0dp">
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:orientation="vertical" android:padding="16dp">
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:text="@string/server_info" android:textColor="#FF6B00"
+                        android:textSize="11sp" android:fontFamily="sans-serif-medium"
+                        android:letterSpacing="0.1" android:layout_marginBottom="12dp"/>
+                    <TextView android:id="@+id/tv_settings_info"
+                        android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:textColor="#8A8A9A" android:textSize="12sp"
+                        android:fontFamily="sans-serif" android:lineSpacingMultiplier="1.6"/>
+                        
+                    <View android:layout_width="match_parent" android:layout_height="1dp"
+                        android:background="#332A24" android:layout_marginTop="16dp" android:layout_marginBottom="16dp"/>
+
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:text="Server Icon (MOTD)" android:textColor="#FFFFFF"
+                        android:textSize="13sp" android:fontFamily="sans-serif-medium"
+                        android:layout_marginBottom="12dp"/>
+
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:orientation="horizontal" android:gravity="center_vertical">
+                        <ImageView android:id="@+id/iv_server_icon"
+                            android:layout_width="64dp" android:layout_height="64dp"
+                            android:layout_marginEnd="16dp"
+                            android:scaleType="centerCrop"
+                            android:background="#1B1613" />
+
+                        <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+                            android:layout_weight="1" android:orientation="vertical">
+                            <com.google.android.material.button.MaterialButton
+                                android:id="@+id/btn_upload_icon"
+                                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                                android:layout_width="match_parent" android:layout_height="40dp"
+                                android:text="Upload Icon" android:textColor="#FF6B00" app:strokeColor="#FF6B00"
+                                android:textSize="12sp" android:fontFamily="sans-serif-medium"
+                                android:insetTop="0dp" android:insetBottom="0dp"/>
+                            
+                            <com.google.android.material.button.MaterialButton
+                                android:id="@+id/btn_reset_icon"
+                                style="@style/Widget.MaterialComponents.Button.TextButton"
+                                android:layout_width="match_parent" android:layout_height="40dp"
+                                android:text="Reset to default" android:textColor="#8A8A9A"
+                                android:textSize="11sp" android:fontFamily="sans-serif-medium"
+                                android:insetTop="0dp" android:insetBottom="0dp"/>
+                        </LinearLayout>
+                    </LinearLayout>
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
 
             <!-- RAM CONFIGURATION CARD -->
-            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
-                android:orientation="vertical" android:background="@drawable/cell_bg"
-                android:padding="18dp" android:layout_marginBottom="14dp">
-                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                    android:text="RAM ALLOCATION" android:textColor="#F0F0F0"
-                    android:textSize="11sp" android:fontFamily="sans-serif-medium"
-                    android:letterSpacing="0.12" android:textStyle="bold"
-                    android:layout_marginBottom="10dp"/>
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                app:cardBackgroundColor="#241C18"
+                app:cardCornerRadius="12dp" app:cardElevation="0dp">
                 <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
-                    android:orientation="horizontal" android:gravity="center_vertical"
-                    android:layout_marginBottom="12dp">
-                    <TextView android:layout_width="0dp" android:layout_height="wrap_content"
-                        android:layout_weight="1" android:text="Allocated RAM"
-                        android:textColor="#F0F0F0" android:textSize="13sp" android:fontFamily="sans-serif-medium"/>
-                    <TextView android:id="@+id/tv_settings_ram" android:layout_width="wrap_content" android:layout_height="wrap_content"
-                        android:text="1024MB" android:textColor="#FF6B00" android:textSize="14sp" android:fontFamily="sans-serif-medium" android:textStyle="bold"/>
-                </LinearLayout>
-                <SeekBar android:id="@+id/seek_settings_ram"
-                    android:layout_width="match_parent" android:layout_height="wrap_content"
-                    android:progressTint="#FF6B00" android:thumbTint="#FF6B00"/>
-            </LinearLayout>
-
-            <!-- NETWORK & AUTOMATION CARD -->
-            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
-                android:orientation="vertical" android:background="@drawable/cell_bg"
-                android:padding="18dp" android:layout_marginBottom="14dp">
-                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                    android:text="NETWORK &amp; AUTOMATION" android:textColor="#F0F0F0"
-                    android:textSize="11sp" android:fontFamily="sans-serif-medium"
-                    android:letterSpacing="0.12" android:textStyle="bold"
-                    android:layout_marginBottom="10dp"/>
-
-                <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
-                    android:text="Alle Netzwerk-Konfigurationen (Tunnels, DNS, Ports) passieren mittlerweile vollautomatisch im Hintergrund sobald der Server startet.\n\nManuelle Tunnel- oder DNS-Einstellungen sind nicht mehr nötig."
-                    android:textColor="#8A8A9A" android:textSize="12sp"
-                    android:fontFamily="sans-serif" android:lineSpacingMultiplier="1.4"/>
-
-
-                <!-- Bedrock Toggle -->
-                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
-                    android:orientation="horizontal" android:gravity="center_vertical"
-                    android:layout_marginTop="16dp">
-                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
-                        android:layout_weight="1" android:orientation="vertical">
-                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                            android:text="Bedrock Support"
-                            android:textColor="#F0F0F0" android:textSize="13sp" android:fontFamily="sans-serif-medium"
-                            android:textStyle="bold"/>
-                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                            android:text="Geyser &amp; Floodgate (Auto-Install)"
-                            android:textColor="#8A8A9A" android:textSize="11sp" android:fontFamily="sans-serif"
-                            android:layout_marginTop="2dp"/>
-                    </LinearLayout>
-                    <com.google.android.material.switchmaterial.SwitchMaterial
-                        android:id="@+id/sw_bedrock"
-                        android:layout_width="wrap_content" android:layout_height="wrap_content"
-                        android:enabled="true"
-                        app:thumbTint="#FF6B00" app:trackTint="#33FF6B00"/>
-                </LinearLayout>
-
-                <!-- Divider -->
-                <View android:layout_width="match_parent" android:layout_height="1dp"
-                    android:background="#1A1A24" android:layout_marginTop="16dp"
-                    android:layout_marginBottom="4dp"/>
-
-                <!-- Voicechat Toggle -->
-                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
-                    android:orientation="horizontal" android:gravity="center_vertical"
-                    android:layout_marginTop="16dp">
-                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
-                        android:layout_weight="1" android:orientation="vertical">
-                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                            android:text="Voicechat Support"
-                            android:textColor="#F0F0F0" android:textSize="13sp" android:fontFamily="sans-serif-medium"
-                            android:textStyle="bold"/>
-                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                            android:text="Simple Voicechat (Auto-Install)"
-                            android:textColor="#8A8A9A" android:textSize="11sp" android:fontFamily="sans-serif"
-                            android:layout_marginTop="2dp"/>
-                    </LinearLayout>
-                    <com.google.android.material.switchmaterial.SwitchMaterial
-                        android:id="@+id/sw_voicechat"
-                        android:layout_width="wrap_content" android:layout_height="wrap_content"
-                        android:enabled="true"
-                        app:thumbTint="#FF6B00" app:trackTint="#33FF6B00"/>
-                </LinearLayout>
-
-                <!-- Divider -->
-                <View android:layout_width="match_parent" android:layout_height="1dp"
-                    android:background="#1A1A24" android:layout_marginTop="16dp"
-                    android:layout_marginBottom="16dp"/>
-
-                <!-- Custom Domain UI -->
-                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
-                    android:orientation="vertical">
+                    android:orientation="vertical" android:padding="16dp">
                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                        android:text="Eigene Domain nutzen"
-                        android:textColor="#F0F0F0" android:textSize="13sp" android:fontFamily="sans-serif-medium"
-                        android:textStyle="bold" android:layout_marginBottom="4dp"/>
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                        android:text="Wenn du deine eigene Domain (z.B. play.deinname.de) nutzen möchtest, erstelle bei deinem Domain-Anbieter (z.B. Cloudflare) einen CNAME Record, der auf diese KodaNetwork Addresse zeigt:"
-                        android:textColor="#8A8A9A" android:textSize="11sp" android:fontFamily="sans-serif"
-                        android:layout_marginBottom="8dp"/>
+                        android:text="@string/ram_allocation" android:textColor="#FF6B00"
+                        android:textSize="11sp" android:fontFamily="sans-serif-medium"
+                        android:letterSpacing="0.1" android:layout_marginBottom="12dp"/>
                     <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
                         android:orientation="horizontal" android:gravity="center_vertical"
-                        android:background="#111118" android:padding="12dp">
-                        <TextView android:id="@+id/tv_custom_domain_target"
-                            android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content"
-                            android:text="Lädt..." android:textColor="#FF6B00" android:fontFamily="monospace"
-                            android:textSize="12sp" android:textIsSelectable="true"/>
-                        <ImageButton android:id="@+id/btn_copy_domain"
-                            android:layout_width="32dp" android:layout_height="32dp"
-                            android:background="?selectableItemBackgroundBorderless"
-                            android:src="?android:attr/actionModeCopyDrawable" app:tint="#8A8A9A"/>
+                        android:layout_marginBottom="12dp">
+                        <TextView android:layout_width="0dp" android:layout_height="wrap_content"
+                            android:layout_weight="1" android:text="@string/allocated_ram"
+                            android:textColor="#FFFFFF" android:textSize="13sp" android:fontFamily="sans-serif-medium"/>
+                        <TextView android:id="@+id/tv_settings_ram" android:layout_width="wrap_content" android:layout_height="wrap_content"
+                            android:text="1024MB" android:textColor="#FF6B00" android:textSize="14sp" android:fontFamily="sans-serif-medium" android:textStyle="bold"/>
+                    </LinearLayout>
+                    <SeekBar android:id="@+id/seek_settings_ram"
+                        android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:progressTint="#FF6B00" android:thumbTint="#FF6B00"/>
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- NETWORK & AUTOMATION CARD -->
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                app:cardBackgroundColor="#241C18"
+                app:cardCornerRadius="12dp" app:cardElevation="0dp">
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:orientation="vertical" android:padding="16dp">
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:text="@string/network_automation" android:textColor="#FF6B00"
+                        android:textSize="11sp" android:fontFamily="sans-serif-medium"
+                        android:letterSpacing="0.1" android:layout_marginBottom="12dp"/>
+                    <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:text="@string/network_automation_desc"
+                        android:textColor="#8A8A9A" android:textSize="12sp"
+                        android:fontFamily="sans-serif" android:lineSpacingMultiplier="1.4"
+                        android:layout_marginBottom="12dp"/>
+
+                    <!-- Custom Domain -->
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:text="@string/custom_domain" android:textColor="#FFFFFF"
+                        android:textSize="13sp" android:fontFamily="sans-serif-medium"
+                        android:layout_marginBottom="8dp"/>
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:text="@string/custom_domain_desc"
+                        android:textColor="#8A8A9A" android:textSize="11sp" android:fontFamily="sans-serif"
+                        android:layout_marginBottom="12dp"/>
+
+                    <LinearLayout android:id="@+id/ll_domain_input_container"
+                        android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:orientation="horizontal" android:gravity="center_vertical"
+                        android:background="#1B1613" android:padding="2dp" android:layout_marginBottom="12dp">
+
+                        <EditText android:id="@+id/et_domain_prefix"
+                            android:layout_width="0dp" android:layout_height="40dp"
+                            android:layout_weight="1"
+                            android:hint="play.mydomain.com"
+                            android:textColor="#FFFFFF" android:textColorHint="#555566"
+                            android:background="@null" android:textSize="13sp"
+                            android:paddingStart="10dp" android:paddingEnd="10dp"
+                            android:inputType="textUri" android:fontFamily="sans-serif"/>
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btn_link_domain"
+                            style="@style/Widget.MaterialComponents.Button.TextButton"
+                            android:layout_width="wrap_content" android:layout_height="40dp"
+                            android:text="@string/set_domain" android:textColor="#FF6B00"
+                            android:textAllCaps="false"
+                            android:textSize="13sp" android:fontFamily="sans-serif-medium"/>
+                    </LinearLayout>
+
+                    <!-- DNS Configuration Panel (Hidden by default) -->
+                    <LinearLayout android:id="@+id/ll_dns_verification_panel"
+                        android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:orientation="vertical" android:visibility="gone"
+                        android:background="#111118" android:padding="16dp" android:layout_marginBottom="12dp">
+                        
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                            android:text="@string/dns_record_desc" android:textColor="#FFFFFF"
+                            android:textSize="12sp" android:layout_marginBottom="12dp"/>
+                            
+                        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:layout_marginBottom="4dp">
+                            <TextView android:layout_width="50dp" android:layout_height="wrap_content" android:text="Type:" android:textColor="#8A8A9A" android:textSize="11sp"/>
+                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="SRV" android:textColor="#FFFFFF" android:textSize="11sp" android:fontFamily="monospace"/>
+                        </LinearLayout>
+                        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:layout_marginBottom="4dp">
+                            <TextView android:layout_width="50dp" android:layout_height="wrap_content" android:text="Name:" android:textColor="#8A8A9A" android:textSize="11sp"/>
+                            <TextView android:id="@+id/tv_dns_name" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="_minecraft._tcp.play" android:textColor="#FFFFFF" android:textSize="11sp" android:fontFamily="monospace" android:textIsSelectable="true"/>
+                        </LinearLayout>
+                        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:layout_marginBottom="12dp">
+                            <TextView android:layout_width="50dp" android:layout_height="wrap_content" android:text="Value:" android:textColor="#8A8A9A" android:textSize="11sp"/>
+                            <TextView android:id="@+id/tv_dns_value" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="0 5 12345 xyz.playit.gg" android:textColor="#FFFFFF" android:textSize="11sp" android:fontFamily="monospace" android:textIsSelectable="true"/>
+                        </LinearLayout>
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btn_verify_domain"
+                            android:layout_width="match_parent" android:layout_height="48dp"
+                            android:text="@string/verify_configuration" android:textColor="#000000"
+                            android:textSize="13sp" android:fontFamily="sans-serif-medium"
+                            app:backgroundTint="#FF6B00" app:cornerRadius="8dp"/>
+                            
+                        <TextView android:id="@+id/tv_verification_status" android:layout_width="match_parent" android:layout_height="wrap_content"
+                            android:text="@string/unverified" android:textColor="#FF3333" android:textSize="12sp" android:gravity="center" android:layout_marginTop="8dp"/>
+                    </LinearLayout>
+
+                    <View android:layout_width="match_parent" android:layout_height="1dp"
+                        android:background="#332A24" android:layout_marginTop="16dp" android:layout_marginBottom="16dp"/>
+
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:orientation="horizontal" android:gravity="center_vertical">
+                        <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+                            android:layout_weight="1" android:orientation="vertical">
+                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                                android:text="@string/bedrock_support"
+                                android:textColor="#FFFFFF" android:textSize="13sp" android:fontFamily="sans-serif-medium"/>
+                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                                android:text="@string/geyser_floodgate"
+                                android:textColor="#8A8A9A" android:textSize="11sp" android:fontFamily="sans-serif"
+                                android:layout_marginTop="2dp"/>
+                        </LinearLayout>
+                        <com.google.android.material.switchmaterial.SwitchMaterial
+                            android:id="@+id/switch_bedrock"
+                            android:layout_width="wrap_content" android:layout_height="wrap_content"
+                            app:useMaterialThemeColors="false" app:thumbTint="@color/switch_thumb" app:trackTint="@color/switch_track"/>
+                    </LinearLayout>
+
+                    <View android:layout_width="match_parent" android:layout_height="1dp"
+                        android:background="#332A24" android:layout_marginTop="12dp" android:layout_marginBottom="12dp"/>
+
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:orientation="horizontal" android:gravity="center_vertical">
+                        <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+                            android:layout_weight="1" android:orientation="vertical">
+                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                                android:text="@string/voicechat_support"
+                                android:textColor="#FFFFFF" android:textSize="13sp" android:fontFamily="sans-serif-medium"/>
+                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                                android:text="@string/simple_voice_chat"
+                                android:textColor="#8A8A9A" android:textSize="11sp" android:fontFamily="sans-serif"
+                                android:layout_marginTop="2dp"/>
+                        </LinearLayout>
+                        <com.google.android.material.switchmaterial.SwitchMaterial
+                            android:id="@+id/switch_voicechat"
+                            android:layout_width="wrap_content" android:layout_height="wrap_content"
+                            app:useMaterialThemeColors="false" app:thumbTint="@color/switch_thumb" app:trackTint="@color/switch_track"/>
                     </LinearLayout>
                 </LinearLayout>
-            </LinearLayout>
+            </androidx.cardview.widget.CardView>
 
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btn_dl_jar" style="@style/KodaButton"
-                android:layout_width="match_parent" android:layout_height="50dp"
-                android:text="DOWNLOAD SERVER.JAR"
-                android:fontFamily="sans-serif-medium"
-                android:textSize="13sp"
-                android:layout_marginBottom="10dp"
-                app:cornerRadius="12dp"/>
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btn_del_server" style="@style/KodaButton.Danger"
-                android:layout_width="match_parent" android:layout_height="48dp"
-                android:text="DELETE SERVER"
-                android:fontFamily="sans-serif-medium"
-                android:textSize="13sp"
+            <!-- Gameplay Settings Card -->
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent" android:layout_height="wrap_content"
                 android:layout_marginBottom="32dp"
-                app:cornerRadius="12dp"/>
+                app:cardBackgroundColor="#241C18"
+                app:cardCornerRadius="12dp" app:cardElevation="0dp">
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:orientation="vertical" android:padding="16dp">
+                    
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:text="@string/gameplay_settings" android:textColor="#FF6B00"
+                        android:textSize="11sp" android:fontFamily="sans-serif-medium"
+                        android:letterSpacing="0.1" android:layout_marginBottom="16dp"/>
+                        
+                    <!-- Max Players -->
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:orientation="horizontal" android:gravity="center_vertical" android:layout_marginBottom="16dp">
+                        <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1"
+                            android:text="@string/max_players" android:textColor="#FFFFFF" android:textSize="13sp"/>
+                        <EditText android:id="@+id/et_max_players" android:layout_width="80dp" android:layout_height="40dp"
+                            android:background="#1B1613" android:textColor="#FFFFFF" android:textSize="13sp"
+                            android:inputType="number" android:gravity="center" android:text="20"/>
+                    </LinearLayout>
+                    
+                    <!-- Difficulty -->
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:orientation="horizontal" android:gravity="center_vertical" android:layout_marginBottom="16dp">
+                        <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1"
+                            android:text="@string/difficulty" android:textColor="#FFFFFF" android:textSize="13sp"/>
+                        <Spinner android:id="@+id/spinner_difficulty" android:layout_width="120dp" android:layout_height="40dp"
+                            android:background="#1B1613" android:popupBackground="#241C18" />
+                    </LinearLayout>
+                    
+                    <!-- View Distance -->
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:orientation="vertical" android:layout_marginBottom="16dp">
+                        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal">
+                            <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1"
+                                android:text="@string/view_distance" android:textColor="#FFFFFF" android:textSize="13sp"/>
+                            <TextView android:id="@+id/tv_view_distance_val" android:layout_width="wrap_content" android:layout_height="wrap_content"
+                                android:text="10" android:textColor="#FF6B00" android:textSize="13sp"/>
+                        </LinearLayout>
+                        <SeekBar android:id="@+id/sb_view_distance" android:layout_width="match_parent" android:layout_height="wrap_content"
+                            android:max="27" android:progress="5" android:layout_marginTop="8dp"/>
+                    </LinearLayout>
+
+                    <!-- Simulation Distance -->
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:orientation="vertical" android:layout_marginBottom="16dp">
+                        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal">
+                            <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1"
+                                android:text="@string/simulation_distance" android:textColor="#FFFFFF" android:textSize="13sp"/>
+                            <TextView android:id="@+id/tv_sim_distance_val" android:layout_width="wrap_content" android:layout_height="wrap_content"
+                                android:text="10" android:textColor="#FF6B00" android:textSize="13sp"/>
+                        </LinearLayout>
+                        <SeekBar android:id="@+id/sb_sim_distance" android:layout_width="match_parent" android:layout_height="wrap_content"
+                            android:max="27" android:progress="5" android:layout_marginTop="8dp"/>
+                    </LinearLayout>
+                    
+                    <!-- Toggles -->
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical" android:layout_marginBottom="8dp">
+                        <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="@string/online_mode_premium" android:textColor="#FFFFFF" android:textSize="13sp"/>
+                        <com.google.android.material.switchmaterial.SwitchMaterial android:id="@+id/switch_online_mode" android:layout_width="wrap_content" android:layout_height="wrap_content" app:useMaterialThemeColors="false" app:thumbTint="@color/switch_thumb" app:trackTint="@color/switch_track"/>
+                    </LinearLayout>
+                    
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical" android:layout_marginBottom="8dp">
+                        <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="Hardcore Mode" android:textColor="#FFFFFF" android:textSize="13sp"/>
+                        <com.google.android.material.switchmaterial.SwitchMaterial android:id="@+id/switch_hardcore" android:layout_width="wrap_content" android:layout_height="wrap_content" app:useMaterialThemeColors="false" app:thumbTint="@color/switch_thumb" app:trackTint="@color/switch_track"/>
+                    </LinearLayout>
+                    
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical" android:layout_marginBottom="8dp">
+                        <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="PvP Enabled" android:textColor="#FFFFFF" android:textSize="13sp"/>
+                        <com.google.android.material.switchmaterial.SwitchMaterial android:id="@+id/switch_pvp" android:layout_width="wrap_content" android:layout_height="wrap_content" app:useMaterialThemeColors="false" app:thumbTint="@color/switch_thumb" app:trackTint="@color/switch_track"/>
+                    </LinearLayout>
+                    
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical">
+                        <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="Allow Flight" android:textColor="#FFFFFF" android:textSize="13sp"/>
+                        <com.google.android.material.switchmaterial.SwitchMaterial android:id="@+id/switch_flight" android:layout_width="wrap_content" android:layout_height="wrap_content" app:useMaterialThemeColors="false" app:thumbTint="@color/switch_thumb" app:trackTint="@color/switch_track"/>
+                    </LinearLayout>
+
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- CONTROLS CARD -->
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:layout_marginBottom="24dp"
+                app:cardBackgroundColor="#2A1010"
+                app:cardCornerRadius="12dp" app:cardElevation="0dp">
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:orientation="vertical" android:padding="16dp">
+                    
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:text="DANGER ZONE" android:textColor="#FF4444"
+                        android:textSize="11sp" android:fontFamily="sans-serif-medium"
+                        android:letterSpacing="0.1" android:layout_marginBottom="12dp"/>
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btn_dl_jar" style="@style/KodaButton"
+                        android:layout_width="match_parent" android:layout_height="48dp"
+                        android:text="Redownload server.jar"
+                        android:fontFamily="sans-serif-medium"
+                        android:textSize="13sp"
+                        app:cornerRadius="10dp"
+                        android:layout_marginBottom="12dp"/>
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btn_export_zip" style="@style/KodaButton.Outline"
+                        android:layout_width="match_parent" android:layout_height="48dp"
+                        android:text="EXPORT AS ZIP"
+                        android:fontFamily="sans-serif-medium"
+                        android:textSize="13sp"
+                        app:cornerRadius="10dp"
+                        android:layout_marginBottom="12dp"/>
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btn_hibernate" style="@style/KodaButton.Outline"
+                        android:layout_width="match_parent" android:layout_height="48dp"
+                        android:text="WINTERSCHLAF (HIBERNATE)"
+                        android:fontFamily="sans-serif-medium"
+                        android:textSize="13sp"
+                        app:cornerRadius="10dp"
+                        android:layout_marginBottom="12dp"/>
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btn_del_server"
+                        android:layout_width="match_parent" android:layout_height="48dp"
+                        android:text="DELETE SERVER"
+                        android:fontFamily="sans-serif-medium"
+                        android:textSize="13sp"
+                        android:textColor="#FFFFFF"
+                        app:backgroundTint="#FF4444" app:cornerRadius="10dp"
+                        app:rippleColor="#44FFFFFF"/>
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
 
             <!-- Hidden compat views for legacy code -->
             <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
                 android:orientation="vertical" android:visibility="gone">
-                <TextView android:id="@+id/tv_termux_status"
-                    android:layout_width="match_parent" android:layout_height="wrap_content"
-                    android:textColor="#8A8A9A" android:textSize="12sp"/>
-                <TextView android:id="@+id/tv_tunnel_status"
-                    android:layout_width="match_parent" android:layout_height="wrap_content"
-                    android:textColor="#8A8A9A" android:textSize="12sp"/>
-                <TextView android:id="@+id/tv_domain_status"
-                    android:layout_width="match_parent" android:layout_height="wrap_content"
-                    android:textColor="#8A8A9A" android:textSize="12sp"/>
-                <EditText android:id="@+id/et_domain_prefix"
-                    android:layout_width="match_parent" android:layout_height="wrap_content"
-                    android:textColor="#F0F0F0" android:textSize="12sp"/>
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btn_termux_setup"
-                    android:layout_width="match_parent" android:layout_height="wrap_content"
-                    android:text="Termux Setup" style="@style/KodaButton"
-                    android:visibility="gone"/>
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btn_start_tunnel"
-                    android:layout_width="match_parent" android:layout_height="wrap_content"
-                    android:text="Start Tunnel" style="@style/KodaButton"/>
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btn_link_domain"
-                    android:layout_width="match_parent" android:layout_height="wrap_content"
-                    android:text="Link Domain" style="@style/KodaButton"/>
+                <TextView android:id="@+id/tv_termux_status" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+                <TextView android:id="@+id/tv_tunnel_status" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+                <TextView android:id="@+id/tv_domain_status" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+                <com.google.android.material.button.MaterialButton android:id="@+id/btn_termux_setup" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+                <com.google.android.material.button.MaterialButton android:id="@+id/btn_start_tunnel" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
             </LinearLayout>
 
         </LinearLayout>

@@ -34,7 +34,7 @@ import java.util.List;
 import eu.kodanetwork.mchost.R;
 import eu.kodanetwork.mchost.model.ServerInstance;
 import eu.kodanetwork.mchost.model.ServerRepo;
-import eu.kodanetwork.mchost.service.TermuxServerService;
+import eu.kodanetwork.mchost.service.KodaServerService;
 import eu.kodanetwork.mchost.util.LocaleHelper;
 import eu.kodanetwork.mchost.util.ThemeHelper;
 
@@ -46,14 +46,14 @@ public class MainActivity extends AppCompatActivity {
     private View tvEmpty;
     private ServerCardAdapter adapter;
     private ServerRepo repo;
-    private TermuxServerService svc;
+    private KodaServerService svc;
     private boolean bound = false;
     private final Handler handler = new Handler(Looper.getMainLooper());
 
     private final ServiceConnection conn = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName n, IBinder b) {
-            svc = ((TermuxServerService.LocalBinder) b).get();
+            svc = ((KodaServerService.LocalBinder) b).get();
             bound = true;
             adapter.setService(svc);
             svc.addStateCb((id, state) -> runOnUiThread(() -> adapter.notifyDataSetChanged()));
@@ -110,7 +110,7 @@ public class MainActivity extends AppCompatActivity {
 
             ExtendedFloatingActionButton fab = findViewById(R.id.fab_add);
             if (fab != null) {
-                fab.setText(LocaleHelper.t(this, "[+] NEW SERVER", "[+] NEUER SERVER"));
+                fab.setText(R.string.new_server_btn);
                 fab.setOnClickListener(v -> {
                     eu.kodanetwork.mchost.util.HapticUtil.forceVibrate(this, 80);
                     startActivity(new Intent(this, CreateServerActivity.class));
@@ -143,8 +143,8 @@ public class MainActivity extends AppCompatActivity {
 
             String autoStartId = getIntent().getStringExtra("auto_start_server");
             if (autoStartId != null && !autoStartId.isEmpty()) {
-                Intent startSvc = new Intent(this, TermuxServerService.class);
-                startSvc.setAction(TermuxServerService.ACTION_START);
+                Intent startSvc = new Intent(this, KodaServerService.class);
+                startSvc.setAction(KodaServerService.ACTION_START);
                 startSvc.putExtra("id", autoStartId);
                 startService(startSvc);
             }
@@ -201,8 +201,7 @@ public class MainActivity extends AppCompatActivity {
                 
                 TextView tvCount = findViewById(R.id.tv_server_count);
                 if (tvCount != null) {
-                    String label = LocaleHelper.t(this, " SERVER", " SERVER");
-                    if (list.size() != 1 && " SERVER".equals(label)) label = " SERVERS";
+                    String label = list.size() == 1 ? getString(R.string.server_singular) : getString(R.string.server_plural);
                     tvCount.setText(list.size() + label);
                 }
             } catch (Exception ignored) {}
@@ -211,7 +210,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void startAndBind() {
         try {
-            Intent si = new Intent(this, TermuxServerService.class);
+            Intent si = new Intent(this, KodaServerService.class);
             bindService(si, conn, Context.BIND_AUTO_CREATE);
         } catch (Exception ignored) {}
     }
@@ -272,6 +271,35 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
         refresh();
+        checkOfflineHibernations();
+    }
+
+    private void checkOfflineHibernations() {
+        new Thread(() -> {
+            try {
+                List<ServerInstance> list = repo.all();
+                for (ServerInstance srv : list) {
+                    if (srv.state == ServerInstance.State.OFFLINE && srv.getSubdomain() != null && !srv.getSubdomain().isEmpty()) {
+                        okhttp3.Request request = new okhttp3.Request.Builder()
+                            .url("https://scsezpfrrmpyuapblbxk.supabase.co/rest/v1/koda_servers?host=eq." + srv.getSubdomain() + "&select=server_version")
+                            .get()
+                            .addHeader("apikey", eu.kodanetwork.mchost.security.PraetorSecurity.getSupabaseKey())
+                            .addHeader("Authorization", "Bearer " + eu.kodanetwork.mchost.security.PraetorSecurity.getSupabaseKey())
+                            .build();
+                        try (okhttp3.Response response = new okhttp3.OkHttpClient().newCall(request).execute()) {
+                            if (response.isSuccessful() && response.body() != null) {
+                                String json = response.body().string();
+                                if (json.contains("\"server_version\":\"HIBERNATED\"") || json.contains("\"server_version\": \"HIBERNATED\"")) {
+                                    Log.d(TAG, "Server " + srv.getName() + " is offline but hibernated remotely. Zipping...");
+                                    eu.kodanetwork.mchost.utils.HibernationManager.hibernateServer(this, srv, repo);
+                                    refresh();
+                                }
+                            }
+                        } catch (Exception e) {}
+                    }
+                }
+            } catch (Exception e) {}
+        }).start();
     }
 
     @Override

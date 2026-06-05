@@ -14,6 +14,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import eu.kodanetwork.mchost.model.ServerInstance;
+import eu.kodanetwork.mchost.R;
+import android.content.Context;
 
 public class JarDownloader {
 
@@ -25,14 +27,19 @@ public class JarDownloader {
 
     private final ExecutorService ex   = Executors.newSingleThreadExecutor();
     private final Handler         main = new Handler(Looper.getMainLooper());
+    private final Context         context;
+
+    public JarDownloader(Context context) {
+        this.context = context;
+    }
 
     public void download(ServerInstance srv, Cb cb) {
         ex.submit(() -> {
             try {
-                post(cb, 0, "Resolving URL…");
+                post(cb, 0, context.getString(R.string.dl_resolving_url));
                 String url = resolve(srv, cb);
                 if (url == null) return;
-                post(cb, 5, "Connecting…");
+                post(cb, 5, context.getString(R.string.dl_connecting));
                 new File(srv.getServerDir()).mkdirs();
                 
                 String fileName = url.substring(url.lastIndexOf('/') + 1);
@@ -58,32 +65,31 @@ public class JarDownloader {
     private String resolve(ServerInstance srv, Cb cb) throws Exception {
         switch (srv.getType()) {
             case PAPER:
-                post(cb,2,"Checking PaperMC API…");
+                post(cb,2,context.getString(R.string.dl_checking_api, "PaperMC"));
                 return paper(srv.getVersion(), cb);
             case PURPUR:
-                post(cb,2,"Checking Purpur API…");
+                post(cb,2,context.getString(R.string.dl_checking_api, "Purpur"));
                 return "https://api.purpurmc.org/v2/purpur/"+srv.getVersion()+"/latest/download";
             case VANILLA:
-                post(cb,2,"Checking Mojang manifest…");
+                post(cb,2,context.getString(R.string.dl_checking_mojang));
                 return vanilla(srv.getVersion(), cb);
             case FABRIC:
-                post(cb,2,"Building Fabric URL…");
+                post(cb,2,context.getString(R.string.dl_building_url, "Fabric"));
                 return "https://meta.fabricmc.net/v2/versions/loader/"+srv.getVersion()+"/stable/stable/server/jar";
             case FORGE:
-                post(cb,2,"Building Forge URL…");
+                post(cb,2,context.getString(R.string.dl_building_url, "Forge"));
                 return forge(srv.getVersion(), cb);
             case NEOFORGE:
-                post(cb,2,"Building NeoForge URL…");
+                post(cb,2,context.getString(R.string.dl_building_url, "NeoForge"));
                 return neoforge(srv.getVersion(), cb);
             case FOLIA:
-                post(cb,2,"Checking Folia API…");
+                post(cb,2,context.getString(R.string.dl_checking_api, "Folia"));
                 return folia(srv.getVersion(), cb);
             case VELOCITY:
-                post(cb,2,"Checking Velocity API…");
+                post(cb,2,context.getString(R.string.dl_checking_api, "Velocity"));
                 return velocity(srv.getVersion(), cb);
             default:
-                main.post(() -> cb.onError("Manual install required for "+srv.getType().name()+
-                    ".\nPlace server.jar in: "+srv.getServerDir()));
+                main.post(() -> cb.onError(context.getString(R.string.dl_manual_required, srv.getType().name(), srv.getServerDir())));
                 return null;
         }
     }
@@ -92,9 +98,9 @@ public class JarDownloader {
         String j = fetch("https://api.papermc.io/v2/projects/paper/versions/"+ver);
         org.json.JSONObject obj = new org.json.JSONObject(j);
         org.json.JSONArray builds = obj.getJSONArray("builds");
-        if (builds.length() == 0) throw new Exception("No Paper builds found for "+ver);
+        if (builds.length() == 0) throw new Exception(context.getString(R.string.dl_error_no_builds, "Paper", ver));
         int build = builds.getInt(builds.length() - 1);
-        post(cb,4,"Found build #"+build);
+        post(cb,4,context.getString(R.string.dl_found_build, "Paper", String.valueOf(build)));
         return "https://api.papermc.io/v2/projects/paper/versions/"+ver+"/builds/"+build+
                "/downloads/paper-"+ver+"-"+build+".jar";
     }
@@ -103,9 +109,9 @@ public class JarDownloader {
         String j = fetch("https://api.papermc.io/v2/projects/folia/versions/"+ver);
         org.json.JSONObject obj = new org.json.JSONObject(j);
         org.json.JSONArray builds = obj.getJSONArray("builds");
-        if (builds.length() == 0) throw new Exception("No Folia builds found for "+ver);
+        if (builds.length() == 0) throw new Exception(context.getString(R.string.dl_error_no_builds, "Folia", ver));
         int build = builds.getInt(builds.length() - 1);
-        post(cb,4,"Found Folia build #"+build);
+        post(cb,4,context.getString(R.string.dl_found_build, "Folia", String.valueOf(build)));
         return "https://api.papermc.io/v2/projects/folia/versions/"+ver+"/builds/"+build+
                "/downloads/folia-"+ver+"-"+build+".jar";
     }
@@ -114,9 +120,9 @@ public class JarDownloader {
         String j = fetch("https://api.papermc.io/v2/projects/velocity/versions/"+ver);
         org.json.JSONObject obj = new org.json.JSONObject(j);
         org.json.JSONArray builds = obj.getJSONArray("builds");
-        if (builds.length() == 0) throw new Exception("No Velocity builds found for "+ver);
+        if (builds.length() == 0) throw new Exception(context.getString(R.string.dl_error_no_builds, "Velocity", ver));
         int build = builds.getInt(builds.length() - 1);
-        post(cb,4,"Found Velocity build #"+build);
+        post(cb,4,context.getString(R.string.dl_found_build, "Velocity", String.valueOf(build)));
         return "https://api.papermc.io/v2/projects/velocity/versions/"+ver+"/builds/"+build+
                "/downloads/velocity-"+ver+"-"+build+".jar";
     }
@@ -129,8 +135,8 @@ public class JarDownloader {
         String latest = null;
         while (m.find()) latest = m.group(1);
         
-        if (latest == null) throw new Exception("No Forge build found for Minecraft " + mcVer);
-        post(cb, 4, "Found Forge " + latest);
+        if (latest == null) throw new Exception(context.getString(R.string.dl_error_no_builds, "Forge", mcVer));
+        post(cb, 4, context.getString(R.string.dl_found_version, "Forge", latest));
         
         return "https://maven.minecraftforge.net/net/minecraftforge/forge/" + latest + "/forge-" + latest + "-installer.jar";
     }
@@ -138,7 +144,7 @@ public class JarDownloader {
     private String vanilla(String ver, Cb cb) throws Exception {
         String manifest = fetch("https://launchermeta.mojang.com/mc/game/version_manifest.json");
         int p = manifest.indexOf("\"id\":\""+ver+"\"");
-        if (p<0) throw new Exception("Version "+ver+" not found in Mojang manifest");
+        if (p<0) throw new Exception(context.getString(R.string.dl_error_mojang, ver));
         int us = manifest.indexOf("\"url\":\"",p)+7;
         String vUrl = manifest.substring(us, manifest.indexOf("\"",us));
         String vj = fetch(vUrl);
@@ -158,8 +164,8 @@ public class JarDownloader {
         String latest = null;
         while (m.find()) latest = m.group(1); // Get the last one in the list (usually latest)
         
-        if (latest == null) throw new Exception("No NeoForge build found for Minecraft " + mcVer);
-        post(cb, 4, "Found NeoForge " + latest);
+        if (latest == null) throw new Exception(context.getString(R.string.dl_error_no_builds, "NeoForge", mcVer));
+        post(cb, 4, context.getString(R.string.dl_found_version, "NeoForge", latest));
         
         // Return the installer jar URL
         return "https://maven.neoforged.net/releases/net/neoforged/neoforge/" + latest + "/neoforge-" + latest + "-installer.jar";
@@ -171,7 +177,7 @@ public class JarDownloader {
         c.setConnectTimeout(15000); c.setReadTimeout(180000);
         c.setRequestProperty("User-Agent","KodaNetwork/3.0");
         c.connect();
-        if (c.getResponseCode()>=300) throw new Exception("HTTP "+c.getResponseCode());
+        if (c.getResponseCode()>=300) throw new Exception(context.getString(R.string.dl_error_http, c.getResponseCode()));
         long total = c.getContentLengthLong();
         try (InputStream is=c.getInputStream(); FileOutputStream fo=new FileOutputStream(dest)) {
             byte[] buf=new byte[16384]; long done=0; int r;
@@ -183,7 +189,7 @@ public class JarDownloader {
                     if (now - lastPostTime > 250 || done == total) {
                         lastPostTime = now;
                         int pct=(int)(done*100/total);
-                        String msg="Downloading… "+done/1024/1024+" / "+total/1024/1024+" MB";
+                        String msg=context.getString(R.string.dl_downloading, String.valueOf(done/1024/1024), String.valueOf(total/1024/1024));
                         post(cb,pct,msg);
                     }
                 }

@@ -16,7 +16,7 @@ import java.util.List;
 
 import eu.kodanetwork.mchost.R;
 import eu.kodanetwork.mchost.model.ServerInstance;
-import eu.kodanetwork.mchost.service.TermuxServerService;
+import eu.kodanetwork.mchost.service.KodaServerService;
 
 public class ServerCardAdapter extends RecyclerView.Adapter<ServerCardAdapter.VH> {
 
@@ -25,11 +25,11 @@ public class ServerCardAdapter extends RecyclerView.Adapter<ServerCardAdapter.VH
     private List<ServerInstance> data = new ArrayList<>();
     private final Context ctx;
     private final Click click;
-    private TermuxServerService svc;
+    private KodaServerService svc;
 
     public ServerCardAdapter(Context c, Click cl) { ctx = c; click = cl; }
     public void setData(List<ServerInstance> d)   { data = new ArrayList<>(d); notifyDataSetChanged(); }
-    public void setService(TermuxServerService s)  { svc = s; notifyDataSetChanged(); }
+    public void setService(KodaServerService s)  { svc = s; notifyDataSetChanged(); }
 
     @NonNull @Override
     public VH onCreateViewHolder(@NonNull ViewGroup p, int t) {
@@ -142,40 +142,49 @@ public class ServerCardAdapter extends RecyclerView.Adapter<ServerCardAdapter.VH
             ServerInstance.State st = s.state;
             String label; int dotDrw; int textCol;
             switch (st) {
-                case ONLINE: label="ONLINE"; dotDrw=R.drawable.dot_online; textCol=0xFF00E676; break;
-                case STARTING: label="STARTING"; dotDrw=R.drawable.dot_warn; textCol=0xFFFFCC00; break;
-                case STOPPING: label="STOPPING"; dotDrw=R.drawable.dot_warn; textCol=0xFFFF8800; break;
-                case CRASHED: label="CRASHED"; dotDrw=R.drawable.dot_err; textCol=0xFFFF3333; break;
-                case INSTALLING: label="INSTALL"; dotDrw=R.drawable.dot_warn; textCol=0xFF2277FF; break;
-                default: label="OFFLINE"; dotDrw=R.drawable.dot_offline; textCol=0xFF8A8A9A; break; // dim gray for offline
+                case ONLINE: label=ctx.getString(R.string.status_online); dotDrw=R.drawable.dot_online; textCol=0xFF00E676; break;
+                case STARTING: label=ctx.getString(R.string.status_starting); dotDrw=R.drawable.dot_warn; textCol=0xFFFFCC00; break;
+                case STOPPING: label=ctx.getString(R.string.status_stopping); dotDrw=R.drawable.dot_warn; textCol=0xFFFF8800; break;
+                case RESTARTING: label=ctx.getString(R.string.status_restarting); dotDrw=R.drawable.dot_warn; textCol=0xFFFF8800; break;
+                case SETTING_UP: label=ctx.getString(R.string.status_setting_up); dotDrw=R.drawable.dot_warn; textCol=0xFF9C27B0; break;
+                case CRASHED: label=ctx.getString(R.string.status_crashed); dotDrw=R.drawable.dot_err; textCol=0xFFFF3333; break;
+                case INSTALLING: label=ctx.getString(R.string.status_installing); dotDrw=R.drawable.dot_warn; textCol=0xFF2277FF; break;
+                case HIBERNATED: label=ctx.getString(R.string.hibernate); dotDrw=R.drawable.dot_offline; textCol=0xFF44AAFF; break;
+                default: label=ctx.getString(R.string.status_offline); dotDrw=R.drawable.dot_offline; textCol=0xFF8A8A9A; break; // dim gray for offline
             }
             badge.setText(label);
             badge.setTextColor(textCol);
             
             String verText = s.getType().name() + " • ";
             if (s.state == ServerInstance.State.ONLINE) {
-                verText += s.onlinePlayerNames.size() + " players";
+                verText += s.onlinePlayerNames.size() + " " + ctx.getString(R.string.players);
             } else {
-                verText += "Offline";
+                verText += s.getVersion();
             }
             if (ver != null) ver.setText(verText);
 
             if (btnAction != null) {
-                if (st == ServerInstance.State.ONLINE || st == ServerInstance.State.STARTING) {
-                    btnAction.setText("STOP");
+                if (st == ServerInstance.State.HIBERNATED) {
+                    btnAction.setText(ctx.getString(R.string.wake_up));
+                    btnAction.setBackgroundTintList(android.content.res.ColorStateList.valueOf(0xFF2B221E));
+                    btnAction.setTextColor(0xFF44AAFF);
+                } else if (st == ServerInstance.State.ONLINE || st == ServerInstance.State.STARTING) {
+                    btnAction.setText(ctx.getString(R.string.stop));
                     btnAction.setBackgroundTintList(android.content.res.ColorStateList.valueOf(0xFFFF5252));
                     btnAction.setTextColor(0xFF111111);
                 } else {
-                    btnAction.setText("START");
+                    btnAction.setText(ctx.getString(R.string.start));
                     btnAction.setBackgroundTintList(android.content.res.ColorStateList.valueOf(0xFF2B221E));
                     btnAction.setTextColor(0xFFF0F0F0);
                 }
                 btnAction.setOnClickListener(v -> {
                     eu.kodanetwork.mchost.util.HapticUtil.forceVibrate(v.getContext(), 50);
-                    if (st == ServerInstance.State.ONLINE || st == ServerInstance.State.STARTING) {
-                        android.content.Intent i = new android.content.Intent(ctx, TermuxServerService.class);
-                        i.setAction(TermuxServerService.ACTION_STOP);
-                        i.putExtra(TermuxServerService.EXTRA_ID, s.getId());
+                    if (st == ServerInstance.State.HIBERNATED) {
+                        click.on(s);
+                    } else if (st == ServerInstance.State.ONLINE || st == ServerInstance.State.STARTING) {
+                        android.content.Intent i = new android.content.Intent(ctx, KodaServerService.class);
+                        i.setAction(KodaServerService.ACTION_STOP);
+                        i.putExtra(KodaServerService.EXTRA_ID, s.getId());
                         if (android.os.Build.VERSION.SDK_INT >= 26) ctx.startForegroundService(i);
                         else ctx.startService(i);
                     } else {
@@ -183,9 +192,9 @@ public class ServerCardAdapter extends RecyclerView.Adapter<ServerCardAdapter.VH
                             s.state = ServerInstance.State.STARTING;
                             eu.kodanetwork.mchost.model.ServerRepo.get(ctx).update(s);
                             
-                            android.content.Intent i = new android.content.Intent(ctx, TermuxServerService.class);
-                            i.setAction(TermuxServerService.ACTION_START);
-                            i.putExtra(TermuxServerService.EXTRA_ID, s.getId());
+                            android.content.Intent i = new android.content.Intent(ctx, KodaServerService.class);
+                            i.setAction(KodaServerService.ACTION_START);
+                            i.putExtra(KodaServerService.EXTRA_ID, s.getId());
                             if (android.os.Build.VERSION.SDK_INT >= 26) ctx.startForegroundService(i);
                             else ctx.startService(i);
                         }

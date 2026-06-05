@@ -90,6 +90,7 @@ public class CreateServerActivity extends AppCompatActivity {
     private org.json.JSONArray aiChatHistory = new org.json.JSONArray();
     private org.json.JSONArray aiSelectedPlugins = new org.json.JSONArray();
     private String aiSelectedTheme = "#FF6B00";
+    private String aiSuggestedName = null;
 
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
@@ -746,14 +747,15 @@ public class CreateServerActivity extends AppCompatActivity {
         android.app.ActivityManager.MemoryInfo mi = new android.app.ActivityManager.MemoryInfo();
         ((android.app.ActivityManager) getSystemService(ACTIVITY_SERVICE)).getMemoryInfo(mi);
         long freeMegs = mi.availMem / 1048576L;
+        long maxSafeRam = freeMegs - 1024; // Keep 1.0GB buffer for Android OS
         
         int maxIndex = 0;
         for (int i = 0; i < RAM_STEPS.length; i++) {
-            if (RAM_STEPS[i] <= freeMegs) maxIndex = i;
+            if (RAM_STEPS[i] <= maxSafeRam) maxIndex = i;
         }
-        if (maxIndex == 0 && freeMegs < RAM_STEPS[0]) maxIndex = 0; // At least allow minimum
+        if (maxIndex == 0 && maxSafeRam < RAM_STEPS[0]) maxIndex = 0; // At least allow minimum
         
-        long targetRam = (long) (freeMegs * 0.75);
+        long targetRam = Math.min((long) (freeMegs * 0.75), maxSafeRam);
         int targetIndex = 0;
         for (int i = 0; i <= maxIndex; i++) {
             if (RAM_STEPS[i] <= targetRam) targetIndex = i;
@@ -803,8 +805,12 @@ public class CreateServerActivity extends AppCompatActivity {
                 if (rg != null) rg.check(R.id.rb_setup_ai);
                 
                 String currentName = etName.getText().toString().trim();
-                if (currentName.isEmpty()) {
-                    etName.setText("AI-Server-" + new java.util.Random().nextInt(1000));
+                if (currentName.isEmpty() || currentName.startsWith("AI-Server-")) {
+                    if (aiSuggestedName != null && !aiSuggestedName.isEmpty()) {
+                        etName.setText(aiSuggestedName);
+                    } else if (currentName.isEmpty()) {
+                        etName.setText("AI-Server-" + new java.util.Random().nextInt(1000));
+                    }
                 }
                 
                 if (svChat.getLayoutParams().height == 0) {
@@ -920,7 +926,7 @@ public class CreateServerActivity extends AppCompatActivity {
                         "CRITICAL: When choosing plugins in Phase 2, you MUST explicitly include ALL required dependencies in the 'plugins' array (e.g. ProtocolLib, Vault, PlaceholderAPI, LuckPerms), otherwise the server will crash! " +
                         "ONLY suggest Modrinth project IDs that are strictly compatible with " + serverType + " " + selectedVersion + ". " +
                         "You must ALWAYS output valid JSON matching this schema exactly: " +
-                        "{\"current_phase\": 1 or 2, \"chat_reply\": \"your message to the user\", \"theme_color\": \"#HEXCODE\", \"plugins\": [\"modrinth_project_id_1\", ...]}";
+                        "{\"current_phase\": 1 or 2, \"server_name\": \"Cool Name for the Server\", \"chat_reply\": \"your message to the user\", \"theme_color\": \"#HEXCODE\", \"plugins\": [\"modrinth_project_id_1\", ...]}";
                     sysInst.put("parts", new org.json.JSONArray().put(new org.json.JSONObject().put("text", promptText)));
                     payload.put("systemInstruction", sysInst);
                     
@@ -954,12 +960,16 @@ public class CreateServerActivity extends AppCompatActivity {
                         org.json.JSONObject resJson = new org.json.JSONObject(resText);
                         String reply = resJson.optString("chat_reply", "I have updated the design!");
                         String theme = resJson.optString("theme_color", "#FF6B00");
+                        String serverName = resJson.optString("server_name", "");
                         org.json.JSONArray plugins = resJson.optJSONArray("plugins");
                         if (plugins == null) plugins = new org.json.JSONArray();
                         int phase = resJson.optInt("current_phase", 1);
                         
                         aiSelectedTheme = theme;
                         aiSelectedPlugins = plugins;
+                        if (!serverName.isEmpty()) {
+                            aiSuggestedName = serverName;
+                        }
                         
                         runOnUiThread(() -> {
                             llChat.removeView(typingLabel);

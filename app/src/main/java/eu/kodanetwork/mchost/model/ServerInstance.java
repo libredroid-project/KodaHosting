@@ -7,7 +7,7 @@ import org.json.JSONObject;
 public class ServerInstance {
 
     public enum Type       { PAPER, PURPUR, FORGE, FABRIC, VANILLA, NEOFORGE, VELOCITY, FOLIA }
-    public enum State      { OFFLINE, STARTING, ONLINE, STOPPING, CRASHED, INSTALLING }
+    public enum State      { OFFLINE, STARTING, ONLINE, STOPPING, CRASHED, INSTALLING, RESTARTING, SETTING_UP, HIBERNATED }
     public enum Gamemode    { survival, creative, adventure, spectator }
     public enum Difficulty  { peaceful, easy, normal, hard }
 
@@ -19,6 +19,7 @@ public class ServerInstance {
     private int       port;
     private String    subdomain;
     private String    serverDir;
+    private long      lastActive;
 
     private int       maxPlayers = 20;
     private Gamemode   gamemode   = Gamemode.survival;
@@ -91,6 +92,15 @@ public class ServerInstance {
         j.put("themeColor", themeColor);
         j.put("autoSetup", autoSetup);
         j.put("aiPrompt", aiPrompt);
+        j.put("bedrockSupport", bedrockSupport);
+        j.put("bedrockPort", bedrockPort);
+        j.put("bedrockPort", bedrockPort);
+        j.put("voicechat", voicechat);
+        j.put("voicechatPort", voicechatPort);
+        j.put("lastActive", lastActive);
+        if (state == State.HIBERNATED) {
+            j.put("isHibernated", true);
+        }
         
         JSONArray kp = new JSONArray();
         for (String p : knownPlayers) kp.put(p);
@@ -123,7 +133,13 @@ public class ServerInstance {
         s.autoSetup      = j.optBoolean("autoSetup", true);
         s.aiPrompt       = j.optString("aiPrompt", "");
         s.bedrockSupport = j.optBoolean("bedrockSupport", false);
+        s.bedrockPort    = j.optInt("bedrockPort", 0);
         s.voicechat      = j.optBoolean("voicechat", false);
+        s.voicechatPort  = j.optInt("voicechatPort", 0);
+        s.lastActive     = j.optLong("lastActive", System.currentTimeMillis());
+        if (j.optBoolean("isHibernated", false)) {
+            s.state = State.HIBERNATED;
+        }
 
         JSONArray kp = j.optJSONArray("knownPlayers");
         if (kp != null) {
@@ -139,6 +155,8 @@ public class ServerInstance {
     public void   setName(String v)            { name = v; subdomain = sanitize(v); }
     public Type   getType()                    { return type; }
     public String getVersion()                 { return version; }
+    public long   getLastActive()              { return lastActive; }
+    public void   setLastActive(long v)        { lastActive = v; }
     public int    getRamMB()                   { return ramMB; }
     public void   setRamMB(int ramMB)          { this.ramMB = ramMB; }
     public int    getPort()                    { return port; }
