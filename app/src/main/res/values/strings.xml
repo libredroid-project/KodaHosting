@@ -111,7 +111,7 @@
     <string name="praetor_title">P.R.A.E.T.O.R.</string>
     <string name="praetor_subtitle">PROTOCOL FOR RISK ASSESSMENT,\nENFORCEMENT &amp; TOTAL OVERSIGHT RESPONSE</string>
     <string name="praetor_action_fix">FIX ISSUE</string>
-    <string name="praetor_action_auto_ram">AUTO-ADJUST RAM</string>
+    <string name="praetor_action_auto_ram">USE LESS RAM</string>
     <string name="praetor_action_start_anyway">START ANYWAY (RISK)</string>
     <string name="praetor_action_cancel">CANCEL</string>
     <string name="praetor_hibernate_warning">WARNING: Server Hibernation mode is being initiated. DNS entries will be deleted and the server will be compressed.</string>

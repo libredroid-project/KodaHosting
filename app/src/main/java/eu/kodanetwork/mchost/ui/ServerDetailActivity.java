@@ -59,6 +59,7 @@ public class ServerDetailActivity extends AppCompatActivity {
     private final Handler h = new Handler(Looper.getMainLooper());
     private Runnable ticker;
     private static final int REQ_IMPORT_FILE = 9912;
+    private static final int REQ_IMPORT_FOLDER = 9913;
 
     // Tabs
     private TabLayout tabs;
@@ -299,11 +300,20 @@ public class ServerDetailActivity extends AppCompatActivity {
         View btnImportFile = findViewById(R.id.btn_import_file);
         if (btnImportFile != null) {
             btnImportFile.setOnClickListener(v -> {
-                Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-                intent.setType("*/*");
-                intent.addCategory(Intent.CATEGORY_OPENABLE);
-                intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
-                startActivityForResult(Intent.createChooser(intent, "Import Files"), REQ_IMPORT_FILE);
+                new AlertDialog.Builder(this)
+                    .setTitle("Import...")
+                    .setItems(new String[]{"File(s)", "Folder"}, (d, w) -> {
+                        if (w == 0) {
+                            Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+                            intent.setType("*/*");
+                            intent.addCategory(Intent.CATEGORY_OPENABLE);
+                            intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
+                            startActivityForResult(Intent.createChooser(intent, "Import Files"), REQ_IMPORT_FILE);
+                        } else {
+                            Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE);
+                            startActivityForResult(intent, REQ_IMPORT_FOLDER);
+                        }
+                    }).show();
             });
         }
 
@@ -2067,6 +2077,11 @@ public class ServerDetailActivity extends AppCompatActivity {
             if (!uris.isEmpty()) {
                 importFilesToCurrentDir(uris);
             }
+        } else if (requestCode == REQ_IMPORT_FOLDER && resultCode == RESULT_OK && data != null) {
+            android.net.Uri treeUri = data.getData();
+            if (treeUri != null && currentDir != null) {
+                importFolderToCurrentDir(treeUri);
+            }
         }
     }
 
@@ -2132,6 +2147,50 @@ public class ServerDetailActivity extends AppCompatActivity {
                 refreshFiles();
             });
         }).start();
+    }
+
+    private void importFolderToCurrentDir(android.net.Uri treeUri) {
+        androidx.documentfile.provider.DocumentFile rootDoc = androidx.documentfile.provider.DocumentFile.fromTreeUri(this, treeUri);
+        if (rootDoc == null || !rootDoc.isDirectory()) return;
+
+        File destDir = new File(currentDir, rootDoc.getName() != null ? rootDoc.getName() : "ImportedFolder");
+        if (!destDir.exists()) destDir.mkdirs();
+
+        Toast.makeText(this, "Importing folder...", Toast.LENGTH_SHORT).show();
+        new Thread(() -> {
+            int[] counts = new int[]{0, 0};
+            copyDocumentFileRecursive(rootDoc, destDir, counts);
+            runOnUiThread(() -> {
+                String msg = "Imported " + counts[0] + " file(s) into " + destDir.getName();
+                if (counts[1] > 0) msg += " (" + counts[1] + " failed)";
+                Toast.makeText(this, msg, Toast.LENGTH_LONG).show();
+                refreshFiles();
+            });
+        }).start();
+    }
+
+    private void copyDocumentFileRecursive(androidx.documentfile.provider.DocumentFile doc, File destDir, int[] counts) {
+        if (!destDir.exists()) destDir.mkdirs();
+        for (androidx.documentfile.provider.DocumentFile file : doc.listFiles()) {
+            if (file.isDirectory()) {
+                File subDir = new File(destDir, file.getName());
+                copyDocumentFileRecursive(file, subDir, counts);
+            } else {
+                try {
+                    File dest = new File(destDir, file.getName());
+                    java.io.InputStream in = getContentResolver().openInputStream(file.getUri());
+                    java.io.OutputStream out = new java.io.FileOutputStream(dest);
+                    byte[] buf = new byte[8192];
+                    int len;
+                    while ((len = in.read(buf)) > 0) out.write(buf, 0, len);
+                    in.close();
+                    out.close();
+                    counts[0]++;
+                } catch (Exception e) {
+                    counts[1]++;
+                }
+            }
+        }
     }
 
     @Override protected void onDestroy() {

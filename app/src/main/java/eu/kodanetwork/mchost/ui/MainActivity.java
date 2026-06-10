@@ -151,9 +151,31 @@ public class MainActivity extends AppCompatActivity {
 
             ThemeHelper.apply(this);
             eu.kodanetwork.mchost.util.HapticUtil.applyHaptics(this);
+            checkToS();
             Log.d(TAG, "MainActivity created");
         } catch (Exception e) {
             Log.e(TAG, "Error in onCreate", e);
+        }
+    }
+
+    private void checkToS() {
+        android.content.SharedPreferences prefs = eu.kodanetwork.mchost.App.getPrefs(this);
+        if (!prefs.getBoolean("tos_accepted", false)) {
+            android.app.Dialog dialog = new android.app.Dialog(this, android.R.style.Theme_Black_NoTitleBar_Fullscreen);
+            dialog.setContentView(R.layout.dialog_tos);
+            dialog.setCancelable(false);
+
+            dialog.findViewById(R.id.btn_accept_tos).setOnClickListener(v -> {
+                prefs.edit().putBoolean("tos_accepted", true).apply();
+                dialog.dismiss();
+            });
+
+            dialog.findViewById(R.id.btn_reject_tos).setOnClickListener(v -> {
+                finishAffinity();
+                System.exit(0);
+            });
+
+            dialog.show();
         }
     }
 
