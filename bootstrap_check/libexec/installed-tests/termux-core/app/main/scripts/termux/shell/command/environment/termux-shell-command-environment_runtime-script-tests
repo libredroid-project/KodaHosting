@@ -1,0 +1,103 @@
+#!/data/data/com.termux/files/usr/bin/bash
+# shellcheck shell=bash
+
+##
+# `TermuxShellCommandEnvioronment_runTests`
+##
+TermuxShellCommandEnvioronment_runTests() {
+
+    termux_core__tests__log 3 "TermuxShellCommandEnvioronment_runTests()"
+
+    if [[ "$TERMUX_CORE__TESTS__SKIP_TERMUX_CORE_ENV_VARIABLE_TESTS" != "true" ]]; then
+        local tests_start_time; tests_start_time="$(date "+%s")" || return $?
+
+        local tests_count__old_value="$TERMUX_CORE__TESTS__TESTS_COUNT"
+        TERMUX_CORE__TESTS__TESTS_COUNT="0"
+
+        test__termux_scoped_env_variable || return $?
+        test__termux_apps_info_env_variable || return $?
+        test__termux_apps_info_app_version_name || return $?
+
+        termux_core__tests__log 3 "All $TERMUX_CORE__TESTS__TESTS_COUNT 'termux_scooed_env' tests successful in \
+$(termux_core__tests__print_elapsed_time "$tests_start_time")"
+
+        TERMUX_CORE__TESTS__TESTS_COUNT="$((tests_count__old_value + TERMUX_CORE__TESTS__TESTS_COUNT))"
+    fi
+
+    return 0
+}
+
+
+
+
+
+##
+# `test__termux_scoped_env_variable`
+##
+test__termux_scoped_env_variable() {
+
+    (
+        # shellcheck source=app/main/tests/scripts/termux/shell/command/environment/termux-scoped-env-variable_runtime-script-tests.in
+        termux_core__tests__source_file_from_path \
+            "$TERMUX_CORE__TESTS__TESTS_PATH/app/main/scripts/termux/shell/command/environment/termux-scoped-env-variable_runtime-script-tests" || exit $?
+        termux_core__termux_scoped_env_variable__run_tests || exit $?
+    ) || return $?
+
+    return 0
+
+}
+
+##
+# `test__termux_apps_info_env_variable`
+##
+test__termux_apps_info_env_variable() {
+
+    (
+        # shellcheck source=app/main/tests/scripts/termux/shell/command/environment/termux-apps-info-env-variable_runtime-script-tests.in
+        termux_core__tests__source_file_from_path \
+            "$TERMUX_CORE__TESTS__TESTS_PATH/app/main/scripts/termux/shell/command/environment/termux-apps-info-env-variable_runtime-script-tests" || exit $?
+        termux_core__termux_apps_info_env_variable__run_tests || exit $?
+    ) || return $?
+
+    return 0
+
+}
+
+##
+# `test__termux_apps_info_app_version_name`
+##
+test__termux_apps_info_app_version_name() {
+
+    (
+        # shellcheck source=app/main/tests/scripts/termux/shell/command/environment/termux-apps-info-app-version-name_runtime-script-tests.in
+        termux_core__tests__source_file_from_path \
+            "$TERMUX_CORE__TESTS__TESTS_PATH/app/main/scripts/termux/shell/command/environment/termux-apps-info-app-version-name_runtime-script-tests" || exit $?
+        termux_core__termux_apps_info_app_version_name__run_tests || exit $?
+    ) || return $?
+
+    return 0
+
+}
+
+
+termux_core__set_termux_core_test_scoped_env_variables__default() {
+
+    TERMUX_CORE__TESTS__TERMUX_ENV__S_ROOT="$TERMUX_ENV__S_ROOT"
+    TERMUX_CORE__TESTS__TERMUX__PACKAGE_NAME="$TERMUX_APP__PACKAGE_NAME"
+    TERMUX_CORE__TESTS__TERMUX_APP__DATA_DIR="$TERMUX_APP__DATA_DIR"
+    TERMUX_CORE__TESTS__TERMUX__ROOTFS="$TERMUX__ROOTFS"
+    TERMUX_CORE__TESTS__TERMUX__HOME="$TERMUX__HOME"
+    TERMUX_CORE__TESTS__TERMUX__PREFIX="$TERMUX__PREFIX"
+
+}
+
+termux_core__set_termux_core_test_scoped_env_variables__foo() {
+
+    TERMUX_CORE__TESTS__TERMUX_ENV__S_ROOT="FOO_"
+    TERMUX_CORE__TESTS__TERMUX__PACKAGE_NAME="com.foo"
+    TERMUX_CORE__TESTS__TERMUX_APP__DATA_DIR="/data/data/com.foo"
+    TERMUX_CORE__TESTS__TERMUX__ROOTFS="$TERMUX_CORE__TESTS__TERMUX_APP__DATA_DIR/termux/rootfs/0"
+    TERMUX_CORE__TESTS__TERMUX__HOME="$TERMUX_CORE__TESTS__TERMUX__ROOTFS/home"
+    TERMUX_CORE__TESTS__TERMUX__PREFIX="$TERMUX_CORE__TESTS__TERMUX__ROOTFS/usr"
+
+}

@@ -1,0 +1,11 @@
+#!/data/data/com.termux/files/usr/bin/sh
+# Automatically added by termux_step_update_alternatives
+if [ "$1" = 'configure' ] || [ "$1" = 'abort-upgrade' ] || [ "$1" = 'abort-deconfigure' ] || [ "$1" = 'abort-remove' ] || [ "debian" = 'pacman' ]; then
+  if [ -x "/data/data/com.termux/files/usr/bin/update-alternatives" ]; then
+    # editor
+    update-alternatives \
+      --install "/data/data/com.termux/files/usr/bin/editor" "editor" "/data/data/com.termux/files/usr/bin/nano" 50 \
+      --slave "/data/data/com.termux/files/usr/share/man/man1/editor.1.gz" "editor.1.gz" "/data/data/com.termux/files/usr/share/man/man1/nano.1.gz"
+  fi
+fi
+# End automatically added section

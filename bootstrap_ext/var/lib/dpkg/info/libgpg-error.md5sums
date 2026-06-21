@@ -1,0 +1,14 @@
+60e3c4ae2bd7855d00e0b5050bd35d94  data/data/com.termux/files/usr/share/aclocal/gpg-error.m4
+e4b709375bb87eb1d1f6836d29b49a1d  data/data/com.termux/files/usr/share/aclocal/gpgrt.m4
+b8380f3481dfbf5b2d001313a306d830  data/data/com.termux/files/usr/share/man/man1/gpg-error-config.1.gz
+7dcfd08322886d78d4684c7416968a55  data/data/com.termux/files/usr/share/man/man1/gpgrt-config.1.gz
+cdac136052af95c36619c36e59f4301d  data/data/com.termux/files/usr/share/libgpg-error/errorref.txt
+44a1734abc32100419e5ba1b5e228dc0  data/data/com.termux/files/usr/share/info/gpgrt.info
+b347191f3a0b2190142103170fd6b272  data/data/com.termux/files/usr/lib/pkgconfig/gpg-error.pc
+1ef16976bbca4d172f06cef7c556ba61  data/data/com.termux/files/usr/lib/libgpg-error.so
+5774171c6646ccd1e7cdcf510ba9199f  data/data/com.termux/files/usr/bin/yat2m
+f34db048900412a6cf2a0d899a7ebcc9  data/data/com.termux/files/usr/bin/gpg-error-config
+ba829329798b1655a8dac54582659619  data/data/com.termux/files/usr/bin/gpg-error
+d49926a0fafe9a65088e35b11795477e  data/data/com.termux/files/usr/bin/gpgrt-config
+3dff90056c88da312eafb6aeea1d273f  data/data/com.termux/files/usr/include/gpg-error.h
+3dff90056c88da312eafb6aeea1d273f  data/data/com.termux/files/usr/include/gpgrt.h

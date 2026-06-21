@@ -1,0 +1,65 @@
+Privacy Policy
+
+Last Updated: June 2026
+
+1. Introduction
+
+Welcome to KodaHosting. We respect your privacy and are committed to protecting any information that may be processed while you use our mobile application and the accompanying Web Dashboard. This Privacy Policy explains what information we collect, how we use it, and your rights regarding your data.
+
+2. Information We Collect & Process
+
+KodaHosting processes certain data to function correctly:
+
+- Account Information: When you register or log in, we securely process your email address and authentication details to manage your personal KodaHosting account. Authentication is handled securely by our partner, Supabase.
+
+- Web Dashboard & Remote Control: When using the Web Dashboard, we process your authentication tokens and proxy server commands securely via our API to allow remote management of your Android-hosted servers.
+
+- Local Data: Your Minecraft server files, worlds, plugins, and configurations are stored purely locally on your device.
+
+- Biometric Data: If you enable Biometric Security in the app settings, your device's fingerprint or face scan is used. This data never leaves your device and is processed securely by Android's local biometric system.
+
+- Device Information: We check your device architecture (e.g., ARM64) and Android version locally to download the correct Java runtime environments and binary files.
+
+- IP Privacy: Your personal home IP address is never leaked. All multiplayer traffic is routed through our central VPS infrastructure. Players connecting to your server will only ever see the IP address of our secure proxy.
+
+- AI Server Builder: If you use the AI Server Builder, your text prompts are sent to the Google Gemini API for processing to generate server configurations. Do not submit sensitive personal information in these prompts.
+
+3. Third-Party Services
+
+The App utilizes certain third-party services that may collect information used to identify you or provide core functionalities:
+
+- Google Play Services: For app distribution, crash reporting, and standard analytics.
+
+- Modrinth API / Spigot: To search and download server plugins directly within the app.
+
+- GitHub Releases: Used to download essential server binaries like Java and secure tunnel clients.
+
+- Bore / FRP (Fast Reverse Proxy): Used exclusively to create the secure network tunnels between your device and our VPS infrastructure.
+
+4. Data Security
+
+We value your trust in using our App. Since the core functionality is local server hosting, your personal server data remains entirely on your device. Any data transmitted to APIs (like plugin search queries) is sent over secure, encrypted connections (HTTPS).
+
+5. Your GDPR Rights (User Rights)
+
+Under the General Data Protection Regulation (GDPR) and applicable privacy laws, you have the following rights:
+
+- Right to Access: You can request a copy of the personal data we hold about you.
+
+- Right to Erasure (Right to be Forgotten): You can request the permanent deletion of your account and associated email address at any time.
+
+- Right to Rectification: You may update or correct your account information.
+
+To exercise these rights, please contact us via our support channels.
+
+6. Children's Privacy
+
+Our services are not directed to individuals under the age of 13 (or 16 in certain EU jurisdictions). We do not knowingly collect personal data from children. If we become aware that a child has provided us with personal data, we will take steps to delete such information.
+
+7. Changes to This Privacy Policy
+
+We may update our Privacy Policy from time to time. We will notify you of any changes by posting the new Privacy Policy on this page. You are advised to review this Privacy Policy periodically for any changes.
+
+6. Contact Us
+
+If you have any questions or suggestions about our Privacy Policy, do not hesitate to contact us at the support email provided in the Google Play Store listing.

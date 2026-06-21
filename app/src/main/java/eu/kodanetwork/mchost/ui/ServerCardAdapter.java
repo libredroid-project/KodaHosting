@@ -70,11 +70,142 @@ public class ServerCardAdapter extends RecyclerView.Adapter<ServerCardAdapter.VH
 
             // Maintain the new modern dark theme design unless explicitly in light mode
             if (isLight) {
-                itemView.setBackgroundColor(0xFFF3F4F6); // light mode fallback
+                android.graphics.drawable.GradientDrawable gd = new android.graphics.drawable.GradientDrawable();
+                gd.setColor(0xFFF5E1F2); // Noticeable light purple/pink box for card
+                gd.setStroke(3, 0xFFFF8C38); // Orange stroke
+                gd.setCornerRadius(24f);
+                int pL = itemView.getPaddingLeft(), pT = itemView.getPaddingTop(), pR = itemView.getPaddingRight(), pB = itemView.getPaddingBottom();
+                itemView.setBackground(gd);
+                itemView.setPadding(pL, pT, pR, pB);
+
+                // Ensure the card has margins so they don't touch
+                if (itemView.getLayoutParams() instanceof android.view.ViewGroup.MarginLayoutParams) {
+                    android.view.ViewGroup.MarginLayoutParams p = (android.view.ViewGroup.MarginLayoutParams) itemView.getLayoutParams();
+                    p.setMargins(16, 16, 16, 16);
+                    itemView.setLayoutParams(p);
+                }
             }
+
+            int themeColor = android.graphics.Color.parseColor(prefs.getString("theme_color", "#FF6B00"));
 
             name.setText(s.getName());
             if (type != null) type.setText(s.getType().name());
+
+            // === DATABASE-SPECIFIC CARD ===
+            if (s.isDatabase()) {
+                // Hide MC-specific views
+                if (ivServerIcon != null) ivServerIcon.setVisibility(View.GONE);
+                if (addr != null) addr.setText("Port: " + s.getPort());
+                // Hide address pill parent (the LinearLayout with pill_address_bg)
+                View addrPill = addr != null ? (View) addr.getParent() : null;
+                if (addrPill != null) {
+                    // Replace pill content with port info
+                    addr.setText(":" + s.getPort());
+                }
+
+                // Hide TPS
+                TextView tvTps = itemView.findViewById(R.id.tv_tps);
+                if (tvTps != null) {
+                    View tpsParent = (View) tvTps.getParent();
+                    if (tpsParent != null) tpsParent.setVisibility(View.GONE);
+                }
+
+                // Change RAM label to "DB MEMORY"
+                // The RAM label is the first child TextView in the stats container
+                // Replace ver text with user + masked password
+                String masked = "••••••••";
+                String dbInfo = s.getType().name() + " • " + s.getDbUsername() + " / " + masked;
+                if (ver != null) ver.setText(dbInfo);
+
+                // RAM still useful for databases
+                int ramTotal = s.getRamMB();
+                int ramUsed = s.ramUsageMB;
+                String ramText = String.format(java.util.Locale.US, "%.1fGB / %.1fGB", 0f, ramTotal / 1024f);
+                if (s.state == ServerInstance.State.ONLINE && ramUsed > 0) {
+                    ramText = String.format(java.util.Locale.US, "%.1fGB / %.1fGB", ramUsed / 1024f, ramTotal / 1024f);
+                }
+                ram.setText(ramText);
+
+                if (pbRam != null) {
+                    pbRam.setMax(ramTotal);
+                    pbRam.setProgress((ramUsed > 0 && s.state == ServerInstance.State.ONLINE) ? ramUsed : 0);
+                }
+
+                // Battery/CPU still useful
+                android.widget.ProgressBar pbBattery = itemView.findViewById(R.id.pb_battery);
+                if (tvBattery != null) {
+                    if (s.state == ServerInstance.State.ONLINE && ramTotal > 0) {
+                        int fakeCpu = Math.min(100, Math.max(5, (ramUsed * 100) / ramTotal));
+                        tvBattery.setText(fakeCpu + "%");
+                        if (pbBattery != null) pbBattery.setProgress(fakeCpu);
+                    } else {
+                        tvBattery.setText("0%");
+                        if (pbBattery != null) pbBattery.setProgress(0);
+                    }
+                }
+
+                // Status badge
+                ServerInstance.State st = s.state;
+                String label; int dotDrw; int textCol;
+                switch (st) {
+                    case ONLINE: label=ctx.getString(R.string.status_online); dotDrw=R.drawable.dot_online; textCol=0xFF00E676; break;
+                    case STARTING: label=ctx.getString(R.string.status_starting); dotDrw=R.drawable.dot_warn; textCol=0xFFFFCC00; break;
+                    case STOPPING: label=ctx.getString(R.string.status_stopping); dotDrw=R.drawable.dot_warn; textCol=0xFFFF8800; break;
+                    case CRASHED: label=ctx.getString(R.string.status_crashed); dotDrw=R.drawable.dot_err; textCol=0xFFFF3333; break;
+                    default: label=ctx.getString(R.string.status_offline); dotDrw=R.drawable.dot_offline; textCol=0xFF8A8A9A; break;
+                }
+                badge.setText(label);
+                badge.setTextColor(textCol);
+                dot.setBackground(ctx.getDrawable(dotDrw));
+
+                // Start/Stop button
+                if (btnAction != null) {
+                    if (st == ServerInstance.State.ONLINE || st == ServerInstance.State.STARTING) {
+                        btnAction.setText(ctx.getString(R.string.stop));
+                        btnAction.setBackgroundTintList(android.content.res.ColorStateList.valueOf(0xFFFF5252));
+                        btnAction.setTextColor(0xFF111111);
+                    } else {
+                        btnAction.setText(ctx.getString(R.string.start));
+                        btnAction.setBackgroundTintList(android.content.res.ColorStateList.valueOf(0xFF2B221E));
+                        btnAction.setTextColor(0xFFF0F0F0);
+                    }
+                    btnAction.setOnClickListener(v -> {
+                        eu.kodanetwork.mchost.util.HapticUtil.forceVibrate(v.getContext(), 50);
+                        if (st == ServerInstance.State.ONLINE || st == ServerInstance.State.STARTING) {
+                            android.content.Intent intent = new android.content.Intent(ctx, KodaServerService.class);
+                            intent.setAction(KodaServerService.ACTION_STOP);
+                            intent.putExtra(KodaServerService.EXTRA_ID, s.getId());
+                            if (android.os.Build.VERSION.SDK_INT >= 26) ctx.startForegroundService(intent);
+                            else ctx.startService(intent);
+                        } else {
+                            s.state = ServerInstance.State.STARTING;
+                            eu.kodanetwork.mchost.model.ServerRepo.get(ctx).update(s);
+                            android.content.Intent intent = new android.content.Intent(ctx, KodaServerService.class);
+                            intent.setAction(KodaServerService.ACTION_START);
+                            intent.putExtra(KodaServerService.EXTRA_ID, s.getId());
+                            if (android.os.Build.VERSION.SDK_INT >= 26) ctx.startForegroundService(intent);
+                            else ctx.startService(intent);
+                        }
+                    });
+                }
+
+                View.OnClickListener cardClick = v -> {
+                    eu.kodanetwork.mchost.util.HapticUtil.forceVibrate(v.getContext(), 40);
+                    click.on(s);
+                };
+                itemView.setOnClickListener(cardClick);
+                eu.kodanetwork.mchost.util.ThemeHelper.applyToView(itemView, isLight, themeColor, isCyber);
+                return; // Done for databases
+            }
+
+            // === NORMAL SERVER CARD (below) ===
+            // Reset views that might have been hidden by database card
+            if (ivServerIcon != null) ivServerIcon.setVisibility(View.VISIBLE);
+            TextView tvTpsReset = itemView.findViewById(R.id.tv_tps);
+            if (tvTpsReset != null) {
+                View tpsParent = (View) tvTpsReset.getParent();
+                if (tpsParent != null) tpsParent.setVisibility(View.VISIBLE);
+            }
 
             // Real RAM info
             int ramTotal = s.getRamMB();
@@ -134,6 +265,12 @@ public class ServerCardAdapter extends RecyclerView.Adapter<ServerCardAdapter.VH
                     }).start();
                 } else {
                     ivServerIcon.setImageResource(R.mipmap.ic_launcher);
+                    if (isLight) {
+                        // In light mode, the background becomes LIGHT_CELL (pinkish), so we tint the logo to be solid orange to stand out
+                        ivServerIcon.setColorFilter(0xFFFF8C38, android.graphics.PorterDuff.Mode.SRC_IN);
+                    } else {
+                        ivServerIcon.clearColorFilter();
+                    }
                 }
             }
 
@@ -155,11 +292,14 @@ public class ServerCardAdapter extends RecyclerView.Adapter<ServerCardAdapter.VH
             badge.setText(label);
             badge.setTextColor(textCol);
             
-            String verText = s.getType().name() + " • ";
-            if (s.state == ServerInstance.State.ONLINE) {
-                verText += s.onlinePlayerNames.size() + " " + ctx.getString(R.string.players);
-            } else {
-                verText += s.getVersion();
+            String verText = s.getType().name();
+            if (!s.isDatabase()) {
+                verText += " • ";
+                if (s.state == ServerInstance.State.ONLINE) {
+                    verText += s.onlinePlayerNames.size() + " " + ctx.getString(R.string.players);
+                } else {
+                    verText += s.getVersion();
+                }
             }
             if (ver != null) ver.setText(verText);
 
@@ -210,6 +350,9 @@ public class ServerCardAdapter extends RecyclerView.Adapter<ServerCardAdapter.VH
             };
             
             itemView.setOnClickListener(cardClick);
+
+            // Apply theme LAST so that dynamic colors on btnAction are properly styled for light mode
+            eu.kodanetwork.mchost.util.ThemeHelper.applyToView(itemView, isLight, themeColor, isCyber);
         }
     }
 }

@@ -16,16 +16,16 @@
             android:layout_weight="1" android:orientation="vertical">
             <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
                 android:text="@string/app_name" android:textColor="#FF8C00"
-                android:textSize="17sp" android:fontFamily="@font/press_start_2p" android:textStyle="normal"
+                android:textSize="12sp" android:fontFamily="@font/press_start_2p" android:textStyle="normal"
                 android:shadowColor="#FF4500" android:shadowDx="1.0" android:shadowDy="1.0" android:shadowRadius="1.5"
                 android:maxLines="1" android:singleLine="true"
                 app:autoSizeTextType="uniform"
-                app:autoSizeMinTextSize="10sp"
-                app:autoSizeMaxTextSize="17sp"/>
+                app:autoSizeMinTextSize="6sp"
+                app:autoSizeMaxTextSize="12sp"/>
         </LinearLayout>
 
-        <TextView android:id="@+id/tv_server_count" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1"
-            android:layout_marginStart="24dp"
+        <TextView android:id="@+id/tv_server_count" android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:layout_marginStart="8dp" android:layout_marginEnd="16dp"
             android:text="" android:textColor="#8A8A9A"
             android:textSize="11sp" android:fontFamily="sans-serif-medium" android:letterSpacing="0.1"/>
 
@@ -33,6 +33,13 @@
             android:text="@string/log_button" android:textColor="#8A8A9A"
             android:textSize="11sp" android:fontFamily="sans-serif-medium" android:letterSpacing="0.1"
             android:layout_marginEnd="16dp" android:background="?attr/selectableItemBackground" android:padding="4dp"/>
+
+        <TextView android:id="@+id/btn_support_main"
+            android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:text="🎟️" android:textColor="#8A8A9A"
+            android:textSize="18sp"
+            android:padding="10dp"
+            android:background="?attr/selectableItemBackgroundBorderless"/>
 
         <TextView android:id="@+id/btn_settings"
             android:layout_width="wrap_content" android:layout_height="wrap_content"
@@ -89,11 +96,24 @@
         android:layout_width="match_parent" android:layout_height="wrap_content"
         android:minHeight="60dp"
         android:orientation="horizontal" android:gravity="center_vertical"
-        android:background="#16110D" android:paddingStart="20dp" android:paddingEnd="16dp">
+        android:background="#16110D" android:paddingStart="16dp" android:paddingEnd="16dp"
+        android:paddingTop="6dp" android:paddingBottom="6dp">
         <TextView android:layout_width="0dp" android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="kodanetwork.eu" android:textColor="#2A2A35"
             android:textSize="11sp" android:fontFamily="sans-serif"/>
+        
+        <com.google.android.material.button.MaterialButton android:id="@+id/fab_add_db"
+            android:layout_width="wrap_content" android:layout_height="40dp"
+            android:text="＋ DB" android:textColor="#AAAAAA"
+            android:textSize="11sp" android:fontFamily="sans-serif-medium"
+            android:backgroundTint="#1A1A24"
+            app:cornerRadius="20dp"
+            android:insetTop="0dp" android:insetBottom="0dp"
+            android:layout_marginEnd="8dp"
+            android:minWidth="0dp"
+            android:paddingStart="14dp" android:paddingEnd="14dp"
+            app:strokeColor="#2A2A35" app:strokeWidth="1dp"/>
         <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton android:id="@+id/fab_add"
             android:layout_width="wrap_content" android:layout_height="wrap_content"
             android:text="@string/new_server_btn" android:textColor="#FFFFFF"

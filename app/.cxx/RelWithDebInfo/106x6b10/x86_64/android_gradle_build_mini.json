@@ -1,0 +1,27 @@
+{
+  "buildFiles": [
+    "C:\\Users\\Home\\KodaHosting\\KodaNetwork\\app\\src\\main\\cpp\\CMakeLists.txt"
+  ],
+  "cleanCommandsComponents": [
+    [
+      "C:\\Users\\Home\\AppData\\Local\\Android\\Sdk\\cmake\\3.22.1\\bin\\ninja.exe",
+      "-C",
+      "C:\\Users\\Home\\KodaHosting\\KodaNetwork\\app\\.cxx\\RelWithDebInfo\\106x6b10\\x86_64",
+      "clean"
+    ]
+  ],
+  "buildTargetsCommandComponents": [
+    "C:\\Users\\Home\\AppData\\Local\\Android\\Sdk\\cmake\\3.22.1\\bin\\ninja.exe",
+    "-C",
+    "C:\\Users\\Home\\KodaHosting\\KodaNetwork\\app\\.cxx\\RelWithDebInfo\\106x6b10\\x86_64",
+    "{LIST_OF_TARGETS_TO_BUILD}"
+  ],
+  "libraries": {
+    "embeddedjvm::@6890427a1f51a3e7e1df": {
+      "artifactName": "embeddedjvm",
+      "abi": "x86_64",
+      "output": "C:\\Users\\Home\\KodaHosting\\KodaNetwork\\app\\build\\intermediates\\cxx\\RelWithDebInfo\\106x6b10\\obj\\x86_64\\libembeddedjvm.so",
+      "runtimeFiles": []
+    }
+  }
+}

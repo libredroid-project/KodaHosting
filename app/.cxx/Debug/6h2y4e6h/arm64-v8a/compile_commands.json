@@ -1,0 +1,7 @@
+[
+{
+  "directory": "C:/Users/Home/KodaHosting/KodaNetwork/app/.cxx/Debug/6h2y4e6h/arm64-v8a",
+  "command": "C:\\Users\\Home\\AppData\\Local\\Android\\Sdk\\ndk\\25.1.8937393\\toolchains\\llvm\\prebuilt\\windows-x86_64\\bin\\clang++.exe --target=aarch64-none-linux-android26 --sysroot=C:/Users/Home/AppData/Local/Android/Sdk/ndk/25.1.8937393/toolchains/llvm/prebuilt/windows-x86_64/sysroot -Dembeddedjvm_EXPORTS -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security  -std=c++17 -fno-limit-debug-info  -fPIC -o CMakeFiles\\embeddedjvm.dir\\EmbeddedJvm.cpp.o -c C:\\Users\\Home\\KodaHosting\\KodaNetwork\\app\\src\\main\\cpp\\EmbeddedJvm.cpp",
+  "file": "C:\\Users\\Home\\KodaHosting\\KodaNetwork\\app\\src\\main\\cpp\\EmbeddedJvm.cpp"
+}
+]

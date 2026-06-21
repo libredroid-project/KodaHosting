@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="NumberPickerTheme" parent="Theme.AppCompat.Light">
+        <item name="android:textColorPrimary">#FFFFFF</item>
+        <item name="colorControlNormal">#FF6B00</item>
+    </style>
+</resources>

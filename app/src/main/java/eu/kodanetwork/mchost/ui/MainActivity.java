@@ -82,7 +82,12 @@ public class MainActivity extends AppCompatActivity {
             prefs.edit().putString("app_uuid", java.util.UUID.randomUUID().toString()).apply();
         }
 
+        // Initialize Google Play Integrity API check
+        eu.kodanetwork.mchost.security.KodaIntegrityHelper.checkIntegrity(this);
+
         setContentView(R.layout.activity_main);
+        
+        eu.kodanetwork.mchost.orchestration.DatabaseOrchestrator.ensureDatabasesExtracted(this);
 
         // Apply light mode background early
         eu.kodanetwork.mchost.util.NetworkMonitorManager.init(this);
@@ -114,6 +119,45 @@ public class MainActivity extends AppCompatActivity {
                 fab.setOnClickListener(v -> {
                     eu.kodanetwork.mchost.util.HapticUtil.forceVibrate(this, 80);
                     startActivity(new Intent(this, CreateServerActivity.class));
+                });
+            }
+
+            View fabDb = findViewById(R.id.fab_add_db);
+            if (fabDb != null) {
+                fabDb.setOnClickListener(v -> {
+                    eu.kodanetwork.mchost.util.HapticUtil.forceVibrate(this, 80);
+                    startActivity(new Intent(this, CreateDatabaseActivity.class));
+                });
+            }
+
+            View btnSupportMain = findViewById(R.id.btn_support_main);
+            if (btnSupportMain != null) {
+                btnSupportMain.setOnClickListener(v -> {
+                    eu.kodanetwork.mchost.util.HapticUtil.forceVibrate(this, 80);
+                    SupportSelectionDialog dialog = new SupportSelectionDialog(this, new SupportSelectionDialog.SupportDialogListener() {
+                        @Override
+                        public void onReportBugClicked() {
+                            // Open create bug ticket UI
+                            Intent intent = new Intent(MainActivity.this, CreateSupportTicketActivity.class);
+                            intent.putExtra("TICKET_TYPE", "BUG");
+                            startActivity(intent);
+                        }
+
+                        @Override
+                        public void onReportServerClicked() {
+                            // Open create server ticket UI
+                            Intent intent = new Intent(MainActivity.this, CreateSupportTicketActivity.class);
+                            intent.putExtra("TICKET_TYPE", "SERVER_REPORT");
+                            startActivity(intent);
+                        }
+
+                        @Override
+                        public void onMyTicketsClicked() {
+                            // Open ticket list
+                            startActivity(new Intent(MainActivity.this, SupportTicketListActivity.class));
+                        }
+                    });
+                    dialog.show();
                 });
             }
 
@@ -174,6 +218,40 @@ public class MainActivity extends AppCompatActivity {
                 finishAffinity();
                 System.exit(0);
             });
+
+            TextView tvTosContent = dialog.findViewById(R.id.tv_tos_content);
+            String tosHtml = "<b>Terms of Service</b><br><br>" +
+                "<font color='#888899'>Last Updated: June 2026</font><br><br>" +
+                "By downloading, installing, or using the KodaHosting mobile application and related services, you agree to comply with and be bound by these Terms of Service. If you do not agree to these Terms, you must uninstall the app and cease using our services immediately.<br><br>" +
+                "<b>Eligibility & Age Requirements</b><br>" +
+                "You must be at least 13 years old (or 16 in certain EU jurisdictions) to use this Service. By agreeing to these Terms, you represent and warrant that you meet these age requirements.<br><br>" +
+                "<b>1. Service Overview</b><br>" +
+                "KodaHosting provides a mobile environment and networking infrastructure that allows you to host Minecraft servers directly from your Android device. We provide the networking tunnels to proxy incoming player connections securely to your device.<br><br>" +
+                "<b>2. Acceptable Use Policy</b><br>" +
+                "You agree to use KodaHosting solely for its intended purpose: hosting personal game servers. You are entirely responsible for the content, worlds, and plugins loaded onto your servers.<br><br>" +
+                "<font color='#FF4444'><b>Strict Prohibitions</b></font><br>" +
+                "The following actions are strictly prohibited and will result in an immediate, permanent ban from KodaHosting services without warning or refund:<br>" +
+                "&#8226; <b>Reverse Engineering:</b> You may not decompile, reverse engineer, decrypt, or otherwise attempt to extract the source code of the KodaHosting App, our official plugins, or our proprietary networking binaries.<br>" +
+                "&#8226; <b>Unauthorized Tunnels:</b> You may not use the KodaHosting network infrastructure to host unauthorized tunnels, VPNs, proxies, or any traffic that is not standard Minecraft gameplay data.<br>" +
+                "&#8226; <b>Malicious Activity & Password Stealing:</b> You may not use our services to host malware, execute phishing campaigns, or attempt to steal passwords, session tokens, or personal data from joining players or other users.<br><br>" +
+                "<b>3. Service Reliability & Uptime</b><br>" +
+                "Because the servers run on your own hardware, uptime depends directly on your device's power state and network connectivity. KodaHosting does not guarantee 100% uptime for our central proxy routing infrastructure, though we strive for maximum reliability.<br><br>" +
+                "<b>4. Account Termination</b><br>" +
+                "We reserve the right to suspend or terminate your account and access to the KodaHosting proxy infrastructure at any time, for any reason, particularly if you violate the Acceptable Use Policy.<br><br>" +
+                "<b>5. Disclaimer of Warranties</b><br>" +
+                "THE SERVICE IS PROVIDED ON AN \"AS IS\" AND \"AS AVAILABLE\" BASIS. WE EXPRESSLY DISCLAIM ALL WARRANTIES OF ANY KIND, WHETHER EXPRESS OR IMPLIED. We do not guarantee that the service will be uninterrupted, secure, or error-free, nor do we guarantee the safety of your device data.<br><br>" +
+                "<b>6. Limitation of Liability</b><br>" +
+                "TO THE MAXIMUM EXTENT PERMITTED BY LAW, KODAHOSTING SHALL NOT BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES, OR ANY LOSS OF DATA (INCLUDING SERVER WORLDS OR CONFIGURATIONS), RESULTING FROM YOUR USE OF THE APP.<br><br>" +
+                "<b>7. Governing Law</b><br>" +
+                "These Terms shall be governed by and construed in accordance with the laws of the European Union and applicable local laws.<br><br>" +
+                "<b>8. Changes to Terms</b><br>" +
+                "We reserve the right to modify these Terms of Service at any time. Continued use of the app after any such changes shall constitute your consent to such changes.";
+            tvTosContent.setText(android.text.Html.fromHtml(tosHtml, android.text.Html.FROM_HTML_MODE_LEGACY));
+
+            eu.kodanetwork.mchost.util.HapticUtil.forceVibrate(this, 200);
+            new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
+                eu.kodanetwork.mchost.util.HapticUtil.forceVibrate(this, 300);
+            }, 300);
 
             dialog.show();
         }
@@ -293,7 +371,75 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
         refresh();
+        checkAppStatus();
         checkOfflineHibernations();
+    }
+
+    private void checkAppStatus() {
+        new Thread(() -> {
+            try {
+                String uuid = eu.kodanetwork.mchost.App.getPrefs(this).getString("app_uuid", "");
+                String apiKey = eu.kodanetwork.mchost.security.PraetorSecurity.getSupabaseKey();
+                String baseUrl = eu.kodanetwork.mchost.security.PraetorSecurity.getSupabaseUrl();
+                okhttp3.OkHttpClient client = new okhttp3.OkHttpClient();
+
+                // Check Ban Status
+                if (!uuid.isEmpty()) {
+                    okhttp3.Request userReq = new okhttp3.Request.Builder()
+                        .url(baseUrl + "/rest/v1/koda_users?app_uuid=eq." + uuid + "&select=is_banned")
+                        .addHeader("apikey", apiKey)
+                        .addHeader("Authorization", "Bearer " + apiKey)
+                        .build();
+                    try (okhttp3.Response response = client.newCall(userReq).execute()) {
+                        if (response.isSuccessful() && response.body() != null) {
+                            String json = response.body().string();
+                            if (json.contains("\"is_banned\":true") || json.contains("\"is_banned\": true")) {
+                                runOnUiThread(() -> {
+                                    startActivity(new Intent(MainActivity.this, BannedActivity.class));
+                                    finish();
+                                });
+                                return;
+                            }
+                        }
+                    } catch (Exception ignored) {}
+                }
+
+                // Check Maintenance Mode
+                okhttp3.Request maintReq = new okhttp3.Request.Builder()
+                    .url(baseUrl + "/rest/v1/app_settings?key=eq.maintenance_mode&select=value")
+                    .addHeader("apikey", apiKey)
+                    .addHeader("Authorization", "Bearer " + apiKey)
+                    .build();
+                try (okhttp3.Response response = client.newCall(maintReq).execute()) {
+                    if (response.isSuccessful() && response.body() != null) {
+                        String json = response.body().string();
+                        if (json.contains("\"active\":true") || json.contains("\"active\": true")) {
+                            // extract reason and duration via simple string search or JSON parsing
+                            String reason = "System Maintenance";
+                            int duration = 60;
+                            try {
+                                org.json.JSONArray arr = new org.json.JSONArray(json);
+                                if (arr.length() > 0) {
+                                    org.json.JSONObject val = arr.getJSONObject(0).getJSONObject("value");
+                                    reason = val.optString("reason", reason);
+                                    duration = val.optInt("duration_minutes", duration);
+                                }
+                            } catch (Exception ignored) {}
+
+                            final String finalReason = reason;
+                            final int finalDuration = duration;
+                            runOnUiThread(() -> {
+                                Intent intent = new Intent(MainActivity.this, MaintenanceActivity.class);
+                                intent.putExtra("reason", finalReason);
+                                intent.putExtra("duration", finalDuration);
+                                startActivity(intent);
+                                finish();
+                            });
+                        }
+                    }
+                } catch (Exception ignored) {}
+            } catch (Exception ignored) {}
+        }).start();
     }
 
     private void checkOfflineHibernations() {

@@ -1,0 +1,15 @@
+351665948d32a6ba0a3818314b0373b6  data/data/com.termux/files/usr/share/man/man1/zstdgrep.1.gz
+b8ac251a295c8af39cfe8e793fae10de  data/data/com.termux/files/usr/share/man/man1/zstdless.1.gz
+3c83c4fb52801ad218a872baee10c294  data/data/com.termux/files/usr/share/man/man1/zstd.1.gz
+27dc089a0f0741e6193402342ccf4e5d  data/data/com.termux/files/usr/lib/libzstd.so.1.5.7
+883d258438085f605f6894346097b219  data/data/com.termux/files/usr/lib/pkgconfig/libzstd.pc
+bef62ec42a8fdd6d4eb31bfa416149ee  data/data/com.termux/files/usr/lib/cmake/zstd/zstdConfig.cmake
+65c7685cb3203a33d6b1b01e7ab8e2c3  data/data/com.termux/files/usr/lib/cmake/zstd/zstdTargets-release.cmake
+716102cfbd666456b907b0b951db0f5f  data/data/com.termux/files/usr/lib/cmake/zstd/zstdConfigVersion.cmake
+e26318ae002bf7ce129da249277dd9be  data/data/com.termux/files/usr/lib/cmake/zstd/zstdTargets.cmake
+813a0eb9155b0ef6516d815c53cef35b  data/data/com.termux/files/usr/bin/zstdless
+5e82e5cc52569aaed973af940621f373  data/data/com.termux/files/usr/bin/zstd
+3e4b9f1567d9c38929a9aa8e183e5e7a  data/data/com.termux/files/usr/bin/zstdgrep
+c41245e70dc8b3520adab14d208c8b46  data/data/com.termux/files/usr/include/zstd_errors.h
+0885616b65e9f8a4ec3d90c27aa9b289  data/data/com.termux/files/usr/include/zstd.h
+6576e2f31efa67d1609fe87d23b25950  data/data/com.termux/files/usr/include/zdict.h

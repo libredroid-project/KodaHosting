@@ -76,7 +76,7 @@ public class CreateServerActivity extends AppCompatActivity {
     private android.widget.NumberPicker npServerType;
     private View layoutNameSection, layoutTypeSection, layoutVersionSection, layoutSetupSection;
     private MaterialButton btnCreate, btnImport, btnImportZip;
-    private ImageButton btnBack;
+    private android.widget.ImageButton btnBack;
     private com.google.android.material.switchmaterial.SwitchMaterial swUseNative;
     private android.widget.RadioGroup rgSetupType;
     private String selectedColor = "#FF6B00";
@@ -116,7 +116,34 @@ public class CreateServerActivity extends AppCompatActivity {
     );
 
     private String lastTheme = "modern";
+    private String lastThemeMode = "dark";
 
+    private void animateLightBlob(android.view.View blob) {
+        if (blob == null || blob.getVisibility() != android.view.View.VISIBLE) return;
+        
+        float randomX = (float) (Math.random() * 600 - 300);
+        float randomY = (float) (Math.random() * 600 - 300);
+        
+        blob.animate()
+            .translationX(randomX)
+            .translationY(randomY)
+            .setDuration(4000)
+            .setInterpolator(new android.view.animation.AccelerateDecelerateInterpolator())
+            .withEndAction(() -> animateLightBlob(blob))
+            .start();
+    }
+
+    private boolean isLight() {
+        return eu.kodanetwork.mchost.util.ThemeHelper.isLightMode(this);
+    }
+
+    private int pageBg() {
+        return isLight() ? 0xFFF3F4F6 : 0xFF0A0807;
+    }
+
+    private int headerBg() {
+        return isLight() ? 0xFFFFFFFF : 0xFF1B1613;
+    }
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -129,18 +156,62 @@ public class CreateServerActivity extends AppCompatActivity {
             findViewById(android.R.id.content).getRootView().setBackgroundResource(R.drawable.bg_cyber_grid);
         }
 
-        // Apply light mode background early
-        if (eu.kodanetwork.mchost.util.ThemeHelper.isLightMode(this)) {
-            findViewById(android.R.id.content).setBackgroundColor(0xFFF5F5F5);
-            if (android.os.Build.VERSION.SDK_INT >= 23) {
-                getWindow().setStatusBarColor(0xFFF5F5F5);
-                getWindow().getDecorView().setSystemUiVisibility(
-                    android.view.View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR | android.view.View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR);
-                getWindow().setNavigationBarColor(0xFFF5F5F5);
-            }
-        }
-        
         lastThemeMode = prefs.getString("theme_mode", "dark");
+        boolean isLight = eu.kodanetwork.mchost.util.ThemeHelper.isLightMode(this);
+
+        // Apply background and status/nav bar colors
+        int pageColor = pageBg();
+        int headerColor = headerBg();
+
+        findViewById(android.R.id.content).setBackgroundColor(pageColor);
+        findViewById(R.id.main_scroll).setBackgroundColor(pageColor);
+        
+        android.view.View mainScroll = findViewById(R.id.main_scroll);
+        if (mainScroll instanceof android.view.ViewGroup) {
+            ((android.view.ViewGroup) mainScroll).setClipToPadding(false);
+        }
+
+        findViewById(R.id.top_bar_container).setBackgroundColor(headerColor);
+        if (android.os.Build.VERSION.SDK_INT >= 23) {
+            getWindow().addFlags(android.view.WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+            getWindow().clearFlags(android.view.WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+            getWindow().setStatusBarColor(android.graphics.Color.TRANSPARENT);
+            getWindow().setNavigationBarColor(android.graphics.Color.TRANSPARENT);
+            
+            // Apply Edge-to-Edge properly bypassing global hack
+            if (android.os.Build.VERSION.SDK_INT >= 30) {
+                getWindow().setDecorFitsSystemWindows(false);
+            } else {
+                getWindow().getDecorView().setSystemUiVisibility(
+                    android.view.View.SYSTEM_UI_FLAG_LAYOUT_STABLE |
+                    android.view.View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN |
+                    android.view.View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                );
+            }
+            
+            // Route the padding properly!
+            findViewById(R.id.root_layout).setOnApplyWindowInsetsListener((v, insets) -> {
+                android.view.View topBar = findViewById(R.id.top_bar_container);
+                if (topBar != null) topBar.setPadding(0, insets.getSystemWindowInsetTop(), 0, 0);
+                
+                android.view.View scroll = findViewById(R.id.main_scroll);
+                if (scroll != null) scroll.setPadding(scroll.getPaddingLeft(), 0, scroll.getPaddingRight(), insets.getSystemWindowInsetBottom() + 120);
+                
+                return insets.consumeSystemWindowInsets();
+            });
+
+            if (isLight) {
+                int flags = getWindow().getDecorView().getSystemUiVisibility();
+                flags |= android.view.View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR | android.view.View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR;
+                getWindow().getDecorView().setSystemUiVisibility(flags);
+            }
+            
+            // Handle ThemeHelper overriding it later
+            new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
+                getWindow().setStatusBarColor(android.graphics.Color.TRANSPARENT);
+                getWindow().setNavigationBarColor(android.graphics.Color.TRANSPARENT);
+            }, 500);
+        }
 
         etName          = findViewById(R.id.et_name);
         seekRam         = findViewById(R.id.seek_ram);
@@ -1056,6 +1127,7 @@ public class CreateServerActivity extends AppCompatActivity {
         if (loadingOverlay != null && loadingText != null) {
             loadingText.setText("Prüfe Servername...");
             loadingOverlay.setVisibility(android.view.View.VISIBLE);
+            animateLightBlob(findViewById(R.id.java_extract_light_blob));
         }
 
         executor.submit(() -> {
@@ -1170,7 +1242,6 @@ public class CreateServerActivity extends AppCompatActivity {
         }
     }
 
-    private String lastThemeMode = "dark";
 
     @Override
     protected void onResume() {

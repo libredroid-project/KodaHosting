@@ -1,0 +1,4 @@
+# ninja log v5
+1	18	0	clean	5317178f812570d5
+0	476	8016072934275075	CMakeFiles/embeddedjvm.dir/EmbeddedJvm.cpp.o	9fa5a2a9decb27a
+479	611	8016072935630382	C:/Users/Home/KodaHosting/KodaNetwork/app/build/intermediates/cxx/Debug/6h2y4e6h/obj/x86/libembeddedjvm.so	2e51591cefe95d12

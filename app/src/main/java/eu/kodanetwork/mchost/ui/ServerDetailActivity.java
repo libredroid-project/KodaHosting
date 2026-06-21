@@ -202,6 +202,10 @@ public class ServerDetailActivity extends AppCompatActivity {
         currentDir = new File(server.getServerDir());
 
         bindViews();
+        if (server.isDatabase()) {
+            setupDatabaseOverrides();
+        }
+
         ((TextView) findViewById(R.id.tv_title)).setText(server.getName());
         ImageButton btnBack = findViewById(R.id.btn_back);
         btnBack.setOnClickListener(v -> finish());
@@ -357,7 +361,7 @@ public class ServerDetailActivity extends AppCompatActivity {
 
         // Java check — uses exec() to actually test java, runs in background
         tvJavaInfo.setText("checking java…");
-        tvJavaInfo.setTextColor(Color.parseColor("#888888"));
+        tvJavaInfo.setTextColor(eu.kodanetwork.mchost.util.ThemeHelper.isLightMode(this) ? 0xFF555566 : Color.parseColor("#888888"));
         new Thread(() -> {
             String javaPath = JavaFinder.find(this);
             runOnUiThread(() -> {
@@ -372,19 +376,101 @@ public class ServerDetailActivity extends AppCompatActivity {
         }).start();
     }
 
+    private void setupDatabaseOverrides() {
+        // Hide standard server dashboard elements
+        View cardPlayers = findViewById(R.id.card_players);
+        if (cardPlayers != null) cardPlayers.setVisibility(View.GONE);
+        if (tvJoinAddr != null) ((View)tvJoinAddr.getParent()).setVisibility(View.GONE);
+        View layoutBedrockPort = findViewById(R.id.layout_bedrock_port);
+        if (layoutBedrockPort != null) layoutBedrockPort.setVisibility(View.GONE);
+
+        // Hide standard settings cards
+        View cardRam = findViewById(R.id.card_settings_ram);
+        if (cardRam != null) cardRam.setVisibility(View.GONE);
+        View cardNetwork = findViewById(R.id.card_settings_network);
+        if (cardNetwork != null) cardNetwork.setVisibility(View.GONE);
+        View cardGameplay = findViewById(R.id.card_settings_gameplay);
+        if (cardGameplay != null) cardGameplay.setVisibility(View.GONE);
+        View layoutNetwork = findViewById(R.id.layout_network);
+        if (layoutNetwork != null) ((View)layoutNetwork.getParent()).setVisibility(View.GONE);
+        View cardDatabaseSettings = findViewById(R.id.card_database_settings);
+        if (cardDatabaseSettings != null) cardDatabaseSettings.setVisibility(View.VISIBLE);
+
+        View btnDlJar = findViewById(R.id.btn_dl_jar);
+        if (btnDlJar != null) btnDlJar.setVisibility(View.GONE);
+        View tvIconTitle = findViewById(R.id.tv_icon_title);
+        if (tvIconTitle != null) tvIconTitle.setVisibility(View.GONE);
+        View layoutServerIcon = findViewById(R.id.layout_server_icon);
+        if (layoutServerIcon != null) layoutServerIcon.setVisibility(View.GONE);
+        
+        // Hide plugins tab logic handles this below in setupTabs
+        // Setup DB Settings Logic
+        EditText etDbName = findViewById(R.id.et_db_name);
+        EditText etDbUser = findViewById(R.id.et_db_user);
+        EditText etDbPass = findViewById(R.id.et_db_pass);
+        ImageButton btnTogglePass = findViewById(R.id.btn_toggle_pass);
+        if (btnTogglePass != null && etDbPass != null) {
+            btnTogglePass.setOnClickListener(v -> {
+                if (etDbPass.getInputType() == android.text.InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD) {
+                    etDbPass.setInputType(android.text.InputType.TYPE_CLASS_TEXT | android.text.InputType.TYPE_TEXT_VARIATION_PASSWORD);
+                    btnTogglePass.setImageResource(android.R.drawable.ic_menu_view);
+                } else {
+                    etDbPass.setInputType(android.text.InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD);
+                    btnTogglePass.setImageResource(android.R.drawable.ic_menu_close_clear_cancel);
+                }
+                etDbPass.setSelection(etDbPass.getText().length());
+            });
+        }
+        if (etDbName != null) {
+            etDbName.setText(server.getName());
+            etDbName.addTextChangedListener(new android.text.TextWatcher() {
+                @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+                @Override public void onTextChanged(CharSequence s, int start, int before, int count) {}
+                @Override public void afterTextChanged(android.text.Editable s) {
+                    server.setName(s.toString().trim());
+                    repo.update(server);
+                }
+            });
+        }
+        if (etDbUser != null) {
+            etDbUser.setText(server.getDbUsername());
+            etDbUser.addTextChangedListener(new android.text.TextWatcher() {
+                @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+                @Override public void onTextChanged(CharSequence s, int start, int before, int count) {}
+                @Override public void afterTextChanged(android.text.Editable s) {
+                    server.setDbUsername(s.toString().trim());
+                    repo.update(server);
+                }
+            });
+        }
+        if (etDbPass != null) {
+            etDbPass.setText(server.getDbPassword());
+            etDbPass.addTextChangedListener(new android.text.TextWatcher() {
+                @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+                @Override public void onTextChanged(CharSequence s, int start, int before, int count) {}
+                @Override public void afterTextChanged(android.text.Editable s) {
+                    server.setDbPassword(s.toString().trim());
+                    repo.update(server);
+                }
+            });
+        }
+    }
+
     // ── Tabs ─────────────────────────────────────────────────────────────────
 
     private void setupTabs() {
         tabs.addTab(tabs.newTab().setText(R.string.tab_dashboard));
         tabs.addTab(tabs.newTab().setText(R.string.tab_console));
         tabs.addTab(tabs.newTab().setText(R.string.tab_files));
-        String pluginTabName = "Plugins";
-        if (server != null && (server.getType() == eu.kodanetwork.mchost.model.ServerInstance.Type.FABRIC || 
-                               server.getType() == eu.kodanetwork.mchost.model.ServerInstance.Type.FORGE || 
-                               server.getType() == eu.kodanetwork.mchost.model.ServerInstance.Type.NEOFORGE)) {
-            pluginTabName = "Mods";
+        if (!server.isDatabase()) {
+            String pluginTabName = "Plugins";
+            if (server != null && (server.getType() == eu.kodanetwork.mchost.model.ServerInstance.Type.FABRIC || 
+                                   server.getType() == eu.kodanetwork.mchost.model.ServerInstance.Type.FORGE || 
+                                   server.getType() == eu.kodanetwork.mchost.model.ServerInstance.Type.NEOFORGE)) {
+                pluginTabName = "Mods";
+            }
+            tabs.addTab(tabs.newTab().setText(pluginTabName));
         }
-        tabs.addTab(tabs.newTab().setText(pluginTabName));
         tabs.addTab(tabs.newTab().setText(R.string.tab_settings));
         tabs.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override public void onTabSelected(TabLayout.Tab t) {
@@ -469,7 +555,7 @@ public class ServerDetailActivity extends AppCompatActivity {
         if (hasOffline) {
             TextView header2 = new TextView(this);
             header2.setText(R.string.players_offline_known);
-            header2.setTextColor(Color.GRAY);
+            header2.setTextColor(eu.kodanetwork.mchost.util.ThemeHelper.isLightMode(this) ? 0xFF555566 : Color.GRAY);
             header2.setTextSize(12);
             header2.setPadding(48, shown.isEmpty() ? pad : pad*2, 48, pad/2);
             container.addView(header2);
@@ -484,7 +570,8 @@ public class ServerDetailActivity extends AppCompatActivity {
         if (container.getChildCount() == 2) { // Only Title and Divider
             TextView empty = new TextView(this);
             empty.setText(R.string.players_none_known);
-            empty.setTextColor(0xFF888899);
+            boolean light = eu.kodanetwork.mchost.util.ThemeHelper.isLightMode(this);
+            empty.setTextColor(light ? 0xFF555566 : 0xFF888899);
             empty.setPadding(48, pad, 48, pad);
             container.addView(empty);
         }
@@ -590,11 +677,12 @@ public class ServerDetailActivity extends AppCompatActivity {
     }
 
     private void showTab(int i) {
+        int targetSettings = server.isDatabase() ? 3 : 4;
         pDash    .setVisibility(i == 0 ? View.VISIBLE : View.GONE);
         pConsole .setVisibility(i == 1 ? View.VISIBLE : View.GONE);
         pFiles   .setVisibility(i == 2 ? View.VISIBLE : View.GONE);
-        if (pPlugins != null) pPlugins.setVisibility(i == 3 ? View.VISIBLE : View.GONE);
-        pSettings.setVisibility(i == 4 ? View.VISIBLE : View.GONE);
+        if (pPlugins != null) pPlugins.setVisibility(!server.isDatabase() && i == 3 ? View.VISIBLE : View.GONE);
+        pSettings.setVisibility(i == targetSettings ? View.VISIBLE : View.GONE);
         if (i == 2) refreshFiles();
     }
 
@@ -609,15 +697,19 @@ public class ServerDetailActivity extends AppCompatActivity {
                 serverDir.mkdirs();
             }
             
-            File[] jars = serverDir.listFiles((d, name) -> name.endsWith(".jar"));
-            if (jars == null || jars.length == 0) {
-                eu.kodanetwork.mchost.util.AppLogger.log("UI", "No .jar file found in " + serverDir.getAbsolutePath());
-                Toast.makeText(this, "Bitte zuerst die Server .jar herunterladen (Settings-Tab)", Toast.LENGTH_LONG).show();
-                tabs.selectTab(tabs.getTabAt(4));
-                return;
+            if (!server.isDatabase()) {
+                File[] jars = serverDir.listFiles((d, name) -> name.endsWith(".jar"));
+                if (jars == null || jars.length == 0) {
+                    eu.kodanetwork.mchost.util.AppLogger.log("UI", "No .jar file found in " + serverDir.getAbsolutePath());
+                    Toast.makeText(this, "Bitte zuerst die Server .jar herunterladen (Settings-Tab)", Toast.LENGTH_LONG).show();
+                    tabs.selectTab(tabs.getTabAt(tabs.getTabCount() - 1));
+                    return;
+                }
+                eu.kodanetwork.mchost.util.AppLogger.log("UI", "Found jar: " + jars[0].getName() + ". Binding and starting service...");
+                checkEulaAndStart();
+            } else {
+                checkQueueAndStart();
             }
-            eu.kodanetwork.mchost.util.AppLogger.log("UI", "Found jar: " + jars[0].getName() + ". Binding and starting service...");
-            checkEulaAndStart();
         });
         btnStop   .setOnClickListener(v -> sendAction(KodaServerService.ACTION_STOP));
         btnRestart.setOnClickListener(v -> sendAction(KodaServerService.ACTION_RESTART));
@@ -889,7 +981,7 @@ public class ServerDetailActivity extends AppCompatActivity {
                 }
                 break;
             case HIBERNATED: label = "❄ " + getString(R.string.status_hibernated); col = 0xFF44AAFF; break;
-            default:         label = "○ OFFLINE";    col = 0xFF888888; break;
+            default:         label = "○ OFFLINE";    col = eu.kodanetwork.mchost.util.ThemeHelper.isLightMode(this) ? 0xFF555566 : 0xFF888888; break;
         }
         tvBadge.setText(label);
         tvBadge.setTextColor(col);
@@ -1010,8 +1102,9 @@ public class ServerDetailActivity extends AppCompatActivity {
                 chip.setTextColor(0xFFFF5252);
                 chip.setChipStrokeColor(android.content.res.ColorStateList.valueOf(0xFFFF5252));
             } else {
-                chip.setTextColor(0xFFF0F0F0);
-                chip.setChipStrokeColor(android.content.res.ColorStateList.valueOf(0xFF8A8A9A));
+                boolean light = eu.kodanetwork.mchost.util.ThemeHelper.isLightMode(this);
+                chip.setTextColor(light ? 0xFF333333 : 0xFFF0F0F0);
+                chip.setChipStrokeColor(android.content.res.ColorStateList.valueOf(light ? 0xFFCCCCCC : 0xFF8A8A9A));
             }
             chip.setChipStrokeWidth(3f);
             chip.setChipBackgroundColor(android.content.res.ColorStateList.valueOf(Color.TRANSPARENT));
@@ -1054,7 +1147,7 @@ public class ServerDetailActivity extends AppCompatActivity {
             else if (line.startsWith(">") || line.contains("KodaNet"))  col = Color.parseColor("#FF6B00");
             else if (line.contains("Done (") || line.contains("✓"))    col = Color.parseColor("#00E676");
             else if (line.startsWith("  ─") || line.startsWith("  🍊")) col = Color.parseColor("#FF8C42");
-            else                                                       col = Color.parseColor("#CCCCCC");
+            else                                                       col = eu.kodanetwork.mchost.util.ThemeHelper.isLightMode(this) ? 0xFF333333 : Color.parseColor("#CCCCCC");
 
             int start = ssb.length();
             ssb.append(line).append("\n");
@@ -1176,7 +1269,8 @@ public class ServerDetailActivity extends AppCompatActivity {
         tv.setTextSize(13);
         tv.setPadding(16, 24, 16, 24); // Taller rows for touch
         tv.setTypeface(android.graphics.Typeface.MONOSPACE);
-        tv.setTextColor(text.contains("📁") || text.startsWith("..") ? 0xFFFF6B00 : 0xFFCCCCCC);
+        boolean light = eu.kodanetwork.mchost.util.ThemeHelper.isLightMode(this);
+        tv.setTextColor(text.contains("📁") || text.startsWith("..") ? 0xFFFF6B00 : (light ? 0xFF333333 : 0xFFCCCCCC));
         
         if (file != null) {
             tv.setBackgroundResource(android.R.drawable.list_selector_background);
@@ -1297,12 +1391,15 @@ public class ServerDetailActivity extends AppCompatActivity {
     // ── Settings ──────────────────────────────────────────────────────────────
 
     private void setupSettings() {
+        String addressLabel = server.isDatabase() ? "Verbindungs-Adresse:" : "Beitritts-Adresse:";
+        String addressValue = server.isDatabase() ? "127.0.0.1 (Lokal)" : server.getJoinAddress();
+
         tvSettingsInfo.setText(
             "Name:       " + server.getName() + "\n" +
             "Typ:        " + server.getType().name() + " " + server.getVersion() + "\n" +
             "RAM:        " + server.getRamMB() + " MB\n" +
             "Port:       " + server.getPort() + "\n" +
-            "Beitritts-Adresse:\n" + server.getJoinAddress() + "\n\n" +
+            addressLabel + "\n" + addressValue + "\n\n" +
             "Dateipfad:\n" + server.getServerDir()
         );
         etDomainPrefix.setText(server.getSubdomain());
@@ -1554,13 +1651,19 @@ public class ServerDetailActivity extends AppCompatActivity {
                 }
                 dialog.dismiss();
                     new Thread(() -> {
+                        // 1. Tell service to kill process BEFORE we delete files or the repo entry
+                        if (server.state != ServerInstance.State.OFFLINE) {
+                            sendAction(KodaServerService.ACTION_KILL);
+                            try { Thread.sleep(500); } catch(Exception ignored){}
+                        }
+
                         try {
                             String anonKey = eu.kodanetwork.mchost.security.PraetorSecurity.getSupabaseKey();
                             android.content.SharedPreferences prefs = eu.kodanetwork.mchost.App.getPrefs(this);
                             String token = prefs.getString("koda_session_token", null);
                             String authHeader = token != null ? "Bearer " + token : "Bearer " + anonKey;
                             
-                            // 1. Delete DNS Link
+                            // 2. Delete DNS Link
                             try {
                                 if (server.getSubdomain() != null && !server.getSubdomain().isEmpty()) {
                                     new eu.kodanetwork.mchost.network.supabase.SupabaseFunctionsClient(ServerDetailActivity.this)
@@ -1570,12 +1673,12 @@ public class ServerDetailActivity extends AppCompatActivity {
                                 android.util.Log.e("ServerDetail", "Failed to delete DNS link", e);
                             }
                             
-                            // 2. PATCH to change host and server_version to hide it from lobby (bypasses RLS DELETE restrictions for anon users)
+                            // 3. PATCH to change host and server_version to hide it from lobby
                             try {
                                 java.net.HttpURLConnection patchConn = (java.net.HttpURLConnection) new java.net.URL("https://scsezpfrrmpyuapblbxk.supabase.co/rest/v1/koda_servers?host=eq." + server.getSubdomain()).openConnection();
                                 patchConn.setRequestMethod("PATCH");
                                 patchConn.setRequestProperty("apikey", anonKey);
-                                patchConn.setRequestProperty("Authorization", "Bearer " + anonKey);
+                                patchConn.setRequestProperty("Authorization", authHeader);
                                 patchConn.setRequestProperty("Content-Type", "application/json");
                                 patchConn.setDoOutput(true);
                                 String jsonPatch = "{\"host\": \"deleted_" + server.getSubdomain() + "\", \"server_version\": \"DELETED\"}";
@@ -1585,13 +1688,13 @@ public class ServerDetailActivity extends AppCompatActivity {
                                 android.util.Log.e("ServerDetail", "Failed to patch server", e);
                             }
                             
-                            // 3. Try to actually DELETE the row (now targets the deleted_ host)
+                            // 4. Try to actually DELETE the row (now targets the deleted_ host)
                             try {
                                 java.net.URL url = new java.net.URL("https://scsezpfrrmpyuapblbxk.supabase.co/rest/v1/koda_servers?host=eq.deleted_" + server.getSubdomain());
                                 java.net.HttpURLConnection conn = (java.net.HttpURLConnection) url.openConnection();
                                 conn.setRequestMethod("DELETE");
                                 conn.setRequestProperty("apikey", anonKey);
-                                conn.setRequestProperty("Authorization", "Bearer " + anonKey);
+                                conn.setRequestProperty("Authorization", authHeader);
                                 conn.getResponseCode();
                             } catch (Exception e) {
                                 android.util.Log.e("ServerDetail", "Failed to delete server", e);
@@ -1599,13 +1702,16 @@ public class ServerDetailActivity extends AppCompatActivity {
                         } catch (Exception e) {
                             android.util.Log.e("ServerDetail", "Critical error during deletion", e);
                         }
+
+                        // 5. Delete local files
+                        deleteRecursively(new File(server.getServerDir()));
+
+                        // 6. Delete from repo and close activity on UI thread
+                        runOnUiThread(() -> {
+                            repo.delete(server.getId()); 
+                            finish();
+                        });
                     }).start();
-                    if (server.state != ServerInstance.State.OFFLINE) {
-                        sendAction(KodaServerService.ACTION_KILL);
-                    }
-                    deleteRecursively(new File(server.getServerDir()));
-                    repo.delete(server.getId()); 
-                    finish(); 
             });
             dialog.show();
         });

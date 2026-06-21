@@ -1,0 +1,612 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/settings_root"
+    android:fitsSystemWindows="true"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent" android:layout_height="match_parent"
+    android:orientation="vertical" android:background="#1B1613">
+
+    <!-- TOP BAR -->
+    <LinearLayout android:layout_width="match_parent" android:layout_height="56dp"
+        android:orientation="horizontal" android:gravity="center_vertical"
+        android:background="#1B1613"
+        android:paddingStart="16dp" android:paddingEnd="16dp">
+        <TextView android:id="@+id/btn_back"
+            android:layout_width="40dp" android:layout_height="40dp"
+            android:text="←" android:textColor="#F0F0F0" android:textSize="20sp"
+            android:gravity="center" android:fontFamily="sans-serif-medium"
+            android:background="?attr/selectableItemBackgroundBorderless"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/settings"
+            android:textColor="#FFFFFF"
+            android:textSize="24sp"
+            android:fontFamily="sans-serif-medium"
+            android:layout_gravity="center_vertical"/>
+        <View android:layout_width="0dp" android:layout_height="0dp" android:layout_weight="1"/>
+        <TextView android:id="@+id/tv_settings_version"
+            android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:text="v1.8485" android:textColor="#888899"
+            android:textSize="11sp" android:fontFamily="sans-serif"/>
+    </LinearLayout>
+    
+    <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#241C18"/>
+
+    <ScrollView android:id="@+id/settings_scroll"
+        android:layout_width="match_parent" android:layout_height="match_parent"
+        android:scrollbars="none" android:fillViewport="true">
+        
+        <LinearLayout android:id="@+id/settings_content"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:orientation="vertical" android:padding="16dp" android:clipToPadding="false">
+
+            <!-- MINECRAFT ACCOUNT -->
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                app:cardBackgroundColor="#241C18"
+                app:cardCornerRadius="12dp" app:cardElevation="0dp">
+                
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:orientation="vertical" android:padding="16dp">
+                    
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:text="@string/minecraft_account" android:textColor="#FF6B00"
+                        android:textSize="11sp" android:fontFamily="sans-serif-medium"
+                        android:letterSpacing="0.1" android:layout_marginBottom="6dp"/>
+                        
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:text="@string/link_minecraft_instructions" android:textColor="#888899"
+                        android:textSize="12sp" android:fontFamily="sans-serif"
+                        android:layout_marginBottom="12dp"/>
+
+                    <LinearLayout android:id="@+id/ll_linked_accounts_container"
+                        android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:orientation="vertical">
+                        
+                        <TextView android:id="@+id/tv_link_status"
+                            android:layout_width="wrap_content" android:layout_height="wrap_content"
+                            android:text="@string/not_linked" android:textColor="#FF4444"
+                            android:textSize="13sp" android:fontFamily="sans-serif-medium"
+                            android:layout_marginBottom="8dp"/>
+
+                        <TextView android:id="@+id/tv_link_instructions"
+                            android:layout_width="match_parent" android:layout_height="wrap_content"
+                            android:text="@string/link_steps"
+                            android:textColor="#AAAAAA" android:textSize="12sp"
+                            android:fontFamily="sans-serif" android:lineSpacingExtra="2dp"
+                            android:layout_marginBottom="12dp"/>
+
+                        <com.google.android.material.button.MaterialButton android:id="@+id/btn_generate_code"
+                            android:layout_width="match_parent" android:layout_height="44dp"
+                            android:text="@string/link_new_account" android:textSize="13sp"
+                            android:textColor="#FFFFFF" android:textAllCaps="false"
+                            android:fontFamily="sans-serif-medium"
+                            app:backgroundTint="#FF6B00"
+                            app:cornerRadius="10dp"
+                            app:rippleColor="#44FFFFFF"/>
+                    </LinearLayout>
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- APPEARANCE -->
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                app:cardBackgroundColor="#241C18"
+                app:cardCornerRadius="12dp" app:cardElevation="0dp">
+
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:orientation="vertical" android:padding="16dp">
+
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:text="@string/appearance" android:textColor="#FF6B00"
+                        android:textSize="11sp" android:fontFamily="sans-serif-medium"
+                        android:letterSpacing="0.1" android:layout_marginBottom="12dp"/>
+
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:text="@string/theme_mode" android:textColor="#FFFFFF"
+                        android:textSize="13sp" android:fontFamily="sans-serif-medium"
+                        android:layout_marginBottom="8dp"/>
+
+                    <!-- Theme Mode Slider -->
+                    <FrameLayout android:id="@+id/container_theme"
+                        android:layout_width="match_parent" android:layout_height="40dp"
+                        android:layout_marginBottom="16dp"
+                        android:background="@drawable/theme_switch_bg" android:padding="4dp">
+                        
+                        <!-- The sliding pill -->
+                        <View android:id="@+id/pill_theme"
+                            android:layout_width="0dp" android:layout_height="match_parent"
+                            android:background="@drawable/pill_bg" />
+
+                        <LinearLayout android:layout_width="match_parent" android:layout_height="match_parent"
+                            android:orientation="horizontal">
+                            <TextView android:id="@+id/btn_theme_dark"
+                                android:layout_width="0dp" android:layout_height="match_parent"
+                                android:layout_weight="1" android:text="@string/theme_dark"
+                                android:gravity="center" android:textSize="13sp"
+                                android:textColor="#FFFFFF" android:fontFamily="sans-serif-medium" />
+                            <TextView android:id="@+id/btn_theme_light"
+                                android:layout_width="0dp" android:layout_height="match_parent"
+                                android:layout_weight="1" android:text="@string/theme_light"
+                                android:gravity="center" android:textSize="13sp"
+                                android:textColor="#888899" android:fontFamily="sans-serif-medium" />
+                            <TextView android:id="@+id/btn_theme_auto"
+                                android:layout_width="0dp" android:layout_height="match_parent"
+                                android:layout_weight="1" android:text="@string/theme_auto"
+                                android:gravity="center" android:textSize="13sp"
+                                android:textColor="#888899" android:fontFamily="sans-serif-medium" />
+                        </LinearLayout>
+                    </FrameLayout>
+
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:text="@string/language" android:textColor="#FFFFFF"
+                        android:textSize="13sp" android:fontFamily="sans-serif-medium"
+                        android:layout_marginBottom="8dp"/>
+
+                    <com.google.android.material.button.MaterialButton android:id="@+id/btn_lang_selector"
+                        android:layout_width="match_parent" android:layout_height="44dp"
+                        android:text="Language: System Default"
+                        android:textAllCaps="false" android:textSize="13sp"
+                        android:textColor="#FFFFFF" android:fontFamily="sans-serif-medium"
+                        app:backgroundTint="#332A24" app:cornerRadius="10dp"
+                        app:rippleColor="#22FFFFFF" android:layout_marginBottom="8dp" />
+
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:text="@string/haptic_feedback" android:textColor="#FFFFFF"
+                        android:textSize="13sp" android:fontFamily="sans-serif-medium"
+                        android:layout_marginTop="8dp" android:layout_marginBottom="8dp"/>
+
+                    <com.google.android.material.button.MaterialButton android:id="@+id/btn_haptics_toggle"
+                        android:layout_width="match_parent" android:layout_height="44dp"
+                        android:text="Haptic Feedback: ON"
+                        android:textAllCaps="false" android:textSize="13sp"
+                        android:textColor="#FFFFFF" android:fontFamily="sans-serif-medium"
+                        app:backgroundTint="#332A24" app:cornerRadius="10dp"
+                        app:rippleColor="#22FFFFFF" android:layout_marginBottom="8dp" />
+
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:text="UI Animations" android:textColor="#FFFFFF"
+                        android:textSize="13sp" android:fontFamily="sans-serif-medium"
+                        android:layout_marginTop="8dp" android:layout_marginBottom="8dp"/>
+
+                    <com.google.android.material.button.MaterialButton android:id="@+id/btn_animations_toggle"
+                        android:layout_width="match_parent" android:layout_height="44dp"
+                        android:text="Animations: ON"
+                        android:textAllCaps="false" android:textSize="13sp"
+                        android:textColor="#FFFFFF" android:fontFamily="sans-serif-medium"
+                        app:backgroundTint="#332A24" app:cornerRadius="10dp"
+                        app:rippleColor="#22FFFFFF" android:layout_marginBottom="8dp" />
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- SCREENSAVER -->
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                app:cardBackgroundColor="#241C18"
+                app:cardCornerRadius="12dp" app:cardElevation="0dp">
+
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:orientation="vertical" android:padding="16dp">
+
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:text="@string/screensaver" android:textColor="#FF6B00"
+                        android:textSize="11sp" android:fontFamily="sans-serif-medium"
+                        android:letterSpacing="0.1" android:layout_marginBottom="12dp"/>
+
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:text="@string/style" android:textColor="#FFFFFF"
+                        android:textSize="13sp" android:fontFamily="sans-serif-medium"
+                        android:layout_marginBottom="8dp"/>
+
+                    <FrameLayout android:id="@+id/container_style"
+                        android:layout_width="match_parent" android:layout_height="40dp"
+                        android:layout_marginBottom="16dp"
+                        android:background="@drawable/theme_switch_bg" android:padding="4dp">
+                        
+                        <View android:id="@+id/pill_style"
+                            android:layout_width="0dp" android:layout_height="match_parent"
+                            android:background="@drawable/pill_bg" />
+
+                        <LinearLayout android:layout_width="match_parent" android:layout_height="match_parent"
+                            android:orientation="horizontal">
+                            <TextView android:id="@+id/btn_style_squares"
+                                android:layout_width="0dp" android:layout_height="match_parent"
+                                android:layout_weight="1" android:text="@string/squares"
+                                android:gravity="center" android:textSize="13sp"
+                                android:textColor="#FFFFFF" android:fontFamily="sans-serif-medium" />
+                            <TextView android:id="@+id/btn_style_black"
+                                android:layout_width="0dp" android:layout_height="match_parent"
+                                android:layout_weight="1" android:text="@string/black"
+                                android:gravity="center" android:textSize="13sp"
+                                android:textColor="#888899" android:fontFamily="sans-serif-medium" />
+                            <TextView android:id="@+id/btn_style_off"
+                                android:layout_width="0dp" android:layout_height="match_parent"
+                                android:layout_weight="1" android:text="@string/off"
+                                android:gravity="center" android:textSize="13sp"
+                                android:textColor="#888899" android:fontFamily="sans-serif-medium" />
+                        </LinearLayout>
+                    </FrameLayout>
+
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:text="@string/afk_timeout" android:textColor="#FFFFFF"
+                        android:textSize="13sp" android:fontFamily="sans-serif-medium"
+                        android:layout_marginBottom="8dp"/>
+
+                    <FrameLayout android:id="@+id/container_timeout"
+                        android:layout_width="match_parent" android:layout_height="40dp"
+                        android:background="@drawable/theme_switch_bg" android:padding="4dp">
+                        
+                        <View android:id="@+id/pill_timeout"
+                            android:layout_width="0dp" android:layout_height="match_parent"
+                            android:background="@drawable/pill_bg" />
+
+                        <LinearLayout android:layout_width="match_parent" android:layout_height="match_parent"
+                            android:orientation="horizontal">
+                            <TextView android:id="@+id/btn_timeout_1m"
+                                android:layout_width="0dp" android:layout_height="match_parent"
+                                android:layout_weight="1" android:text="@string/min_1"
+                                android:gravity="center" android:textSize="13sp"
+                                android:textColor="#FFFFFF" android:fontFamily="sans-serif-medium" />
+                            <TextView android:id="@+id/btn_timeout_2m"
+                                android:layout_width="0dp" android:layout_height="match_parent"
+                                android:layout_weight="1" android:text="@string/min_2"
+                                android:gravity="center" android:textSize="13sp"
+                                android:textColor="#888899" android:fontFamily="sans-serif-medium" />
+                            <TextView android:id="@+id/btn_timeout_5m"
+                                android:layout_width="0dp" android:layout_height="match_parent"
+                                android:layout_weight="1" android:text="@string/min_5"
+                                android:gravity="center" android:textSize="13sp"
+                                android:textColor="#888899" android:fontFamily="sans-serif-medium" />
+                        </LinearLayout>
+                    </FrameLayout>
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- NETWORK & SECURITY -->
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                app:cardBackgroundColor="#241C18"
+                app:cardCornerRadius="12dp" app:cardElevation="0dp">
+
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:orientation="vertical" android:padding="16dp">
+
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:text="@string/network_security" android:textColor="#FF6B00"
+                        android:textSize="11sp" android:fontFamily="sans-serif-medium"
+                        android:letterSpacing="0.1" android:layout_marginBottom="12dp"/>
+
+                    <com.google.android.material.button.MaterialButton android:id="@+id/btn_network_alarm"
+                        android:layout_width="match_parent" android:layout_height="44dp"
+                        android:text="@string/network_alarm_off"
+                        android:textAllCaps="false" android:textSize="13sp"
+                        android:textColor="#FFFFFF" android:fontFamily="sans-serif-medium"
+                        app:backgroundTint="#332A24" app:cornerRadius="10dp"
+                        app:rippleColor="#22FFFFFF" android:layout_marginBottom="8dp"/>
+
+                    <com.google.android.material.button.MaterialButton android:id="@+id/btn_dev_termux"
+                        android:layout_width="match_parent" android:layout_height="44dp"
+                        android:text="@string/lobby_remote_on"
+                        android:textAllCaps="false" android:textSize="13sp"
+                        android:textColor="#FFFFFF" android:fontFamily="sans-serif-medium"
+                        app:backgroundTint="#332A24" app:cornerRadius="10dp"
+                        app:rippleColor="#22FFFFFF" android:layout_marginBottom="8dp"/>
+
+                    <com.google.android.material.button.MaterialButton android:id="@+id/btn_beta_jni"
+                        android:layout_width="match_parent" android:layout_height="44dp"
+                        android:text="@string/beta_jni_off"
+                        android:textAllCaps="false" android:textSize="13sp"
+                        android:textColor="#FFFFFF" android:fontFamily="sans-serif-medium"
+                        app:backgroundTint="#332A24" app:cornerRadius="10dp"
+                        app:rippleColor="#22FFFFFF" android:layout_marginBottom="16dp"/>
+
+                    <View android:layout_width="match_parent" android:layout_height="1dp"
+                        android:background="#332A24" android:layout_marginBottom="16dp"/>
+
+                    <TextView android:id="@+id/tv_2fa_status"
+                        android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:text="@string/twofa_disabled" android:textColor="#FF4444"
+                        android:textSize="13sp" android:fontFamily="sans-serif-medium"
+                        android:layout_marginBottom="12dp"/>
+
+                    <com.google.android.material.button.MaterialButton android:id="@+id/btn_2fa_toggle"
+                        android:layout_width="match_parent" android:layout_height="44dp"
+                        android:text="@string/enable_2fa"
+                        android:textAllCaps="false" android:textSize="13sp"
+                        android:textColor="#FFFFFF" android:fontFamily="sans-serif-medium"
+                        app:backgroundTint="#332A24" app:cornerRadius="10dp"
+                        app:rippleColor="#22FFFFFF" android:layout_marginBottom="8dp"/>
+
+                    <com.google.android.material.button.MaterialButton android:id="@+id/btn_2fa_set_password"
+                        android:layout_width="match_parent" android:layout_height="44dp"
+                        android:text="@string/set_2fa_password"
+                        android:textAllCaps="false" android:textSize="13sp"
+                        android:textColor="#FFFFFF" android:fontFamily="sans-serif-medium"
+                        app:backgroundTint="#332A24" app:cornerRadius="10dp"
+                        app:rippleColor="#22FFFFFF" android:visibility="gone" android:layout_marginBottom="16dp"/>
+
+                    <View android:layout_width="match_parent" android:layout_height="1dp"
+                        android:background="#332A24" android:layout_marginBottom="16dp"/>
+
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:text="@string/biometrics" android:textColor="#FF6B00"
+                        android:textSize="11sp" android:fontFamily="sans-serif-medium"
+                        android:letterSpacing="0.1" android:layout_marginBottom="12dp"/>
+
+                    <com.google.android.material.switchmaterial.SwitchMaterial android:id="@+id/switch_bio_main"
+                        android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:text="@string/enable_biometric" android:textColor="#FFFFFF"
+                        android:textSize="14sp" android:fontFamily="sans-serif-medium"
+                        android:layout_marginBottom="8dp"/>
+
+                    <LinearLayout android:id="@+id/ll_bio_options"
+                        android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:orientation="vertical" android:paddingStart="16dp"
+                        android:visibility="gone">
+
+                        <com.google.android.material.checkbox.MaterialCheckBox android:id="@+id/cb_bio_resume"
+                            android:layout_width="match_parent" android:layout_height="wrap_content"
+                            android:text="@string/bio_resume" android:textColor="#CCCCCC"
+                            android:textSize="13sp" android:fontFamily="sans-serif"/>
+
+                        <com.google.android.material.checkbox.MaterialCheckBox android:id="@+id/cb_bio_cold_start"
+                            android:layout_width="match_parent" android:layout_height="wrap_content"
+                            android:text="@string/bio_cold_start" android:textColor="#CCCCCC"
+                            android:textSize="13sp" android:fontFamily="sans-serif"/>
+
+                        <com.google.android.material.checkbox.MaterialCheckBox android:id="@+id/cb_bio_server_click"
+                            android:layout_width="match_parent" android:layout_height="wrap_content"
+                            android:text="@string/bio_server_click" android:textColor="#CCCCCC"
+                            android:textSize="13sp" android:fontFamily="sans-serif"/>
+
+                        <com.google.android.material.checkbox.MaterialCheckBox android:id="@+id/cb_bio_create_server"
+                            android:layout_width="match_parent" android:layout_height="wrap_content"
+                            android:text="@string/bio_create_server" android:textColor="#CCCCCC"
+                            android:textSize="13sp" android:fontFamily="sans-serif"/>
+
+                    </LinearLayout>
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- ACCOUNT -->
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                app:cardBackgroundColor="#241C18"
+                app:cardCornerRadius="12dp" app:cardElevation="0dp">
+
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:orientation="vertical" android:padding="16dp">
+
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:text="@string/account" android:textColor="#FF6B00"
+                        android:textSize="11sp" android:fontFamily="sans-serif-medium"
+                        android:letterSpacing="0.1" android:layout_marginBottom="12dp"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/language"
+                        android:textColor="#8A8A9A"
+                        android:textSize="12sp"
+                        android:textStyle="bold"
+                        android:layout_marginBottom="8dp"/>
+
+                    <TextView android:id="@+id/tv_account_email"
+                        android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:text="@string/loading" android:textColor="#FFFFFF"
+                        android:textSize="15sp" android:fontFamily="sans-serif-medium"
+                        android:layout_marginBottom="16dp"/>
+
+                    <com.google.android.material.button.MaterialButton android:id="@+id/btn_logout"
+                        android:layout_width="match_parent" android:layout_height="44dp"
+                        android:text="@string/logout" android:textSize="13sp"
+                        android:textAllCaps="false"
+                        android:textColor="#FF4444"
+                        android:fontFamily="sans-serif-medium"
+                        app:backgroundTint="#2A1010" app:cornerRadius="10dp"
+                        app:rippleColor="#22FF4444" />
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- SUPPORT -->
+            <androidx.cardview.widget.CardView android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                app:cardBackgroundColor="#241C18"
+                app:cardCornerRadius="12dp" app:cardElevation="0dp">
+
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:orientation="vertical" android:padding="16dp">
+
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:text="@string/support" android:textColor="#FF6B00"
+                        android:textSize="11sp" android:fontFamily="sans-serif-medium"
+                        android:letterSpacing="0.1" android:layout_marginBottom="12dp"/>
+
+                    <com.google.android.material.button.MaterialButton android:id="@+id/btn_report_server"
+                        android:layout_width="match_parent" android:layout_height="44dp"
+                        android:text="@string/report_server" android:textSize="13sp"
+                        android:textAllCaps="false"
+                        android:textColor="#FFFFFF"
+                        android:fontFamily="sans-serif-medium"
+                        android:layout_marginBottom="8dp"
+                        app:backgroundTint="#302621" app:cornerRadius="10dp"
+                        app:rippleColor="#22FFFFFF" />
+
+                    <com.google.android.material.button.MaterialButton android:id="@+id/btn_report_bug"
+                        android:layout_width="match_parent" android:layout_height="44dp"
+                        android:text="@string/report_bug" android:textSize="13sp"
+                        android:textAllCaps="false"
+                        android:textColor="#FFFFFF"
+                        android:fontFamily="sans-serif-medium"
+                        app:backgroundTint="#302621" app:cornerRadius="10dp"
+                        app:rippleColor="#22FFFFFF" />
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- GEMINI AI -->
+            <androidx.cardview.widget.CardView android:id="@+id/layout_gemini_settings"
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                app:cardBackgroundColor="#241C18"
+                app:cardCornerRadius="12dp" app:cardElevation="0dp">
+
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:orientation="vertical" android:padding="16dp">
+
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:orientation="horizontal" android:gravity="center_vertical"
+                        android:layout_marginBottom="12dp">
+                        <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+                            android:layout_weight="1" android:orientation="vertical">
+                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                                android:text="GEMINI AI" android:textColor="#FF6B00"
+                                android:textSize="11sp" android:fontFamily="sans-serif-medium"
+                                android:letterSpacing="0.1"/>
+                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                                android:text="AI Server Builder API Key" android:textColor="#888899"
+                                android:textSize="11sp" android:fontFamily="sans-serif"
+                                android:layout_marginTop="2dp"/>
+                        </LinearLayout>
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                            android:text="BETA" android:textColor="#FFFFFF" android:textSize="9sp"
+                            android:fontFamily="sans-serif-medium" android:letterSpacing="0.1"
+                            android:background="#FF6B00" android:paddingStart="6dp" android:paddingEnd="6dp"
+                            android:paddingTop="3dp" android:paddingBottom="3dp"/>
+                    </LinearLayout>
+
+                    <LinearLayout android:id="@+id/ll_gemini_input_container"
+                        android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:orientation="horizontal" android:gravity="center_vertical"
+                        android:background="#1B1613" android:padding="2dp">
+
+                        <EditText android:id="@+id/et_gemini_api_key"
+                            android:layout_width="0dp" android:layout_height="40dp"
+                            android:layout_weight="1"
+                            android:hint="Paste your API Key..."
+                            android:textColor="#FFFFFF" android:textColorHint="#555566"
+                            android:background="@null" android:textSize="13sp"
+                            android:paddingStart="10dp" android:paddingEnd="10dp"
+                            android:inputType="textPassword" android:fontFamily="sans-serif"/>
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btn_save_gemini_key"
+                            style="@style/Widget.MaterialComponents.Button.TextButton"
+                            android:layout_width="wrap_content" android:layout_height="40dp"
+                            android:text="Save" android:textColor="#FF6B00"
+                            android:textAllCaps="false"
+                            android:textSize="13sp" android:fontFamily="sans-serif-medium"/>
+                    </LinearLayout>
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- DEVICE INFO -->
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                app:cardBackgroundColor="#241C18"
+                app:cardCornerRadius="12dp" app:cardElevation="0dp">
+
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:orientation="vertical" android:padding="16dp">
+
+                    <LinearLayout android:id="@+id/ll_info_header"
+                        android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:orientation="horizontal" android:gravity="center_vertical"
+                        android:background="?attr/selectableItemBackground">
+                        <TextView android:layout_width="0dp" android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="@string/device_info" android:textColor="#FF6B00"
+                            android:textSize="11sp" android:fontFamily="sans-serif-medium"
+                            android:letterSpacing="0.1"/>
+                        <TextView android:id="@+id/tv_info_icon"
+                            android:layout_width="wrap_content" android:layout_height="wrap_content"
+                            android:text="▼" android:textColor="#888899" android:textSize="12sp"/>
+                    </LinearLayout>
+
+                    <LinearLayout android:id="@+id/ll_info_content"
+                        android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:orientation="vertical" android:visibility="gone"
+                        android:layout_marginTop="12dp"
+                        android:background="#1B1613" android:padding="12dp">
+                        <TextView android:id="@+id/tv_info_text"
+                            android:layout_width="match_parent" android:layout_height="wrap_content"
+                            android:textColor="#AAAAAA" android:textSize="12sp"
+                            android:fontFamily="monospace" android:lineSpacingExtra="4dp"/>
+                    </LinearLayout>
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- LEGAL & LICENSES -->
+            <androidx.cardview.widget.CardView
+                android:id="@+id/card_legal"
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                android:clickable="true" android:focusable="true"
+                android:foreground="?attr/selectableItemBackground"
+                app:cardBackgroundColor="#241C18"
+                app:cardCornerRadius="12dp" app:cardElevation="0dp">
+
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:orientation="horizontal" android:padding="16dp"
+                    android:gravity="center_vertical">
+
+                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+                        android:layout_weight="1" android:orientation="vertical">
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                            android:text="Legal &amp; Licenses" android:textColor="#FFFFFF"
+                            android:textSize="14sp" android:fontFamily="sans-serif-medium"/>
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                            android:text="View open-source licenses and notices" android:textColor="#888899"
+                            android:textSize="12sp" android:layout_marginTop="2dp"/>
+                    </LinearLayout>
+
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- DANGER ZONE -->
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:layout_marginBottom="24dp"
+                app:cardBackgroundColor="#2A1010"
+                app:cardCornerRadius="12dp" app:cardElevation="0dp">
+
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:orientation="vertical" android:padding="16dp">
+
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:text="@string/danger_zone" android:textColor="#FF4444"
+                        android:textSize="11sp" android:fontFamily="sans-serif-medium"
+                        android:letterSpacing="0.1" android:layout_marginBottom="6dp"/>
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:text="@string/danger_zone_desc" android:textColor="#888899"
+                        android:textSize="12sp" android:fontFamily="sans-serif"
+                        android:layout_marginBottom="16dp"/>
+
+                    <com.google.android.material.button.MaterialButton android:id="@+id/btn_delete_servers"
+                        android:layout_width="match_parent" android:layout_height="44dp"
+                        android:text="DELETE ALL SERVERS"
+                        android:textAllCaps="true" android:textSize="13sp"
+                        android:textColor="#FFFFFF"
+                        android:fontFamily="sans-serif-medium"
+                        app:backgroundTint="#FF4444" app:cornerRadius="10dp"
+                        app:rippleColor="#44FFFFFF" android:layout_marginBottom="12dp" />
+                    <com.google.android.material.button.MaterialButton android:id="@+id/btn_revoke_tos"
+                        android:layout_width="match_parent" android:layout_height="44dp"
+                        android:text="REVOKE TOS"
+                        android:textAllCaps="true" android:textSize="13sp"
+                        android:textColor="#FFFFFF"
+                        android:fontFamily="sans-serif-medium"
+                        app:backgroundTint="#FF4444" app:cornerRadius="10dp"
+                        app:rippleColor="#44FFFFFF" />
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>

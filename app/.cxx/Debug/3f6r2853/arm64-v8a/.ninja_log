@@ -1,0 +1,17 @@
+# ninja log v5
+3	150	8015444961465191	C:/Users/Home/KodaHosting/KodaNetwork/app/build/intermediates/cxx/Debug/3f6r2853/obj/arm64-v8a/libembeddedjvm.so	ab96d6c7c65a864e
+2	522	8015442699384112	CMakeFiles/embeddedjvm.dir/EmbeddedJvm.cpp.o	f18099099fa90848
+0	15	0	clean	5317178f812570d5
+2	143	8015445257988179	C:/Users/Home/KodaHosting/KodaNetwork/app/build/intermediates/cxx/Debug/3f6r2853/obj/arm64-v8a/libembeddedjvm.so	46abea8c0604b219
+2	138	8015445470906230	C:/Users/Home/KodaHosting/KodaNetwork/app/build/intermediates/cxx/Debug/3f6r2853/obj/arm64-v8a/libembeddedjvm.so	46abea8c0604b219
+0	11	0	clean	5317178f812570d5
+2	343	8015446871357677	CMakeFiles/embeddedjvm.dir/EmbeddedJvm.cpp.o	f18099099fa90848
+343	460	8015446872418801	C:/Users/Home/KodaHosting/KodaNetwork/app/build/intermediates/cxx/Debug/3f6r2853/obj/arm64-v8a/libembeddedjvm.so	46abea8c0604b219
+2	184	8015448263850227	C:/Users/Home/KodaHosting/KodaNetwork/app/build/intermediates/cxx/Debug/3f6r2853/obj/arm64-v8a/libembeddedjvm.so	46abea8c0604b219
+0	10	0	clean	5317178f812570d5
+3	419	8015449905719817	CMakeFiles/embeddedjvm.dir/EmbeddedJvm.cpp.o	f18099099fa90848
+419	545	8015449906855886	C:/Users/Home/KodaHosting/KodaNetwork/app/build/intermediates/cxx/Debug/3f6r2853/obj/arm64-v8a/libembeddedjvm.so	46abea8c0604b219
+3	240	8015451557684846	C:/Users/Home/KodaHosting/KodaNetwork/app/build/intermediates/cxx/Debug/3f6r2853/obj/arm64-v8a/libembeddedjvm.so	46abea8c0604b219
+1	12	0	clean	5317178f812570d5
+4	537	8015452975316694	CMakeFiles/embeddedjvm.dir/EmbeddedJvm.cpp.o	f18099099fa90848
+538	696	8015452976775757	C:/Users/Home/KodaHosting/KodaNetwork/app/build/intermediates/cxx/Debug/3f6r2853/obj/arm64-v8a/libembeddedjvm.so	46abea8c0604b219

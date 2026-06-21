@@ -46,6 +46,9 @@ public class JarDownloader {
                 if (!fileName.endsWith(".jar") || fileName.contains("?")) {
                     fileName = "server.jar";
                 }
+                if (srv.getType() == ServerInstance.Type.FABRIC) {
+                    fileName = "fabric-server.jar";
+                }
                 
                 // Optional: Clean up old jars to avoid clutter
                 File[] oldJars = new File(srv.getServerDir()).listFiles((d, name) -> name.endsWith(".jar"));

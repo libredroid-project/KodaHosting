@@ -10,11 +10,16 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
 import eu.kodanetwork.mchost.R;
+import eu.kodanetwork.mchost.util.AnimHelper;
 
 public class LoginPageActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        getWindow().setFlags(
+                android.view.WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
+                android.view.WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
+        );
         setContentView(R.layout.activity_design_login);
 
         EditText etUser = findViewById(R.id.et_username);
@@ -22,12 +27,30 @@ public class LoginPageActivity extends AppCompatActivity {
         Button btnSignIn = findViewById(R.id.btn_sign_in);
         Button btnGoogle = findViewById(R.id.btn_google);
         TextView tvCreate = findViewById(R.id.tv_create_account);
+        TextView tvTitle = findViewById(R.id.tv_praetor_title);
+
+        if (tvTitle != null) {
+            String praetorHtml = "<font color=\"#555555\">P.R.</font><font color=\"#AAAAAA\">A</font><font color=\"#555555\">.</font><font color=\"#AAAAAA\">E</font><font color=\"#555555\">.</font><font color=\"#FFFFFF\">T</font><font color=\"#555555\">.</font><font color=\"#FFFFFF\">O</font><font color=\"#555555\">.</font><font color=\"#FFFFFF\">R.</font>";
+            tvTitle.setText(android.text.Html.fromHtml(praetorHtml, android.text.Html.FROM_HTML_MODE_LEGACY));
+        }
+
+        android.widget.CheckBox cbLegal = findViewById(R.id.cb_legal);
+        if (cbLegal != null) {
+            cbLegal.setText(android.text.Html.fromHtml("I accept the <a href='https://privacy.kodanetwork.eu/tos'>Terms of Service</a> and <a href='https://privacy.kodanetwork.eu/privacy'>Privacy Policy</a>", android.text.Html.FROM_HTML_MODE_LEGACY));
+            cbLegal.setMovementMethod(android.text.method.LinkMovementMethod.getInstance());
+        }
+
+        eu.kodanetwork.mchost.util.ThemeHelper.apply(this);
 
         btnSignIn.setOnClickListener(v -> {
             String email = etUser.getText().toString().trim();
             String pwd = etPass.getText().toString().trim();
             if (email.isEmpty() || pwd.isEmpty()) {
                 Toast.makeText(this, "Email und Passwort erforderlich", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            if (cbLegal != null && !cbLegal.isChecked()) {
+                Toast.makeText(this, "You must accept the Terms of Service and Privacy Policy to continue.", Toast.LENGTH_LONG).show();
                 return;
             }
             btnSignIn.setEnabled(false);
@@ -59,6 +82,10 @@ public class LoginPageActivity extends AppCompatActivity {
         });
 
         btnGoogle.setOnClickListener(v -> {
+            if (!cbLegal.isChecked()) {
+                Toast.makeText(this, "Du musst die Terms of Service und Privacy Policy akzeptieren.", Toast.LENGTH_SHORT).show();
+                return;
+            }
             try {
                 com.google.android.gms.auth.api.signin.GoogleSignInOptions gso = new com.google.android.gms.auth.api.signin.GoogleSignInOptions.Builder(com.google.android.gms.auth.api.signin.GoogleSignInOptions.DEFAULT_SIGN_IN)
                     .requestIdToken(getString(getResources().getIdentifier("default_web_client_id", "string", getPackageName())))
@@ -71,7 +98,10 @@ public class LoginPageActivity extends AppCompatActivity {
             }
         });
 
-        tvCreate.setOnClickListener(v -> startActivity(new Intent(this, RegisterPageActivity.class)));
+        tvCreate.setOnClickListener(v -> {
+            AnimHelper.startSlideVertical(this, new Intent(this, RegisterPageActivity.class));
+            finish();
+        });
     }
 
     @Override
@@ -104,7 +134,14 @@ public class LoginPageActivity extends AppCompatActivity {
                     });
                 }
             } catch (Exception e) {
-                Toast.makeText(this, "Google Login aborted", Toast.LENGTH_SHORT).show();
+                if (e instanceof com.google.android.gms.common.api.ApiException) {
+                    int code = ((com.google.android.gms.common.api.ApiException)e).getStatusCode();
+                    Toast.makeText(this, "Google Login aborted (Code: " + code + ")", Toast.LENGTH_LONG).show();
+                    android.util.Log.e("GoogleLogin", "ApiException code " + code, e);
+                } else {
+                    Toast.makeText(this, "Google Login aborted: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                    android.util.Log.e("GoogleLogin", "Exception during login", e);
+                }
             }
         }
     }

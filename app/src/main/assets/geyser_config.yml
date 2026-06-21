@@ -1,0 +1,62 @@
+bedrock:
+  address: 127.0.0.1
+  port: {GEYSER_PORT}
+  clone-remote-port: false
+java:
+  address: 127.0.0.1
+  port: {SERVER_PORT}
+  auth-type: floodgate
+motd:
+  primary-motd: Geyser
+  secondary-motd: Another Geyser server.
+  passthrough-motd: true
+  max-players: 100
+  passthrough-player-counts: true
+  integrated-ping-passthrough: true
+  ping-passthrough-interval: 3
+gameplay:
+  server-name: Geyser
+  cooldown-type: crosshair
+  command-suggestions: true
+  show-coordinates: true
+  disable-bedrock-scaffolding: false
+  nether-roof-workaround: false
+  emotes-enabled: true
+  block-legacy-codes: true
+  unusable-space-block: minecraft:barrier
+  enable-custom-content: true
+  force-resource-packs: true
+  enable-integrated-pack: true
+  forward-player-ping: false
+  xbox-achievements-enabled: false
+  max-visible-custom-skulls: 128
+  custom-skull-render-distance: 32
+default-locale: system
+log-player-ip-addresses: true
+saved-user-logins:
+  - ThisExampleUsernameShouldBeLongEnoughToNeverBeAnXboxUsername
+  - ThisOtherExampleUsernameShouldAlsoBeLongEnough
+pending-authentication-timeout: 120
+notify-on-new-bedrock-update: true
+advanced:
+  cache-images: 0
+  scoreboard-packet-threshold: 20
+  add-team-suggestions: true
+  resource-pack-urls: []
+  floodgate-key-file: key.pem
+  java:
+    use-haproxy-protocol: false
+    use-direct-connection: true
+    disable-compression: true
+  bedrock:
+    broadcast-port: {GEYSER_PORT}
+    compression-level: 6
+    use-haproxy-protocol: false
+    haproxy-protocol-whitelisted-ips:
+      - 85.215.180.87
+      - 127.0.0.1
+    use-waterdogpe-forwarding: false
+    mtu: 1200
+    validate-bedrock-login: true
+debug-mode: false
+config-version: 7

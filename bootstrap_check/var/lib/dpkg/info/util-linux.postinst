@@ -1,0 +1,11 @@
+#!/data/data/com.termux/files/usr/bin/sh
+# Automatically added by termux_step_update_alternatives
+if [ "$1" = 'configure' ] || [ "$1" = 'abort-upgrade' ] || [ "$1" = 'abort-deconfigure' ] || [ "$1" = 'abort-remove' ] || [ "debian" = 'pacman' ]; then
+  if [ -x "/data/data/com.termux/files/usr/bin/update-alternatives" ]; then
+    # pager
+    update-alternatives \
+      --install "/data/data/com.termux/files/usr/bin/pager" "pager" "/data/data/com.termux/files/usr/bin/more" 25 \
+      --slave "/data/data/com.termux/files/usr/share/man/man1/pager.1.gz" "pager.1.gz" "/data/data/com.termux/files/usr/share/man/man1/more.1.gz"
+  fi
+fi
+# End automatically added section

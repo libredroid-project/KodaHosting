@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Tag used to track if a view has already been styled by ThemeHelper -->
+    <item name="tag_themed" type="id" />
+</resources>

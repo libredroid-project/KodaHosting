@@ -1,0 +1,24 @@
+name: KodaLobbyPlugin
+version: 1.0
+main: eu.kodanetwork.lobby.KodaLobbyPlugin
+api-version: 1.13
+description: Custom Lobby Plugin for KodaNetwork
+author: KodaNetwork
+
+commands:
+  server:
+    description: "Connect to a server"
+    usage: "/server <name>"
+  join:
+    description: "Connect to a server or player"
+    usage: "/join <name>"
+  link:
+    description: "Link your Minecraft account to the Android App"
+    usage: "/link <code>"
+  lobbyadmin:
+    description: "Admin commands for KodaLobbyPlugin"
+    usage: "/lobbyadmin reload"
+    permission: kodalobby.admin
+  myservers:
+    description: "Manage your servers"
+    usage: "/myservers"

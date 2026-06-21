@@ -46,6 +46,22 @@
     <string name="clear_docs">Clear Documents</string>
     <string name="clear_app_data">Clear App Data</string>
 
+    <string name="support">SUPPORT</string>
+    <string name="report_server">Report Server</string>
+    <string name="report_bug">Report Bug</string>
+    <string name="report_server_desc">Report a server for violating our Terms of Service.</string>
+    <string name="report_bug_desc">Found a bug in the app? Let us know!</string>
+    <string name="server_subdomain">Server Subdomain/ID</string>
+    <string name="reason">Reason for report</string>
+    <string name="report">REPORT</string>
+    <string name="cancel">CANCEL</string>
+    <string name="bug_description">Describe the bug...</string>
+    <string name="report_submitted">Report submitted. Thank you!</string>
+    <string name="error_server_not_found">Server not found.</string>
+    <string name="error_not_logged_in">You must be logged in to report a bug.</string>
+    <string name="error_report_failed">Failed to submit report.</string>
+
+
     <string name="mc_server_manager">Minecraft Server Manager</string>
     <string name="log_button">LOG</string>
     <string name="server_name_header">SERVER NAME</string>
@@ -130,5 +146,23 @@
     <string name="praetor_action_proceed">PROCEED</string>
     <string name="queue_checking">Checking Capacity...</string>
     <string name="queue_waiting">Queue (%1$d/%2$d)\nPlease wait...</string>
+
     <string name="watchdog_limit_reached">🚨 Your server was stopped because the global network limit (%1$d/%1$d) has been reached. Please restart to join the queue.</string>
+    <string name="support_tickets">Support Tickets</string>
+    <string name="new_ticket">New Ticket</string>
+    <string name="create">Create</string>
+    <string name="chat_type_reply">Type your reply...</string>
+    <string name="chat_admin">Admin</string>
+    <string name="chat_system">System</string>
+    <string name="chat_you">You</string>
+    <string name="support_tickets_title">SUPPORT TICKETS</string>
+    <string name="how_can_we_help">How can we help you today?</string>
+    <string name="not_logged_in">Not Logged In</string>
+    <string name="login_warning_desc">You must be logged in to create or view support tickets. Please go to the Account tab and log in.</string>
+    <string name="create_support_ticket">Create Support Ticket</string>
+    <string name="subject_reference">Subject / Reference</string>
+    <string name="subject_hint">e.g. Server Subdomain or Short Summary</string>
+    <string name="initial_message">Initial Message</string>
+    <string name="message_hint">Describe the problem in detail...</string>
+    <string name="create_and_open_chat">CREATE &amp; OPEN CHAT</string>
 </resources>

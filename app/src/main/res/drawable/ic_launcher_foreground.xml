@@ -1,0 +1,45 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="1024dp"
+    android:height="1024dp"
+    android:viewportWidth="1024"
+    android:viewportHeight="1024">
+
+    <!-- Glowing Outer Hexagon (Network) -->
+    <path
+        android:pathData="M512,120 L180,312 L180,712 L512,904 L844,712 L844,312 Z"
+        android:strokeWidth="12"
+        android:strokeColor="#4DFF6B00" />
+
+    <!-- Secondary Inner Frame -->
+    <path
+        android:pathData="M512,180 L230,342 L230,682 L512,844 L794,682 L794,342 Z"
+        android:strokeWidth="4"
+        android:strokeColor="#99FF6B00" />
+
+    <!-- 3D Isometric Cube (The Server Core) -->
+    <!-- Top Face -->
+    <path
+        android:fillColor="#FF9500"
+        android:pathData="M512,320 L712,420 L512,520 L312,420 Z" />
+    <!-- Left Face -->
+    <path
+        android:fillColor="#FF6B00"
+        android:pathData="M312,420 L512,520 L512,720 L312,620 Z" />
+    <!-- Right Face -->
+    <path
+        android:fillColor="#CC5800"
+        android:pathData="M512,520 L712,420 L712,620 L512,720 Z" />
+
+    <!-- Glowing Core Pulse Lines -->
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M512,480 l20,10 l-20,10 l-20,-10 z" />
+    
+    <!-- Data "Bits" (Floating Pixels) -->
+    <path android:fillColor="#FF6B00" android:pathData="M250,280 h30 v30 h-30 z" />
+    <path android:fillColor="#FF9500" android:pathData="M750,700 h25 v25 h-25 z" />
+    <path android:fillColor="#FF6B00" android:pathData="M800,250 h20 v20 h-20 z" />
+    <path android:fillColor="#CC5800" android:pathData="M200,750 h15 v15 h-15 z" />
+
+</vector>

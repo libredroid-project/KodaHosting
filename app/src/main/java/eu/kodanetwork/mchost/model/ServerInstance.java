@@ -6,7 +6,7 @@ import org.json.JSONObject;
 
 public class ServerInstance {
 
-    public enum Type       { PAPER, PURPUR, FORGE, FABRIC, VANILLA, NEOFORGE, VELOCITY, FOLIA }
+    public enum Type       { PAPER, PURPUR, FORGE, FABRIC, VANILLA, NEOFORGE, VELOCITY, FOLIA, MARIADB, REDIS, MONGODB, POSTGRESQL }
     public enum State      { OFFLINE, STARTING, ONLINE, STOPPING, CRASHED, INSTALLING, RESTARTING, SETTING_UP, HIBERNATED }
     public enum Gamemode    { survival, creative, adventure, spectator }
     public enum Difficulty  { peaceful, easy, normal, hard }
@@ -20,6 +20,8 @@ public class ServerInstance {
     private String    subdomain;
     private String    serverDir;
     private long      lastActive;
+    private String    dbUsername = "admin";
+    private String    dbPassword = "password";
 
     private int       maxPlayers = 20;
     private Gamemode   gamemode   = Gamemode.survival;
@@ -72,6 +74,17 @@ public class ServerInstance {
     public boolean isRunning() {
         return state == State.ONLINE || state == State.STARTING;
     }
+
+    public boolean isDatabase() {
+        return type == Type.MARIADB || type == Type.REDIS || type == Type.MONGODB || type == Type.POSTGRESQL;
+    }
+
+    public String getDbUsername() { return dbUsername; }
+    public void setDbUsername(String dbUsername) { this.dbUsername = dbUsername; }
+    public String getDbPassword() { return dbPassword; }
+    public void setDbPassword(String dbPassword) { this.dbPassword = dbPassword; }
+    public void setType(Type t) { this.type = t; }
+    public void setPort(int port) { this.port = port; }
 
     public String getFormattedUptime() {
         if (startTime == 0 || !isRunning()) return "--:--:--";
@@ -155,6 +168,7 @@ public class ServerInstance {
     public void   setName(String v)            { name = v; subdomain = sanitize(v); }
     public Type   getType()                    { return type; }
     public String getVersion()                 { return version; }
+    public void   setVersion(String v)         { version = v; }
     public long   getLastActive()              { return lastActive; }
     public void   setLastActive(long v)        { lastActive = v; }
     public int    getRamMB()                   { return ramMB; }

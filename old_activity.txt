@@ -1,0 +1,117 @@
+# Activity Log
+
+- Initialized activity log.
+- Searched for "online" in the codebase. Found relevant logic in `TermuxServerService.java` and `ServerInstance.java`.
+- Analyzed `TermuxServerService.java`. Identified potential issues with state management in `startTermuxFlow` and possible state persistence.
+- Verified `ServerInstance.java`. `state` is NOT persisted in JSON.
+- Investigating `TermuxServerService.java` for logic that might incorrectly set the state to `ONLINE`. Found that `updateStatsLocally` is empty and `startLogMonitor` is the primary state updater.
+- Checking `ServerDetailActivity.java` to see how the UI reflects the state.
+- Suspecting that `TermuxServerService` fails to detect when a Termux-based server stops or crashes.
+- Examining `ServerCardAdapter.java` to see how the main list displays the state.
+- Checking `activity_server_detail.xml` to see if the status text is hardcoded.
+- Confirmed that `TermuxServerService` only sets state to `OFFLINE` in native mode or when explicitly stopped.
+- Planning to implement proper status checking in `updateStatsLocally`.
+- Implemented `updateStatsLocally` in `TermuxServerService.java` with a socket-based ping and player count parsing.
+- Fixed a compilation error in `TermuxServerService.java` by casting byte literals.
+- Added `startTime` initialization and a 2-minute timeout for the `STARTING` state in `TermuxServerService.java`.
+- Ensured `onlinePlayers` is reset to 0 when the server goes `OFFLINE`.
+- Refined `updateStatsLocally` to include socket timeouts for better reliability.
+- Further improved ping response parsing in `updateStatsLocally`.
+- Added log parsing in `startLogMonitor` to detect player joins and leaves, populating `onlinePlayerNames`.
+- Implemented ANSI escape code stripping to ensure player names are extracted without color codes.
+- Replaced the console log TextView with a WebView to properly render ANSI/RGB colors and fix display issues with terminal codes.
+- Added a robust ANSI-to-HTML converter in `ServerDetailActivity` to handle technical output styles.
+- Improved ANSI-to-HTML conversion to handle underline and italics, and added a catch-all filter to strip remaining terminal escape codes from the log display.
+- Fixed an issue where console colors were lost by ensuring the CSS style block is always correctly included in the WebView console.
+- Made the ANSI-to-HTML converter more robust against missing escape characters and added support for more terminal formatting codes.
+- Fixed a bug where DNS records (A and SRV) were not created in Native mode by properly starting the `frpc` tunnel process.
+- Improved tunnel monitoring to support both FRP and the Bore tool, including automatic port extraction from logs.
+- Fixed a UI bug where the "Native Hosting" switch was not correctly initialized or saved.
+- Implemented a "Player Database" that stores all players who have ever joined the server.
+- Upgraded File Manager with long-press context menu for Copy, Cut, Delete, and Rename operations.
+- Added a "Paste" function that appears when a file is in the clipboard.
+- Rebuilt the File Editor for a smoother experience:
+    - Enabled inertia (fling) scrolling.
+    - Removed line numbers to provide more space and focus.
+- Integrated local TAB plugin storage (TAB_RAR):
+    - App now checks `TAB_RAR` folder for pre-packaged jars (Forge/Paper) before attempting Modrinth download.
+    - Added logic to automatically copy matching local jars based on Minecraft version and server type.
+- Fixed a critical startup bug in Termux mode by adding a `cd` command to the bash script, resolving "Unable to access jarfile" errors.
+- Improved TAB plugin discovery:
+    - Added support for standard Android Documents folder for `TAB_RAR`.
+    - Implemented flexible naming fallbacks (e.g., checking for "Bukkit" if "Paper" is not found).
+    - Added detailed logging to identify where the app is searching for local files.
+- Revamped the "Create Server" flow:
+    - Added choice between "KodaHosting Design" and "Manual Setup".
+    - Integrated Modrinth API to automatically download the correct TAB plugin version.
+    - Added a Theme Color picker (Koda, Red, Green, Cyan) that dynamically styles the TAB header, footer, and scoreboard.
+- Fixed multiple compilation errors across the project:
+    - Added missing `FileReader` import and `ACTION` constants to `TermuxServerService.java`.
+    - Added `get()` method to `LocalBinder` for UI access.
+    - Fixed method calls in `TermuxServerService` (corrected `getById` to `byId` and updated `JavaFinder` usage).
+    - Synchronized `CreateServerActivity` and `ServerDetailActivity` with the corrected service methods.
+    - Cleaned up orphaned code blocks in `CreateServerActivity.java`.
+- Implemented a professional full-screen technical loading overlay for the entire automatic setup process (Core download -> Termux setup -> Boot -> Design Injection -> Restart).
+- Fixed a major stability bug where servers would crash with `BindException` during the automatic restart phase.
+- Optimized the injection process with a 25-second cooling period and aggressive port-clearing logic.
+- Finalized the multi-phase automatic setup for "KodaHosting Design":
+    1. Initial boot -> Wait 10s -> Stop.
+    2. Inject TAB JAR -> Start -> Wait 14s (config generation).
+    3. Overwrite entire `config.yml` with custom template -> Reload TAB -> Complete.
+- Upgraded the loading screen with a success state:
+    - Displays a large green checkmark upon completion.
+    - Added "SETUP ERFOLGREICH!" confirmation before automatically closing.
+- Fixed server crash issues by implementing a more stable `nohup` execution and aggressive port-clearing logic.
+- Fixed build errors caused by missing `fifoPath` variable in the `RT` class. The variable was re-added to ensure the background console communication works properly.
+- Fixed an issue where the Termux background process failed to start entirely. Removed problematic `export PATH` and `fuser` commands that caused silent intent failures, and restored the proven single-quoted background execution string. The server now securely binds as a persistent background task.
+- Restored the player name parsing logic to properly detect and list online players in the dashboard.
+- Fixed a compilation error in `ServerInstance.java` by adding the missing `JSONArray` import.
+- Added the ability to manage offline players, including a new "Entbannen" (unban) action using the `/pardon` command.
+- Strengthened player name extraction by adding aggressive ANSI/color stripping and filtering for valid Minecraft name characters (alphanumeric and underscores).
+- Fixed an issue where the auto-generated TAB configuration would lose color themes or revert to defaults. 
+    - The custom configuration writing process (`writeTabConfig`) was completely restored to match the user's requested 250+ line YAML template, ensuring critical sections like `mysql` and `components` are not omitted. This prevents the TAB plugin from rejecting the generated config file.
+    - Updated the config template to display dynamic Server IPs within the scoreboard and removed placeholder animations from the header.
+- Addressed bugs preventing commands and the stop button from functioning by placing the communication pipe (`in.fifo`) in Termux's native `/data/data/...` directory.
+- Added a "GENERAL SETTINGS" screen (accessible from the main dashboard) allowing users to configure the AFK Screensaver and Application Language.
+- Developed an interactive AFK Screensaver feature that automatically triggers after 1, 2, or 5 minutes of inactivity. Users can choose between a floating orange squares animation or a pure black screen. The screensaver can be dismissed by tapping anywhere on the screen.
+- Redesigned the TAB and Scoreboard configuration generated for "KodaHosting Design" servers:
+    - Completely modernised the Scoreboard with `Profile` and `Server` sections.
+    - Reduced clutter by removing the unnecessary "SERVER-IP:" prefix, showing just the domain name.
+    - Changed the top header text to "KODAHOSTING" instead of "KODA NETWORK HOSTING".
+    - Removed the "Visit our webpage" message entirely from the footer.
+    - Ensured the dynamic Theme Color applies consistently to all titles and layout lines.
+    - Added extra pre-installation capabilities: when setting up a Paper 1.21.11 server, LuckPerms and PlaceholderAPI are automatically copied from the assets folder to the server's plugins folder.
+- Redesigned the Scoreboard with fitting emojis (👤, 🔰, 📶, 👥, ⚡) and applied dynamic theme colors to the values for a more vibrant, modern look.
+- Fixed the broken `%maxplayers%` placeholder in the TAB configuration by switching to the standardized `%server_max_players%` variable and adding automated PAPI expansion downloads (`papi ecloud download Server`) to the setup sequence.
+- Updated the scoreboard domain display to a clean gray color (`&7`) for better visual hierarchy.
+- Fixed a bugged emoji for the TPS line by replacing it with a more compatible lightning bolt (⚡).
+- Replaced the static predefined Theme Color choices during Server Creation with a full RGB Color Picker. Users can perfectly fine-tune the Theme Color of their server design.
+- Implemented an English and German language translation system via `LocaleHelper.java` to support the new Settings dropdown menu.
+- Fixed a severe bug where the Termux background process crashed instantly and didn't open at all. 
+    - The inline bash command was replaced with a generated `start.sh` script to avoid Android Intent parsing bugs.
+    - Removed the suicidal `pkill` command from the startup sequence (which was accidentally killing the launch script before Java could start) and replaced it with a targeted `fuser` port release. 
+    - Added `export PATH` to ensure all background binaries are found. Termux now reliably starts and stays in the background.
+- Modified JavaFinder to copy java_export from assets instead of unzipping jre21.zip to fix unpacking errors.
+- Redesigned MainActivity UI by moving the Settings and Debug Log buttons to the top header bar and converting them into cleaner icon buttons ([?] and [LOG]).
+- Added an emergency alert dialog and alarm sound playback in MainActivity when a server enters the CRASHED state.
+- Updated LocaleHelper to automatically detect and use the device's system language as the default, fulfilling the request for automatic language support in all menus.
+- Fixed a compilation error in `MainActivity.java` caused by calling a non-existent `findById` method on `ServerRepo`. Changed it to the correct `byId` method.
+- Updated ANSI-to-HTML log converter in `ServerDetailActivity` to map to the exact original Minecraft server hex colors for all 16 standard and bright colors.
+- Removed Termux terminology and references during Native mode execution by renaming `termuxRoot` to `nativeRoot` in `JavaFinder.java`.
+- Refactored Native mode server and FRPC startup in `TermuxServerService.java` to rely purely on Java's native `ProcessBuilder` and `Runtime.getRuntime().exec()` instead of using `TermuxBridge`, ensuring Native mode operates completely independently of the Termux App.
+- Fixed native Java failing to start due to missing Bionic/Termux linker dependencies. Extracted the standalone `proot` binary from `res/raw/proot_bin` in `JavaFinder.java` and modified `TermuxServerService.java` to wrap the native Java execution in a `proot` instance, binding the native root path to `/data/data/com.termux/files` to create an isolated runtime environment without needing the Termux app.
+- Fixed PRoot environment permission errors by setting the PROOT_TMP_DIR environment variable to the writable server directory.
+- Corrected the PRoot execution paths so Java and FRPC binaries inside the guest environment are referenced correctly as /data/data/com.termux/files/usr/bin/java.
+- Replaced the simple crash dialog in MainActivity with a full-screen, flashing red emergency dialog and added a longer, louder alarm sound using RingtoneManager.
+- Built a completely custom Linux environment (fake rootfs) inside the app's files directory. By symlinking the host's /system, /bionic, etc. into ake_root and using proot -0 -r fake_root, PRoot's glue rootfs and path normalization permission bugs are bypassed, allowing the Termux-compiled Java binaries to run seamlessly on native Android without Termux.
+- Replaced the dialog crash alert with a new global CrashAlertActivity that forces itself onto the screen regardless of what the user is doing.
+- Developed a completely custom, synthesized alarm tone using Android's AudioTrack. It programmatically generates a loud, terrifying, sweeping siren (sine wave from 400Hz to 1400Hz) that automatically stops after 20 seconds to serve as the emergency crash alert.
+- Redesigned the whole app UI to be edge-to-edge. Modified `styles.xml` to enable translucent status/navigation bars and updated all activity layouts to include `android:fitsSystemWindows='true'`, allowing backgrounds to flow under the system bars while keeping text safe.
+- Upgraded `CrashAlertActivity` with a modern design: pulsing dark red background, a scrollable server log view (crash report), and a 'RESTART SERVER' button to immediately bring the server back online.
+- Fixed the native Java execution bug by building a sophisticated PRoot environment. Instead of symlinks, it now uses real directory mount points inside `fake_root` and bind-mounts all host system paths (`/system`, `/dev`, `/proc`, etc.) into the guest environment, ensuring Termux-compiled binaries find their dependencies.
+- Integrated automatic language detection for the new UI elements using `LocaleHelper`.
+- Updated app version to "0.1.231beta" and increased versionCode to 4 in `app/build.gradle`.
+- Cleaned up corrupted UTF-8 characters (mojibake) across all main layout files (`activity_main.xml`, `activity_server_detail.xml`, `activity_create_server.xml`) to fix "random characters" in the UI.
+- Removed outdated server settings buttons (Playit Tunnel, IONOS DNS, Subdomain prefix) from `activity_server_detail.xml` as these processes are now handled automatically.
+- Added a clear explanation in the Server Settings UI that network configurations (Tunnels, DNS, Ports) happen automatically in the background.
+- Disabled the non-functional "Native Mode" hosting option in both `activity_create_server.xml` and `activity_server_detail.xml` with clear warnings ("NATIVE MODE GEHT NICHT").

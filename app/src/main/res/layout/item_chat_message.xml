@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="8dp">
+
+    <LinearLayout
+        android:id="@+id/ll_message_container"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:maxWidth="280dp">
+
+        <TextView
+            android:id="@+id/tv_sender_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="User"
+            android:textColor="#888888"
+            android:textSize="10sp"
+            android:layout_marginBottom="2dp"/>
+
+        <LinearLayout
+            android:id="@+id/ll_bubble"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@drawable/bg_dialog_custom"
+            android:padding="12dp">
+
+            <ImageView
+                android:id="@+id/iv_attachment"
+                android:layout_width="200dp"
+                android:layout_height="200dp"
+                android:scaleType="centerCrop"
+                android:visibility="gone"
+                android:layout_marginBottom="8dp"/>
+
+            <TextView
+                android:id="@+id/tv_attachment_link"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="📎 View Attachment"
+                android:textColor="#FF8C00"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:visibility="gone"
+                android:paddingBottom="8dp"/>
+
+            <TextView
+                android:id="@+id/tv_message"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Message"
+                android:textColor="#FFFFFF"
+                android:textSize="14sp"
+                android:autoLink="web"/>
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/tv_time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="12:00"
+            android:textColor="#666666"
+            android:textSize="10sp"
+            android:layout_marginTop="2dp"
+            android:layout_gravity="end"/>
+
+    </LinearLayout>
+</LinearLayout>

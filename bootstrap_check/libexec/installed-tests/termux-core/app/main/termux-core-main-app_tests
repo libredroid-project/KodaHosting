@@ -1,0 +1,75 @@
+#!/data/data/com.termux/files/usr/bin/bash
+# shellcheck shell=bash
+
+##
+# `termux_core_main_app__tests__main`
+##
+termux_core_main_app__tests__main() {
+
+    TERMUX_CORE__TESTS__LOG_TAG="termux-core-main-app.tests"
+
+    termux_core__tests__log 4 "main()"
+
+    # Set `TERMUX_CORE__TESTS__TESTS_PATH` used by compiled c tests.
+    if [[ ! "$TERMUX_CORE__TESTS__TESTS_PATH" =~ $TERMUX_CORE__TESTS__REGEX__ROOTFS_OR_ABSOLUTE_PATH ]]; then
+        termux_core__tests__log_error "The TERMUX_CORE__TESTS__TESTS_PATH '$TERMUX_CORE__TESTS__TESTS_PATH' is either not set or is not an absolute path"
+        return 1
+    fi
+
+
+    # Run runtime tests.
+    if [[ "$TERMUX_CORE__TESTS__RUN_RUNTIME_TESTS" == "true" ]]; then
+        termux_core_main_app__runtime_tests__run_command || return $?
+    fi
+
+    return 0
+
+}
+
+
+
+##
+# `termux_core_main_app__runtime_tests__run_command`
+##
+termux_core_main_app__runtime_tests__run_command() {
+
+    termux_core__tests__log 4 "Running 'runtime' tests"
+
+    (
+        termux_core_main_app__runtime_script_tests__run_command || exit $?
+    ) || return $?
+
+    return 0
+
+}
+
+##
+# `termux_core_main_app__runtime_script_tests__run_command`
+##
+termux_core_main_app__runtime_script_tests__run_command() {
+
+    local return_value
+
+    local tests_start_time; tests_start_time="$(date "+%s")" || return $?
+
+    termux_core__tests__log 1 "Running 'termux-core-main-app_runtime-script-tests'"
+
+    (
+        # shellcheck source=app/main/tests/scripts/termux-core-main-app_runtime-script-tests.in
+        termux_core__tests__source_file_from_path \
+            "$TERMUX_CORE__TESTS__TESTS_PATH/app/main/scripts/termux-core-main-app_runtime-script-tests" || exit $?
+
+        termux_core_main_app__runtime_script_tests__main
+    )
+    return_value=$?
+    if [ $return_value -ne 0 ]; then
+        termux_core__tests__log_error "'termux-core-main-app_runtime-script-tests' failed"
+        return $return_value
+    fi
+
+    termux_core__tests__log 2 "'termux-core-main-app_runtime-script-tests' completed in \
+$(termux_core__tests__print_elapsed_time "$tests_start_time")"
+
+    return 0
+
+}

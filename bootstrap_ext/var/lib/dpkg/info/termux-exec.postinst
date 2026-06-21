@@ -1,0 +1,50 @@
+#!/data/data/com.termux/files/usr/bin/sh
+# shellcheck shell=sh
+# shellcheck disable=SC2039,SC2059,SC3043
+
+log() { echo "termux-exec.postinst:" "$@"; }
+log_error() { echo "termux-exec.postinst:" "$@" 1>&2; }
+
+##
+# `main` [`<argument...>`]
+##
+main() {
+
+    log "Start"
+
+
+    local is_android_build_version_sdk_available="true"
+    local android_build_version_sdk="${ANDROID__BUILD_VERSION_SDK:-}"
+    case "$android_build_version_sdk" in
+        ''|*[!0-9]*)
+            android_build_version_sdk="$(getprop "ro.build.version.sdk")" || true
+            case "$android_build_version_sdk" in
+                ''|*[!0-9]*)
+                    log_error "Failed to get android_build_version_sdk value from 'getprop': '$android_build_version_sdk'"
+                    is_android_build_version_sdk_available="false"
+                    ;;
+            esac
+            ;;
+    esac
+    if [ "$is_android_build_version_sdk_available" = "true" ]; then
+        log "android_build_version_sdk: '$android_build_version_sdk'"
+    fi
+
+
+    # `termux-exec-system-linker-exec` called by `termux-exec-ld-preload-lib`
+    # will fail if `ANDROID__BUILD_VERSION_SDK` is not exported
+    # (by Termux app) and `getprop` command at `/system/bin/getprop`
+    # is not accessible.
+    # - https://github.com/termux/termux-app/issues/4448
+    if [ "$is_android_build_version_sdk_available" = "true" ]; then
+        termux-exec-ld-preload-lib setup -v || return $?
+    else
+        log_error "Skipping setting primary Termux '\$LD_PRELOAD' library as android_build_version_sdk value is not available"
+    fi
+
+
+    log "End"
+
+}
+
+main "$@"

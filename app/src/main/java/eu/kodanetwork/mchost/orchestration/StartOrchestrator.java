@@ -91,6 +91,19 @@ public class StartOrchestrator {
                         File dest = new File(jreDir, entry.getName());
                         if (entry.isDirectory()) {
                             dest.mkdirs();
+                        } else if (entry.isSymbolicLink()) {
+                            dest.getParentFile().mkdirs();
+                            try {
+                                java.nio.file.Path link = dest.toPath();
+                                java.nio.file.Path target = java.nio.file.Paths.get(entry.getLinkName());
+                                if (java.nio.file.Files.exists(link, java.nio.file.LinkOption.NOFOLLOW_LINKS)) {
+                                    java.nio.file.Files.delete(link);
+                                }
+                                java.nio.file.Files.createSymbolicLink(link, target);
+                                fileCount++;
+                            } catch (Exception e) {
+                                logStatic("Symlink failed: " + e.getMessage());
+                            }
                         } else {
                             dest.getParentFile().mkdirs();
                             try (java.io.FileOutputStream fos = new java.io.FileOutputStream(dest)) {

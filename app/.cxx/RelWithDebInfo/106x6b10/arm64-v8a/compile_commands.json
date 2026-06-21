@@ -1,0 +1,12 @@
+[
+{
+  "directory": "C:/Users/Home/KodaHosting/KodaNetwork/app/.cxx/RelWithDebInfo/106x6b10/arm64-v8a",
+  "command": "C:\\Users\\Home\\AppData\\Local\\Android\\Sdk\\ndk\\27.0.12077973\\toolchains\\llvm\\prebuilt\\windows-x86_64\\bin\\clang++.exe --target=aarch64-none-linux-android26 --sysroot=C:/Users/Home/AppData/Local/Android/Sdk/ndk/27.0.12077973/toolchains/llvm/prebuilt/windows-x86_64/sysroot -Dembeddedjvm_EXPORTS -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security  -std=c++17 -O2 -g -DNDEBUG -fPIC -o CMakeFiles\\embeddedjvm.dir\\EmbeddedJvm.cpp.o -c C:\\Users\\Home\\KodaHosting\\KodaNetwork\\app\\src\\main\\cpp\\EmbeddedJvm.cpp",
+  "file": "C:\\Users\\Home\\KodaHosting\\KodaNetwork\\app\\src\\main\\cpp\\EmbeddedJvm.cpp"
+},
+{
+  "directory": "C:/Users/Home/KodaHosting/KodaNetwork/app/.cxx/RelWithDebInfo/106x6b10/arm64-v8a",
+  "command": "C:\\Users\\Home\\AppData\\Local\\Android\\Sdk\\ndk\\27.0.12077973\\toolchains\\llvm\\prebuilt\\windows-x86_64\\bin\\clang++.exe --target=aarch64-none-linux-android26 --sysroot=C:/Users/Home/AppData/Local/Android/Sdk/ndk/27.0.12077973/toolchains/llvm/prebuilt/windows-x86_64/sysroot -Dembeddedjvm_EXPORTS -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security  -std=c++17 -O2 -g -DNDEBUG -fPIC -o CMakeFiles\\embeddedjvm.dir\\PraetorSecurity.cpp.o -c C:\\Users\\Home\\KodaHosting\\KodaNetwork\\app\\src\\main\\cpp\\PraetorSecurity.cpp",
+  "file": "C:\\Users\\Home\\KodaHosting\\KodaNetwork\\app\\src\\main\\cpp\\PraetorSecurity.cpp"
+}
+]

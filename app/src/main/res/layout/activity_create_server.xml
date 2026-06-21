@@ -1,29 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/root_layout"
-    android:fitsSystemWindows="true"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent" android:layout_height="match_parent"
-    android:orientation="vertical" android:background="#0A0A0F">
+    android:orientation="vertical">
 
-    <!-- Header -->
-    <LinearLayout android:layout_width="match_parent" android:layout_height="64dp"
-        android:orientation="horizontal" android:gravity="center_vertical"
-        android:background="@drawable/header_bg"
-        android:paddingStart="8dp" android:paddingEnd="20dp"
-        android:elevation="4dp">
-        <ImageButton android:id="@+id/btn_back"
-            android:layout_width="48dp" android:layout_height="48dp"
-            android:src="@android:drawable/ic_media_previous"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:tint="#FF6B00"
-            android:scaleType="centerInside"/>
-        <TextView android:layout_width="0dp" android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="New Server" android:textColor="#F0F0F0"
-            android:textSize="18sp" android:fontFamily="sans-serif-medium"
-            android:textStyle="bold" android:layout_marginStart="4dp"/>
+    <!-- Header Container -->
+    <LinearLayout android:id="@+id/top_bar_container"
+        android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="#1B1613" android:elevation="4dp">
+        
+        <LinearLayout android:id="@+id/top_bar" android:layout_width="match_parent" android:layout_height="48dp"
+            android:orientation="horizontal" android:gravity="center_vertical"
+            android:paddingStart="8dp" android:paddingEnd="20dp">
+            <ImageButton android:id="@+id/btn_back"
+                android:layout_width="40dp" android:layout_height="40dp"
+                android:src="@android:drawable/ic_media_previous"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:tint="#FF6B00"
+                android:scaleType="centerInside"/>
+            <TextView android:layout_width="0dp" android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="New Server" android:textColor="#F0F0F0"
+                android:textSize="18sp" android:fontFamily="sans-serif-medium"
+                android:textStyle="bold" android:layout_marginStart="4dp"/>
+        </LinearLayout>
     </LinearLayout>
+    
     <View android:layout_width="match_parent" android:layout_height="2dp"
         android:background="#FF6B00"/>
 
@@ -376,9 +380,17 @@
         android:id="@+id/layout_java_extract"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="#DD0A0A0F"
+        android:background="#DD0A0807"
         android:elevation="10dp"
         android:visibility="gone">
+        
+        <View
+            android:id="@+id/java_extract_light_blob"
+            android:layout_width="300dp"
+            android:layout_height="300dp"
+            android:layout_gravity="center"
+            android:background="@drawable/bg_light_blob"/>
+            
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -386,18 +398,20 @@
             android:layout_gravity="center"
             android:gravity="center">
             <ProgressBar
-                android:layout_width="64dp"
-                android:layout_height="64dp"
+                android:layout_width="56dp"
+                android:layout_height="56dp"
                 android:indeterminateTint="#FF6B00"/>
             <TextView
                 android:id="@+id/tv_extract_msg"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
+                android:layout_marginTop="20dp"
                 android:text="Preparing Java..."
                 android:textColor="#F0F0F0"
-                android:textSize="16sp"
-                android:fontFamily="sans-serif-medium"/>
+                android:textSize="18sp"
+                android:fontFamily="sans-serif-medium"
+                android:textStyle="bold"
+                android:letterSpacing="0.05"/>
         </LinearLayout>
     </FrameLayout>
 </LinearLayout>

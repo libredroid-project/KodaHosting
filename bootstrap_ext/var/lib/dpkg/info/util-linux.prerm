@@ -1,0 +1,8 @@
+#!/data/data/com.termux/files/usr/bin/sh
+# Automatically added by termux_step_update_alternatives
+if [ "$1" = 'remove' ] || [ "$1" != 'upgrade' ] || [ "debian" = 'pacman' ]; then
+  if [ -x "/data/data/com.termux/files/usr/bin/update-alternatives" ]; then
+    update-alternatives --remove "pager" "/data/data/com.termux/files/usr/bin/more"
+  fi
+fi
+# End automatically added section

@@ -1,0 +1,463 @@
+#!/data/data/com.termux/files/usr/bin/bash
+# shellcheck shell=bash
+
+##
+# `termux_external_packages__tests__main`
+##
+termux_external_packages__tests__main() {
+
+    TERMUX_CORE__TESTS__LOG_TAG="termux-external-pkgs.tests"
+
+    termux_core__tests__log 4 "main()"
+
+    # Set `TERMUX_CORE__TESTS__TESTS_PATH` used by compiled c tests.
+    if [[ ! "$TERMUX_CORE__TESTS__TESTS_PATH" =~ $TERMUX_CORE__TESTS__REGEX__ROOTFS_OR_ABSOLUTE_PATH ]]; then
+        termux_core__tests__log_error "The TERMUX_CORE__TESTS__TESTS_PATH '$TERMUX_CORE__TESTS__TESTS_PATH' is either not set or is not an absolute path"
+        return 1
+    fi
+
+
+    # Run tests.
+    termux_external_packages__tests__run_tests || return $?
+
+    return 0
+}
+
+##
+# `termux_external_packages__tests__run_tests`
+##
+termux_external_packages__tests__run_tests() {
+
+    termux_core__tests__log 2 "runTests(start)"
+
+    TERMUX_CORE__TESTS__TESTS_COUNT="0"
+    TERMUX_CORE__TESTS__LOG_EMPTY_LINE_AFTER_SCRIPT_TEST="true"
+
+
+
+    if [[ "android-tools" =~ $TERMUX_CORE__TESTS__TEST_PACKAGES_FILTER ]]; then
+        (test__android_tools) || return $?
+    fi
+
+    if [[ "termux-exec" =~ $TERMUX_CORE__TESTS__TEST_PACKAGES_FILTER ]]; then
+        (test__termux_exec) || return $?
+    fi
+
+    if [[ "termux-tools" =~ $TERMUX_CORE__TESTS__TEST_PACKAGES_FILTER ]]; then
+        (test__termux_tools) || return $?
+    fi
+
+    if [[ "termux-am" =~ $TERMUX_CORE__TESTS__TEST_PACKAGES_FILTER ]]; then
+        (test__termux_am) || return $?
+    fi
+
+    if [[ "termux-am-socket" =~ $TERMUX_CORE__TESTS__TEST_PACKAGES_FILTER ]]; then
+        (test__termux_am_socket) || return $?
+    fi
+
+    if [[ "termux-api" =~ $TERMUX_CORE__TESTS__TEST_PACKAGES_FILTER ]]; then
+        (test__termux_api) || return $?
+    fi
+
+    if [[ "tudo" =~ $TERMUX_CORE__TESTS__TEST_PACKAGES_FILTER ]]; then
+        (test__tudo) || return $?
+    fi
+
+    if [[ "sudo" =~ $TERMUX_CORE__TESTS__TEST_PACKAGES_FILTER ]]; then
+        (test__sudo) || return $?
+    fi
+
+
+
+    # Some package tests are run by external scripts, so not part of count.
+    termux_core__tests__log 2 "runTests(end): $TERMUX_CORE__TESTS__TESTS_COUNT internal tests completed"
+
+    return 0
+}
+
+
+
+test__android_tools() {
+
+    [[ "$TERMUX_CORE__TESTS__RUN_RUNTIME_TESTS" != "true" ]] && return 0
+
+    termux_core__tests__log 3 "test__android_tools()"
+
+    # Remove LD_LIBRARY_PATH from environment to avoid conflicting
+    # with system libraries that system binaries may link against
+    # Some tools require having /system/bin/app_process in the PATH,
+    # at least `am` and `pm` on a Nexus 6p running Android `6.0`.
+    local android_env="LD_LIBRARY_PATH= LD_PRELOAD= PATH=/system/bin"
+
+    termux_core__tests__run_script_test "android-getprop-ro-build-version-sdk" \
+        "#!/usr/bin/bash${NL}${android_env} /system/bin/getprop 'ro.build.version.sdk'" \
+        0 "^[0-9]+$" || return $?
+
+    termux_core__tests__run_script_test "android-pm-list-termux-package" \
+        "#!/usr/bin/bash${NL}out=\"\$(${android_env} /system/bin/pm list packages -u --user '$TERMUX__USER_ID' 2>&1 </dev/null)\"; echo \"\$out\" | grep '$TERMUX_APP__PACKAGE_NAME'" \
+        0 "^.*package:$TERMUX_APP__PACKAGE_NAME.*$" || return $?
+
+    termux_core__tests__run_script_test "android-logcat" \
+        "#!/usr/bin/bash${NL}${android_env} /system/bin/logcat -d -t 100" \
+        0 "^.*..*$" || return $?
+
+    return 0
+
+}
+
+
+
+test__termux_exec() {
+
+    termux_core__tests__log 3 "test__termux_exec()"
+
+    local termux_exec__tests_file_path="$TERMUX__PREFIX/libexec/installed-tests/termux-exec/app/main/termux-exec-tests"
+
+    if [[ ! -f "$termux_exec__tests_file_path" ]]; then
+        termux_core__tests__log 3 "Skipping termux-exec tests since 'termux-exec-tests' file not found"
+        return 0
+    fi
+
+    printf -v "$TERMUX_EXEC__TESTS__LOG_LEVEL___N" "%s" "$TERMUX_CORE__TESTS__LOG_LEVEL" || exit $?
+    export "${TERMUX_EXEC__TESTS__LOG_LEVEL___N?}" || exit $?
+
+    local -a command_options=()
+
+    if [[ "$TERMUX_CORE__TESTS__USE_FSANITIZE_BUILDS" == "true" ]]; then
+        command_options+=("-f")
+    fi
+
+    if [[ "$TERMUX_CORE__TESTS__DETECT_LEAKS" == "true" ]]; then
+        command_options+=("-l")
+    fi
+
+    "$termux_exec__tests_file_path" "${command_options[@]}" "$TERMUX_CORE__TESTS__COMMAND_TYPE_ID" || return $?
+
+    return 0
+
+}
+
+
+
+test__termux_tools() {
+
+    [[ "$TERMUX_CORE__TESTS__RUN_RUNTIME_TESTS" != "true" ]] && return 0
+
+    termux_core__tests__log 3 "test__termux_tools()"
+
+    termux_core__tests__run_script_test "termux-getprop-ro-build-version-sdk" \
+        "#!/usr/bin/bash${NL}getprop 'ro.build.version.sdk'" \
+        0 "^[0-9]+$" || return $?
+
+    termux_core__tests__run_script_test "termux-pm-list-termux-package" \
+        "#!/usr/bin/bash${NL}out=\"\$(pm list packages -u --user '$TERMUX__USER_ID' 2>&1 </dev/null)\"; echo \"\$out\" | grep '$TERMUX_APP__PACKAGE_NAME'" \
+        0 "^.*package:$TERMUX_APP__PACKAGE_NAME.*$" || return $?
+
+    termux_core__tests__run_script_test "termux-logcat" \
+        "#!/usr/bin/bash${NL}logcat -d -t 100" \
+        0 "^.*..*$" || return $?
+
+    if [ "$ANDROID__BUILD_VERSION_SDK" -ge 24 ]; then
+        termux_core__tests__run_script_test "termux-info" \
+            "#!/usr/bin/bash${NL}termux-info --no-set-clipboard" \
+            0 "^.*$TERMUX__USER_ID___N=$TERMUX__USER_ID.*$" || return $?
+    fi
+
+    # Send empty file/url and just check no error was set while sending intent.
+    termux_core__tests__run_script_test "termux-open" \
+        "#!/usr/bin/bash${NL}termux-open ''" \
+        0 "^.*.*$" || return $?
+
+    # Just check no error was set while sending intent.
+    # termux-setup-storage, sends the same intent but requires ~/storage
+    # directory to not exist, so do not test that.
+    termux_core__tests__run_script_test "termux-reload-settings" \
+        "#!/usr/bin/bash${NL}termux-reload-settings" \
+        0 "^.*.*$" || return $?
+
+    return 0
+
+}
+
+
+
+test__termux_am() {
+
+    [[ "$TERMUX_CORE__TESTS__RUN_RUNTIME_TESTS" != "true" ]] && return 0
+
+    termux_core__tests__log 3 "test__termux_am()"
+
+    # The `--user` flag must be passed if running in a secondary user (`> 0`).
+    test__termux_am__wrapper "-user" " --user '$TERMUX__USER_ID'" || return $?
+
+    # If `--user` flag is not passed to  `am`, then it should
+    # automatically use current user as default, so test that.
+    test__termux_am__wrapper "-current-user" "" || return $?
+
+    return 0
+
+}
+
+test__termux_am__wrapper() {
+
+    local test_name_suffix="$1"
+    local user_id_arg="$2"
+
+    # Set `rw-------` permission for `am.apk` to test if `am` correctly
+    # makes it read-only to prevent`SIGABRT` on Android `>= 14`.
+    # - https://github.com/termux/TermuxAm/commit/598a9c06c325db6d41cc840dedcb8ba34564c79f
+    local am_apk_path="$TERMUX__PREFIX/libexec/termux-am/am.apk"
+    chmod 0600 "$am_apk_path" || return $?
+
+
+    if [ "$ANDROID__BUILD_VERSION_SDK" -ge 34 ]; then
+        termux_core__tests__run_script_test "am-broadcast$test_name_suffix" \
+            "#!/usr/bin/bash${NL}am broadcast$user_id_arg -a '$TERMUX_APP__PACKAGE_NAME.test' '$TERMUX_APP__PACKAGE_NAME'" \
+            0 "^.*Broadcast sent without waiting for result$" || return $?
+    else
+        termux_core__tests__run_script_test "am-broadcast$test_name_suffix" \
+            "#!/usr/bin/bash${NL}am broadcast$user_id_arg -a '$TERMUX_APP__PACKAGE_NAME.test' '$TERMUX_APP__PACKAGE_NAME'" \
+            0 "^.*Broadcast completed: result=0$" || return $?
+    fi
+
+    # FIXME: Read env variable otherwise default.
+    termux_core__tests__run_script_test "am-start-activity$test_name_suffix" \
+        "#!/usr/bin/bash${NL}am start$user_id_arg '$TERMUX_APP__PACKAGE_NAME/$TERMUX_APP__SHELL_API__SHELL_API_ACTIVITY__CLASS_NAME'" \
+        0 "^.*Starting: Intent \{.*\}.*$" || return $?
+
+    termux_core__tests__run_script_test "am-start-service$test_name_suffix" \
+        "#!/usr/bin/bash${NL}am startservice$user_id_arg '$TERMUX_APP__PACKAGE_NAME/$TERMUX_APP__SHELL_API__SHELL_API_SERVICE__CLASS_NAME'" \
+        0 "^.*Starting service: Intent \{.*\}.*$" || return $?
+
+    return 0
+
+}
+
+
+
+test__termux_am_socket() {
+
+    [[ "$TERMUX_CORE__TESTS__RUN_RUNTIME_TESTS" != "true" ]] && return 0
+
+    termux_core__tests__log 3 "test__termux_am_socket()"
+
+    # If cannot connect to `TermuxAmSocketServer` in termux-app to get `am` help.
+    if [[ "$(termux-am --am-help 2>/dev/null)" != *"usage: am "* ]]; then
+        termux_core__tests__log 3 "Skipping termux-am-socket tests since failed to connect to server"
+        return 0
+    fi
+
+
+    # The `--user` flag must be passed if running in a secondary user (`> 0`).
+    test__termux_am_socket__wrapper "-user" " --user '$TERMUX__USER_ID'" || return $?
+
+    # If `--user` flag is not passed to  `termux-am`, then it should
+    # automatically use current user as default, so test that.
+    if [[ "$TERMUX__USER_ID" == "0" ]]; then
+        test__termux_am_socket__wrapper "-current-user" "" || return $?
+    fi
+
+    return 0
+
+}
+
+test__termux_am_socket__wrapper() {
+
+    local test_name_suffix="$1"
+    local user_id_arg="$2"
+
+    termux_core__tests__run_script_test "termux-am-broadcast$test_name_suffix" \
+        "#!/usr/bin/bash${NL}termux-am broadcast$user_id_arg -a '$TERMUX_APP__PACKAGE_NAME.test' '$TERMUX_APP__PACKAGE_NAME'" \
+        0 "^.*Broadcast completed: result=.*$" || return $? # resultCode seems to be -1
+
+    # FIXME: Read env variable otherwise default.
+    termux_core__tests__run_script_test "termux-am-start-activity$test_name_suffix" \
+        "#!/usr/bin/bash${NL}termux-am start$user_id_arg '$TERMUX_APP__PACKAGE_NAME/$TERMUX_APP__SHELL_API__SHELL_API_ACTIVITY__CLASS_NAME'" \
+        0 "^.*Starting: Intent \{.*\}.*$" || return $?
+
+    termux_core__tests__run_script_test "termux-am-start-service$test_name_suffix" \
+        "#!/usr/bin/bash${NL}termux-am startservice$user_id_arg '$TERMUX_APP__PACKAGE_NAME/$TERMUX_APP__SHELL_API__SHELL_API_SERVICE__CLASS_NAME'" \
+        0 "^.*Starting service: Intent \{.*\}.*$" || return $?
+
+    return 0
+
+}
+
+
+
+test__termux_api() {
+
+    [[ "$TERMUX_CORE__TESTS__RUN_RUNTIME_TESTS" != "true" ]] && return 0
+
+    termux_core__tests__log 3 "test__termux_api()"
+
+    # If running as root.
+    if [[ "$TERMUX_CORE__TESTS__UID" == "0" ]]; then
+        termux_core__tests__log 3 "Skipping termux-api tests since running as root"
+        return 0
+    fi
+
+
+    # This must be run after `TermuxShellCommandEnvioronment_runTests()`.
+    # Check if `termux-apps-info.env` file exists whose path is exported in
+    # the `$TERMUX_CORE__APPS_INFO_ENV_FILE` environment variable by the
+    # Termux app running the current shell, which is sourced by
+    # `termux_core__bash__termux_apps_info_app_version_name` to load the
+    # latest value in the current environment for
+    # `$TERMUX_API_APP__APP_VERSION_NAME` before getting it.
+    # The `termux-apps-app-version-name.bash` (under `$PATH`) and
+    # `termux-apps-info.env` file (as `$TERMUX_CORE__APPS_INFO_ENV_FILE` not exported)
+    # will not be available in Termux docker.
+    TERMUX_API_APP__APP_VERSION_NAME___N="TERMUX_API_APP__APP_VERSION_NAME"
+
+    termux_core__tests__log 5 "$TERMUX_CORE__APPS_INFO_ENV_FILE___N='$TERMUX_CORE__APPS_INFO_ENV_FILE'"
+    if [ -n "$TERMUX_CORE__APPS_INFO_ENV_FILE" ] && [ -f "$TERMUX_CORE__APPS_INFO_ENV_FILE" ]; then
+        # Source for `termux_core__bash__termux_apps_info_app_version_name` function.
+        termux_core__tests__source_file_from_path "termux-apps-app-version-name.bash" || return $?
+
+        termux_core__bash__termux_apps_info_app_version_name get-value \
+            "TERMUX_API_APP__APP_VERSION_NAME" cn="termux-api-app" || return $?
+        termux_core__tests__log 5 "$TERMUX_API_APP__APP_VERSION_NAME___N='$TERMUX_API_APP__APP_VERSION_NAME'"
+    else
+        # Fallback to manually exported variable by caller.
+        termux_core__tests__copy_variable TERMUX_API_APP__APP_VERSION_NAME "$TERMUX_API_APP__APP_VERSION_NAME___N"
+
+        TERMUX_API_APP__APP_VERSION_NAME="${TERMUX_API_APP__APP_VERSION_NAME:-}"
+        termux_core__tests__log 5 "${TERMUX_API_APP__APP_VERSION_NAME___N}__FALLBACK='$TERMUX_API_APP__APP_VERSION_NAME'"
+    fi
+
+
+    # If `termux-app` did not export the version variable for `termux-api` app.
+    if [[ ! "$TERMUX_API_APP__APP_VERSION_NAME" =~ ^[0-9].*$ ]]; then
+        termux_core__tests__log 3 "Skipping termux-api tests since app not installed"
+        return 0
+    fi
+
+    # If `termux-api-package` is not installed.
+    if [[ ! -f "$TERMUX__PREFIX/libexec/termux-api" ]]; then
+        termux_core__tests__log 3 "Skipping termux-api tests since package not installed"
+        return 0
+    fi
+
+
+    termux_core__tests__run_script_test "termux-battery-status" \
+        "#!/usr/bin/bash${NL}termux-battery-status" \
+        0 "^.*\"percentage\": [0-9]+.*$" || return $?
+
+    termux_core__tests__run_script_test "termux-usb" \
+        "#!/usr/bin/bash${NL}termux-usb -l" \
+        0 "^\[.*\]$" || return $?
+
+    termux_core__tests__run_script_test "termux-clipboard-set" \
+        "#!/usr/bin/bash${NL}termux-clipboard-set termux-api-test" \
+        0 "^$" || return $?
+
+    # Wait for clipboard to be set.
+    sleep 3
+
+    termux_core__tests__run_script_test "termux-clipboard-get" \
+        "#!/usr/bin/bash${NL}termux-clipboard-get" \
+        0 "^termux-api-test$" || return $?
+
+    return 0
+
+}
+
+
+
+test__tudo() {
+
+    local return_value
+
+    [[ "$TERMUX_CORE__TESTS__RUN_RUNTIME_TESTS" != "true" ]] && return 0
+
+    termux_core__tests__log 3 "test__tudo()"
+
+    local tudo_script_file_path="$TERMUX__PREFIX/bin/tudo"
+    local tudo_tests_file_path="$TERMUX__PREFIX/libexec/installed-tests/tudo/tudo_tests"
+    local tudo_version_string
+    local tudo_version_regex='^tudo version=[^ ]+ org=agnostic-apollo project=tudo$'
+
+    if [[ ! -f "$tudo_script_file_path" ]]; then
+        termux_core__tests__log 3 "Skipping tudo tests since tudo not installed"
+        return 0
+    fi
+
+    if [[ ! -f "$tudo_tests_file_path" ]]; then
+        termux_core__tests__log 3 "Skipping tudo tests since 'tudo_tests' file not found"
+        return 0
+    fi
+
+
+    tudo_version_string="$("$tudo_script_file_path" --version)"
+    return_value=$?
+    if [ $return_value -ne 0 ] || [ -z "$tudo_version_string" ]; then
+        termux_core__tests__log 3 "Skipping tudo tests since failed to get 'tudo' version string"
+        return 0
+    fi
+
+    if [[ ! "$tudo_version_string" =~ $tudo_version_regex ]]; then
+        termux_core__tests__log 3 "Skipping tudo tests since 'tudo' version string is not for 'tudo' project provided by 'agnostic-apollo' org: '$tudo_version_string'"
+        return 0
+    fi
+
+
+    TUDO_TESTS__LOG_LEVEL="$TERMUX_CORE__TESTS__LOG_LEVEL" "$tudo_tests_file_path" || return $?
+
+    return 0
+
+}
+
+
+
+test__sudo() {
+
+    local return_value
+
+    [[ "$TERMUX_CORE__TESTS__RUN_RUNTIME_TESTS" != "true" ]] && return 0
+
+    termux_core__tests__log 3 "test__sudo()"
+
+    local sudo_script_file_path="$TERMUX__PREFIX/bin/sudo"
+    local sudo_tests_file_path="$TERMUX__PREFIX/libexec/installed-tests/sudo/sudo_tests"
+    local sudo_version_string
+    local sudo_version_regex='^sudo version=[^ ]+ org=agnostic-apollo project=sudo$'
+
+    if [[ "$TERMUX_CORE__TESTS__UID" != "0" ]]; then
+        if [[ "$(su -c "id -u")" != "0" ]]; then
+            termux_core__tests__log 3 "Skipping sudo tests since root access is not available"
+            return 0
+        fi
+    fi
+
+    if [[ ! -f "$sudo_script_file_path" ]]; then
+        termux_core__tests__log 3 "Skipping sudo tests since sudo not installed"
+        return 0
+    fi
+
+    if [[ ! -f "$sudo_tests_file_path" ]]; then
+        termux_core__tests__log 3 "Skipping sudo tests since 'sudo_tests' file not found"
+        return 0
+    fi
+
+
+    # Run tests only for `sudo` project provided by 'agnostic-apollo' org,
+    # and not for other `sudo` implementations like `tsu`.
+    sudo_version_string="$("$sudo_script_file_path" --version)"
+    return_value=$?
+    if [ $return_value -ne 0 ] || [ -z "$sudo_version_string" ]; then
+        termux_core__tests__log 3 "Skipping sudo tests since failed to get 'sudo' version string"
+        return 0
+    fi
+
+    if [[ ! "$sudo_version_string" =~ $sudo_version_regex ]]; then
+        termux_core__tests__log 3 "Skipping sudo tests since 'sudo' version string is not for 'sudo' project provided by 'agnostic-apollo' org: '$sudo_version_string'"
+        return 0
+    fi
+
+
+    SUDO_TESTS__LOG_LEVEL="$TERMUX_CORE__TESTS__LOG_LEVEL" "$sudo_tests_file_path" || return $?
+
+    return 0
+
+}

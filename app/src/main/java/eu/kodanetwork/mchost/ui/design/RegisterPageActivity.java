@@ -15,20 +15,41 @@ public class RegisterPageActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        getWindow().setFlags(
+                android.view.WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
+                android.view.WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
+        );
         setContentView(R.layout.activity_design_register);
 
         EditText etEmail = findViewById(R.id.et_email);
-        EditText etUsername = findViewById(R.id.et_username);
         EditText etPassword = findViewById(R.id.et_password);
         EditText etInvite = findViewById(R.id.et_invite);
         Button btnCreate = findViewById(R.id.btn_create_account);
         TextView tvSignIn = findViewById(R.id.tv_sign_in);
+        TextView tvTitle = findViewById(R.id.tv_praetor_title);
+
+        if (tvTitle != null) {
+            String praetorHtml = "<font color=\"#555555\">P.R.</font><font color=\"#AAAAAA\">A</font><font color=\"#555555\">.</font><font color=\"#AAAAAA\">E</font><font color=\"#555555\">.</font><font color=\"#FFFFFF\">T</font><font color=\"#555555\">.</font><font color=\"#FFFFFF\">O</font><font color=\"#555555\">.</font><font color=\"#FFFFFF\">R.</font>";
+            tvTitle.setText(android.text.Html.fromHtml(praetorHtml, android.text.Html.FROM_HTML_MODE_LEGACY));
+        }
+
+        android.widget.CheckBox cbLegal = findViewById(R.id.cb_legal);
+        if (cbLegal != null) {
+            cbLegal.setText(android.text.Html.fromHtml("I accept the <a href='https://privacy.kodanetwork.eu/tos'>Terms of Service</a> and <a href='https://privacy.kodanetwork.eu/privacy'>Privacy Policy</a>", android.text.Html.FROM_HTML_MODE_LEGACY));
+            cbLegal.setMovementMethod(android.text.method.LinkMovementMethod.getInstance());
+        }
+
+        eu.kodanetwork.mchost.util.ThemeHelper.apply(this);
 
         btnCreate.setOnClickListener(v -> {
             String email = etEmail.getText().toString().trim();
             String pwd = etPassword.getText().toString().trim();
-            if (email.isEmpty() || etUsername.getText().toString().trim().isEmpty() || pwd.isEmpty()) {
+            if (email.isEmpty() || pwd.isEmpty()) {
                 Toast.makeText(this, "Bitte Pflichtfelder ausfüllen", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            if (cbLegal != null && !cbLegal.isChecked()) {
+                Toast.makeText(this, "You must accept the Terms of Service and Privacy Policy to continue.", Toast.LENGTH_LONG).show();
                 return;
             }
             
@@ -56,6 +77,9 @@ public class RegisterPageActivity extends AppCompatActivity {
             });
         });
 
-        tvSignIn.setOnClickListener(v -> startActivity(new Intent(this, LoginPageActivity.class)));
+        tvSignIn.setOnClickListener(v -> {
+            eu.kodanetwork.mchost.util.AnimHelper.startSlideVertical(this, new Intent(this, LoginPageActivity.class));
+            finish();
+        });
     }
 }

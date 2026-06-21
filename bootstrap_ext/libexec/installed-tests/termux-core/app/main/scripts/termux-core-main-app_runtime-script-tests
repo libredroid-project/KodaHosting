@@ -1,0 +1,45 @@
+#!/data/data/com.termux/files/usr/bin/bash
+# shellcheck shell=bash
+
+
+##
+# `termux_core_main_app__runtime_script_tests__main`
+##
+termux_core_main_app__runtime_script_tests__main() {
+
+    TERMUX_CORE__TESTS__LOG_TAG="termux-core-main-app.rs-tests"
+
+    termux_core__tests__log 4 "main()"
+
+
+    # Run tests.
+    termux_core_main_app__runtime_script_tests__run_tests || return $?
+
+    return 0
+}
+
+##
+# `termux_core_main_app__runtime_script_tests__run_tests`
+##
+termux_core_main_app__runtime_script_tests__run_tests() {
+
+    termux_core__tests__log 2 "runTests(start)"
+
+    TERMUX_CORE__TESTS__TESTS_COUNT="0"
+    TERMUX_CORE__TESTS__LOG_EMPTY_LINE_AFTER_SCRIPT_TEST="true"
+
+
+
+    (
+        # shellcheck source=app/main/tests/scripts/termux/shell/command/environment/termux-shell-command-environment_runtime-script-tests.in
+        termux_core__tests__source_file_from_path \
+            "$TERMUX_CORE__TESTS__TESTS_PATH/app/main/scripts/termux/shell/command/environment/termux-shell-command-environment_runtime-script-tests" || exit $?
+        TermuxShellCommandEnvioronment_runTests || exit $?
+    ) || return $?
+
+
+
+    termux_core__tests__log 2 "runTests(end): $TERMUX_CORE__TESTS__TESTS_COUNT tests completed"
+
+    return 0
+}

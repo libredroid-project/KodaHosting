@@ -1,0 +1,39 @@
+private void refreshFiles() {
+        layoutFileList.removeAllViews();
+        String rootPath = new File(server.getServerDir()).getAbsolutePath();
+        String relPath = currentDir.getAbsolutePath().replace(rootPath, "");
+        if (relPath.isEmpty()) relPath = "/";
+        tvFilesRoot.setText(relPath);
+
+        if (!currentDir.exists()) {
+            addFRow("(noch nicht heruntergeladen)", null);
+            return;
+        }
+
+        addProtectedHeader(currentDir);
+
+        // Back button if not in root
+        if (!currentDir.getAbsolutePath().equals(rootPath)) {
+            addFRow(".. (Ordner hoch)", currentDir.getParentFile());
+        }
+
+        File[] files = currentDir.listFiles();
+        if (files == null || files.length == 0) {
+            if (currentDir.getAbsolutePath().equals(rootPath)) addFRow("(leer)", null);
+            return;
+        }
+
+        Arrays.sort(files, (a, b) -> {
+            if (a.isDirectory() != b.isDirectory()) return a.isDirectory() ? -1 : 1;
+            return a.getName().compareToIgnoreCase(b.getName());
+        });
+
+        for (File f : files) {
+            if (f.getName().startsWith(".frpc") || f.getName().equals(".sys")) continue;
+            String size = f.isFile() ? " (" + f.length() / 1024 + " KB)" : "";
+            addFRow((f.isDirectory() ? "📁 " : fileIcon(f)) + f.getName() + size, f);
+        }
+    }
+
+    private File clipFile;
+    private boolean clipCut;

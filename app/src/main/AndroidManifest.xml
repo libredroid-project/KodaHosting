@@ -34,6 +34,9 @@
         android:largeHeap="true">
 
         <activity android:name=".ui.SettingsActivity" android:screenOrientation="portrait"/>
+        <activity android:name=".ui.PraetorConfirmActivity" 
+            android:theme="@style/Theme.KodaNetwork.Translucent"
+            android:screenOrientation="portrait"/>
         <activity android:name=".ui.ScreensaverActivity" android:screenOrientation="portrait"/>
         <activity android:name=".ui.CrashAlertActivity" android:screenOrientation="portrait"/>
 
@@ -54,6 +57,16 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
+        
+        <activity
+            android:name=".ui.MaintenanceActivity"
+            android:exported="false"
+            android:screenOrientation="portrait" />
+            
+        <activity
+            android:name=".ui.BannedActivity"
+            android:exported="false"
+            android:screenOrientation="portrait" />
 
         <activity
             android:name=".ui.design.LoginPageActivity"
@@ -93,6 +106,18 @@
 
         <activity
             android:name=".ui.CreateServerActivity"
+            android:exported="false"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="adjustPan"/>
+            
+        <activity
+            android:name=".ui.LicensesActivity"
+            android:exported="false"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="adjustPan"/>
+
+        <activity
+            android:name=".ui.CreateDatabaseActivity"
             android:exported="false"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustPan"/>
@@ -146,9 +171,38 @@
             android:foregroundServiceType="dataSync"/>
 
         <service
-            android:name=".service.IsolatedJvmService"
+            android:name=".service.IsolatedJvmService1"
             android:exported="false"
-            android:process=":jvm_process"/>
+            android:process=":jvm1"/>
+            
+        <service
+            android:name=".service.IsolatedJvmService2"
+            android:exported="false"
+            android:process=":jvm2"/>
+            
+        <service
+            android:name=".service.IsolatedJvmService3"
+            android:exported="false"
+            android:process=":jvm3"/>
+            
+        <activity android:name=".ui.PraetorAccountsActivity"
+            android:exported="false"
+            android:theme="@style/Theme.KodaNetwork"
+            android:screenOrientation="portrait"/>
+
+        <activity android:name=".ui.CreateSupportTicketActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize"
+            android:screenOrientation="portrait"/>
+            
+        <activity android:name=".ui.SupportTicketListActivity"
+            android:exported="false"
+            android:screenOrientation="portrait"/>
+            
+        <activity android:name=".ui.SupportChatActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize"
+            android:screenOrientation="portrait"/>
 
         <receiver
             android:name=".service.BootReceiver"
