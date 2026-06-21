@@ -1,0 +1,175 @@
+package eu.kodanetwork.mchost.ui;
+
+import android.content.Intent;
+import android.os.Bundle;
+import android.widget.EditText;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import androidx.appcompat.app.AppCompatActivity;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import eu.kodanetwork.mchost.R;
+import eu.kodanetwork.mchost.network.supabase.SupportApi;
+import eu.kodanetwork.mchost.util.ThemeHelper;
+
+public class CreateSupportTicketActivity extends AppCompatActivity {
+
+    private String ticketType; // "BUG" or "SERVER_REPORT"
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        ThemeHelper.apply(this);
+        setContentView(R.layout.activity_create_support_ticket);
+
+        ticketType = getIntent().getStringExtra("TICKET_TYPE");
+        if (ticketType == null) ticketType = "BUG";
+
+        TextView tvTitle = findViewById(R.id.tv_title);
+        EditText etReference = findViewById(R.id.et_reference);
+        if (ticketType.equals("SERVER_REPORT")) {
+            tvTitle.setText("Report Server");
+            etReference.setHint("Name of the server");
+        } else {
+            tvTitle.setText("Report Bug");
+            etReference.setHint("Short Summary of the bug");
+        }
+
+        findViewById(R.id.btn_back).setOnClickListener(v -> finish());
+
+        findViewById(R.id.btn_create_ticket).setOnClickListener(v -> {
+            String reference = etReference.getText().toString().trim();
+            String message = ((EditText) findViewById(R.id.et_message)).getText().toString().trim();
+
+            if (reference.isEmpty() || message.isEmpty()) {
+                Toast.makeText(this, "Please fill out all fields", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            createTicket(reference, message);
+        });
+    }
+
+    private void createTicket(String reference, String message) {
+        String uuid = eu.kodanetwork.mchost.App.getPrefs(this).getString("app_uuid", null);
+        if (uuid == null) {
+            Toast.makeText(this, "Not logged in", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        new Thread(() -> {
+            try {
+                if (ticketType.equals("SERVER_REPORT")) {
+                    String checkResponse = SupportApi.makeSupabaseRequest(
+                            "rest/v1/koda_servers?host=eq." + reference + "&select=id", "GET", null);
+                    if (checkResponse == null || checkResponse.equals("[]")) {
+                        runOnUiThread(() -> Toast.makeText(this, "Error: Server does not exist on KodaNetwork", Toast.LENGTH_SHORT).show());
+                        return;
+                    }
+                }
+
+                // 1. Create the ticket
+                JSONObject ticketObj = new JSONObject();
+                ticketObj.put("reporter_uuid", uuid);
+                ticketObj.put("ticket_type", ticketType);
+                if (ticketType.equals("SERVER_REPORT")) {
+                    ticketObj.put("reference_id", reference);
+                    ticketObj.put("title", "Server Report: " + reference);
+                } else {
+                    ticketObj.put("title", reference);
+                }
+
+                String ticketResponseStr = SupportApi.makeSupabaseRequest(
+                        "rest/v1/support_tickets", "POST", ticketObj.toString());
+                
+                // Fetch the created ticket ID (since we need it to create the first message)
+                // Wait, POST to rest/v1/support_tickets?select=id doesn't always return if header isn't set, but we can query it.
+                // Best way: append ?select=id or just query the latest ticket for this user.
+                String fetchResponse = SupportApi.makeSupabaseRequest(
+                        "rest/v1/support_tickets?reporter_uuid=eq." + uuid + "&order=created_at.desc&limit=1", "GET", null);
+                
+                JSONArray arr = new JSONArray(fetchResponse);
+                if (arr.length() > 0) {
+                    String ticketId = arr.getJSONObject(0).getString("id");
+
+                    // 2. Create the first message
+                    JSONObject msgObj = new JSONObject();
+                    msgObj.put("ticket_id", ticketId);
+                    msgObj.put("sender_uuid", uuid);
+                    msgObj.put("message", message);
+
+                    SupportApi.makeSupabaseRequest(
+                            "rest/v1/support_ticket_messages", "POST", msgObj.toString());
+
+                    // 2b. Append Diagnostic Telemetry
+                    String telemetry = getDiagnosticTelemetry(uuid);
+                    JSONObject sysObj = new JSONObject();
+                    sysObj.put("ticket_id", ticketId);
+                    sysObj.put("sender_uuid", "system");
+                    sysObj.put("message", telemetry);
+                    SupportApi.makeSupabaseRequest(
+                            "rest/v1/support_ticket_messages", "POST", sysObj.toString());
+
+                    // 3. Open the chat activity
+                    runOnUiThread(() -> {
+                        Toast.makeText(this, "Ticket created!", Toast.LENGTH_SHORT).show();
+                        Intent intent = new Intent(this, SupportChatActivity.class);
+                        intent.putExtra("TICKET_ID", ticketId);
+                        intent.putExtra("TICKET_TITLE", ticketType.equals("SERVER_REPORT") ? "Server Report: " + reference : reference);
+                        intent.putExtra("TICKET_STATUS", "OPEN");
+                        startActivity(intent);
+                        finish();
+                    });
+                } else {
+                    throw new Exception("Failed to retrieve created ticket");
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+                runOnUiThread(() -> Toast.makeText(this, "Error creating ticket", Toast.LENGTH_SHORT).show());
+            }
+        }).start();
+    }
+
+    private String getDiagnosticTelemetry(String uuid) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("--- SYSTEM TELEMETRY ---\n");
+        sb.append("Device: ").append(android.os.Build.MANUFACTURER).append(" ").append(android.os.Build.MODEL).append("\n");
+        sb.append("OS Version: Android ").append(android.os.Build.VERSION.RELEASE).append(" (API ").append(android.os.Build.VERSION.SDK_INT).append(")\n");
+        sb.append("App Version: ").append(eu.kodanetwork.mchost.BuildConfig.VERSION_NAME).append("\n");
+        
+        android.content.SharedPreferences prefs = eu.kodanetwork.mchost.App.getPrefs(this);
+        sb.append("Language: ").append(prefs.getString("language", "system")).append("\n");
+        sb.append("Theme Mode: ").append(prefs.getString("theme_mode", "dark")).append("\n");
+        sb.append("Design Name: ").append(prefs.getString("app_theme", "modern")).append("\n");
+        sb.append("Animations: ").append(prefs.getBoolean("animations_enabled", true)).append("\n");
+
+        long maxMem = Runtime.getRuntime().maxMemory() / (1024 * 1024);
+        sb.append("Max Memory: ").append(maxMem).append(" MB\n");
+        sb.append("Storage Free: ").append(getFilesDir().getFreeSpace() / (1024 * 1024)).append(" MB\n");
+
+        try {
+            String serversResponse = SupportApi.makeSupabaseRequest(
+                "rest/v1/koda_servers?owner_app_uuid=eq." + uuid + "&select=host,server_version,is_banned", "GET", null);
+            if (serversResponse != null && !serversResponse.equals("[]")) {
+                sb.append("\nOwned Servers:\n");
+                JSONArray arr = new JSONArray(serversResponse);
+                for (int i=0; i<arr.length(); i++) {
+                    JSONObject srv = arr.getJSONObject(i);
+                    sb.append("- ").append(srv.optString("host", "Unknown"));
+                    sb.append(" (Version: ").append(srv.optString("server_version", "N/A")).append(")");
+                    if (srv.optBoolean("is_banned", false)) sb.append(" [BANNED]");
+                    sb.append("\n");
+                }
+            } else {
+                sb.append("\nOwned Servers: None");
+            }
+        } catch (Exception e) {
+            sb.append("\nOwned Servers: Failed to fetch (" + e.getMessage() + ")");
+        }
+        
+        return sb.toString();
+    }
+}
