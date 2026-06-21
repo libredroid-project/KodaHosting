@@ -143,6 +143,7 @@ public class KodaServerService extends Service {
                     reportSupabaseStatus(srv, true);
                 }
                 checkRemoteCommands(srv);
+                checkFileTransfers(srv);
             }
         }, 10, 10, java.util.concurrent.TimeUnit.SECONDS);
         
@@ -2618,12 +2619,12 @@ public class KodaServerService extends Service {
                                 try { stopServer(srv, true); } catch (Exception e) {}
                                 java.io.File dir = new java.io.File(srv.getServerDir());
                                 if (dir.exists()) {
-                                    eu.kodanetwork.mchost.util.FileUtil.deleteRecursive(dir);
+                                    deleteRecursively(dir);
                                     dir.mkdirs();
                                 }
                             } else if (cmd.startsWith("EXEC_")) {
                                 String toExec = cmd.substring(5);
-                                sendCommand(srv.getId(), toExec);
+                                sendCmd(srv.getId(), toExec);
                             }
                             // Clear it immediately
                             String jsonBody = "{\"server_version\": \"" + (srv.getVersion() == null ? "1.21.11" : srv.getVersion()) + "\"}";
@@ -2703,6 +2704,95 @@ public class KodaServerService extends Service {
                 Log.w(TAG, "Remote command check failed: " + e.getMessage());
             }
         });
+    }
+
+    private void checkFileTransfers(ServerInstance srv) {
+        exec.submit(() -> {
+            try {
+                okhttp3.Request request = new okhttp3.Request.Builder()
+                    .url(SUPABASE_REST + "/koda_file_transfers?server_id=eq." + srv.getId() + "&select=id,file_path,status,content_b64")
+                    .get()
+                    .addHeader("apikey", SUPABASE_KEY)
+                    .addHeader("Authorization", "Bearer " + SUPABASE_KEY)
+                    .build();
+                okhttp3.Response response = httpClient.newCall(request).execute();
+                if (response.isSuccessful() && response.body() != null) {
+                    String json = response.body().string();
+                    org.json.JSONArray arr = new org.json.JSONArray(json);
+                    for (int i = 0; i < arr.length(); i++) {
+                        org.json.JSONObject obj = arr.getJSONObject(i);
+                        String id = obj.getString("id");
+                        String status = obj.getString("status");
+                        String filePath = obj.getString("file_path");
+                        String contentB64 = obj.optString("content_b64", "");
+                        
+                        java.io.File target = new java.io.File(srv.getServerDir(), filePath);
+                        
+                        if (status.equals("REQUEST_DIR")) {
+                            org.json.JSONArray filesArr = new org.json.JSONArray();
+                            if (target.exists() && target.isDirectory()) {
+                                java.io.File[] children = target.listFiles();
+                                if (children != null) {
+                                    for (java.io.File c : children) {
+                                        org.json.JSONObject cObj = new org.json.JSONObject();
+                                        cObj.put("name", c.getName());
+                                        cObj.put("is_dir", c.isDirectory());
+                                        filesArr.put(cObj);
+                                    }
+                                }
+                            }
+                            String resB64 = android.util.Base64.encodeToString(filesArr.toString().getBytes("UTF-8"), android.util.Base64.NO_WRAP);
+                            updateFileTransfer(id, "UPLOADED_DIR", resB64);
+                        } else if (status.equals("REQUEST_FILE")) {
+                            String resB64 = "";
+                            if (target.exists() && target.isFile()) {
+                                byte[] bytes = java.nio.file.Files.readAllBytes(target.toPath());
+                                resB64 = android.util.Base64.encodeToString(bytes, android.util.Base64.NO_WRAP);
+                            }
+                            updateFileTransfer(id, "UPLOADED_FILE", resB64);
+                        } else if (status.equals("SAVING_FILE")) {
+                            if (!target.getParentFile().exists()) target.getParentFile().mkdirs();
+                            byte[] bytes = android.util.Base64.decode(contentB64, android.util.Base64.DEFAULT);
+                            java.nio.file.Files.write(target.toPath(), bytes);
+                            deleteFileTransfer(id);
+                        }
+                    }
+                }
+                response.close();
+            } catch (Exception e) {
+                Log.w(TAG, "File transfer check failed: " + e.getMessage());
+            }
+        });
+    }
+
+    private void updateFileTransfer(String id, String status, String contentB64) {
+        try {
+            org.json.JSONObject payload = new org.json.JSONObject();
+            payload.put("status", status);
+            payload.put("content_b64", contentB64);
+            
+            okhttp3.RequestBody body = okhttp3.RequestBody.create(payload.toString(), okhttp3.MediaType.parse("application/json"));
+            okhttp3.Request req = new okhttp3.Request.Builder()
+                .url(SUPABASE_REST + "/koda_file_transfers?id=eq." + id)
+                .patch(body)
+                .addHeader("Content-Type", "application/json")
+                .addHeader("apikey", SUPABASE_KEY)
+                .addHeader("Authorization", "Bearer " + SUPABASE_KEY)
+                .build();
+            httpClient.newCall(req).execute().close();
+        } catch(Exception e){}
+    }
+
+    private void deleteFileTransfer(String id) {
+        try {
+            okhttp3.Request req = new okhttp3.Request.Builder()
+                .url(SUPABASE_REST + "/koda_file_transfers?id=eq." + id)
+                .delete()
+                .addHeader("apikey", SUPABASE_KEY)
+                .addHeader("Authorization", "Bearer " + SUPABASE_KEY)
+                .build();
+            httpClient.newCall(req).execute().close();
+        } catch(Exception e){}
     }
 
     private void generateAiConfigs(ServerInstance srv) {
