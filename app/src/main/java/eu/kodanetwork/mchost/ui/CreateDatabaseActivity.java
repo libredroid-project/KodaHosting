@@ -28,6 +28,9 @@ public class CreateDatabaseActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_database);
         
+        // Match status bar to the top bar background color to avoid the grey stripe
+        getWindow().setStatusBarColor(android.graphics.Color.parseColor("#1B1613"));
+        
         eu.kodanetwork.mchost.util.ThemeHelper.apply(this);
         eu.kodanetwork.mchost.util.ThemeHelper.apply(this);
         

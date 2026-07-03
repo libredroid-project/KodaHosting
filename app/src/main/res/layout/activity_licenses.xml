@@ -10,7 +10,7 @@
         android:layout_height="60dp"
         android:orientation="horizontal"
         android:gravity="center_vertical"
-        android:background="@color/bg_void"
+        android:background="#1B1613"
         android:paddingHorizontal="16dp"
         android:elevation="4dp">
         <TextView
