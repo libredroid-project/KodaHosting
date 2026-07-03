@@ -56,18 +56,8 @@ public class DatabaseOrchestrator {
             
             try {
                 eu.kodanetwork.mchost.util.TarXzUtil.extract(tempTar.getAbsolutePath(), destDir.getAbsolutePath());
-                
-                // chmod all files in usr/bin
-                File binDir = new File(destDir, "bin");
-                if (!binDir.exists()) binDir = new File(destDir, "usr/bin");
-                if (binDir.exists() && binDir.isDirectory()) {
-                    File[] bins = binDir.listFiles();
-                    if (bins != null) {
-                        for (File b : bins) {
-                            b.setExecutable(true, false);
-                        }
-                    }
-                }
+                // chmod all files recursively to avoid permission denied
+                makeExecutableRecursive(destDir);
                 
                 // create the .ready marker
                 new File(destDir, ".symlinks_fixed_2").createNewFile();
@@ -95,5 +85,18 @@ public class DatabaseOrchestrator {
             }
         }
         file.delete();
+    }
+
+    private static void makeExecutableRecursive(File file) {
+        if (!file.exists()) return;
+        file.setExecutable(true, false);
+        if (file.isDirectory()) {
+            File[] children = file.listFiles();
+            if (children != null) {
+                for (File child : children) {
+                    makeExecutableRecursive(child);
+                }
+            }
+        }
     }
 }
