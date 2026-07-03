@@ -657,14 +657,17 @@ public class CreateServerActivity extends AppCompatActivity {
     private List<String> fetchPaperMcVersions(String project) {
         try {
             String json = get("https://fill.papermc.io/v3/projects/" + project);
-            org.json.JSONObject obj = new org.json.JSONObject(json);
-            org.json.JSONArray arr = obj.getJSONArray("versions");
+            com.google.gson.JsonObject obj = com.google.gson.JsonParser.parseString(json).getAsJsonObject();
+            com.google.gson.JsonObject versionsObj = obj.getAsJsonObject("versions");
             List<String> res = new ArrayList<>();
-            for (int i = 0; i < arr.length(); i++) {
-                String ver = arr.getString(i).trim();
-                if (!ver.isEmpty()) res.add(ver);
+            for (String key : versionsObj.keySet()) {
+                com.google.gson.JsonArray arr = versionsObj.getAsJsonArray(key);
+                for (int i = 0; i < arr.size(); i++) {
+                    String ver = arr.get(i).getAsString().trim();
+                    if (!ver.isEmpty()) res.add(ver);
+                }
             }
-            java.util.Collections.reverse(res); return res;
+            return res;
         } catch (Exception ignored) {}
         return new ArrayList<>();
     }
