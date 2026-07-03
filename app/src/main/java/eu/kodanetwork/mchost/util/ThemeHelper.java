@@ -146,9 +146,6 @@ public class ThemeHelper {
                 // 3. System UI
                 if (android.os.Build.VERSION.SDK_INT >= 21) {
                     boolean isCreateServer = activity instanceof eu.kodanetwork.mchost.ui.CreateServerActivity;
-                    boolean isOldWarmDesign = isCreateServer 
-                            || activity instanceof eu.kodanetwork.mchost.ui.CreateDatabaseActivity
-                            || activity instanceof eu.kodanetwork.mchost.ui.LicensesActivity;
                     
                     if (isPraetorDesign) {
                         activity.getWindow().addFlags(android.view.WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
@@ -172,9 +169,9 @@ public class ThemeHelper {
                                 View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR | View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR);
                         }
                     } else {
-                        int darkBg = isOldWarmDesign ? 0xFF1B1613 : DARK_STATUS;
+                        int darkBg = isCreateServer ? 0xFF1B1613 : DARK_STATUS;
                         activity.getWindow().setStatusBarColor(darkBg);
-                        activity.getWindow().setNavigationBarColor(isOldWarmDesign ? android.graphics.Color.TRANSPARENT : darkBg);
+                        activity.getWindow().setNavigationBarColor(isCreateServer ? android.graphics.Color.TRANSPARENT : darkBg);
                         activity.getWindow().getDecorView().setSystemUiVisibility(0);
                     }
                 }

@@ -15,9 +15,6 @@ public class LicensesActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_licenses);
-        
-        // Match status bar to the top bar background color to avoid the grey stripe
-        getWindow().setStatusBarColor(android.graphics.Color.parseColor("#1B1613"));
 
         android.content.SharedPreferences prefs = eu.kodanetwork.mchost.App.getPrefs(this);
         if ("cyber".equals(prefs.getString("app_theme", "modern"))) {

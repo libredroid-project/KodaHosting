@@ -627,6 +627,17 @@ public class SettingsActivity extends Activity {
         Button btnReportBug = findViewById(R.id.btn_report_bug);
         Button btnReportServer = findViewById(R.id.btn_report_server);
         Button btnMyTickets = findViewById(R.id.btn_my_tickets);
+        View tvLoginWarning = findViewById(R.id.tv_support_login_warning);
+        View llButtons = findViewById(R.id.ll_support_buttons);
+
+        if (!eu.kodanetwork.mchost.network.supabase.SupabaseAuth.isLoggedIn(this)) {
+            if (tvLoginWarning != null) tvLoginWarning.setVisibility(View.VISIBLE);
+            if (llButtons != null) llButtons.setVisibility(View.GONE);
+            return;
+        } else {
+            if (tvLoginWarning != null) tvLoginWarning.setVisibility(View.GONE);
+            if (llButtons != null) llButtons.setVisibility(View.VISIBLE);
+        }
 
         if (btnReportBug != null) {
             btnReportBug.setOnClickListener(v -> {
