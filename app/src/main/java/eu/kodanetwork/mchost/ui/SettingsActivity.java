@@ -624,168 +624,32 @@ public class SettingsActivity extends Activity {
       }
 
     private void setupSupport() {
-        Button btnReportServer = findViewById(R.id.btn_report_server);
-        Button btnReportBug = findViewById(R.id.btn_report_bug);
+        Button btnSupportTickets = findViewById(R.id.btn_support_tickets);
+        if (btnSupportTickets == null) return;
 
-        if (btnReportServer == null || btnReportBug == null) return;
-
-        btnReportServer.setOnClickListener(v -> showReportServerDialog());
-        btnReportBug.setOnClickListener(v -> showReportBugDialog());
-    }
-
-    private void showReportServerDialog() {
-        android.widget.LinearLayout layout = new android.widget.LinearLayout(this);
-        layout.setOrientation(android.widget.LinearLayout.VERTICAL);
-        layout.setPadding(50, 40, 50, 10);
-
-        android.widget.EditText inputHost = new android.widget.EditText(this);
-        inputHost.setHint(R.string.server_subdomain);
-        inputHost.setTextColor(0xFFFFFFFF);
-        inputHost.setHintTextColor(0x88FFFFFF);
-        layout.addView(inputHost);
-
-        android.widget.EditText inputReason = new android.widget.EditText(this);
-        inputReason.setHint(R.string.reason);
-        inputReason.setTextColor(0xFFFFFFFF);
-        inputReason.setHintTextColor(0x88FFFFFF);
-        layout.addView(inputReason);
-
-        android.app.AlertDialog dialog = new android.app.AlertDialog.Builder(this, android.R.style.Theme_DeviceDefault_Dialog_Alert)
-                .setTitle(R.string.report_server)
-                .setMessage(R.string.report_server_desc)
-                .setView(layout)
-                .setPositiveButton(R.string.report, null)
-                .setNegativeButton(R.string.cancel, null)
-                .create();
-
-        dialog.setOnShowListener(d -> {
-            dialog.getButton(android.app.AlertDialog.BUTTON_POSITIVE).setOnClickListener(b -> {
-                String host = inputHost.getText().toString().trim();
-                String reason = inputReason.getText().toString().trim();
-                if (host.isEmpty() || reason.isEmpty()) return;
-
-                new Thread(() -> {
-                    try {
-                        String anonKey = eu.kodanetwork.mchost.security.PraetorSecurity.getSupabaseKey();
-                        
-                        // Check if server exists
-                        java.net.URL checkUrl = new java.net.URL("https://scsezpfrrmpyuapblbxk.supabase.co/rest/v1/koda_servers?host=eq." + host);
-                        java.net.HttpURLConnection checkConn = (java.net.HttpURLConnection) checkUrl.openConnection();
-                        checkConn.setRequestMethod("GET");
-                        checkConn.setRequestProperty("apikey", anonKey);
-                        checkConn.setRequestProperty("Authorization", "Bearer " + anonKey);
-                        
-                        if (checkConn.getResponseCode() == 200) {
-                            java.io.InputStreamReader r = new java.io.InputStreamReader(checkConn.getInputStream());
-                            StringBuilder sb = new StringBuilder();
-                            int c; while ((c = r.read()) != -1) sb.append((char) c);
-                            r.close();
-                            if (sb.toString().equals("[]")) {
-                                runOnUiThread(() -> Toast.makeText(this, R.string.error_server_not_found, Toast.LENGTH_SHORT).show());
-                                return;
-                            }
-                        } else {
-                            runOnUiThread(() -> Toast.makeText(this, R.string.error_server_not_found, Toast.LENGTH_SHORT).show());
-                            return;
-                        }
-
-                        // Submit report
-                        java.net.URL postUrl = new java.net.URL("https://scsezpfrrmpyuapblbxk.supabase.co/rest/v1/support_reports");
-                        java.net.HttpURLConnection postConn = (java.net.HttpURLConnection) postUrl.openConnection();
-                        postConn.setRequestMethod("POST");
-                        postConn.setRequestProperty("apikey", anonKey);
-                        postConn.setRequestProperty("Authorization", "Bearer " + anonKey);
-                        postConn.setRequestProperty("Content-Type", "application/json");
-                        postConn.setDoOutput(true);
-
-                        String reporterUuid = prefs.getString("user_uuid", "");
-                        org.json.JSONObject json = new org.json.JSONObject();
-                        json.put("server_host", host);
-                        json.put("reason", reason);
-                        if (!reporterUuid.isEmpty()) json.put("reporter_uuid", reporterUuid);
-
-                        postConn.getOutputStream().write(json.toString().getBytes());
-                        if (postConn.getResponseCode() == 201) {
-                            runOnUiThread(() -> {
-                                Toast.makeText(this, R.string.report_submitted, Toast.LENGTH_SHORT).show();
-                                dialog.dismiss();
-                            });
-                        } else {
-                            runOnUiThread(() -> Toast.makeText(this, R.string.error_report_failed, Toast.LENGTH_SHORT).show());
-                        }
-                    } catch (Exception e) {
-                        runOnUiThread(() -> Toast.makeText(this, R.string.error_report_failed, Toast.LENGTH_SHORT).show());
-                    }
-                }).start();
+        btnSupportTickets.setOnClickListener(v -> {
+            SupportSelectionDialog dialog = new SupportSelectionDialog(this, new SupportSelectionDialog.SupportDialogListener() {
+                @Override
+                public void onBugReport() {
+                    Intent intent = new Intent(SettingsActivity.this, CreateSupportTicketActivity.class);
+                    intent.putExtra("TICKET_TYPE", "BUG");
+                    startActivity(intent);
+                }
+                @Override
+                public void onServerReport() {
+                    Intent intent = new Intent(SettingsActivity.this, CreateSupportTicketActivity.class);
+                    intent.putExtra("TICKET_TYPE", "SERVER_REPORT");
+                    startActivity(intent);
+                }
+                @Override
+                public void onMyTickets() {
+                    startActivity(new Intent(SettingsActivity.this, SupportTicketListActivity.class));
+                }
             });
+            dialog.show();
         });
-        dialog.show();
     }
 
-    private void showReportBugDialog() {
-        if (!eu.kodanetwork.mchost.network.supabase.SupabaseAuth.isLoggedIn(this)) {
-            Toast.makeText(this, R.string.error_not_logged_in, Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        android.widget.LinearLayout layout = new android.widget.LinearLayout(this);
-        layout.setOrientation(android.widget.LinearLayout.VERTICAL);
-        layout.setPadding(50, 40, 50, 10);
-
-        android.widget.EditText inputDesc = new android.widget.EditText(this);
-        inputDesc.setHint(R.string.bug_description);
-        inputDesc.setTextColor(0xFFFFFFFF);
-        inputDesc.setHintTextColor(0x88FFFFFF);
-        layout.addView(inputDesc);
-
-        android.app.AlertDialog dialog = new android.app.AlertDialog.Builder(this, android.R.style.Theme_DeviceDefault_Dialog_Alert)
-                .setTitle(R.string.report_bug)
-                .setMessage(R.string.report_bug_desc)
-                .setView(layout)
-                .setPositiveButton(R.string.report, null)
-                .setNegativeButton(R.string.cancel, null)
-                .create();
-
-        dialog.setOnShowListener(d -> {
-            dialog.getButton(android.app.AlertDialog.BUTTON_POSITIVE).setOnClickListener(b -> {
-                String desc = inputDesc.getText().toString().trim();
-                if (desc.isEmpty()) return;
-
-                new Thread(() -> {
-                    try {
-                        String token = prefs.getString("koda_session_token", null);
-                        String reporterUuid = prefs.getString("user_uuid", "");
-                        if (token == null || reporterUuid.isEmpty()) return;
-
-                        java.net.URL postUrl = new java.net.URL("https://scsezpfrrmpyuapblbxk.supabase.co/rest/v1/support_bugs");
-                        java.net.HttpURLConnection postConn = (java.net.HttpURLConnection) postUrl.openConnection();
-                        postConn.setRequestMethod("POST");
-                        postConn.setRequestProperty("apikey", eu.kodanetwork.mchost.security.PraetorSecurity.getSupabaseKey());
-                        postConn.setRequestProperty("Authorization", "Bearer " + token);
-                        postConn.setRequestProperty("Content-Type", "application/json");
-                        postConn.setDoOutput(true);
-
-                        org.json.JSONObject json = new org.json.JSONObject();
-                        json.put("description", desc);
-                        json.put("reporter_uuid", reporterUuid);
-
-                        postConn.getOutputStream().write(json.toString().getBytes());
-                        if (postConn.getResponseCode() == 201) {
-                            runOnUiThread(() -> {
-                                Toast.makeText(this, R.string.report_submitted, Toast.LENGTH_SHORT).show();
-                                dialog.dismiss();
-                            });
-                        } else {
-                            runOnUiThread(() -> Toast.makeText(this, R.string.error_report_failed, Toast.LENGTH_SHORT).show());
-                        }
-                    } catch (Exception e) {
-                        runOnUiThread(() -> Toast.makeText(this, R.string.error_report_failed, Toast.LENGTH_SHORT).show());
-                    }
-                }).start();
-            });
-        });
-        dialog.show();
-    }
 
     private void fetchLinkStatus(String appUuid, String expectedCode) {
         new Thread(() -> {
