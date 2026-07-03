@@ -35,7 +35,7 @@ public class RegisterPageActivity extends AppCompatActivity {
 
         android.widget.CheckBox cbLegal = findViewById(R.id.cb_legal);
         if (cbLegal != null) {
-            cbLegal.setText(android.text.Html.fromHtml("I accept the <a href='https://privacy.kodanetwork.eu/tos'>Terms of Service</a> and <a href='https://privacy.kodanetwork.eu/privacy'>Privacy Policy</a>", android.text.Html.FROM_HTML_MODE_LEGACY));
+            cbLegal.setText(android.text.Html.fromHtml("I accept the <a href='https://host.kodanetwork.eu/tos.html'>Terms of Service</a> and <a href='https://host.kodanetwork.eu/privacy.html'>Privacy Policy</a>", android.text.Html.FROM_HTML_MODE_LEGACY));
             cbLegal.setMovementMethod(android.text.method.LinkMovementMethod.getInstance());
         }
 
@@ -54,24 +54,68 @@ public class RegisterPageActivity extends AppCompatActivity {
             }
             
             btnCreate.setEnabled(false);
-            btnCreate.setText("Lade...");
-            
-            eu.kodanetwork.mchost.network.supabase.SupabaseAuth.signUp(this, email, pwd, new eu.kodanetwork.mchost.network.supabase.SupabaseAuth.AuthCallback() {
+            btnCreate.setText("Sende Code...");
+
+            // Generate 6 digit code
+            String generatedCode = String.format("%06d", new java.util.Random().nextInt(999999));
+
+            eu.kodanetwork.mchost.network.ResendHelper.sendOTP(email, generatedCode, new eu.kodanetwork.mchost.network.ResendHelper.Callback() {
                 @Override
                 public void onSuccess() {
                     runOnUiThread(() -> {
-                        Toast.makeText(RegisterPageActivity.this, "Account erfolgreich erstellt!", Toast.LENGTH_SHORT).show();
-                        startActivity(new Intent(RegisterPageActivity.this, eu.kodanetwork.mchost.ui.MainActivity.class));
-                        finishAffinity();
+                        btnCreate.setEnabled(true);
+                        btnCreate.setText("Account Erstellen");
+
+                        android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(RegisterPageActivity.this);
+                        builder.setTitle("Email Verifizierung");
+                        builder.setMessage("Bitte gib den 6-stelligen Code ein, der an " + email + " gesendet wurde.");
+
+                        final EditText input = new EditText(RegisterPageActivity.this);
+                        input.setInputType(android.text.InputType.TYPE_CLASS_NUMBER);
+                        builder.setView(input);
+
+                        builder.setPositiveButton("Verifizieren", (dialog, which) -> {
+                            String code = input.getText().toString().trim();
+                            if (code.equals(generatedCode)) {
+                                Toast.makeText(RegisterPageActivity.this, "Code akzeptiert! Account wird erstellt...", Toast.LENGTH_SHORT).show();
+                                btnCreate.setEnabled(false);
+                                btnCreate.setText("Lade...");
+
+                                eu.kodanetwork.mchost.network.supabase.SupabaseAuth.signUp(RegisterPageActivity.this, email, pwd, new eu.kodanetwork.mchost.network.supabase.SupabaseAuth.AuthCallback() {
+                                    @Override
+                                    public void onSuccess() {
+                                        runOnUiThread(() -> {
+                                            Toast.makeText(RegisterPageActivity.this, "Account erfolgreich erstellt!", Toast.LENGTH_SHORT).show();
+                                            startActivity(new Intent(RegisterPageActivity.this, eu.kodanetwork.mchost.ui.MainActivity.class));
+                                            finishAffinity();
+                                        });
+                                    }
+
+                                    @Override
+                                    public void onError(String message) {
+                                        runOnUiThread(() -> {
+                                            btnCreate.setEnabled(true);
+                                            btnCreate.setText("Account Erstellen");
+                                            Toast.makeText(RegisterPageActivity.this, "Fehler: " + message, Toast.LENGTH_LONG).show();
+                                        });
+                                    }
+                                });
+                            } else {
+                                Toast.makeText(RegisterPageActivity.this, "Falscher Code!", Toast.LENGTH_SHORT).show();
+                            }
+                        });
+                        builder.setNegativeButton("Abbrechen", (dialog, which) -> dialog.cancel());
+                        builder.setCancelable(false);
+                        builder.show();
                     });
                 }
-                
+
                 @Override
                 public void onError(String message) {
                     runOnUiThread(() -> {
                         btnCreate.setEnabled(true);
                         btnCreate.setText("Account Erstellen");
-                        Toast.makeText(RegisterPageActivity.this, "Fehler: " + message, Toast.LENGTH_LONG).show();
+                        Toast.makeText(RegisterPageActivity.this, "Fehler beim Senden des Codes: " + message, Toast.LENGTH_LONG).show();
                     });
                 }
             });

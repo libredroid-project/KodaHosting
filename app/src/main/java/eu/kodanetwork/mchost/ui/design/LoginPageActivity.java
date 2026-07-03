@@ -36,7 +36,7 @@ public class LoginPageActivity extends AppCompatActivity {
 
         android.widget.CheckBox cbLegal = findViewById(R.id.cb_legal);
         if (cbLegal != null) {
-            cbLegal.setText(android.text.Html.fromHtml("I accept the <a href='https://privacy.kodanetwork.eu/tos'>Terms of Service</a> and <a href='https://privacy.kodanetwork.eu/privacy'>Privacy Policy</a>", android.text.Html.FROM_HTML_MODE_LEGACY));
+            cbLegal.setText(android.text.Html.fromHtml("I accept the <a href='https://host.kodanetwork.eu/tos.html'>Terms of Service</a> and <a href='https://host.kodanetwork.eu/privacy.html'>Privacy Policy</a>", android.text.Html.FROM_HTML_MODE_LEGACY));
             cbLegal.setMovementMethod(android.text.method.LinkMovementMethod.getInstance());
         }
 
