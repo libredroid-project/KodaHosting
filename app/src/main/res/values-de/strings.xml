@@ -142,12 +142,18 @@
     <string name="eula_decline">ABLEHNEN</string>
     <string name="eula_accept">AKZEPTIEREN</string>
 
+
     <string name="praetor_title">P.R.A.E.T.O.R.</string>
     <string name="praetor_subtitle">PROTOCOL FOR RISK ASSESSMENT,\nENFORCEMENT &amp; TOTAL OVERSIGHT RESPONSE</string>
     <string name="praetor_action_fix">PROBLEM BEHEBEN</string>
     <string name="praetor_action_auto_ram">RAM AUTO-ANPASSEN</string>
     <string name="praetor_action_start_anyway">TROTZDEM STARTEN (RISIKO)</string>
-    <string name="praetor_action_cancel">ABBRECHEN</string>
+    <string name="praetor_action_cancel">Abbrechen</string>
+
+    <string name="email_verification">EMAIL VERIFIZIERUNG</string>
+    <string name="enter_code">Bitte gib den 6-stelligen Code ein</string>
+    <string name="verify">VERIFIZIEREN</string>
+
     <string name="praetor_hibernate_warning">WARNUNG: Server-Winterschlaf (Hibernation) wird eingeleitet. DNS-Einträge werden gelöscht und der Server wird komprimiert.</string>
     <string name="praetor_hibernate_long_explanation">LANGE ERKLÄRUNG</string>
     <string name="praetor_hibernate_confirm">HIBERNATE</string>

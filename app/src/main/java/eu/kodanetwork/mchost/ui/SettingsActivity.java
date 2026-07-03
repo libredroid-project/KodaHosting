@@ -107,6 +107,7 @@ public class SettingsActivity extends Activity {
     }
 
     private void tintBtn(Button btn, int bgColor, int textColor) {
+        if (btn == null) return;
         if (btn instanceof com.google.android.material.button.MaterialButton) {
             com.google.android.material.button.MaterialButton mb = (com.google.android.material.button.MaterialButton) btn;
             mb.setBackgroundTintList(android.content.res.ColorStateList.valueOf(bgColor));
@@ -540,13 +541,11 @@ public class SettingsActivity extends Activity {
 
     private void setupAccountManagement() {
         TextView tvEmail = findViewById(R.id.tv_account_email);
-        Button btnLogout = findViewById(R.id.btn_logout);
+        androidx.cardview.widget.CardView cardAccount = findViewById(R.id.card_account);
         
         if (!eu.kodanetwork.mchost.network.supabase.SupabaseAuth.isLoggedIn(this)) {
             tvEmail.setText("Not logged in (Local Mode)");
-            btnLogout.setText("Log In / Register");
-            btnLogout.setTextColor(0xFF00E676); // Green text
-            btnLogout.setOnClickListener(v -> {
+            cardAccount.setOnClickListener(v -> {
                 eu.kodanetwork.mchost.util.HapticUtil.forceVibrate(this, 80);
                 startActivity(new Intent(this, eu.kodanetwork.mchost.ui.design.LoginPageActivity.class));
             });
@@ -555,20 +554,64 @@ public class SettingsActivity extends Activity {
 
         String email = prefs.getString("account_email", "Unknown Email");
         tvEmail.setText(email);
-        btnLogout.setText("Log Out");
-        btnLogout.setTextColor(0xFFFF4444); // Red text
 
-        btnLogout.setOnClickListener(v -> {
-            new android.app.AlertDialog.Builder(this)
-                .setTitle("Log Out")
-                .setMessage("Are you sure you want to log out? You will need to sign in again to manage your servers.")
-                .setPositiveButton("Log Out", (d, w) -> {
-                    eu.kodanetwork.mchost.network.supabase.SupabaseAuth.logout(this);
-                    Toast.makeText(this, "Logged out successfully", Toast.LENGTH_SHORT).show();
-                    recreate(); // Reload settings
-                })
-                .setNegativeButton("Cancel", null)
-                .show();
+        cardAccount.setOnClickListener(v -> {
+            eu.kodanetwork.mchost.util.HapticUtil.forceVibrate(this, 80);
+            if (!eu.kodanetwork.mchost.security.PraetorSystem.checkNetwork(this)) {
+                Toast.makeText(this, "Keine Internetverbindung. Aktion abgebrochen.", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            android.app.Dialog dialog = new android.app.Dialog(this, android.R.style.Theme_Black_NoTitleBar_Fullscreen);
+            dialog.setContentView(R.layout.dialog_praetor_account);
+            dialog.setCancelable(true);
+
+            TextView tvAccEmail = dialog.findViewById(R.id.tv_account_email);
+            if (tvAccEmail != null) tvAccEmail.setText(email);
+
+            dialog.findViewById(R.id.btn_dialog_change_password).setOnClickListener(btn -> {
+                eu.kodanetwork.mchost.network.supabase.SupabaseAuth.resetPassword(this, email, new eu.kodanetwork.mchost.network.supabase.SupabaseAuth.AuthCallback() {
+                    @Override public void onSuccess() {
+                        runOnUiThread(() -> Toast.makeText(SettingsActivity.this, "Passwort-Reset Email gesendet!", Toast.LENGTH_LONG).show());
+                    }
+                    @Override public void onError(String msg) {
+                        runOnUiThread(() -> Toast.makeText(SettingsActivity.this, "Fehler: " + msg, Toast.LENGTH_LONG).show());
+                    }
+                });
+                dialog.dismiss();
+            });
+
+            dialog.findViewById(R.id.btn_dialog_delete_account).setOnClickListener(btn -> {
+                new android.app.AlertDialog.Builder(this)
+                    .setTitle("Account löschen?")
+                    .setMessage("Bist du sicher? Alle deine Server und Backups werden unwiderruflich gelöscht!")
+                    .setPositiveButton("Löschen", (d, w) -> {
+                        eu.kodanetwork.mchost.network.supabase.SupabaseAuth.deleteUser(this, new eu.kodanetwork.mchost.network.supabase.SupabaseAuth.AuthCallback() {
+                            @Override public void onSuccess() {
+                                runOnUiThread(() -> {
+                                    eu.kodanetwork.mchost.network.supabase.SupabaseAuth.logout(SettingsActivity.this);
+                                    Toast.makeText(SettingsActivity.this, "Account gelöscht.", Toast.LENGTH_SHORT).show();
+                                    recreate();
+                                });
+                            }
+                            @Override public void onError(String msg) {
+                                runOnUiThread(() -> Toast.makeText(SettingsActivity.this, "Fehler: " + msg, Toast.LENGTH_LONG).show());
+                            }
+                        });
+                        dialog.dismiss();
+                    })
+                    .setNegativeButton("Abbrechen", null).show();
+            });
+
+            dialog.findViewById(R.id.btn_dialog_logout).setOnClickListener(btn -> {
+                eu.kodanetwork.mchost.network.supabase.SupabaseAuth.logout(this);
+                Toast.makeText(this, "Erfolgreich abgemeldet", Toast.LENGTH_SHORT).show();
+                dialog.dismiss();
+                recreate();
+            });
+
+            dialog.findViewById(R.id.btn_dialog_cancel).setOnClickListener(btn -> dialog.dismiss());
+            dialog.show();
         });
 
         setupSupport();

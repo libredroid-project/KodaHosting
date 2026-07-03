@@ -195,22 +195,22 @@ public class MainActivity extends AppCompatActivity {
 
             ThemeHelper.apply(this);
             eu.kodanetwork.mchost.util.HapticUtil.applyHaptics(this);
-            checkToS();
+            checkToS(0);
             Log.d(TAG, "MainActivity created");
         } catch (Exception e) {
             Log.e(TAG, "Error in onCreate", e);
         }
     }
 
-    private void checkToS() {
+    private void checkToS(long newTs) {
         android.content.SharedPreferences prefs = eu.kodanetwork.mchost.App.getPrefs(this);
-        if (!prefs.getBoolean("tos_accepted_v2", false)) {
+        if (!prefs.getBoolean("tos_accepted_v2", false) || (newTs > 0 && newTs > prefs.getLong("accepted_tos_version_ts", 0))) {
             android.app.Dialog dialog = new android.app.Dialog(this, android.R.style.Theme_Black_NoTitleBar_Fullscreen);
             dialog.setContentView(R.layout.dialog_tos);
             dialog.setCancelable(false);
 
             dialog.findViewById(R.id.btn_accept_tos).setOnClickListener(v -> {
-                prefs.edit().putBoolean("tos_accepted_v2", true).apply();
+                prefs.edit().putBoolean("tos_accepted_v2", true).putLong("accepted_tos_version_ts", newTs > 0 ? newTs : System.currentTimeMillis()).apply();
                 dialog.dismiss();
             });
 
@@ -221,7 +221,7 @@ public class MainActivity extends AppCompatActivity {
 
             TextView tvTosContent = dialog.findViewById(R.id.tv_tos_content);
             String tosHtml = "<b>Terms of Service</b><br><br>" +
-                "<font color='#888899'>Last Updated: June 2026</font><br><br>" +
+                "<font color='#888899'>Last Updated: July 2026</font><br><br>" +
                 "By downloading, installing, or using the KodaHosting mobile application, the Web Dashboard, and related services, you agree to comply with and be bound by these Terms of Service. If you do not agree to these Terms, you must uninstall the app and cease using our services immediately.<br><br>" +
                 "<b>Eligibility & Age Requirements</b><br>" +
                 "You must be at least 13 years old (or 16 in certain EU jurisdictions) to use this Service. By agreeing to these Terms, you represent and warrant that you meet these age requirements.<br><br>" +
@@ -441,6 +441,35 @@ public class MainActivity extends AppCompatActivity {
                                 intent.putExtra("duration", finalDuration);
                                 startActivity(intent);
                                 finish();
+                            });
+                        }
+                    }
+                    }
+                } catch (Exception ignored) {}
+
+                // Check latest ToS
+                okhttp3.Request tosReq = new okhttp3.Request.Builder()
+                    .url(baseUrl + "/rest/v1/app_settings?key=eq.latest_tos_version&select=value")
+                    .addHeader("apikey", apiKey)
+                    .addHeader("Authorization", "Bearer " + apiKey)
+                    .build();
+                try (okhttp3.Response response = client.newCall(tosReq).execute()) {
+                    if (response.isSuccessful() && response.body() != null) {
+                        String json = response.body().string();
+                        long latestTs = 0;
+                        try {
+                            org.json.JSONArray arr = new org.json.JSONArray(json);
+                            if (arr.length() > 0) {
+                                String valStr = arr.getJSONObject(0).optString("value", "0");
+                                latestTs = Long.parseLong(valStr);
+                            }
+                        } catch (Exception ignored) {}
+                        
+                        long acceptedTs = eu.kodanetwork.mchost.App.getPrefs(MainActivity.this).getLong("accepted_tos_version_ts", 0);
+                        if (latestTs > acceptedTs) {
+                            final long fTs = latestTs;
+                            runOnUiThread(() -> {
+                                checkToS(fTs);
                             });
                         }
                     }

@@ -630,7 +630,7 @@ public class CreateServerActivity extends AppCompatActivity {
                 else versions = fetchPurpurVersions();
                 mainHandler.post(() -> {
                     if (tvVersionLoading != null) tvVersionLoading.setVisibility(View.GONE);
-                    if (versions.isEmpty()) { versions.add("1.21.4"); versions.add("1.20.1"); }
+                    if (versions.isEmpty()) { versions.add("26.2"); versions.add("26.1.2"); versions.add("No internet"); }
                     setVersionList(versions);
                 });
             });

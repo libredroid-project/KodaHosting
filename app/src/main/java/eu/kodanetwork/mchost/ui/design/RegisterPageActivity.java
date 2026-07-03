@@ -66,20 +66,22 @@ public class RegisterPageActivity extends AppCompatActivity {
                         btnCreate.setEnabled(true);
                         btnCreate.setText("Account Erstellen");
 
-                        android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(RegisterPageActivity.this);
-                        builder.setTitle("Email Verifizierung");
-                        builder.setMessage("Bitte gib den 6-stelligen Code ein, der an " + email + " gesendet wurde.");
+                        android.app.Dialog dialog = new android.app.Dialog(RegisterPageActivity.this, android.R.style.Theme_Black_NoTitleBar_Fullscreen);
+                        dialog.setContentView(R.layout.dialog_praetor_verify);
+                        dialog.setCancelable(false);
 
-                        final EditText input = new EditText(RegisterPageActivity.this);
-                        input.setInputType(android.text.InputType.TYPE_CLASS_NUMBER);
-                        builder.setView(input);
+                        TextView tvSubtitle = dialog.findViewById(R.id.tv_dialog_subtitle);
+                        if (tvSubtitle != null) tvSubtitle.setText(getString(R.string.email_verification) + " - " + email);
 
-                        builder.setPositiveButton("Verifizieren", (dialog, which) -> {
+                        EditText input = dialog.findViewById(R.id.et_verification_code);
+
+                        dialog.findViewById(R.id.btn_dialog_verify).setOnClickListener(v -> {
                             String code = input.getText().toString().trim();
                             if (code.equals(generatedCode)) {
                                 Toast.makeText(RegisterPageActivity.this, "Code akzeptiert! Account wird erstellt...", Toast.LENGTH_SHORT).show();
                                 btnCreate.setEnabled(false);
                                 btnCreate.setText("Lade...");
+                                dialog.dismiss();
 
                                 eu.kodanetwork.mchost.network.supabase.SupabaseAuth.signUp(RegisterPageActivity.this, email, pwd, new eu.kodanetwork.mchost.network.supabase.SupabaseAuth.AuthCallback() {
                                     @Override
@@ -104,9 +106,14 @@ public class RegisterPageActivity extends AppCompatActivity {
                                 Toast.makeText(RegisterPageActivity.this, "Falscher Code!", Toast.LENGTH_SHORT).show();
                             }
                         });
-                        builder.setNegativeButton("Abbrechen", (dialog, which) -> dialog.cancel());
-                        builder.setCancelable(false);
-                        builder.show();
+                        
+                        dialog.findViewById(R.id.btn_dialog_cancel).setOnClickListener(v -> {
+                            dialog.cancel();
+                            btnCreate.setEnabled(true);
+                            btnCreate.setText("Account Erstellen");
+                        });
+                        
+                        dialog.show();
                     });
                 }
 

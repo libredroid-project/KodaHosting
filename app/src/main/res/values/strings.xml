@@ -123,20 +123,6 @@
     <string name="eula_title">MINECRAFT EULA</string>
     <string name="eula_decline">DECLINE</string>
     <string name="eula_accept">ACCEPT</string>
-
-    <string name="praetor_title">P.R.A.E.T.O.R.</string>
-    <string name="praetor_subtitle">PROTOCOL FOR RISK ASSESSMENT,\nENFORCEMENT &amp; TOTAL OVERSIGHT RESPONSE</string>
-    <string name="praetor_action_fix">FIX ISSUE</string>
-    <string name="praetor_action_auto_ram">USE LESS RAM</string>
-    <string name="praetor_action_start_anyway">START ANYWAY (RISK)</string>
-    <string name="praetor_action_cancel">CANCEL</string>
-    <string name="praetor_hibernate_warning">WARNING: Server Hibernation mode is being initiated. DNS entries will be deleted and the server will be compressed.</string>
-    <string name="praetor_hibernate_long_explanation">LONG EXPLANATION</string>
-    <string name="praetor_hibernate_confirm">HIBERNATE</string>
-    <string name="praetor_hibernate_cancel">CANCEL</string>
-    <string name="praetor_reason_ram_conflict">The server needs %3$d MB of RAM. However, this exceeds your device\'s safe available RAM. Your device has %1$d MB total RAM, but with Android OS and other apps running, allocating this much will likely crash your phone or the server.</string>
-    <string name="praetor_reason_console_offline">The console cannot be opened while the server is offline. Please start the server first.</string>
-    <string name="praetor_action_back">BACK</string>
     <string name="praetor_reason_delete_server">Are you ABSOLUTELY sure you want to permanently delete this server? All data, worlds, and plugins will be irretrievably lost!</string>
     <string name="praetor_security_violation">A security violation has been detected.</string>
     <string name="praetor_action_delete">DELETE</string>
@@ -165,4 +151,23 @@
     <string name="initial_message">Initial Message</string>
     <string name="message_hint">Describe the problem in detail...</string>
     <string name="create_and_open_chat">CREATE &amp; OPEN CHAT</string>
+
+    <string name="praetor_title">P.R.A.E.T.O.R.</string>
+    <string name="praetor_subtitle">PROTOCOL FOR RISK ASSESSMENT,\nENFORCEMENT &amp; TOTAL OVERSIGHT RESPONSE</string>
+    <string name="praetor_action_fix">FIX ISSUE</string>
+    <string name="praetor_action_auto_ram">AUTO-ADJUST RAM</string>
+    <string name="praetor_action_start_anyway">START ANYWAY (RISK)</string>
+    <string name="praetor_action_cancel">Cancel</string>
+
+    <string name="email_verification">EMAIL VERIFICATION</string>
+    <string name="enter_code">Please enter the 6-digit code</string>
+    <string name="verify">VERIFY</string>
+
+    <string name="praetor_hibernate_warning">WARNING: Server hibernation will be initiated. DNS records will be deleted and the server will be compressed.</string>
+    <string name="praetor_hibernate_long_explanation">LONG EXPLANATION</string>
+    <string name="praetor_hibernate_confirm">HIBERNATE</string>
+    <string name="praetor_hibernate_cancel">CANCEL</string>
+    <string name="praetor_reason_ram_conflict">The server has too much RAM assigned (%1$d MB). Your device only has %2$d MB RAM available in total. This assignment will likely cause your phone or the server to crash.</string>
+    <string name="praetor_reason_console_offline">The console cannot be opened while the server is offline. Please start the server first.</string>
+    <string name="praetor_action_back">BACK</string>
 </resources>
