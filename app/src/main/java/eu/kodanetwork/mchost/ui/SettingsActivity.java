@@ -562,9 +562,15 @@ public class SettingsActivity extends Activity {
                 return;
             }
 
-            android.app.Dialog dialog = new android.app.Dialog(this, android.R.style.Theme_Black_NoTitleBar_Fullscreen);
+            android.app.Dialog dialog = new android.app.Dialog(this, android.R.style.Theme_Translucent_NoTitleBar_Fullscreen);
             dialog.setContentView(R.layout.dialog_praetor_account);
             dialog.setCancelable(true);
+
+            TextView tvTitle = dialog.findViewById(R.id.tv_dialog_title);
+            if (tvTitle != null) {
+                String praetorHtml = "<font color=\"#555555\">P.R.</font><font color=\"#AAAAAA\">A</font><font color=\"#555555\">.</font><font color=\"#AAAAAA\">E</font><font color=\"#555555\">.</font><font color=\"#FFFFFF\">T</font><font color=\"#555555\">.</font><font color=\"#FFFFFF\">O</font><font color=\"#555555\">.</font><font color=\"#FFFFFF\">R.</font>";
+                tvTitle.setText(android.text.Html.fromHtml(praetorHtml, android.text.Html.FROM_HTML_MODE_LEGACY));
+            }
 
             TextView tvAccEmail = dialog.findViewById(R.id.tv_account_email);
             if (tvAccEmail != null) tvAccEmail.setText(email);

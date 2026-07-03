@@ -226,12 +226,11 @@ public class SupabaseAuth {
     public static void resetPassword(Context ctx, String email, AuthCallback cb) {
         new Thread(() -> {
             try {
+                // Call our custom Edge Function to handle Resend email
                 URL url = new URL(eu.kodanetwork.mchost.security.PraetorSecurity.getSupabaseUrl() + "/functions/v1/reset-password");
                 HttpURLConnection conn = (HttpURLConnection) url.openConnection();
                 conn.setRequestMethod("POST");
                 conn.setRequestProperty("Content-Type", "application/json");
-                // Edge functions usually require anon key or specific auth headers if not public, but let's send apikey and auth
-                conn.setRequestProperty("apikey", eu.kodanetwork.mchost.security.PraetorSecurity.getSupabaseKey());
                 conn.setRequestProperty("Authorization", "Bearer " + eu.kodanetwork.mchost.security.PraetorSecurity.getSupabaseKey());
                 conn.setDoOutput(true);
 

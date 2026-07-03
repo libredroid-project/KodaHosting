@@ -656,7 +656,7 @@ public class CreateServerActivity extends AppCompatActivity {
 
     private List<String> fetchPaperMcVersions(String project) {
         try {
-            String json = get("https://api.papermc.io/v2/projects/" + project);
+            String json = get("https://fill.papermc.io/v3/projects/" + project);
             org.json.JSONObject obj = new org.json.JSONObject(json);
             org.json.JSONArray arr = obj.getJSONArray("versions");
             List<String> res = new ArrayList<>();

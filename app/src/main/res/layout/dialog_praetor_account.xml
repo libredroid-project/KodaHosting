@@ -34,7 +34,7 @@
             android:id="@+id/tv_dialog_subtitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="ACCOUNT MANAGEMENT"
+            android:text="@string/praetor_subtitle_account"
             android:textColor="#8A8A9A"
             android:textSize="10sp"
             android:textStyle="bold"
@@ -69,7 +69,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="56dp"
                 style="@style/KodaButton"
-                android:text="Passwort ändern"
+                android:text="@string/praetor_action_change_password"
                 android:stateListAnimator="@null"
                 android:layout_marginBottom="8dp" />
 
@@ -78,7 +78,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="56dp"
                 style="@style/KodaButton.Danger"
-                android:text="Account löschen"
+                android:text="@string/praetor_action_delete_account"
                 android:stateListAnimator="@null"
                 android:layout_marginBottom="8dp" />
 
@@ -88,7 +88,7 @@
                 android:layout_height="56dp"
                 style="@style/KodaButton.Danger"
                 app:backgroundTint="#222233"
-                android:text="Abmelden"
+                android:text="@string/praetor_action_logout"
                 android:stateListAnimator="@null"
                 android:layout_marginBottom="8dp" />
 
@@ -97,7 +97,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="56dp"
                 style="@style/KodaButton.Outline"
-                android:text="Abbrechen"
+                android:text="@string/praetor_action_cancel"
                 android:stateListAnimator="@null" />
         </LinearLayout>
     </LinearLayout>

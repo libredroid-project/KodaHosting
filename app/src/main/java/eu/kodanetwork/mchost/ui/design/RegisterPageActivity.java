@@ -54,7 +54,7 @@ public class RegisterPageActivity extends AppCompatActivity {
             }
             
             btnCreate.setEnabled(false);
-            btnCreate.setText("Sende Code...");
+            btnCreate.setText(getString(R.string.register_loading));
 
             // Generate 6 digit code
             String generatedCode = String.format("%06d", new java.util.Random().nextInt(999999));
@@ -64,11 +64,17 @@ public class RegisterPageActivity extends AppCompatActivity {
                 public void onSuccess() {
                     runOnUiThread(() -> {
                         btnCreate.setEnabled(true);
-                        btnCreate.setText("Account Erstellen");
+                        btnCreate.setText(getString(R.string.register_create_account));
 
-                        android.app.Dialog dialog = new android.app.Dialog(RegisterPageActivity.this, android.R.style.Theme_Black_NoTitleBar_Fullscreen);
+                        android.app.Dialog dialog = new android.app.Dialog(RegisterPageActivity.this, android.R.style.Theme_Translucent_NoTitleBar_Fullscreen);
                         dialog.setContentView(R.layout.dialog_praetor_verify);
                         dialog.setCancelable(false);
+
+                        TextView tvTitle = dialog.findViewById(R.id.tv_dialog_title);
+                        if (tvTitle != null) {
+                            String praetorHtml = "<font color=\"#555555\">P.R.</font><font color=\"#AAAAAA\">A</font><font color=\"#555555\">.</font><font color=\"#AAAAAA\">E</font><font color=\"#555555\">.</font><font color=\"#FFFFFF\">T</font><font color=\"#555555\">.</font><font color=\"#FFFFFF\">O</font><font color=\"#555555\">.</font><font color=\"#FFFFFF\">R.</font>";
+                            tvTitle.setText(android.text.Html.fromHtml(praetorHtml, android.text.Html.FROM_HTML_MODE_LEGACY));
+                        }
 
                         TextView tvSubtitle = dialog.findViewById(R.id.tv_dialog_subtitle);
                         if (tvSubtitle != null) tvSubtitle.setText(getString(R.string.email_verification) + " - " + email);
@@ -78,9 +84,9 @@ public class RegisterPageActivity extends AppCompatActivity {
                         dialog.findViewById(R.id.btn_dialog_verify).setOnClickListener(v -> {
                             String code = input.getText().toString().trim();
                             if (code.equals(generatedCode)) {
-                                Toast.makeText(RegisterPageActivity.this, "Code akzeptiert! Account wird erstellt...", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(RegisterPageActivity.this, getString(R.string.register_code_accepted), Toast.LENGTH_SHORT).show();
                                 btnCreate.setEnabled(false);
-                                btnCreate.setText("Lade...");
+                                btnCreate.setText(getString(R.string.register_loading));
                                 dialog.dismiss();
 
                                 eu.kodanetwork.mchost.network.supabase.SupabaseAuth.signUp(RegisterPageActivity.this, email, pwd, new eu.kodanetwork.mchost.network.supabase.SupabaseAuth.AuthCallback() {
@@ -97,7 +103,7 @@ public class RegisterPageActivity extends AppCompatActivity {
                                     public void onError(String message) {
                                         runOnUiThread(() -> {
                                             btnCreate.setEnabled(true);
-                                            btnCreate.setText("Account Erstellen");
+                                            btnCreate.setText(getString(R.string.register_create_account));
                                             Toast.makeText(RegisterPageActivity.this, "Fehler: " + message, Toast.LENGTH_LONG).show();
                                         });
                                     }
@@ -110,7 +116,7 @@ public class RegisterPageActivity extends AppCompatActivity {
                         dialog.findViewById(R.id.btn_dialog_cancel).setOnClickListener(v -> {
                             dialog.cancel();
                             btnCreate.setEnabled(true);
-                            btnCreate.setText("Account Erstellen");
+                            btnCreate.setText(getString(R.string.register_create_account));
                         });
                         
                         dialog.show();
@@ -121,7 +127,7 @@ public class RegisterPageActivity extends AppCompatActivity {
                 public void onError(String message) {
                     runOnUiThread(() -> {
                         btnCreate.setEnabled(true);
-                        btnCreate.setText("Account Erstellen");
+                        btnCreate.setText(getString(R.string.register_create_account));
                         Toast.makeText(RegisterPageActivity.this, "Fehler beim Senden des Codes: " + message, Toast.LENGTH_LONG).show();
                     });
                 }

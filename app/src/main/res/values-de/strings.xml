@@ -187,4 +187,11 @@
     <string name="initial_message">Erste Nachricht</string>
     <string name="message_hint">Beschreibe das Problem im Detail...</string>
     <string name="create_and_open_chat">ERSTELLEN &amp; CHAT ÖFFNEN</string>
+    <string name="praetor_subtitle_account">ACCOUNT VERWALTUNG</string>
+    <string name="praetor_action_change_password">Passwort ändern</string>
+    <string name="praetor_action_delete_account">Account löschen</string>
+    <string name="praetor_action_logout">Abmelden</string>
+    <string name="register_create_account">Account Erstellen</string>
+    <string name="register_loading">Lade...</string>
+    <string name="register_code_accepted">Code akzeptiert! Account wird erstellt...</string>
 </resources>

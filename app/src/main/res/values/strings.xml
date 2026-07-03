@@ -170,4 +170,11 @@
     <string name="praetor_reason_ram_conflict">The server has too much RAM assigned (%1$d MB). Your device only has %2$d MB RAM available in total. This assignment will likely cause your phone or the server to crash.</string>
     <string name="praetor_reason_console_offline">The console cannot be opened while the server is offline. Please start the server first.</string>
     <string name="praetor_action_back">BACK</string>
+    <string name="praetor_subtitle_account">ACCOUNT MANAGEMENT</string>
+    <string name="praetor_action_change_password">Change Password</string>
+    <string name="praetor_action_delete_account">Delete Account</string>
+    <string name="praetor_action_logout">Log Out</string>
+    <string name="register_create_account">Create Account</string>
+    <string name="register_loading">Loading...</string>
+    <string name="register_code_accepted">Code accepted! Creating account...</string>
 </resources>

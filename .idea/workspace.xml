@@ -44,22 +44,15 @@
       <change beforePath="$PROJECT_DIR$/.gradle/8.9/fileHashes/resourceHashesCache.bin" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/8.9/fileHashes/resourceHashesCache.bin" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gradle/buildOutputCleanup/buildOutputCleanup.lock" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/buildOutputCleanup/buildOutputCleanup.lock" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gradle/file-system.probe" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/file-system.probe" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/caches/deviceStreaming.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/caches/deviceStreaming.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/.cxx/Debug/536r322x/arm64-v8a/configure_fingerprint.bin" beforeDir="false" afterPath="$PROJECT_DIR$/app/.cxx/Debug/536r322x/arm64-v8a/configure_fingerprint.bin" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/.cxx/Debug/536r322x/armeabi-v7a/configure_fingerprint.bin" beforeDir="false" afterPath="$PROJECT_DIR$/app/.cxx/Debug/536r322x/armeabi-v7a/configure_fingerprint.bin" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/.cxx/Debug/536r322x/x86/configure_fingerprint.bin" beforeDir="false" afterPath="$PROJECT_DIR$/app/.cxx/Debug/536r322x/x86/configure_fingerprint.bin" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/.cxx/Debug/536r322x/x86_64/configure_fingerprint.bin" beforeDir="false" afterPath="$PROJECT_DIR$/app/.cxx/Debug/536r322x/x86_64/configure_fingerprint.bin" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/assets/licenses/privacy.txt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/assets/licenses/privacy.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/assets/licenses/tos.txt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/assets/licenses/tos.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/eu/kodanetwork/mchost/network/supabase/SupabaseAuth.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/eu/kodanetwork/mchost/network/supabase/SupabaseAuth.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/java/eu/kodanetwork/mchost/ui/CreateServerActivity.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/eu/kodanetwork/mchost/ui/CreateServerActivity.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/eu/kodanetwork/mchost/ui/MainActivity.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/eu/kodanetwork/mchost/ui/MainActivity.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/java/eu/kodanetwork/mchost/ui/SettingsActivity.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/eu/kodanetwork/mchost/ui/SettingsActivity.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/eu/kodanetwork/mchost/ui/design/AdminPageActivity.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/eu/kodanetwork/mchost/ui/design/AdminPageActivity.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/java/eu/kodanetwork/mchost/ui/design/RegisterPageActivity.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/eu/kodanetwork/mchost/ui/design/RegisterPageActivity.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/res/layout/activity_design_admin.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/layout/activity_design_admin.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/res/layout/activity_settings.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/layout/activity_settings.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/layout/dialog_praetor_account.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/layout/dialog_praetor_account.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/res/values-de/strings.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/values-de/strings.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/res/values/strings.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/values/strings.xml" afterDir="false" />
     </list>
