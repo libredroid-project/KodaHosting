@@ -624,30 +624,31 @@ public class SettingsActivity extends Activity {
       }
 
     private void setupSupport() {
-        Button btnSupportTickets = findViewById(R.id.btn_support_tickets);
-        if (btnSupportTickets == null) return;
+        Button btnReportBug = findViewById(R.id.btn_report_bug);
+        Button btnReportServer = findViewById(R.id.btn_report_server);
+        Button btnMyTickets = findViewById(R.id.btn_my_tickets);
 
-        btnSupportTickets.setOnClickListener(v -> {
-            SupportSelectionDialog dialog = new SupportSelectionDialog(this, new SupportSelectionDialog.SupportDialogListener() {
-                @Override
-                public void onBugReport() {
-                    Intent intent = new Intent(SettingsActivity.this, CreateSupportTicketActivity.class);
-                    intent.putExtra("TICKET_TYPE", "BUG");
-                    startActivity(intent);
-                }
-                @Override
-                public void onServerReport() {
-                    Intent intent = new Intent(SettingsActivity.this, CreateSupportTicketActivity.class);
-                    intent.putExtra("TICKET_TYPE", "SERVER_REPORT");
-                    startActivity(intent);
-                }
-                @Override
-                public void onMyTickets() {
-                    startActivity(new Intent(SettingsActivity.this, SupportTicketListActivity.class));
-                }
+        if (btnReportBug != null) {
+            btnReportBug.setOnClickListener(v -> {
+                Intent intent = new Intent(SettingsActivity.this, CreateSupportTicketActivity.class);
+                intent.putExtra("TICKET_TYPE", "BUG");
+                startActivity(intent);
             });
-            dialog.show();
-        });
+        }
+        
+        if (btnReportServer != null) {
+            btnReportServer.setOnClickListener(v -> {
+                Intent intent = new Intent(SettingsActivity.this, CreateSupportTicketActivity.class);
+                intent.putExtra("TICKET_TYPE", "SERVER_REPORT");
+                startActivity(intent);
+            });
+        }
+        
+        if (btnMyTickets != null) {
+            btnMyTickets.setOnClickListener(v -> {
+                startActivity(new Intent(SettingsActivity.this, SupportTicketListActivity.class));
+            });
+        }
     }
 
 
