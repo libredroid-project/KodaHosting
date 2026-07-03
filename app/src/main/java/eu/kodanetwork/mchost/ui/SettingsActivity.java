@@ -576,38 +576,42 @@ public class SettingsActivity extends Activity {
             if (tvAccEmail != null) tvAccEmail.setText(email);
 
             dialog.findViewById(R.id.btn_dialog_change_password).setOnClickListener(btn -> {
-                android.widget.EditText input = new android.widget.EditText(this);
-                input.setHint("New Password");
-                input.setInputType(android.text.InputType.TYPE_CLASS_TEXT | android.text.InputType.TYPE_TEXT_VARIATION_PASSWORD);
-                input.setTextColor(0xFFFFFFFF);
-                input.setHintTextColor(0x88FFFFFF);
-                
-                android.widget.LinearLayout layout = new android.widget.LinearLayout(this);
-                layout.setOrientation(android.widget.LinearLayout.VERTICAL);
-                layout.setPadding(50, 40, 50, 10);
-                layout.addView(input);
+                android.app.Dialog passDialog = new android.app.Dialog(this, android.R.style.Theme_Translucent_NoTitleBar_Fullscreen);
+                passDialog.setContentView(R.layout.dialog_praetor_change_password);
+                passDialog.setCancelable(true);
 
-                new android.app.AlertDialog.Builder(this, android.R.style.Theme_DeviceDefault_Dialog_Alert)
-                        .setTitle("Change Password")
-                        .setView(layout)
-                        .setPositiveButton("Update", (d, w) -> {
-                            String newPass = input.getText().toString().trim();
-                            if (newPass.length() < 6) {
-                                Toast.makeText(this, "Password must be at least 6 characters.", Toast.LENGTH_SHORT).show();
-                                return;
-                            }
-                            eu.kodanetwork.mchost.network.supabase.SupabaseAuth.updatePassword(this, newPass, new eu.kodanetwork.mchost.network.supabase.SupabaseAuth.AuthCallback() {
-                                @Override public void onSuccess() {
-                                    runOnUiThread(() -> Toast.makeText(SettingsActivity.this, "Password updated successfully!", Toast.LENGTH_LONG).show());
-                                }
-                                @Override public void onError(String msg) {
-                                    runOnUiThread(() -> Toast.makeText(SettingsActivity.this, "Fehler: " + msg, Toast.LENGTH_LONG).show());
-                                }
-                            });
-                        })
-                        .setNegativeButton("Cancel", null)
-                        .show();
+                TextView tvPassTitle = passDialog.findViewById(R.id.tv_dialog_title);
+                if (tvPassTitle != null) {
+                    String praetorHtml = "<font color=\"#555555\">P.R.</font><font color=\"#AAAAAA\">A</font><font color=\"#555555\">.</font><font color=\"#AAAAAA\">E</font><font color=\"#555555\">.</font><font color=\"#FFFFFF\">T</font><font color=\"#555555\">.</font><font color=\"#FFFFFF\">O</font><font color=\"#555555\">.</font><font color=\"#FFFFFF\">R.</font>";
+                    tvPassTitle.setText(android.text.Html.fromHtml(praetorHtml, android.text.Html.FROM_HTML_MODE_LEGACY));
+                }
+
+                android.widget.EditText input = passDialog.findViewById(R.id.et_new_password);
                 
+                passDialog.findViewById(R.id.btn_dialog_update_password).setOnClickListener(updateBtn -> {
+                    String newPass = input.getText().toString().trim();
+                    if (newPass.length() < 6) {
+                        Toast.makeText(this, "Password must be at least 6 characters.", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+                    eu.kodanetwork.mchost.network.supabase.SupabaseAuth.updatePassword(this, newPass, new eu.kodanetwork.mchost.network.supabase.SupabaseAuth.AuthCallback() {
+                        @Override public void onSuccess() {
+                            runOnUiThread(() -> {
+                                Toast.makeText(SettingsActivity.this, "Password updated successfully!", Toast.LENGTH_LONG).show();
+                                passDialog.dismiss();
+                            });
+                        }
+                        @Override public void onError(String msg) {
+                            runOnUiThread(() -> Toast.makeText(SettingsActivity.this, "Fehler: " + msg, Toast.LENGTH_LONG).show());
+                        }
+                    });
+                });
+                
+                passDialog.findViewById(R.id.btn_dialog_cancel).setOnClickListener(cancelBtn -> {
+                    passDialog.dismiss();
+                });
+                
+                passDialog.show();
                 dialog.dismiss();
             });
 
