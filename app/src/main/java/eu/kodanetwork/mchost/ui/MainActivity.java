@@ -444,7 +444,6 @@ public class MainActivity extends AppCompatActivity {
                             });
                         }
                     }
-                    }
                 } catch (Exception ignored) {}
 
                 // Check latest ToS

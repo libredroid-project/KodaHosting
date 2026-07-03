@@ -1272,7 +1272,7 @@ public class SettingsActivity extends Activity {
             }
             tintBtn((Button)findViewById(R.id.btn_delete_servers), 0xFFFFE5E5, 0xFFFF4444);
             tintBtn((Button)findViewById(R.id.btn_revoke_tos), 0xFFFFE5E5, 0xFFFF4444);
-            tintBtn((Button)findViewById(R.id.btn_logout), 0xFFFFE5E5, 0xFFFF4444);
+
             View geminiInput = findViewById(R.id.ll_gemini_input_container);
             if (geminiInput != null) geminiInput.setBackgroundColor(btnBg);
             TextView tvGeminiInput = findViewById(R.id.et_gemini_api_key);
