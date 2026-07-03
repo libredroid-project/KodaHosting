@@ -586,23 +586,67 @@ public class SettingsActivity extends Activity {
                     tvPassTitle.setText(android.text.Html.fromHtml(praetorHtml, android.text.Html.FROM_HTML_MODE_LEGACY));
                 }
 
-                android.widget.EditText input = passDialog.findViewById(R.id.et_new_password);
+                android.widget.EditText inputOld = passDialog.findViewById(R.id.et_old_password);
+                android.widget.EditText inputNew = passDialog.findViewById(R.id.et_new_password);
+                android.widget.EditText inputConfirm = passDialog.findViewById(R.id.et_new_password_confirm);
                 
                 passDialog.findViewById(R.id.btn_dialog_update_password).setOnClickListener(updateBtn -> {
-                    String newPass = input.getText().toString().trim();
-                    if (newPass.length() < 6) {
-                        Toast.makeText(this, "Password must be at least 6 characters.", Toast.LENGTH_SHORT).show();
+                    String oldPass = inputOld.getText().toString().trim();
+                    String newPass = inputNew.getText().toString().trim();
+                    String confirmPass = inputConfirm.getText().toString().trim();
+                    
+                    if (oldPass.isEmpty()) {
+                        Toast.makeText(this, "Please enter your old password.", Toast.LENGTH_SHORT).show();
                         return;
                     }
-                    eu.kodanetwork.mchost.network.supabase.SupabaseAuth.updatePassword(this, newPass, new eu.kodanetwork.mchost.network.supabase.SupabaseAuth.AuthCallback() {
-                        @Override public void onSuccess() {
+                    if (newPass.length() < 6) {
+                        Toast.makeText(this, "New password must be at least 6 characters.", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+                    if (!newPass.equals(confirmPass)) {
+                        Toast.makeText(this, "New passwords do not match.", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+
+                    // Disable buttons and show loading
+                    passDialog.findViewById(R.id.btn_dialog_update_password).setEnabled(false);
+                    passDialog.findViewById(R.id.btn_dialog_cancel).setEnabled(false);
+                    ((android.widget.Button) passDialog.findViewById(R.id.btn_dialog_update_password)).setText("Verifying...");
+
+                    // Verify old password first by signing in
+                    eu.kodanetwork.mchost.network.supabase.SupabaseAuth.signInWithEmail(this, email, oldPass, new eu.kodanetwork.mchost.network.supabase.SupabaseAuth.AuthCallback() {
+                        @Override
+                        public void onSuccess() {
                             runOnUiThread(() -> {
-                                Toast.makeText(SettingsActivity.this, "Password updated successfully!", Toast.LENGTH_LONG).show();
-                                passDialog.dismiss();
+                                ((android.widget.Button) passDialog.findViewById(R.id.btn_dialog_update_password)).setText("Updating...");
+                            });
+                            // Old password is correct, update to new password
+                            eu.kodanetwork.mchost.network.supabase.SupabaseAuth.updatePassword(SettingsActivity.this, newPass, new eu.kodanetwork.mchost.network.supabase.SupabaseAuth.AuthCallback() {
+                                @Override public void onSuccess() {
+                                    runOnUiThread(() -> {
+                                        Toast.makeText(SettingsActivity.this, "Password updated successfully!", Toast.LENGTH_LONG).show();
+                                        passDialog.dismiss();
+                                    });
+                                }
+                                @Override public void onError(String msg) {
+                                    runOnUiThread(() -> {
+                                        Toast.makeText(SettingsActivity.this, "Error updating password: " + msg, Toast.LENGTH_LONG).show();
+                                        passDialog.findViewById(R.id.btn_dialog_update_password).setEnabled(true);
+                                        passDialog.findViewById(R.id.btn_dialog_cancel).setEnabled(true);
+                                        ((android.widget.Button) passDialog.findViewById(R.id.btn_dialog_update_password)).setText("Update Password");
+                                    });
+                                }
                             });
                         }
-                        @Override public void onError(String msg) {
-                            runOnUiThread(() -> Toast.makeText(SettingsActivity.this, "Fehler: " + msg, Toast.LENGTH_LONG).show());
+                        
+                        @Override
+                        public void onError(String msg) {
+                            runOnUiThread(() -> {
+                                Toast.makeText(SettingsActivity.this, "Old password is incorrect.", Toast.LENGTH_LONG).show();
+                                passDialog.findViewById(R.id.btn_dialog_update_password).setEnabled(true);
+                                passDialog.findViewById(R.id.btn_dialog_cancel).setEnabled(true);
+                                ((android.widget.Button) passDialog.findViewById(R.id.btn_dialog_update_password)).setText("Update Password");
+                            });
                         }
                     });
                 });
