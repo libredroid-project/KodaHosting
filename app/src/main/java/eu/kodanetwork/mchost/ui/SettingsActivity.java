@@ -576,14 +576,38 @@ public class SettingsActivity extends Activity {
             if (tvAccEmail != null) tvAccEmail.setText(email);
 
             dialog.findViewById(R.id.btn_dialog_change_password).setOnClickListener(btn -> {
-                eu.kodanetwork.mchost.network.supabase.SupabaseAuth.resetPassword(this, email, new eu.kodanetwork.mchost.network.supabase.SupabaseAuth.AuthCallback() {
-                    @Override public void onSuccess() {
-                        runOnUiThread(() -> Toast.makeText(SettingsActivity.this, "Passwort-Reset Email gesendet!", Toast.LENGTH_LONG).show());
-                    }
-                    @Override public void onError(String msg) {
-                        runOnUiThread(() -> Toast.makeText(SettingsActivity.this, "Fehler: " + msg, Toast.LENGTH_LONG).show());
-                    }
-                });
+                android.widget.EditText input = new android.widget.EditText(this);
+                input.setHint("New Password");
+                input.setInputType(android.text.InputType.TYPE_CLASS_TEXT | android.text.InputType.TYPE_TEXT_VARIATION_PASSWORD);
+                input.setTextColor(0xFFFFFFFF);
+                input.setHintTextColor(0x88FFFFFF);
+                
+                android.widget.LinearLayout layout = new android.widget.LinearLayout(this);
+                layout.setOrientation(android.widget.LinearLayout.VERTICAL);
+                layout.setPadding(50, 40, 50, 10);
+                layout.addView(input);
+
+                new android.app.AlertDialog.Builder(this, android.R.style.Theme_DeviceDefault_Dialog_Alert)
+                        .setTitle("Change Password")
+                        .setView(layout)
+                        .setPositiveButton("Update", (d, w) -> {
+                            String newPass = input.getText().toString().trim();
+                            if (newPass.length() < 6) {
+                                Toast.makeText(this, "Password must be at least 6 characters.", Toast.LENGTH_SHORT).show();
+                                return;
+                            }
+                            eu.kodanetwork.mchost.network.supabase.SupabaseAuth.updatePassword(this, newPass, new eu.kodanetwork.mchost.network.supabase.SupabaseAuth.AuthCallback() {
+                                @Override public void onSuccess() {
+                                    runOnUiThread(() -> Toast.makeText(SettingsActivity.this, "Password updated successfully!", Toast.LENGTH_LONG).show());
+                                }
+                                @Override public void onError(String msg) {
+                                    runOnUiThread(() -> Toast.makeText(SettingsActivity.this, "Fehler: " + msg, Toast.LENGTH_LONG).show());
+                                }
+                            });
+                        })
+                        .setNegativeButton("Cancel", null)
+                        .show();
+                
                 dialog.dismiss();
             });
 

@@ -223,18 +223,24 @@ public class SupabaseAuth {
             .apply();
     }
 
-    public static void resetPassword(Context ctx, String email, AuthCallback cb) {
+    public static void updatePassword(Context ctx, String newPassword, AuthCallback cb) {
         new Thread(() -> {
             try {
-                // Call our custom Edge Function to handle Resend email
-                URL url = new URL(eu.kodanetwork.mchost.security.PraetorSecurity.getSupabaseUrl() + "/functions/v1/reset-password");
+                String token = App.getPrefs(ctx).getString("koda_session_token", null);
+                if (token == null) {
+                    cb.onError("Not logged in");
+                    return;
+                }
+                
+                URL url = new URL(eu.kodanetwork.mchost.security.PraetorSecurity.getSupabaseUrl() + "/auth/v1/user");
                 HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-                conn.setRequestMethod("POST");
+                conn.setRequestMethod("PUT");
                 conn.setRequestProperty("Content-Type", "application/json");
-                conn.setRequestProperty("Authorization", "Bearer " + eu.kodanetwork.mchost.security.PraetorSecurity.getSupabaseKey());
+                conn.setRequestProperty("apikey", eu.kodanetwork.mchost.security.PraetorSecurity.getSupabaseKey());
+                conn.setRequestProperty("Authorization", "Bearer " + token);
                 conn.setDoOutput(true);
 
-                String json = "{\"email\":\"" + email + "\"}";
+                String json = "{\"password\":\"" + newPassword + "\"}";
                 OutputStream os = conn.getOutputStream();
                 os.write(json.getBytes());
                 os.flush(); os.close();
@@ -243,7 +249,7 @@ public class SupabaseAuth {
                 if (code >= 200 && code < 300) {
                     cb.onSuccess();
                 } else {
-                    cb.onError("Failed to send reset email");
+                    cb.onError("Failed to update password. Code: " + code);
                 }
             } catch (Exception e) {
                 cb.onError(e.getMessage());
