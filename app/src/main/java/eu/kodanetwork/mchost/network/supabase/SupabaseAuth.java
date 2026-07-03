@@ -226,7 +226,7 @@ public class SupabaseAuth {
     public static void updatePassword(Context ctx, String newPassword, AuthCallback cb) {
         new Thread(() -> {
             try {
-                String token = App.getPrefs(ctx).getString("koda_session_token", null);
+                String token = eu.kodanetwork.mchost.App.getPrefs(ctx).getString("koda_session_token", null);
                 if (token == null) {
                     cb.onError("Not logged in");
                     return;
