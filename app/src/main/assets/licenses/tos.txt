@@ -7,9 +7,11 @@ Eligibility & Age Requirements
 
 You must be at least 13 years old (or 16 in certain EU jurisdictions) to use this Service. By agreeing to these Terms, you represent and warrant that you meet these age requirements.
 
-1. Service Overview
+1. Service Overview & Refunds
 
-KodaHosting provides a mobile environment and networking infrastructure that allows you to host Minecraft servers directly from your Android device. We provide the networking tunnels to proxy incoming player connections securely to your device.
+KodaHosting provides a mobile environment and networking infrastructure that allows you to host Minecraft servers directly from your Android device. We provide the networking tunnels to proxy incoming player connections securely to your device. Not an official Minecraft product. Not approved by or associated with Mojang or Microsoft. Users are required to comply with the official Minecraft EULA when operating servers.
+
+Refunds: KodaHosting is a one-time purchase. Refunds are handled in accordance with the standard refund policies of the Google Play Store.
 
 2. Acceptable Use Policy
 
@@ -39,12 +41,21 @@ THE SERVICE IS PROVIDED ON AN "AS IS" AND "AS AVAILABLE" BASIS. WE EXPRESSLY DIS
 
 6. Limitation of Liability
 
-TO THE MAXIMUM EXTENT PERMITTED BY LAW, KODAHOSTING SHALL NOT BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES, OR ANY LOSS OF PROFITS OR REVENUES, WHETHER INCURRED DIRECTLY OR INDIRECTLY, OR ANY LOSS OF DATA (INCLUDING SERVER WORLDS OR CONFIGURATIONS), USE, GOODWILL, OR OTHER INTANGIBLE LOSSES, RESULTING FROM YOUR USE OF THE APP.
+Except in cases of intentional misconduct or gross negligence, KodaHosting shall not be liable for any indirect, incidental, special, consequential, or punitive damages, or any loss of profits or revenues, whether incurred directly or indirectly, or any loss of data (including server worlds or configurations), use, goodwill, or other intangible losses, resulting from your use of the App.
+
+Furthermore, we are not responsible for any hardware damage, overheating, or battery degradation resulting from the intensive use of your device to host servers.
 
 7. Governing Law
 
-These Terms shall be governed by and construed in accordance with the laws of the European Union and applicable local laws, without regard to its conflict of law provisions.
+These Terms shall be governed by and construed in accordance with the laws of the Federal Republic of Germany.
 
 8. Changes to Terms
 
 We reserve the right to modify these Terms of Service at any time. Continued use of the app after any such changes shall constitute your consent to such changes.
+
+9. Impressum (Legal Notice)
+
+Responsible for the content of this application and website:
+Karol Brzostowski
+Deutschland Fixberg 17, 33106 Paderborn-Wewer
+Email: support@host.kodanetwork.eu

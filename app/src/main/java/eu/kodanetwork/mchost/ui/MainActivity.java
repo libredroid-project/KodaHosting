@@ -204,13 +204,13 @@ public class MainActivity extends AppCompatActivity {
 
     private void checkToS() {
         android.content.SharedPreferences prefs = eu.kodanetwork.mchost.App.getPrefs(this);
-        if (!prefs.getBoolean("tos_accepted", false)) {
+        if (!prefs.getBoolean("tos_accepted_v2", false)) {
             android.app.Dialog dialog = new android.app.Dialog(this, android.R.style.Theme_Black_NoTitleBar_Fullscreen);
             dialog.setContentView(R.layout.dialog_tos);
             dialog.setCancelable(false);
 
             dialog.findViewById(R.id.btn_accept_tos).setOnClickListener(v -> {
-                prefs.edit().putBoolean("tos_accepted", true).apply();
+                prefs.edit().putBoolean("tos_accepted_v2", true).apply();
                 dialog.dismiss();
             });
 
@@ -222,11 +222,12 @@ public class MainActivity extends AppCompatActivity {
             TextView tvTosContent = dialog.findViewById(R.id.tv_tos_content);
             String tosHtml = "<b>Terms of Service</b><br><br>" +
                 "<font color='#888899'>Last Updated: June 2026</font><br><br>" +
-                "By downloading, installing, or using the KodaHosting mobile application and related services, you agree to comply with and be bound by these Terms of Service. If you do not agree to these Terms, you must uninstall the app and cease using our services immediately.<br><br>" +
+                "By downloading, installing, or using the KodaHosting mobile application, the Web Dashboard, and related services, you agree to comply with and be bound by these Terms of Service. If you do not agree to these Terms, you must uninstall the app and cease using our services immediately.<br><br>" +
                 "<b>Eligibility & Age Requirements</b><br>" +
                 "You must be at least 13 years old (or 16 in certain EU jurisdictions) to use this Service. By agreeing to these Terms, you represent and warrant that you meet these age requirements.<br><br>" +
-                "<b>1. Service Overview</b><br>" +
-                "KodaHosting provides a mobile environment and networking infrastructure that allows you to host Minecraft servers directly from your Android device. We provide the networking tunnels to proxy incoming player connections securely to your device.<br><br>" +
+                "<b>1. Service Overview & Refunds</b><br>" +
+                "KodaHosting provides a mobile environment and networking infrastructure that allows you to host Minecraft servers directly from your Android device. We provide the networking tunnels to proxy incoming player connections securely to your device. Not an official Minecraft product. Not approved by or associated with Mojang or Microsoft. Users are required to comply with the official Minecraft EULA when operating servers.<br><br>" +
+                "<b>Refunds:</b> KodaHosting is a one-time purchase. Refunds are handled in accordance with the standard refund policies of the Google Play Store.<br><br>" +
                 "<b>2. Acceptable Use Policy</b><br>" +
                 "You agree to use KodaHosting solely for its intended purpose: hosting personal game servers. You are entirely responsible for the content, worlds, and plugins loaded onto your servers.<br><br>" +
                 "<font color='#FF4444'><b>Strict Prohibitions</b></font><br>" +
@@ -239,13 +240,19 @@ public class MainActivity extends AppCompatActivity {
                 "<b>4. Account Termination</b><br>" +
                 "We reserve the right to suspend or terminate your account and access to the KodaHosting proxy infrastructure at any time, for any reason, particularly if you violate the Acceptable Use Policy.<br><br>" +
                 "<b>5. Disclaimer of Warranties</b><br>" +
-                "THE SERVICE IS PROVIDED ON AN \"AS IS\" AND \"AS AVAILABLE\" BASIS. WE EXPRESSLY DISCLAIM ALL WARRANTIES OF ANY KIND, WHETHER EXPRESS OR IMPLIED. We do not guarantee that the service will be uninterrupted, secure, or error-free, nor do we guarantee the safety of your device data.<br><br>" +
+                "THE SERVICE IS PROVIDED ON AN \"AS IS\" AND \"AS AVAILABLE\" BASIS. WE EXPRESSLY DISCLAIM ALL WARRANTIES OF ANY KIND, WHETHER EXPRESS OR IMPLIED, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NON-INFRINGEMENT. We do not guarantee that the service will be uninterrupted, secure, or error-free, nor do we guarantee the safety of your device data.<br><br>" +
                 "<b>6. Limitation of Liability</b><br>" +
-                "TO THE MAXIMUM EXTENT PERMITTED BY LAW, KODAHOSTING SHALL NOT BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES, OR ANY LOSS OF DATA (INCLUDING SERVER WORLDS OR CONFIGURATIONS), RESULTING FROM YOUR USE OF THE APP.<br><br>" +
+                "Except in cases of intentional misconduct or gross negligence, KodaHosting shall not be liable for any indirect, incidental, special, consequential, or punitive damages, or any loss of profits or revenues, whether incurred directly or indirectly, or any loss of data, use, goodwill, or other intangible losses, resulting from your use of the App.<br><br>" +
+                "Furthermore, we are not responsible for any hardware damage, overheating, or battery degradation resulting from the intensive use of your device to host servers.<br><br>" +
                 "<b>7. Governing Law</b><br>" +
-                "These Terms shall be governed by and construed in accordance with the laws of the European Union and applicable local laws.<br><br>" +
+                "These Terms shall be governed by and construed in accordance with the laws of the Federal Republic of Germany.<br><br>" +
                 "<b>8. Changes to Terms</b><br>" +
-                "We reserve the right to modify these Terms of Service at any time. Continued use of the app after any such changes shall constitute your consent to such changes.";
+                "We reserve the right to modify these Terms of Service at any time. Continued use of the app after any such changes shall constitute your consent to such changes.<br><br>" +
+                "<b>9. Impressum (Legal Notice)</b><br>" +
+                "Responsible for the content of this application and website:<br>" +
+                "Karol Brzostowski<br>" +
+                "Deutschland Fixberg 17, 33106 Paderborn-Wewer<br>" +
+                "Email: support@host.kodanetwork.eu";
             tvTosContent.setText(android.text.Html.fromHtml(tosHtml, android.text.Html.FROM_HTML_MODE_LEGACY));
 
             eu.kodanetwork.mchost.util.HapticUtil.forceVibrate(this, 200);

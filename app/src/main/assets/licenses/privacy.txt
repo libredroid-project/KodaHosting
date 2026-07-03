@@ -2,9 +2,14 @@ Privacy Policy
 
 Last Updated: June 2026
 
-1. Introduction
+1. Introduction & Data Controller
 
 Welcome to KodaHosting. We respect your privacy and are committed to protecting any information that may be processed while you use our mobile application and the accompanying Web Dashboard. This Privacy Policy explains what information we collect, how we use it, and your rights regarding your data.
+
+The Data Controller responsible for your personal information is:
+Karol Brzostowski
+Deutschland Fixberg 17, 33106 Paderborn-Wewer
+Email: support@host.kodanetwork.eu
 
 2. Information We Collect & Process
 
@@ -29,6 +34,8 @@ KodaHosting processes certain data to function correctly:
 The App utilizes certain third-party services that may collect information used to identify you or provide core functionalities:
 
 - Google Play Services: For app distribution, crash reporting, and standard analytics.
+
+- Google Play Billing: Used to process your one-time purchase of the KodaHosting app securely.
 
 - Modrinth API / Spigot: To search and download server plugins directly within the app.
 
@@ -60,6 +67,6 @@ Our services are not directed to individuals under the age of 13 (or 16 in certa
 
 We may update our Privacy Policy from time to time. We will notify you of any changes by posting the new Privacy Policy on this page. You are advised to review this Privacy Policy periodically for any changes.
 
-6. Contact Us
+8. Contact Us
 
 If you have any questions or suggestions about our Privacy Policy, do not hesitate to contact us at the support email provided in the Google Play Store listing.
