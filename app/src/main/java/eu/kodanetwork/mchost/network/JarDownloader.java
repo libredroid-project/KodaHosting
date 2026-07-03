@@ -98,36 +98,25 @@ public class JarDownloader {
     }
 
     private String paper(String ver, Cb cb) throws Exception {
-        String j = fetch("https://api.papermc.io/v2/projects/paper/versions/"+ver);
-        org.json.JSONObject obj = new org.json.JSONObject(j);
-        org.json.JSONArray builds = obj.getJSONArray("builds");
-        if (builds.length() == 0) throw new Exception(context.getString(R.string.dl_error_no_builds, "Paper", ver));
-        int build = builds.getInt(builds.length() - 1);
-        post(cb,4,context.getString(R.string.dl_found_build, "Paper", String.valueOf(build)));
-        return "https://api.papermc.io/v2/projects/paper/versions/"+ver+"/builds/"+build+
-               "/downloads/paper-"+ver+"-"+build+".jar";
+        return fetchPaperMcApiV3("paper", ver, cb);
     }
 
     private String folia(String ver, Cb cb) throws Exception {
-        String j = fetch("https://api.papermc.io/v2/projects/folia/versions/"+ver);
-        org.json.JSONObject obj = new org.json.JSONObject(j);
-        org.json.JSONArray builds = obj.getJSONArray("builds");
-        if (builds.length() == 0) throw new Exception(context.getString(R.string.dl_error_no_builds, "Folia", ver));
-        int build = builds.getInt(builds.length() - 1);
-        post(cb,4,context.getString(R.string.dl_found_build, "Folia", String.valueOf(build)));
-        return "https://api.papermc.io/v2/projects/folia/versions/"+ver+"/builds/"+build+
-               "/downloads/folia-"+ver+"-"+build+".jar";
+        return fetchPaperMcApiV3("folia", ver, cb);
     }
 
     private String velocity(String ver, Cb cb) throws Exception {
-        String j = fetch("https://api.papermc.io/v2/projects/velocity/versions/"+ver);
-        org.json.JSONObject obj = new org.json.JSONObject(j);
-        org.json.JSONArray builds = obj.getJSONArray("builds");
-        if (builds.length() == 0) throw new Exception(context.getString(R.string.dl_error_no_builds, "Velocity", ver));
-        int build = builds.getInt(builds.length() - 1);
-        post(cb,4,context.getString(R.string.dl_found_build, "Velocity", String.valueOf(build)));
-        return "https://api.papermc.io/v2/projects/velocity/versions/"+ver+"/builds/"+build+
-               "/downloads/velocity-"+ver+"-"+build+".jar";
+        return fetchPaperMcApiV3("velocity", ver, cb);
+    }
+
+    private String fetchPaperMcApiV3(String project, String ver, Cb cb) throws Exception {
+        String j = fetch("https://fill.papermc.io/v3/projects/" + project + "/versions/" + ver + "/builds");
+        org.json.JSONArray builds = new org.json.JSONArray(j);
+        if (builds.length() == 0) throw new Exception(context.getString(R.string.dl_error_no_builds, project, ver));
+        org.json.JSONObject latestBuildObj = builds.getJSONObject(0);
+        int build = latestBuildObj.getInt("id");
+        post(cb, 4, context.getString(R.string.dl_found_build, project, String.valueOf(build)));
+        return latestBuildObj.getJSONObject("downloads").getJSONObject("server:default").getString("url");
     }
 
     private String forge(String mcVer, Cb cb) throws Exception {

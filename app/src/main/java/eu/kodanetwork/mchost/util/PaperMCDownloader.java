@@ -13,7 +13,7 @@ import java.net.URL;
 
 public class PaperMCDownloader {
     private static final String TAG = "PaperMCDownloader";
-    private static final String API_BASE_URL = "https://api.papermc.io/v2/projects/paper";
+    private static final String API_BASE_URL = "https://fill.papermc.io/v3/projects/paper";
 
     public interface DownloadCallback {
         void onProgress(String message);
@@ -27,21 +27,21 @@ public class PaperMCDownloader {
                 callback.onProgress("Prüfe aktuelle PaperMC Version für " + version + "...");
                 
                 // 1. Get latest build for the version
-                String buildsUrl = API_BASE_URL + "/versions/" + version;
+                String buildsUrl = API_BASE_URL + "/versions/" + version + "/builds";
                 String buildsJson = fetchJson(buildsUrl);
                 if (buildsJson == null) {
                     callback.onError("Fehler beim Abrufen der Builds für Version " + version);
                     return;
                 }
 
-                JSONObject buildsObj = new JSONObject(buildsJson);
-                JSONArray buildsArray = buildsObj.getJSONArray("builds");
+                JSONArray buildsArray = new JSONArray(buildsJson);
                 if (buildsArray.length() == 0) {
                     callback.onError("Keine Builds gefunden für " + version);
                     return;
                 }
                 
-                int latestBuild = buildsArray.getInt(buildsArray.length() - 1);
+                JSONObject latestBuildObj = buildsArray.getJSONObject(0);
+                int latestBuild = latestBuildObj.getInt("id");
                 
                 String jarFileName = "paper-" + version + "-" + latestBuild + ".jar";
                 File targetJar = new File(serverDir, jarFileName);
@@ -62,7 +62,7 @@ public class PaperMCDownloader {
 
                 // 2. Download the jar
                 callback.onProgress("Lade PaperMC Build " + latestBuild + " herunter...");
-                String downloadUrl = buildsUrl + "/builds/" + latestBuild + "/downloads/" + jarFileName;
+                String downloadUrl = latestBuildObj.getJSONObject("downloads").getJSONObject("server:default").getString("url");
                 
                 HttpURLConnection conn = (HttpURLConnection) new URL(downloadUrl).openConnection();
                 conn.setInstanceFollowRedirects(true);

@@ -1,79 +1,104 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="match_parent" android:layout_height="wrap_content"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="#D9121212"> <!-- Slightly transparent background (85% opacity) -->
+    android:background="#A6000000"
+    android:gravity="center"
+    android:padding="32dp">
 
     <LinearLayout
-        android:layout_width="match_parent" android:layout_height="wrap_content"
-        android:orientation="vertical" android:padding="32dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
         android:layout_margin="32dp"
-        android:background="@drawable/bg_dialog_custom">
+        android:background="@drawable/bg_dialog_custom"
+        android:padding="32dp"
+        android:gravity="center">
 
-    <TextView
-        android:id="@+id/tv_dialog_title"
-        android:layout_width="match_parent" android:layout_height="wrap_content"
-        android:text="P.R.A.E.T.O.R. ACCOUNT"
-        android:textColor="#FFFFFF"
-        android:textSize="22sp" android:textStyle="bold"
-        android:gravity="center" android:letterSpacing="0.1"/>
+        <!-- Title -->
+        <TextView
+            android:id="@+id/tv_dialog_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/praetor_title"
+            android:textColor="#FF3333"
+            android:textSize="36sp"
+            android:textStyle="bold"
+            android:letterSpacing="0.1"
+            android:gravity="center" />
 
-    <TextView
-        android:id="@+id/tv_dialog_subtitle"
-        android:layout_width="match_parent" android:layout_height="wrap_content"
-        android:text="ACCOUNT MANAGEMENT"
-        android:textColor="#8A8A9A" android:textSize="10sp" android:textStyle="bold"
-        android:gravity="center" android:letterSpacing="0.05"
-        android:layout_marginTop="8dp"/>
+        <!-- Subtitle -->
+        <TextView
+            android:id="@+id/tv_dialog_subtitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="ACCOUNT MANAGEMENT"
+            android:textColor="#8A8A9A"
+            android:textSize="10sp"
+            android:textStyle="bold"
+            android:letterSpacing="0.05"
+            android:gravity="center"
+            android:layout_marginTop="8dp" />
 
-    <View
-        android:layout_width="40dp" android:layout_height="2dp"
-        android:background="#FF6B00" android:layout_gravity="center_horizontal"
-        android:layout_marginTop="20dp" android:layout_marginBottom="20dp"/>
+        <View
+            android:layout_width="40dp"
+            android:layout_height="2dp"
+            android:background="#FF6B00"
+            android:layout_marginTop="24dp"
+            android:layout_marginBottom="24dp" />
 
-    <TextView
-        android:id="@+id/tv_account_email"
-        android:layout_width="match_parent" android:layout_height="wrap_content"
-        android:text="example@email.com"
-        android:textColor="#F0F0F0" android:textSize="14sp"
-        android:gravity="center" android:layout_marginBottom="32dp"/>
+        <TextView
+            android:id="@+id/tv_account_email"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="example@email.com"
+            android:textColor="#F0F0F0"
+            android:textSize="14sp"
+            android:gravity="center"
+            android:layout_marginBottom="32dp" />
 
-    <LinearLayout
-        android:layout_width="match_parent" android:layout_height="wrap_content"
-        android:orientation="vertical">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btn_dialog_change_password"
-            android:layout_width="match_parent" android:layout_height="56dp"
-            android:text="Passwort ändern"
-            android:textColor="#FFFFFF" android:textSize="14sp" android:textStyle="bold"
-            app:cornerRadius="12dp" app:backgroundTint="#FF6B00"
-            android:stateListAnimator="@null" android:layout_marginBottom="8dp"/>
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_dialog_change_password"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                style="@style/KodaButton"
+                android:text="Passwort ändern"
+                android:stateListAnimator="@null"
+                android:layout_marginBottom="8dp" />
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btn_dialog_delete_account"
-            android:layout_width="match_parent" android:layout_height="56dp"
-            android:text="Account löschen"
-            android:textColor="#FFFFFF" android:textSize="14sp" android:textStyle="bold"
-            app:cornerRadius="12dp" app:backgroundTint="#881111"
-            android:stateListAnimator="@null" android:layout_marginBottom="8dp"/>
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_dialog_delete_account"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                style="@style/KodaButton.Danger"
+                android:text="Account löschen"
+                android:stateListAnimator="@null"
+                android:layout_marginBottom="8dp" />
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btn_dialog_logout"
-            android:layout_width="match_parent" android:layout_height="56dp"
-            android:text="Abmelden"
-            android:textColor="#FF4444" android:textSize="14sp" android:textStyle="bold"
-            app:cornerRadius="12dp" app:backgroundTint="#222233"
-            android:stateListAnimator="@null" android:layout_marginBottom="16dp"/>
-            
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btn_dialog_cancel"
-            android:layout_width="match_parent" android:layout_height="56dp"
-            android:text="Abbrechen"
-            android:textColor="#888899" android:textSize="14sp" android:textStyle="bold"
-            app:cornerRadius="12dp" app:backgroundTint="#00000000"
-            android:stateListAnimator="@null"/>
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_dialog_logout"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                style="@style/KodaButton.Danger"
+                app:backgroundTint="#222233"
+                android:text="Abmelden"
+                android:stateListAnimator="@null"
+                android:layout_marginBottom="8dp" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_dialog_cancel"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                style="@style/KodaButton.Outline"
+                android:text="Abbrechen"
+                android:stateListAnimator="@null" />
         </LinearLayout>
     </LinearLayout>
 </LinearLayout>
