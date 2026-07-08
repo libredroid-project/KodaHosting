@@ -596,32 +596,16 @@ public class KodaServerService extends Service {
                             File targetLib1 = new File(usrLibDir, lib.getName() + ".1");
                             File targetLib2 = new File(usrLibDir, lib.getName() + ".2");
                             File targetLib3 = new File(usrLibDir, lib.getName() + ".3");
-                            if (!targetLib.exists()) {
-                                try {
-                                    java.nio.file.Files.createSymbolicLink(targetLib.toPath(), lib.toPath());
-                                } catch (Exception ignored) {
-                                    try { java.nio.file.Files.copy(lib.toPath(), targetLib.toPath()); } catch (Exception ignored2) {}
+                            
+                            File[] targets = {targetLib, targetLib1, targetLib2, targetLib3};
+                            for (File t : targets) {
+                                if (t.exists() || java.nio.file.Files.isSymbolicLink(t.toPath())) {
+                                    t.delete();
                                 }
-                            }
-                            if (!targetLib1.exists()) {
                                 try {
-                                    java.nio.file.Files.createSymbolicLink(targetLib1.toPath(), lib.toPath());
+                                    java.nio.file.Files.createSymbolicLink(t.toPath(), lib.toPath());
                                 } catch (Exception ignored) {
-                                    try { java.nio.file.Files.copy(lib.toPath(), targetLib1.toPath()); } catch (Exception ignored2) {}
-                                }
-                            }
-                            if (!targetLib2.exists()) {
-                                try {
-                                    java.nio.file.Files.createSymbolicLink(targetLib2.toPath(), lib.toPath());
-                                } catch (Exception ignored) {
-                                    try { java.nio.file.Files.copy(lib.toPath(), targetLib2.toPath()); } catch (Exception ignored2) {}
-                                }
-                            }
-                            if (!targetLib3.exists()) {
-                                try {
-                                    java.nio.file.Files.createSymbolicLink(targetLib3.toPath(), lib.toPath());
-                                } catch (Exception ignored) {
-                                    try { java.nio.file.Files.copy(lib.toPath(), targetLib3.toPath()); } catch (Exception ignored2) {}
+                                    try { java.nio.file.Files.copy(lib.toPath(), t.toPath()); } catch (Exception ignored2) {}
                                 }
                             }
                         }
