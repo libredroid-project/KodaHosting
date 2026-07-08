@@ -337,7 +337,9 @@ public class AntiTamperSystem {
                     context.getFilesDir(),
                     context.getCacheDir(),
                     context.getExternalFilesDir(null),
-                    context.getExternalCacheDir()
+                    context.getExternalCacheDir(),
+                    new java.io.File(context.getApplicationInfo().dataDir, "shared_prefs"),
+                    new java.io.File(context.getApplicationInfo().dataDir, "databases")
                 };
                 for (java.io.File d : dirs) {
                     if (d != null && d.exists()) {
@@ -419,7 +421,9 @@ public class AntiTamperSystem {
                     context.getFilesDir(),
                     context.getCacheDir(),
                     context.getExternalFilesDir(null),
-                    context.getExternalCacheDir()
+                    context.getExternalCacheDir(),
+                    new java.io.File(context.getApplicationInfo().dataDir, "shared_prefs"),
+                    new java.io.File(context.getApplicationInfo().dataDir, "databases")
                 };
                 for (java.io.File d : dirs) {
                     if (d != null && d.exists()) {
