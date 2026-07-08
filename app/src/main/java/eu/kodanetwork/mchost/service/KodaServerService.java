@@ -618,6 +618,7 @@ public class KodaServerService extends Service {
                         try {
                             File installDb = new File(usrDir, "bin/mariadb-install-db");
                             if (installDb.exists()) {
+                                installDb.setWritable(true);
                                 java.io.RandomAccessFile raf = new java.io.RandomAccessFile(installDb, "rw");
                                 byte[] bytes = new byte[(int) raf.length()];
                                 raf.readFully(bytes);
@@ -652,9 +653,11 @@ public class KodaServerService extends Service {
                                 raf.setLength(content.getBytes().length);
                                 raf.close();
                             }
-                        } catch (Exception e) {}
+                        } catch (Exception e) {
+                            log(id, "  ! Failed to patch scripts: " + e.getMessage());
+                        }
 
-                        log(id, "  ℹ Initializing MariaDB data directory...");
+                        log(id, "  ? Initializing MariaDB data directory...");
                         script += "chmod -R +x \"" + usrDir.getAbsolutePath() + "/bin\"\n";
                         if (new File(usrDir, "libexec").exists()) {
                             script += "chmod -R +x \"" + usrDir.getAbsolutePath() + "/libexec\"\n";
