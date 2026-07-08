@@ -11,7 +11,7 @@ You must be at least 13 years old (or 16 in certain EU jurisdictions) to use thi
 
 KodaHosting provides a mobile environment and networking infrastructure that allows you to host Minecraft servers directly from your Android device. We provide the networking tunnels to proxy incoming player connections securely to your device. Not an official Minecraft product. Not approved by or associated with Mojang or Microsoft. Users are required to comply with the official Minecraft EULA when operating servers.
 
-Refunds: KodaHosting is a one-time purchase. Refunds are handled in accordance with the standard refund policies of the Google Play Store.
+Refunds & Right of Withdrawal (Widerrufsrecht): KodaHosting is a one-time purchase. For users residing in the European Economic Area (EEA), you generally have a statutory right of withdrawal within 14 days without giving any reason. Since this application is purchased and distributed exclusively via the Google Play Store, your withdrawal rights and refunds are handled entirely in accordance with the standard refund policies and processes of the Google Play Store.
 
 2. Acceptable Use Policy
 
@@ -55,6 +55,7 @@ We reserve the right to modify these Terms of Service at any time. Continued use
 
 9. Impressum (Legal Notice)
 
+Information in accordance with § 5 DDG (Digitale-Dienste-Gesetz):
 Responsible for the content of this application and website:
 Karol Brzostowski
 Deutschland Fixberg 17, 33106 Paderborn-Wewer

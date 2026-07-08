@@ -27,7 +27,7 @@ KodaHosting processes certain data to function correctly:
 
 - IP Privacy: Your personal home IP address is never leaked. All multiplayer traffic is routed through our central VPS infrastructure. Players connecting to your server will only ever see the IP address of our secure proxy.
 
-- AI Server Builder: If you use the AI Server Builder, your text prompts are sent to the Google Gemini API for processing to generate server configurations. Do not submit sensitive personal information in these prompts.
+- AI Server Builder: If you use the AI Server Builder, your text prompts are sent to the Google Gemini API for processing to generate server configurations. Do not submit sensitive personal information in these prompts. Data transferred outside the European Economic Area (EEA) to Google LLC is safeguarded under the EU-U.S. Data Privacy Framework (DPF) and Standard Contractual Clauses.
 
 3. Third-Party Services
 
@@ -69,4 +69,5 @@ We may update our Privacy Policy from time to time. We will notify you of any ch
 
 8. Contact Us
 
-If you have any questions or suggestions about our Privacy Policy, do not hesitate to contact us at the support email provided in the Google Play Store listing.
+If you have any questions or suggestions about our Privacy Policy, do not hesitate to contact us at:
+Email: support@host.kodanetwork.eu
