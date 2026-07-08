@@ -623,6 +623,7 @@ public class KodaServerService extends Service {
                                 raf.readFully(bytes);
                                 String content = new String(bytes);
                                 content = content.replace("$dirname0//data/data/com.termux/files/usr", "$basedir");
+                                content = content.replace("$basedir//data/data/com.termux/files/usr", "$basedir");
                                 content = content.replace("$dirname0/" + usrDir.getAbsolutePath(), "$basedir");
                                 content = content.replace("$dirname0//" + usrDir.getAbsolutePath(), "$basedir");
                                 content = content.replace("/data/data/com.termux/files/usr", usrDir.getAbsolutePath());

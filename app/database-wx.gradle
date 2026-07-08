@@ -59,6 +59,29 @@ task extractAndRenameDB {
         processDir(new File(dbExtractDir, "usr/sbin"), false)
         processDir(new File(dbExtractDir, "usr/lib"), true)
         processDir(new File(dbExtractDir, "usr/lib/mysql/plugin"), true)
+
+        // Copy required Termux base libraries from bundle_libs and bootstrap_ext
+        def copyLibFile = { File f ->
+            if (f.isFile() && f.name.contains(".so")) {
+                def newName = f.name
+                if (newName.contains(".so.")) {
+                    newName = newName.substring(0, newName.indexOf(".so")) + ".so"
+                }
+                Files.copy(f.toPath(), new File(jniTargetDir, newName).toPath(), StandardCopyOption.REPLACE_EXISTING)
+            }
+        }
+        
+        def bundleLibsDir = file("../bundle_libs")
+        if (bundleLibsDir.exists()) {
+            def files = bundleLibsDir.listFiles()
+            if (files != null) files.each { copyLibFile(it) }
+        }
+        
+        def bootstrapLibDir = file("../bootstrap_ext/lib")
+        if (bootstrapLibDir.exists()) {
+            def files = bootstrapLibDir.listFiles()
+            if (files != null) files.each { copyLibFile(it) }
+        }
     }
 }
 
