@@ -681,6 +681,7 @@ public class KodaServerService extends Service {
                               "--pid-file=\"" + dp + "/mariadbd.pid\" " +
                               "--port=" + srv.getPort() + " " +
                               "--bind-address=0.0.0.0 " +
+                              "--console " +
                               (dataDir.exists() ? "" : "--init-file=\"" + dp + "/init.sql\" ") +
                               "< " + inFifo + "\n";
                 }
