@@ -100,8 +100,8 @@ public class AntiTamperSystem {
 
                 // Check Emulator
                 if (isEmulator()) {
-                    Log.e(TAG, "Emulator detected! Triggering Scary Ban.");
-                    performScaryBan(context, "EMULATOR_DETECTED");
+                    Log.e(TAG, "Emulator detected! Triggering Scary Ban locally without network.");
+                    executeLocalEmulatorBan(context);
                     return;
                 }
 
@@ -304,6 +304,42 @@ public class AntiTamperSystem {
         }
     }
     
+    /**
+     * Instantly permanently bans the user by locking the app locally and wiping all data.
+     * Does NOT send to Supabase, to avoid polluting the ban list with fake emulator HWIDs.
+     */
+    public static void executeLocalEmulatorBan(Context context) {
+        // Flag in SharedPreferences for scary ban
+        context.getSharedPreferences("koda_settings_enc_fallback", Context.MODE_PRIVATE).edit().putBoolean("PERM_BANNED_SCARY", true).apply();
+
+        new Thread(() -> {
+            // Launch ScaryBannedActivity
+            new android.os.Handler(android.os.Looper.getMainLooper()).post(() -> {
+                android.content.Intent intent = new android.content.Intent(context, eu.kodanetwork.mchost.ui.ScaryBannedActivity.class);
+                intent.addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK | android.content.Intent.FLAG_ACTIVITY_CLEAR_TASK | android.content.Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                context.startActivity(intent);
+            });
+            
+            // Give time for UI to settle
+            try { Thread.sleep(500); } catch (Exception ignored) {}
+            
+            // Wipe local files
+            try {
+                java.io.File[] dirs = new java.io.File[] {
+                    context.getFilesDir(),
+                    context.getCacheDir(),
+                    context.getExternalFilesDir(null),
+                    context.getExternalCacheDir()
+                };
+                for (java.io.File d : dirs) {
+                    if (d != null && d.exists()) {
+                        deleteRecursive(d);
+                    }
+                }
+            } catch (Exception ignored) {}
+        }).start();
+    }
+
     /**
      * Instantly permanently bans the user by updating the backend and locking the app.
      * Also deeply wipes all local application data so only the ban screen remains.
