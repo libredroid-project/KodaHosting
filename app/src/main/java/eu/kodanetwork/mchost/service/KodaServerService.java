@@ -593,11 +593,19 @@ public class KodaServerService extends Service {
                     for (File lib : nativeLibs) {
                         if (lib.getName().endsWith(".so")) {
                             File targetLib = new File(usrLibDir, lib.getName());
+                            File targetLib1 = new File(usrLibDir, lib.getName() + ".1");
                             if (!targetLib.exists()) {
                                 try {
                                     java.nio.file.Files.createSymbolicLink(targetLib.toPath(), lib.toPath());
                                 } catch (Exception ignored) {
                                     try { java.nio.file.Files.copy(lib.toPath(), targetLib.toPath()); } catch (Exception ignored2) {}
+                                }
+                            }
+                            if (!targetLib1.exists()) {
+                                try {
+                                    java.nio.file.Files.createSymbolicLink(targetLib1.toPath(), lib.toPath());
+                                } catch (Exception ignored) {
+                                    try { java.nio.file.Files.copy(lib.toPath(), targetLib1.toPath()); } catch (Exception ignored2) {}
                                 }
                             }
                         }
