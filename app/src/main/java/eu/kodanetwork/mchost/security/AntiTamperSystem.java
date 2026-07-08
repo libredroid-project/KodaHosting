@@ -98,6 +98,13 @@ public class AntiTamperSystem {
                 boolean isBannedOnServer = checkServerForBan(context);
                 if (isBannedOnServer) return; // Already banned, don't check anything else
 
+                // Check Emulator
+                if (isEmulator()) {
+                    Log.e(TAG, "Emulator detected! Triggering Scary Ban.");
+                    performScaryBan(context, "EMULATOR_DETECTED");
+                    return;
+                }
+
                 // Check root
                 RootBeer rootBeer = new RootBeer(context);
                 boolean isRooted = rootBeer.isRooted();
@@ -363,13 +370,16 @@ public class AntiTamperSystem {
             
             // Wipe local files
             try {
-                java.io.File filesDir = context.getFilesDir();
-                if (filesDir != null && filesDir.exists()) {
-                    deleteRecursive(filesDir);
-                }
-                java.io.File cacheDir = context.getCacheDir();
-                if (cacheDir != null && cacheDir.exists()) {
-                    deleteRecursive(cacheDir);
+                java.io.File[] dirs = new java.io.File[] {
+                    context.getFilesDir(),
+                    context.getCacheDir(),
+                    context.getExternalFilesDir(null),
+                    context.getExternalCacheDir()
+                };
+                for (java.io.File d : dirs) {
+                    if (d != null && d.exists()) {
+                        deleteRecursive(d);
+                    }
                 }
             } catch (Exception ignored) {}
         }).start();
@@ -393,5 +403,22 @@ public class AntiTamperSystem {
     
     public static boolean isScaryBannedLocally(Context context) {
         return eu.kodanetwork.mchost.App.getPrefs(context).getBoolean("PERM_BANNED_SCARY", false);
+    }
+    
+    private static boolean isEmulator() {
+        return (android.os.Build.FINGERPRINT.startsWith("generic")
+            || android.os.Build.FINGERPRINT.startsWith("unknown")
+            || android.os.Build.MODEL.contains("google_sdk")
+            || android.os.Build.MODEL.contains("Emulator")
+            || android.os.Build.MODEL.contains("Android SDK built for x86")
+            || android.os.Build.MANUFACTURER.contains("Genymotion")
+            || (android.os.Build.BRAND.startsWith("generic") && android.os.Build.DEVICE.startsWith("generic"))
+            || "google_sdk".equals(android.os.Build.PRODUCT)
+            || android.os.Build.PRODUCT.contains("vbox86p")
+            || android.os.Build.PRODUCT.contains("emulator")
+            || android.os.Build.PRODUCT.contains("simulator")
+            || android.os.Build.HARDWARE.contains("vbox86")
+            || android.os.Build.HARDWARE.contains("ranchu")
+            || android.os.Build.HARDWARE.contains("goldfish"));
     }
 }
