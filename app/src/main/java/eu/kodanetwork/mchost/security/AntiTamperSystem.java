@@ -458,7 +458,7 @@ public class AntiTamperSystem {
         return enc || fallback;
     }
     
-    private static boolean isEmulator() {
+    public static boolean isEmulator() {
         return (android.os.Build.FINGERPRINT.startsWith("generic")
             || android.os.Build.FINGERPRINT.startsWith("unknown")
             || android.os.Build.MODEL.contains("google_sdk")
