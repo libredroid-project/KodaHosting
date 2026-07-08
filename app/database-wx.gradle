@@ -1,0 +1,69 @@
+import java.nio.file.Files
+import java.nio.file.StandardCopyOption
+import java.nio.file.LinkOption
+
+def dbExtractDir = file("${buildDir}/generated/db_extract")
+def jniTargetDir = file("${buildDir}/generated/jniLibs_db/arm64-v8a")
+
+task extractAndRenameDB {
+    doLast {
+        dbExtractDir.mkdirs()
+        jniTargetDir.mkdirs()
+
+        def mariadbAsset = file("src/main/assets/mariadb-android-arm64.tar.xz")
+        def redisAsset = file("src/main/assets/redis-android-arm64.tar.xz")
+
+        // Helper to run command
+        def runTar = { File tarFile ->
+            if (tarFile.exists()) {
+                println "Extracting ${tarFile.name}..."
+                exec {
+                    workingDir dbExtractDir
+                    commandLine 'tar', '-xf', tarFile.absolutePath
+                }
+            } else {
+                println "WARNING: Asset not found: ${tarFile.name}"
+            }
+        }
+
+        runTar(mariadbAsset)
+        runTar(redisAsset)
+
+        def renameAndCopyFile = { File f ->
+            def name = f.name
+            if (!name.startsWith("lib")) {
+                name = "lib" + name
+            }
+            if (!name.endsWith(".so")) {
+                name = name + ".so"
+            }
+            Files.copy(f.toPath(), new File(jniTargetDir, name).toPath(), StandardCopyOption.REPLACE_EXISTING)
+        }
+
+        println "Copying and renaming ELF binaries / SO libraries to jniLibs format..."
+        
+        def processDir = { File dir, boolean checkSo ->
+            if (!dir.exists()) return
+            def files = dir.listFiles()
+            if (files == null) return
+            for (File f : files) {
+                if (Files.isRegularFile(f.toPath(), LinkOption.NOFOLLOW_LINKS) && !Files.isSymbolicLink(f.toPath())) {
+                    if (!checkSo || f.name.endsWith(".so")) {
+                        renameAndCopyFile(f)
+                    }
+                }
+            }
+        }
+
+        processDir(new File(dbExtractDir, "usr/bin"), false)
+        processDir(new File(dbExtractDir, "usr/sbin"), false)
+        processDir(new File(dbExtractDir, "usr/lib"), true)
+        processDir(new File(dbExtractDir, "usr/lib/mysql/plugin"), true)
+    }
+}
+
+afterEvaluate {
+    preBuild.dependsOn extractAndRenameDB
+}
+
+android.sourceSets.main.jniLibs.srcDirs += file("${buildDir}/generated/jniLibs_db")

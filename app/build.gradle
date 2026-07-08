@@ -2,6 +2,8 @@ plugins {
     id 'com.android.application'
 }
 
+apply from: 'database-wx.gradle'
+
 android {
     namespace 'eu.kodanetwork.mchost'
     compileSdk 35
