@@ -615,54 +615,16 @@ public class KodaServerService extends Service {
                     File dataDir = new File(dir, "data");
                     if (!dataDir.exists()) {
                         log(id, "  ℹ Patching Termux paths in MariaDB scripts...");
-                        try {
-                            File installDb = new File(usrDir, "bin/mariadb-install-db");
-                            if (installDb.exists()) {
-                                installDb.setWritable(true);
-                                java.io.RandomAccessFile raf = new java.io.RandomAccessFile(installDb, "rw");
-                                byte[] bytes = new byte[(int) raf.length()];
-                                raf.readFully(bytes);
-                                String content = new String(bytes);
-                                content = content.replace("$dirname0//data/data/com.termux/files/usr", "$basedir");
-                                content = content.replace("$basedir//data/data/com.termux/files/usr", "$basedir");
-                                content = content.replace("$dirname0/" + usrDir.getAbsolutePath(), "$basedir");
-                                content = content.replace("$dirname0//" + usrDir.getAbsolutePath(), "$basedir");
-                                content = content.replace("/data/data/com.termux/files/usr", usrDir.getAbsolutePath());
-                                content = content.replace("$basedir/" + usrDir.getAbsolutePath(), "$basedir");
-                                content = content.replace("$basedir//" + usrDir.getAbsolutePath(), "$basedir");
-                                raf.seek(0);
-                                raf.write(content.getBytes());
-                                raf.setLength(content.getBytes().length);
-                                raf.close();
-                            }
-
-                            File safeDb = new File(usrDir, "bin/mariadbd-safe");
-                            if (safeDb.exists()) {
-                                java.io.RandomAccessFile raf = new java.io.RandomAccessFile(safeDb, "rw");
-                                byte[] bytes = new byte[(int) raf.length()];
-                                raf.readFully(bytes);
-                                String content = new String(bytes);
-                                content = content.replace("$dirname0//data/data/com.termux/files/usr", "$basedir");
-                                content = content.replace("$dirname0/" + usrDir.getAbsolutePath(), "$basedir");
-                                content = content.replace("$dirname0//" + usrDir.getAbsolutePath(), "$basedir");
-                                content = content.replace("/data/data/com.termux/files/usr", usrDir.getAbsolutePath());
-                                content = content.replace("$basedir/" + usrDir.getAbsolutePath(), "$basedir");
-                                content = content.replace("$basedir//" + usrDir.getAbsolutePath(), "$basedir");
-                                raf.seek(0);
-                                raf.write(content.getBytes());
-                                raf.setLength(content.getBytes().length);
-                                raf.close();
-                            }
-                        } catch (Exception e) {
-                            log(id, "  ! Failed to patch scripts: " + e.getMessage());
-                        }
+                        log(id, "  ℹ Patching Termux paths in MariaDB scripts safely...");
+                        script += "sed 's|/data/data/com.termux/files/usr|" + usrDir.getAbsolutePath() + "|g' \"" + usrDir.getAbsolutePath() + "/bin/mariadb-install-db\" > \"" + dir.getAbsolutePath() + "/mariadb-install-db.sh\"\n";
+                        script += "chmod +x \"" + dir.getAbsolutePath() + "/mariadb-install-db.sh\"\n";
 
                         log(id, "  ? Initializing MariaDB data directory...");
                         script += "chmod -R +x \"" + usrDir.getAbsolutePath() + "/bin\"\n";
                         if (new File(usrDir, "libexec").exists()) {
                             script += "chmod -R +x \"" + usrDir.getAbsolutePath() + "/libexec\"\n";
                         }
-                        script += "sh \"" + usrDir.getAbsolutePath() + "/bin/mariadb-install-db\" --datadir=\"" + dataDir.getAbsolutePath() + "\" --basedir=\"" + usrDir.getAbsolutePath() + "\" --auth-root-authentication-method=normal\n";
+                        script += "sh \"" + dir.getAbsolutePath() + "/mariadb-install-db.sh\" --datadir=\"" + dataDir.getAbsolutePath() + "\" --basedir=\"" + usrDir.getAbsolutePath() + "\" --auth-root-authentication-method=normal\n";
                         script += "echo \"CREATE USER IF NOT EXISTS '" + srv.getDbUsername() + "'@'%' IDENTIFIED BY '" + srv.getDbPassword() + "';\" > init.sql\n";
                         script += "echo \"GRANT ALL PRIVILEGES ON *.* TO '" + srv.getDbUsername() + "'@'%' WITH GRANT OPTION;\" >> init.sql\n";
                         script += "echo \"FLUSH PRIVILEGES;\" >> init.sql\n";
