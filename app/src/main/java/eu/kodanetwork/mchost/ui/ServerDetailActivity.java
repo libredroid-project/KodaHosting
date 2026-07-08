@@ -86,7 +86,6 @@ public class ServerDetailActivity extends AppCompatActivity {
     // Settings
     private TextView tvSettingsInfo;
     private TextView tvTermuxStatus, tvTunnelStatus, tvDomainStatus;
-    private EditText etDomainPrefix;
     private MaterialButton btnDlJar, btnDelServer;
     private MaterialButton btnTermuxSetup, btnStartTunnel, btnLinkDomain;
     private final ExecutorService io = Executors.newSingleThreadExecutor();
@@ -174,8 +173,12 @@ public class ServerDetailActivity extends AppCompatActivity {
     };
 
     @Override
-    protected void onCreate(Bundle b) {
-        super.onCreate(b);
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        
+        // Prevent screenshots & screen recording
+        getWindow().setFlags(android.view.WindowManager.LayoutParams.FLAG_SECURE, android.view.WindowManager.LayoutParams.FLAG_SECURE);
+
         setContentView(R.layout.activity_server_detail);
         
         eu.kodanetwork.mchost.util.ThemeHelper.apply(this);
@@ -206,16 +209,29 @@ public class ServerDetailActivity extends AppCompatActivity {
             setupDatabaseOverrides();
         }
 
-        ((TextView) findViewById(R.id.tv_title)).setText(server.getName());
-        ImageButton btnBack = findViewById(R.id.btn_back);
+        TextView tvTitle = findViewById(R.id.tv_title);
+        tvTitle.setText(server.getName());
+        tvTitle.setClickable(true);
+        tvTitle.setFocusable(true);
+        android.util.TypedValue outValue = new android.util.TypedValue();
+        getTheme().resolveAttribute(android.R.attr.selectableItemBackground, outValue, true);
+        tvTitle.setBackgroundResource(outValue.resourceId);
+        tvTitle.setOnClickListener(v -> showNameEditDialog());
+        
+        android.widget.ImageButton btnBack = findViewById(R.id.btn_back);
         btnBack.setOnClickListener(v -> finish());
+        
+        android.view.View btnChangeName = findViewById(R.id.btn_change_name);
+        if (btnChangeName != null) {
+            btnChangeName.setOnClickListener(v -> showNameEditDialog());
+        }
 
         setupTabs();
         setupDashButtons();
         setupConsole();
         setupPlugins();
         setupSettings();
-
+        
         Intent si = new Intent(this, KodaServerService.class);
         if (Build.VERSION.SDK_INT >= 26) startForegroundService(si);
         else startService(si);
@@ -334,17 +350,34 @@ public class ServerDetailActivity extends AppCompatActivity {
         tvTermuxStatus = findViewById(R.id.tv_termux_status);
         tvTunnelStatus = findViewById(R.id.tv_tunnel_status);
         tvDomainStatus = findViewById(R.id.tv_domain_status);
-        etDomainPrefix = findViewById(R.id.et_domain_prefix);
         btnDlJar       = findViewById(R.id.btn_dl_jar);
         btnDelServer   = findViewById(R.id.btn_del_server);
         btnTermuxSetup = findViewById(R.id.btn_termux_setup);
         btnStartTunnel = findViewById(R.id.btn_start_tunnel);
         btnLinkDomain = findViewById(R.id.btn_link_domain);
+        
+        android.view.View btnCustomDnsWizard = findViewById(R.id.btn_custom_dns_wizard);
+        if (btnCustomDnsWizard != null) {
+            btnCustomDnsWizard.setOnClickListener(v -> {
+                android.content.Intent intent = new android.content.Intent(this, CustomDnsWizardActivity.class);
+                intent.putExtra("SERVER_ID", server.getId());
+                startActivity(intent);
+            });
+        }
+        
+        android.view.View btnSettingsUpdate = findViewById(R.id.btn_settings_update);
+        if (btnSettingsUpdate != null) {
+            btnSettingsUpdate.setOnClickListener(v -> {
+                android.content.Intent intent = new android.content.Intent(this, UpdateServerActivity.class);
+                intent.putExtra("SERVER_ID", server.getId());
+                startActivity(intent);
+            });
+        }
 
         // tv_custom_domain_target and btn_copy_domain no longer exist.
 
         // Static info
-        tvJoinAddr.setText(server.getJoinAddress());
+        updateJoinAddressDisplay();
         
         View layoutBedrockPort = findViewById(R.id.layout_bedrock_port);
         if (layoutBedrockPort != null && tvBedrockPortDash != null) {
@@ -805,6 +838,99 @@ public class ServerDetailActivity extends AppCompatActivity {
         dialog.show();
     }
 
+
+
+    private void startServer() {
+        if (!bound || svc == null) return;
+        
+        // Add start command
+        Intent i = new Intent(this, KodaServerService.class);
+        i.setAction(KodaServerService.ACTION_START);
+        i.putExtra(KodaServerService.EXTRA_ID, server.getId());
+        startService(i);
+        
+        // Show loading screen...
+        if (layoutFullLoading != null) {
+            layoutFullLoading.setVisibility(View.VISIBLE);
+        }
+    }
+    
+    private void checkForUpdatesAsync() {
+        android.widget.Button btnUpdate = findViewById(R.id.btn_settings_update);
+        if (btnUpdate == null) return;
+        
+        new Thread(() -> {
+            boolean hasUpdates = false;
+            
+            // Check Server Software
+            if (server.getType() == ServerInstance.Type.PAPER) {
+                try {
+                    String buildUrl = "https://api.papermc.io/v2/projects/paper/versions/" + server.getVersion() + "/builds";
+                    java.net.HttpURLConnection conn = (java.net.HttpURLConnection) new java.net.URL(buildUrl).openConnection();
+                    if (conn.getResponseCode() == 200) {
+                        java.io.InputStream is = conn.getInputStream();
+                        java.util.Scanner s = new java.util.Scanner(is).useDelimiter("\\A");
+                        String result = s.hasNext() ? s.next() : "";
+                        is.close();
+                        
+                        org.json.JSONObject res = new org.json.JSONObject(result);
+                        org.json.JSONArray builds = res.getJSONArray("builds");
+                        if (builds.length() > 0) {
+                            int latestBuildNum = builds.getJSONObject(builds.length() - 1).getInt("build");
+                            
+                            // Check local jar
+                            File serverJar = new File(server.getServerDir(), "paper-" + server.getVersion() + "-" + latestBuildNum + ".jar");
+                            if (!serverJar.exists()) {
+                                hasUpdates = true;
+                            }
+                        }
+                    }
+                } catch (Exception e) {}
+            }
+            
+            // Check Plugins
+            if (!hasUpdates) {
+                java.util.List<String> projectIds = new java.util.ArrayList<>(server.pluginVersions.keySet());
+                for (String pid : projectIds) {
+                    try {
+                        String latestVersionId = eu.kodanetwork.mchost.util.ModrinthHelper.getLatestVersionIdSync(pid, server);
+                        if (latestVersionId != null && !latestVersionId.equals(server.pluginVersions.get(pid))) {
+                            hasUpdates = true;
+                            break;
+                        }
+                    } catch (Exception e) {}
+                }
+            }
+            
+            if (hasUpdates) {
+                runOnUiThread(() -> {
+                    btnUpdate.setText("Updates Available!");
+                    btnUpdate.setTextColor(android.graphics.Color.parseColor("#00E676"));
+                    
+                    android.view.View btnDashUpdate = findViewById(R.id.btn_dashboard_update);
+                    if (btnDashUpdate != null) {
+                        btnDashUpdate.setVisibility(View.VISIBLE);
+                        btnDashUpdate.setOnClickListener(v -> {
+                            android.content.Intent intent = new android.content.Intent(ServerDetailActivity.this, UpdateServerActivity.class);
+                            intent.putExtra("SERVER_ID", server.getId());
+                            startActivity(intent);
+                        });
+                    }
+                });
+            } else {
+                runOnUiThread(() -> {
+                    btnUpdate.setText("Check for Updates");
+                    btnUpdate.setTextColor(eu.kodanetwork.mchost.util.ThemeHelper.isLightMode(this) ? 0xFF333333 : 0xFFDDDDDD);
+                    
+                    android.view.View btnDashUpdate = findViewById(R.id.btn_dashboard_update);
+                    if (btnDashUpdate != null) {
+                        btnDashUpdate.setVisibility(View.GONE);
+                    }
+                });
+            }
+        }).start();
+    }
+
     public static int MAX_GLOBAL_SERVERS = 250;
     private boolean isWaitingInQueue = false;
 
@@ -908,7 +1034,7 @@ public class ServerDetailActivity extends AppCompatActivity {
                     runOnUiThread(() -> {
                         tvTunnelStatus.setText("Tunnel: " + playitAddress);
                         tvDomainStatus.setText("Domain: " + domainLink);
-                        tvJoinAddr.setText(server.getJoinAddress());
+                        updateJoinAddressDisplay();
                     });
                 }
 
@@ -933,8 +1059,6 @@ public class ServerDetailActivity extends AppCompatActivity {
                 }
             });
             try {
-                String host = etDomainPrefix.getText() == null ? "" : etDomainPrefix.getText().toString().trim();
-                if (!host.isEmpty()) server.setSubdomain(host);
                 orchestrator.run(server, "");
             } catch (Exception e) {
                 runOnUiThread(() -> tvDomainStatus.setText("Domain error: " + e.getMessage()));
@@ -942,11 +1066,61 @@ public class ServerDetailActivity extends AppCompatActivity {
         });
     }
     private void sendAction(String action) {
+        if (server == null) return;
         android.content.Intent i = new android.content.Intent(this, eu.kodanetwork.mchost.service.KodaServerService.class);
         i.setAction(action);
         i.putExtra(eu.kodanetwork.mchost.service.KodaServerService.EXTRA_ID, server.getId());
         if (android.os.Build.VERSION.SDK_INT >= 26) startForegroundService(i);
         else startService(i);
+    }
+
+    private void handleDnsOccupied() {
+        android.app.Dialog dialog = new android.app.Dialog(this);
+        dialog.setContentView(R.layout.dialog_praetor_input);
+        dialog.getWindow().setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT));
+        dialog.getWindow().setLayout(android.view.ViewGroup.LayoutParams.MATCH_PARENT, android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
+        
+        String praetorHtml = "<font color=\"#555555\">P.R.</font><font color=\"#AAAAAA\">A</font><font color=\"#555555\">.</font><font color=\"#AAAAAA\">E</font><font color=\"#555555\">.</font><font color=\"#FFFFFF\">T</font><font color=\"#555555\">.</font><font color=\"#FFFFFF\">O</font><font color=\"#555555\">.</font><font color=\"#FFFFFF\">R.</font>";
+        android.widget.TextView tvTitle = dialog.findViewById(R.id.tv_dialog_title);
+        if (tvTitle != null) {
+            tvTitle.setText(android.text.Html.fromHtml(praetorHtml, android.text.Html.FROM_HTML_MODE_LEGACY));
+        }
+        
+        ((android.widget.TextView) dialog.findViewById(R.id.tv_dialog_subtitle)).setText(R.string.praetor_subtitle_dns_conflict);
+        ((android.widget.TextView) dialog.findViewById(R.id.tv_dialog_message)).setText(R.string.praetor_message_dns_conflict);
+        
+        android.widget.EditText input = dialog.findViewById(R.id.et_dialog_input);
+        input.setHint(R.string.praetor_hint_change_domain);
+        
+        android.view.View suffix = dialog.findViewById(R.id.tv_dialog_suffix);
+        if (suffix != null) suffix.setVisibility(android.view.View.VISIBLE);
+        
+        dialog.findViewById(R.id.btn_dialog_cancel).setOnClickListener(view -> dialog.dismiss());
+        dialog.findViewById(R.id.btn_dialog_confirm).setOnClickListener(view -> {
+            String newSubdomain = input.getText().toString().trim().toLowerCase();
+            if (newSubdomain.matches("^[a-z0-9-]+$") && newSubdomain.length() >= 3) {
+                String domain = newSubdomain + ".kodanetwork.eu";
+                server.setSubdomain(newSubdomain);
+                server.setDomainLink(domain);
+                repo.update(server);
+                dialog.dismiss();
+                // Retry wake up
+                new Thread(() -> {
+                    try {
+                        eu.kodanetwork.mchost.utils.HibernationManager.wakeUpServer(this, server, repo);
+                        runOnUiThread(() -> {
+                            updateDash();
+                            android.widget.Toast.makeText(this, "Server aufgeweckt!", android.widget.Toast.LENGTH_SHORT).show();
+                        });
+                    } catch (Exception ex2) {
+                        runOnUiThread(() -> android.widget.Toast.makeText(this, "Fehler: " + ex2.getMessage(), android.widget.Toast.LENGTH_LONG).show());
+                    }
+                }).start();
+            } else {
+                android.widget.Toast.makeText(this, "Ungültige Adresse!", android.widget.Toast.LENGTH_SHORT).show();
+            }
+        });
+        dialog.show();
     }
 
     private Runnable autoCloseRunnable;
@@ -983,6 +1157,11 @@ public class ServerDetailActivity extends AppCompatActivity {
             case HIBERNATED: label = "❄ " + getString(R.string.status_hibernated); col = 0xFF44AAFF; break;
             default:         label = "○ OFFLINE";    col = eu.kodanetwork.mchost.util.ThemeHelper.isLightMode(this) ? 0xFF555566 : 0xFF888888; break;
         }
+        
+        if (server.isUpdating()) {
+            label = "⬇ UPDATING…";
+            col = 0xFF00E676;
+        }
         tvBadge.setText(label);
         tvBadge.setTextColor(col);
         int playerCount = server.onlinePlayerNames != null ? server.onlinePlayerNames.size() : server.onlinePlayers;
@@ -1005,26 +1184,46 @@ public class ServerDetailActivity extends AppCompatActivity {
             if (btnChangeDns != null) {
                 btnChangeDns.setVisibility(View.VISIBLE);
                 btnChangeDns.setOnClickListener(v -> {
-                    // Start domain input logic (can just open Settings tab and focus on custom domain, 
-                    // or pop up an alert dialog to change it directly)
-                    android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(this);
-                    builder.setTitle("Join-Adresse ändern");
-                    final android.widget.EditText input = new android.widget.EditText(this);
+                    if (!eu.kodanetwork.mchost.security.PraetorSystem.checkNetwork(this)) return;
+                    
+                    long lastChange = eu.kodanetwork.mchost.App.getPrefs(this).getLong("last_join_change_" + server.getId(), 0);
+                    if (System.currentTimeMillis() - lastChange < 24 * 60 * 60 * 1000L) {
+                        android.widget.Toast.makeText(this, "Du kannst die Join-Adresse nur einmal alle 24 Stunden ändern.", android.widget.Toast.LENGTH_LONG).show();
+                        return;
+                    }
+                    
+                    android.app.Dialog dialog = new android.app.Dialog(this);
+                    dialog.setContentView(R.layout.dialog_praetor_input);
+                    dialog.getWindow().setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT));
+                    dialog.getWindow().setLayout(android.view.ViewGroup.LayoutParams.MATCH_PARENT, android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
+                    
+                    ((android.widget.TextView) dialog.findViewById(R.id.tv_dialog_title)).setText("JOIN ADRESSE");
+                    ((android.widget.TextView) dialog.findViewById(R.id.tv_dialog_subtitle)).setText("CHANGE SUBDOMAIN");
+                    ((android.widget.TextView) dialog.findViewById(R.id.tv_dialog_message)).setText("Gib eine neue Join-Adresse ein (nur Buchstaben, Zahlen und Bindestriche).");
+                    
+                    android.widget.EditText input = dialog.findViewById(R.id.et_dialog_input);
                     input.setHint("Neuer Name (z.B. meincoolerserver)");
                     input.setText(server.getSubdomain());
-                    builder.setView(input);
-                    builder.setPositiveButton("Speichern", (dialog, which) -> {
-                        String newSubdomain = input.getText().toString().trim();
-                        if (!newSubdomain.isEmpty()) {
+                    
+                    android.view.View suffix = dialog.findViewById(R.id.tv_dialog_suffix);
+                    if (suffix != null) suffix.setVisibility(android.view.View.VISIBLE);
+                    
+                    dialog.findViewById(R.id.btn_dialog_cancel).setOnClickListener(view -> dialog.dismiss());
+                    dialog.findViewById(R.id.btn_dialog_confirm).setOnClickListener(view -> {
+                        String newSubdomain = input.getText().toString().trim().toLowerCase();
+                        if (newSubdomain.matches("^[a-z0-9-]+$") && newSubdomain.length() >= 3) {
                             server.setSubdomain(newSubdomain);
                             server.setDomainLink(""); // reset custom domain logic
                             repo.update(server);
-                            tvJoinAddr.setText(newSubdomain);
-                            android.widget.Toast.makeText(this, "Join-Adresse aktualisiert!", android.widget.Toast.LENGTH_SHORT).show();
+                            updateJoinAddressDisplay();
+                            eu.kodanetwork.mchost.App.getPrefs(this).edit().putLong("last_join_change_" + server.getId(), System.currentTimeMillis()).apply();
+                            android.widget.Toast.makeText(this, "Join-Adresse aktualisiert! (Wird beim nächsten Aufwecken registriert)", android.widget.Toast.LENGTH_LONG).show();
+                            dialog.dismiss();
+                        } else {
+                            android.widget.Toast.makeText(this, "Ungültige Adresse!", android.widget.Toast.LENGTH_SHORT).show();
                         }
                     });
-                    builder.setNegativeButton("Abbrechen", (dialog, which) -> dialog.cancel());
-                    builder.show();
+                    dialog.show();
                 });
             }
         } else {
@@ -1034,10 +1233,11 @@ public class ServerDetailActivity extends AppCompatActivity {
             if (btnChangeDns != null) btnChangeDns.setVisibility(View.GONE);
         }
         
-        btnStart  .setEnabled(!running && st != ServerInstance.State.INSTALLING && !restarting && !settingUp && !hibernated);
-        btnStop   .setEnabled(running);
-        btnRestart.setEnabled(running);
-        btnKill   .setEnabled(running || restarting);
+        boolean updating = server.isUpdating();
+        btnStart  .setEnabled(!running && st != ServerInstance.State.INSTALLING && !restarting && !settingUp && !hibernated && !updating);
+        btnStop   .setEnabled(running && !updating);
+        btnRestart.setEnabled(running && !updating);
+        btnKill   .setEnabled((running || restarting) && !updating);
         
         android.widget.TextView btnHibernate = findViewById(R.id.btn_hibernate);
         if (btnHibernate != null) {
@@ -1402,7 +1602,6 @@ public class ServerDetailActivity extends AppCompatActivity {
             addressLabel + "\n" + addressValue + "\n\n" +
             "Dateipfad:\n" + server.getServerDir()
         );
-        etDomainPrefix.setText(server.getSubdomain());
         updateIntegrationStatus();
         
         // Server Icon
@@ -1465,52 +1664,78 @@ public class ServerDetailActivity extends AppCompatActivity {
         btnStartTunnel.setOnClickListener(v -> startTunnel());
         btnLinkDomain.setOnClickListener(v -> handleDomainLink());
 
-        View btnVerifyDomain = findViewById(R.id.btn_verify_domain);
-        if (btnVerifyDomain != null) {
-            btnVerifyDomain.setOnClickListener(v -> {
-                TextView tvStatus = findViewById(R.id.tv_verification_status);
-                tvStatus.setText("Verifying...");
-                tvStatus.setTextColor(0xFFFFA500); // Orange
-                new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
-                    // Simulating verification for now as Java DNS resolution for SRV without library is hard.
-                    // A real implementation would query Cloudflare DoH API.
-                    tvStatus.setText("Verification Successful!");
-                    tvStatus.setTextColor(0xFF00FF00); // Green
-                    server.setSubdomain(etDomainPrefix.getText().toString());
-                    server.setDomainLink(etDomainPrefix.getText().toString() + " -> " + server.getPlayitAddress());
-                    repo.update(server);
-                    tvDomainStatus.setText("Domain: " + server.getDomainLink());
-                    tvJoinAddr.setText(server.getSubdomain());
-                }, 1500);
-            });
-        }
+
 
         android.widget.CompoundButton swBedrock = findViewById(R.id.switch_bedrock);
+        View rowBedrock = findViewById(R.id.row_bedrock);
         if (swBedrock != null) {
             swBedrock.setChecked(server.isBedrockSupport());
-            swBedrock.setOnCheckedChangeListener((btnView, isChecked) -> {
-                server.setBedrockSupport(isChecked);
-                repo.update(server);
-                
-                View layoutBedrockPort = findViewById(R.id.layout_bedrock_port);
-                if (isChecked && layoutBedrockPort != null && tvBedrockPortDash != null) {
-                    layoutBedrockPort.setVisibility(View.VISIBLE);
-                    tvBedrockPortDash.setText(String.valueOf(server.getBedrockPort()));
-                } else if (!isChecked && layoutBedrockPort != null) {
-                    layoutBedrockPort.setVisibility(View.GONE);
+            swBedrock.setOnClickListener(v -> {
+                if (!eu.kodanetwork.mchost.security.PraetorSystem.checkNetwork(this)) {
+                    swBedrock.setChecked(false); // Revert UI visually
+                    return;
                 }
-                
-                triggerAddonRestart();
+                boolean isChecked = swBedrock.isChecked();
+                if (isChecked) {
+                    server.setBedrockSupport(true);
+                    repo.update(server);
+                    
+                    View layoutBedrockPort = findViewById(R.id.layout_bedrock_port);
+                    if (layoutBedrockPort != null && tvBedrockPortDash != null) {
+                        layoutBedrockPort.setVisibility(View.VISIBLE);
+                        tvBedrockPortDash.setText(String.valueOf(server.getBedrockPort()));
+                    }
+                    
+                    triggerAddonRestart();
+                    
+                    android.content.Intent intent = new android.content.Intent(ServerDetailActivity.this, CustomDnsWizardActivity.class);
+                    intent.putExtra("SERVER_ID", server.getId());
+                    intent.putExtra("SERVER_PORT", server.getPort());
+                    intent.putExtra("TARGET_RECORD", "bedrock");
+                    startActivity(intent);
+                } else {
+                    swBedrock.setChecked(true); // REVERT visually!
+                    showAddonWarningDialog("bedrock", swBedrock);
+                }
+            });
+        }
+        if (rowBedrock != null) {
+            rowBedrock.setOnClickListener(v -> {
+                if (!eu.kodanetwork.mchost.security.PraetorSystem.checkNetwork(this)) return;
+                showAddonOptions("bedrock", swBedrock);
             });
         }
 
         android.widget.CompoundButton swVoicechat = findViewById(R.id.switch_voicechat);
+        View rowVoicechat = findViewById(R.id.row_voicechat);
         if (swVoicechat != null) {
             swVoicechat.setChecked(server.isVoicechat());
-            swVoicechat.setOnCheckedChangeListener((btnView, isChecked) -> {
-                server.setVoicechat(isChecked);
-                repo.update(server);
-                triggerAddonRestart();
+            swVoicechat.setOnClickListener(v -> {
+                if (!eu.kodanetwork.mchost.security.PraetorSystem.checkNetwork(this)) {
+                    swVoicechat.setChecked(false); // Revert UI visually
+                    return;
+                }
+                boolean isChecked = swVoicechat.isChecked();
+                if (isChecked) {
+                    server.setVoicechat(true);
+                    repo.update(server);
+                    triggerAddonRestart();
+                    
+                    android.content.Intent intent = new android.content.Intent(ServerDetailActivity.this, CustomDnsWizardActivity.class);
+                    intent.putExtra("SERVER_ID", server.getId());
+                    intent.putExtra("SERVER_PORT", server.getPort());
+                    intent.putExtra("TARGET_RECORD", "voicechat");
+                    startActivity(intent);
+                } else {
+                    swVoicechat.setChecked(true); // REVERT visually!
+                    showAddonWarningDialog("voicechat", swVoicechat);
+                }
+            });
+        }
+        if (rowVoicechat != null) {
+            rowVoicechat.setOnClickListener(v -> {
+                if (!eu.kodanetwork.mchost.security.PraetorSystem.checkNetwork(this)) return;
+                showAddonOptions("voicechat", swVoicechat);
             });
         }
 
@@ -1565,18 +1790,7 @@ public class ServerDetailActivity extends AppCompatActivity {
                             });
                         } catch (Exception e) {
                             if ("DNS_OCCUPIED".equals(e.getMessage())) {
-                                runOnUiThread(() -> {
-                                    android.content.Intent intent = new android.content.Intent(this, eu.kodanetwork.mchost.ui.PraetorWarningActivity.class);
-                                    intent.putExtra(eu.kodanetwork.mchost.ui.PraetorWarningActivity.EXTRA_REASON, getString(R.string.praetor_reason_dns_occupied, server.getSubdomain()));
-                                    intent.putExtra(eu.kodanetwork.mchost.ui.PraetorWarningActivity.EXTRA_ACTION, getString(R.string.praetor_action_understood));
-                                    startActivity(intent);
-                                    
-                                    server.setSubdomain("");
-                                    server.setDomainLink("");
-                                    repo.update(server);
-                                    try { eu.kodanetwork.mchost.utils.HibernationManager.wakeUpServer(this, server, repo); } catch(Exception ignored) {}
-                                    updateDash();
-                                });
+                                runOnUiThread(() -> handleDnsOccupied());
                             } else {
                                 runOnUiThread(() -> android.widget.Toast.makeText(this, "Fehler beim Aufwecken: " + e.getMessage(), android.widget.Toast.LENGTH_LONG).show());
                             }
@@ -1608,18 +1822,7 @@ public class ServerDetailActivity extends AppCompatActivity {
                         });
                     } catch (Exception e) {
                         if ("DNS_OCCUPIED".equals(e.getMessage())) {
-                            runOnUiThread(() -> {
-                                android.content.Intent intent = new android.content.Intent(this, eu.kodanetwork.mchost.ui.PraetorWarningActivity.class);
-                                intent.putExtra(eu.kodanetwork.mchost.ui.PraetorWarningActivity.EXTRA_REASON, getString(R.string.praetor_reason_dns_occupied, server.getSubdomain()));
-                                intent.putExtra(eu.kodanetwork.mchost.ui.PraetorWarningActivity.EXTRA_ACTION, getString(R.string.praetor_action_understood));
-                                startActivity(intent);
-                                
-                                server.setSubdomain("");
-                                server.setDomainLink("");
-                                repo.update(server);
-                                try { eu.kodanetwork.mchost.utils.HibernationManager.wakeUpServer(this, server, repo); } catch(Exception ignored) {}
-                                updateDash();
-                            });
+                            runOnUiThread(() -> handleDnsOccupied());
                         } else {
                             runOnUiThread(() -> android.widget.Toast.makeText(this, "Fehler beim Aufwecken: " + e.getMessage(), android.widget.Toast.LENGTH_LONG).show());
                         }
@@ -1785,35 +1988,240 @@ public class ServerDetailActivity extends AppCompatActivity {
                             pbDl.setVisibility(View.GONE);
                             btnDl.setVisibility(View.VISIBLE);
                             
-                            View headerNormal = findViewById(R.id.layout_header_normal);
                             View headerRestart = findViewById(R.id.layout_header_restart);
                             android.view.View btnRestart = findViewById(R.id.btn_header_restart);
                             
-                            if (headerNormal != null && headerRestart != null && btnRestart != null) {
-                                headerNormal.setVisibility(View.GONE);
+                            if (headerRestart != null && btnRestart != null) {
                                 headerRestart.setVisibility(View.VISIBLE);
                                 btnRestart.setOnClickListener(v2 -> {
-                                    if (bound && svc != null) svc.sendCmd(server.getId(), "stop");
+                                    triggerAddonRestart();
                                     headerRestart.setVisibility(View.GONE);
-                                    headerNormal.setVisibility(View.VISIBLE);
                                 });
                                 
                                 new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
                                     if (headerRestart.getVisibility() == View.VISIBLE) {
                                         headerRestart.setVisibility(View.GONE);
-                                        headerNormal.setVisibility(View.VISIBLE);
                                     }
-                                }, 30000);
-                            } else {
-                                Toast.makeText(ServerDetailActivity.this, "✓ " + file.getName() + " installiert!", Toast.LENGTH_SHORT).show();
+                                }, 5000);
                             }
+                            android.widget.Toast.makeText(ServerDetailActivity.this, "✓ " + file.getName() + " installiert!", android.widget.Toast.LENGTH_SHORT).show();
                         }
                         @Override public void onError(String err) {
                             pbDl.setVisibility(View.GONE);
                             btnDl.setVisibility(View.VISIBLE);
-                            Toast.makeText(ServerDetailActivity.this, "✗ " + err, Toast.LENGTH_LONG).show();
+                            android.widget.Toast.makeText(ServerDetailActivity.this, "✗ " + err, android.widget.Toast.LENGTH_LONG).show();
                         }
                     });
+                });
+                
+                holder.itemView.setOnClickListener(v -> {
+                    // Show a loading dialog instead of pbDl since pbDl is for the download button
+                    android.app.ProgressDialog pd = new android.app.ProgressDialog(ServerDetailActivity.this);
+                    pd.setMessage("Lade Versionen...");
+                    pd.setCancelable(false);
+                    pd.show();
+                    
+                    new Thread(() -> {
+                        try {
+                            String loader = server.getType().name().toLowerCase();
+                            if (server.getType() == ServerInstance.Type.PURPUR) loader = "paper";
+                            String mcVer = server.getVersion();
+                            java.util.List<String> compLoaders = new java.util.ArrayList<>();
+                            if (server.getType() == ServerInstance.Type.PAPER || server.getType() == ServerInstance.Type.PURPUR) {
+                                compLoaders.add("paper");
+                                compLoaders.add("spigot");
+                                compLoaders.add("bukkit");
+                            } else {
+                                compLoaders.add(loader);
+                            }
+                            
+                            org.json.JSONArray versions = null;
+                            for (String l : compLoaders) {
+                                String qL = java.net.URLEncoder.encode("[\"" + l + "\"]", "UTF-8");
+                                String qG = java.net.URLEncoder.encode("[\"" + mcVer + "\"]", "UTF-8");
+                                String u = "https://api.modrinth.com/v2/project/" + p.id + "/version?loaders=" + qL + "&game_versions=" + qG;
+                                java.net.HttpURLConnection conn = (java.net.HttpURLConnection) new java.net.URL(u).openConnection();
+                                conn.setRequestProperty("User-Agent", "KodaNetwork/3.0");
+                                if (conn.getResponseCode() == 200) {
+                                    java.io.InputStream is = conn.getInputStream();
+                                    java.util.Scanner s = new java.util.Scanner(is).useDelimiter("\\A");
+                                    versions = new org.json.JSONArray(s.hasNext() ? s.next() : "");
+                                    is.close();
+                                    if (versions.length() > 0) break;
+                                }
+                            }
+                            
+                            if (versions == null || versions.length() == 0) {
+                                runOnUiThread(() -> {
+                                    pd.dismiss();
+                                    android.widget.Toast.makeText(ServerDetailActivity.this, "Keine kompatible Version gefunden.", android.widget.Toast.LENGTH_SHORT).show();
+                                });
+                                return;
+                            }
+                            
+                            java.util.List<String> names = new java.util.ArrayList<>();
+                            java.util.List<org.json.JSONObject> verObjs = new java.util.ArrayList<>();
+                            for (int i = 0; i < versions.length(); i++) {
+                                org.json.JSONObject ver = versions.getJSONObject(i);
+                                names.add(ver.getString("name") + " (" + ver.getString("version_number") + ")");
+                                verObjs.add(ver);
+                            }
+                            
+                            runOnUiThread(() -> {
+                                pd.dismiss();
+                                
+                                com.google.android.material.bottomsheet.BottomSheetDialog sheet = new com.google.android.material.bottomsheet.BottomSheetDialog(ServerDetailActivity.this);
+                                sheet.setOnShowListener(dialog -> {
+                                    android.view.Window window = ((com.google.android.material.bottomsheet.BottomSheetDialog) dialog).getWindow();
+                                    if (window != null) window.setNavigationBarColor(0xFF0E0E14);
+                                });
+                                android.widget.LinearLayout container = new android.widget.LinearLayout(ServerDetailActivity.this);
+                                container.setOrientation(android.widget.LinearLayout.VERTICAL);
+                                container.setBackgroundColor(0xFF0E0E14);
+                                container.setPadding(0, 0, 0, 48);
+
+                                TextView sheetTitle = new TextView(ServerDetailActivity.this);
+                                sheetTitle.setText(getString(R.string.select_version));
+                                sheetTitle.setTextColor(0xFFFF6B00);
+                                sheetTitle.setTextSize(13);
+                                sheetTitle.setTypeface(android.graphics.Typeface.DEFAULT_BOLD);
+                                sheetTitle.setLetterSpacing(0.12f);
+                                sheetTitle.setPadding(48, 40, 48, 24);
+                                container.addView(sheetTitle);
+
+                                View div = new View(ServerDetailActivity.this);
+                                div.setBackgroundColor(0xFF222230);
+                                div.setLayoutParams(new android.widget.LinearLayout.LayoutParams(android.widget.LinearLayout.LayoutParams.MATCH_PARENT, 1));
+                                container.addView(div);
+                                
+                                android.widget.ScrollView sv = new android.widget.ScrollView(ServerDetailActivity.this);
+                                android.widget.LinearLayout listContainer = new android.widget.LinearLayout(ServerDetailActivity.this);
+                                listContainer.setOrientation(android.widget.LinearLayout.VERTICAL);
+                                sv.addView(listContainer);
+                                container.addView(sv);
+                                
+                                for (int i = 0; i < names.size(); i++) {
+                                    final int which = i;
+                                    String name = names.get(i);
+                                    
+                                    android.widget.LinearLayout row = new android.widget.LinearLayout(ServerDetailActivity.this);
+                                    row.setOrientation(android.widget.LinearLayout.HORIZONTAL);
+                                    row.setPadding(48, 32, 48, 32);
+                                    row.setGravity(android.view.Gravity.CENTER_VERTICAL);
+                                    row.setBackgroundResource(android.R.drawable.list_selector_background);
+                                    row.setClickable(true);
+                                    
+                                    TextView tvName = new TextView(ServerDetailActivity.this);
+                                    tvName.setText(name);
+                                    tvName.setTextColor(0xFFEEEEEE);
+                                    tvName.setTextSize(14);
+                                    android.widget.LinearLayout.LayoutParams lp = new android.widget.LinearLayout.LayoutParams(0, android.view.ViewGroup.LayoutParams.WRAP_CONTENT, 1f);
+                                    row.addView(tvName, lp);
+                                    
+                                    TextView btn = new TextView(ServerDetailActivity.this);
+                                    btn.setText(R.string.select_version);
+                                    btn.setTextColor(0xFFFF6B00);
+                                    btn.setTextSize(14);
+                                    btn.setPadding(48, 8, 0, 8);
+                                    android.util.TypedValue outValue = new android.util.TypedValue();
+                                    getTheme().resolveAttribute(android.R.attr.selectableItemBackgroundBorderless, outValue, true);
+                                    btn.setBackgroundResource(outValue.resourceId);
+                                    row.addView(btn);
+                                    
+                                    row.setOnClickListener(vRow -> {
+                                        sheet.dismiss();
+                                        org.json.JSONObject selectedVer = verObjs.get(which);
+                                        btnDl.setVisibility(View.GONE);
+                                        pbDl.setVisibility(View.VISIBLE);
+                                        
+                                        new Thread(() -> {
+                                            try {
+                                                org.json.JSONArray files = selectedVer.getJSONArray("files");
+                                                org.json.JSONObject fileObj = files.getJSONObject(0);
+                                                for (int j = 0; j < files.length(); j++) {
+                                                    if (files.getJSONObject(j).optBoolean("primary", false)) {
+                                                        fileObj = files.getJSONObject(j); break;
+                                                    }
+                                                }
+                                                
+                                                String dlUrl = fileObj.getString("url");
+                                                String fName = fileObj.getString("filename");
+                                                
+                                                java.io.File targetDir = new java.io.File(server.getServerDir(), (server.getType() == ServerInstance.Type.PAPER || server.getType() == ServerInstance.Type.PURPUR) ? "plugins" : "mods");
+                                                targetDir.mkdirs();
+                                                java.io.File targetFile = new java.io.File(targetDir, fName);
+                                                
+                                                String oldVersionId = server.pluginVersions.get(p.id);
+                                                eu.kodanetwork.mchost.util.ModrinthHelper.deleteOldVersion(oldVersionId, targetDir, fName);
+                                                
+                                                java.net.HttpURLConnection dlConn = (java.net.HttpURLConnection) new java.net.URL(dlUrl).openConnection();
+                                                dlConn.setRequestProperty("User-Agent", "KodaNetwork/3.0");
+                                                dlConn.setInstanceFollowRedirects(true);
+                                                
+                                                if (dlConn.getResponseCode() < 300) {
+                                                    java.io.InputStream dlIs = dlConn.getInputStream();
+                                                    java.io.FileOutputStream fos = new java.io.FileOutputStream(targetFile);
+                                                    byte[] buf = new byte[8192]; int r;
+                                                    while ((r = dlIs.read(buf)) != -1) fos.write(buf, 0, r);
+                                                    fos.close(); dlIs.close();
+                                                    
+                                                    server.pluginVersions.put(p.id, selectedVer.getString("id"));
+                                                    ServerRepo.get(ServerDetailActivity.this).update(server);
+                                                    
+                                                    runOnUiThread(() -> {
+                                                        pbDl.setVisibility(View.GONE);
+                                                        btnDl.setVisibility(View.VISIBLE);
+                                                        if (server.state != ServerInstance.State.OFFLINE) {
+                                                            View headerRestart = findViewById(R.id.layout_header_restart);
+                                                            android.view.View btnRestartObj = findViewById(R.id.btn_header_restart);
+                                                            if (headerRestart != null && btnRestartObj != null) {
+                                                                headerRestart.setVisibility(View.VISIBLE);
+                                                                btnRestartObj.setOnClickListener(v2 -> {
+                                                                    triggerAddonRestart();
+                                                                    headerRestart.setVisibility(View.GONE);
+                                                                });
+                                                                new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
+                                                                    if (headerRestart.getVisibility() == View.VISIBLE) headerRestart.setVisibility(View.GONE);
+                                                                }, 5000);
+                                                            }
+                                                        }
+                                                    });
+                                                } else {
+                                                    runOnUiThread(() -> {
+                                                        pbDl.setVisibility(View.GONE); btnDl.setVisibility(View.VISIBLE);
+                                                        android.widget.Toast.makeText(ServerDetailActivity.this, "Download-Fehler", android.widget.Toast.LENGTH_SHORT).show();
+                                                    });
+                                                }
+                                            } catch (Exception e) {
+                                                runOnUiThread(() -> {
+                                                    pbDl.setVisibility(View.GONE); btnDl.setVisibility(View.VISIBLE);
+                                                    android.widget.Toast.makeText(ServerDetailActivity.this, "Fehler: " + e.getMessage(), android.widget.Toast.LENGTH_SHORT).show();
+                                                    View headerRestart = findViewById(R.id.layout_header_restart);
+                                                    if (headerRestart != null) {
+                                                        new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
+                                                            if (headerRestart.getVisibility() == View.VISIBLE) {
+                                                                headerRestart.setVisibility(View.GONE);
+                                                            }
+                                                        }, 5000);
+                                                    }
+                                                });
+                                            }
+                                        }).start();
+                                    });
+                                    
+                                    listContainer.addView(row);
+                                }
+                                
+                                sheet.setContentView(container);
+                                sheet.show();
+                            });
+                        } catch (Exception e) {
+                            runOnUiThread(() -> {
+                                pd.dismiss();
+                                android.widget.Toast.makeText(ServerDetailActivity.this, "Fehler beim Laden", android.widget.Toast.LENGTH_SHORT).show();
+                            });
+                        }
+                    }).start();
                 });
             }
             @Override public int getItemCount() { return pluginList.size(); }
@@ -1874,71 +2282,277 @@ public class ServerDetailActivity extends AppCompatActivity {
     }
 
     private void handleDomainLink() {
-        String host = etDomainPrefix.getText().toString().trim();
-        if (host.isEmpty()) {
-            etDomainPrefix.setError("Required");
-            return;
-        }
-        if (server.getPlayitAddress() == null || server.getPlayitAddress().isEmpty()) {
-            Toast.makeText(this, "Start playit tunnel first", Toast.LENGTH_SHORT).show();
+        if (!eu.kodanetwork.mchost.security.PraetorSystem.checkNetwork(this)) return;
+        
+        long lastChange = eu.kodanetwork.mchost.App.getPrefs(this).getLong("last_join_change_" + server.getId(), 0);
+        if (System.currentTimeMillis() - lastChange < 24 * 60 * 60 * 1000L) {
+            Toast.makeText(this, "Du kannst die Join-Adresse nur einmal alle 24 Stunden ändern.", Toast.LENGTH_LONG).show();
             return;
         }
         
-        if (host.contains(".")) {
-            // Vercel-style custom domain flow
-            View dnsPanel = findViewById(R.id.ll_dns_verification_panel);
-            TextView tvDnsName = findViewById(R.id.tv_dns_name);
-            TextView tvDnsValue = findViewById(R.id.tv_dns_value);
-            TextView tvStatus = findViewById(R.id.tv_verification_status);
-            
-            if (dnsPanel != null && tvDnsName != null && tvDnsValue != null) {
-                dnsPanel.setVisibility(View.VISIBLE);
-                tvStatus.setText("Unverified");
-                tvStatus.setTextColor(0xFFFF3333);
-                
-                String[] hostParts = host.split("\\.", 2);
-                String subdomain = hostParts[0];
-                if (hostParts.length > 1) {
-                    tvDnsName.setText("_minecraft._tcp." + subdomain);
-                } else {
-                    tvDnsName.setText("_minecraft._tcp");
-                }
-                
-                String[] playitParts = server.getPlayitAddress().split(":");
-                String target = playitParts[0];
-                int port = playitParts.length > 1 ? Integer.parseInt(playitParts[1]) : server.getPort();
-                
-                tvDnsValue.setText("0 5 " + port + " " + target);
-                Toast.makeText(this, "Please configure DNS records as shown.", Toast.LENGTH_LONG).show();
+        android.app.Dialog dialog = new android.app.Dialog(this);
+        dialog.setContentView(R.layout.dialog_praetor_input);
+        dialog.getWindow().setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT));
+        dialog.getWindow().setLayout(android.view.ViewGroup.LayoutParams.MATCH_PARENT, android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
+        
+        String praetorHtml = "<font color=\"#555555\">P.R.</font><font color=\"#AAAAAA\">A</font><font color=\"#555555\">.</font><font color=\"#AAAAAA\">E</font><font color=\"#555555\">.</font><font color=\"#FFFFFF\">T</font><font color=\"#555555\">.</font><font color=\"#FFFFFF\">O</font><font color=\"#555555\">.</font><font color=\"#FFFFFF\">R.</font>";
+        ((android.widget.TextView) dialog.findViewById(R.id.tv_dialog_title)).setText(android.text.Html.fromHtml(praetorHtml, android.text.Html.FROM_HTML_MODE_LEGACY));
+        ((android.widget.TextView) dialog.findViewById(R.id.tv_dialog_subtitle)).setText(R.string.praetor_subtitle);
+        ((android.widget.TextView) dialog.findViewById(R.id.tv_dialog_message)).setText(R.string.praetor_message_change_domain);
+        
+        android.widget.EditText input = dialog.findViewById(R.id.et_dialog_input);
+        input.setHint(R.string.praetor_hint_change_domain);
+        if (server.getSubdomain() != null) input.setText(server.getSubdomain());
+        
+        android.view.View suffix = dialog.findViewById(R.id.tv_dialog_suffix);
+        if (suffix != null) suffix.setVisibility(android.view.View.VISIBLE);
+        
+        dialog.findViewById(R.id.btn_dialog_cancel).setOnClickListener(view -> dialog.dismiss());
+        dialog.findViewById(R.id.btn_dialog_confirm).setOnClickListener(view -> {
+            String newSubdomain = input.getText().toString().trim().toLowerCase();
+            if (newSubdomain.matches("^[a-z0-9-]+$") && newSubdomain.length() >= 3) {
+                dialog.dismiss();
+                io.execute(() -> {
+                    try {
+                        String domain = newSubdomain + ".kodanetwork.eu";
+                        String oldSubdomain = server.getSubdomain();
+                        
+                        if (server.getPlayitAddress() != null && !server.getPlayitAddress().isEmpty()) {
+                            eu.kodanetwork.mchost.network.supabase.SupabaseFunctionsClient client = new eu.kodanetwork.mchost.network.supabase.SupabaseFunctionsClient(this);
+                            
+                            // Delete old record if it exists
+                            if (oldSubdomain != null && !oldSubdomain.isEmpty()) {
+                                try {
+                                    client.deleteDnsLink("", oldSubdomain);
+                                } catch (Exception ignored) {}
+                            }
+                            
+                            String[] parts = server.getPlayitAddress().split(":");
+                            String target = parts[0];
+                            int port = parts.length > 1 ? Integer.parseInt(parts[1]) : server.getPort();
+                            
+                            client.createDnsLink("", newSubdomain, target, port, "tcp");
+                            server.setDomainLink(domain + " -> " + server.getPlayitAddress());
+                        } else {
+                            server.setDomainLink("");
+                        }
+                        
+                        server.setSubdomain(newSubdomain);
+                        
+                        repo.update(server);
+                        eu.kodanetwork.mchost.App.getPrefs(this).edit().putLong("last_join_change_" + server.getId(), System.currentTimeMillis()).apply();
+                        runOnUiThread(() -> {
+                            if (server.getPlayitAddress() != null && !server.getPlayitAddress().isEmpty()) {
+                                tvDomainStatus.setText("Domain: " + server.getDomainLink());
+                            } else {
+                                tvDomainStatus.setText("Domain: " + domain + " (offline)");
+                            }
+                            updateJoinAddressDisplay();
+                            Toast.makeText(this, "Join-Adresse aktualisiert!", Toast.LENGTH_SHORT).show();
+                        });
+                    } catch (Exception e) {
+                        runOnUiThread(() -> {
+                            tvDomainStatus.setText("Domain error: " + e.getMessage());
+                            Toast.makeText(this, "DNS request failed: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                        });
+                    }
+                });
+            } else {
+                Toast.makeText(this, "Ungültige Adresse! Mindestens 3 Zeichen (a-z, 0-9, -).", Toast.LENGTH_SHORT).show();
             }
-        } else {
-            // Legacy Supabase subdomain flow
-            io.execute(() -> {
-                try {
-                    SupabaseFunctionsClient client = new SupabaseFunctionsClient(this);
-                    String[] parts = server.getPlayitAddress().split(":");
-                    String target = parts[0];
-                    int port = parts.length > 1 ? Integer.parseInt(parts[1]) : server.getPort();
-                    
-                    client.createDnsLink("", host, target, port, "tcp");
-                    
-                    String domain = host + ".kodanetwork.eu";
-                    server.setSubdomain(host);
-                    server.setDomainLink(domain + " -> " + server.getPlayitAddress());
-                    repo.update(server);
-                    runOnUiThread(() -> {
-                        tvDomainStatus.setText("Domain: " + server.getDomainLink());
-                        tvJoinAddr.setText(domain);
-                        Toast.makeText(this, "CNAME created via Supabase", Toast.LENGTH_SHORT).show();
-                    });
-                } catch (Exception e) {
-                    runOnUiThread(() -> {
-                        tvDomainStatus.setText("Domain error: " + e.getMessage());
-                        Toast.makeText(this, "DNS request failed: " + e.getMessage(), Toast.LENGTH_LONG).show();
-                    });
+        });
+        dialog.show();
+    }
+
+    private void showAddonOptions(String addonType, android.widget.CompoundButton toggleSwitch) {
+        android.app.Dialog dialog = new android.app.Dialog(this);
+        dialog.setContentView(R.layout.dialog_praetor_addon);
+        dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+        
+        TextView tvTitle = dialog.findViewById(R.id.tv_praetor_title);
+        String praetorHtml = "<font color=\"#555555\">P.R.</font><font color=\"#AAAAAA\">A</font><font color=\"#555555\">.</font><font color=\"#AAAAAA\">E</font><font color=\"#555555\">.</font><font color=\"#FFFFFF\">T</font><font color=\"#555555\">.</font><font color=\"#FFFFFF\">O</font><font color=\"#555555\">.</font><font color=\"#FFFFFF\">R.</font>";
+        tvTitle.setText(android.text.Html.fromHtml(praetorHtml, android.text.Html.FROM_HTML_MODE_LEGACY));
+
+        TextView tvSubtitle = dialog.findViewById(R.id.tv_addon_title);
+        tvSubtitle.setText(addonType.equals("bedrock") ? "BEDROCK SUPPORT" : "VOICECHAT SUPPORT");
+
+        boolean isEnabled = addonType.equals("bedrock") ? server.isBedrockSupport() : server.isVoicechat();
+        boolean hasCustomDomain = server.getCustomDomain() != null && !server.getCustomDomain().isEmpty();
+
+        com.google.android.material.button.MaterialButton btnToggle = dialog.findViewById(R.id.btn_addon_toggle);
+        com.google.android.material.button.MaterialButton btnChange = dialog.findViewById(R.id.btn_addon_change_domain);
+        com.google.android.material.button.MaterialButton btnUnlink = dialog.findViewById(R.id.btn_addon_unlink_domain);
+
+        btnToggle.setText(isEnabled ? "TURN OFF" : "TURN ON");
+        btnToggle.setOnClickListener(v -> {
+            if (!isEnabled) {
+                toggleSwitch.setChecked(true);
+                if (addonType.equals("bedrock")) {
+                    server.setBedrockSupport(true);
+                    View layoutBedrockPort = findViewById(R.id.layout_bedrock_port);
+                    if (layoutBedrockPort != null && tvBedrockPortDash != null) {
+                        layoutBedrockPort.setVisibility(View.VISIBLE);
+                        tvBedrockPortDash.setText(String.valueOf(server.getBedrockPort()));
+                    }
+                } else {
+                    server.setVoicechat(true);
                 }
+                repo.update(server);
+                triggerAddonRestart();
+                
+                android.content.Intent intent = new android.content.Intent(ServerDetailActivity.this, CustomDnsWizardActivity.class);
+                intent.putExtra("SERVER_ID", server.getId());
+                intent.putExtra("SERVER_PORT", server.getPort());
+                intent.putExtra("TARGET_RECORD", addonType);
+                startActivity(intent);
+                
+                dialog.dismiss();
+            } else {
+                dialog.dismiss();
+                showAddonWarningDialog(addonType, toggleSwitch);
+            }
+        });
+
+        if (isEnabled && hasCustomDomain) {
+            btnChange.setVisibility(View.VISIBLE);
+            btnUnlink.setVisibility(View.VISIBLE);
+            
+            btnChange.setOnClickListener(v -> {
+                android.content.Intent intent = new android.content.Intent(ServerDetailActivity.this, CustomDnsWizardActivity.class);
+                intent.putExtra("SERVER_ID", server.getId());
+                intent.putExtra("SERVER_PORT", server.getPort());
+                intent.putExtra("TARGET_RECORD", addonType);
+                startActivity(intent);
+                dialog.dismiss();
             });
+
+            btnUnlink.setOnClickListener(v -> {
+                android.widget.Toast.makeText(this, "Unlinked from Custom Domain. Reverting to default.", android.widget.Toast.LENGTH_SHORT).show();
+                dialog.dismiss();
+            });
+        } else if (isEnabled) {
+            btnChange.setVisibility(View.VISIBLE);
+            btnUnlink.setVisibility(View.GONE);
+            
+            btnChange.setText("LINK CUSTOM DOMAIN");
+            btnChange.setOnClickListener(v -> {
+                android.content.Intent intent = new android.content.Intent(ServerDetailActivity.this, CustomDnsWizardActivity.class);
+                intent.putExtra("SERVER_ID", server.getId());
+                intent.putExtra("SERVER_PORT", server.getPort());
+                intent.putExtra("TARGET_RECORD", addonType);
+                startActivity(intent);
+                dialog.dismiss();
+            });
+        } else {
+            btnChange.setVisibility(View.GONE);
+            btnUnlink.setVisibility(View.GONE);
         }
+
+        dialog.show();
+    }
+
+    private void showAddonWarningDialog(String addonType, android.widget.CompoundButton toggleSwitch) {
+        android.app.Dialog dialog = new android.app.Dialog(this);
+        dialog.setContentView(R.layout.dialog_praetor_addon);
+        dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+        
+        TextView tvTitle = dialog.findViewById(R.id.tv_praetor_title);
+        String praetorHtml = "<font color=\"#555555\">P.R.</font><font color=\"#AAAAAA\">A</font><font color=\"#555555\">.</font><font color=\"#AAAAAA\">E</font><font color=\"#555555\">.</font><font color=\"#FFFFFF\">T</font><font color=\"#555555\">.</font><font color=\"#FFFFFF\">O</font><font color=\"#555555\">.</font><font color=\"#FFFFFF\">R.</font>";
+        tvTitle.setText(android.text.Html.fromHtml(praetorHtml, android.text.Html.FROM_HTML_MODE_LEGACY));
+
+        TextView tvSubtitle = dialog.findViewById(R.id.tv_addon_title);
+        tvSubtitle.setText(addonType.equals("bedrock") ? "BEDROCK SUPPORT" : "VOICECHAT SUPPORT");
+        
+        boolean hasCustomDomain = server.getCustomDomain() != null && !server.getCustomDomain().trim().isEmpty() && !server.getCustomDomain().contains("koda.network");
+        
+        dialog.findViewById(R.id.layout_addon_options).setVisibility(View.GONE);
+        dialog.findViewById(R.id.layout_addon_warning).setVisibility(View.VISIBLE);
+        
+        TextView tvWarningText = dialog.findViewById(R.id.tv_addon_warning_text);
+        String warningText = "The server will be stopped.\n";
+        if (addonType.equals("bedrock")) {
+            warningText += "The 'Geyser-Spigot' and 'floodgate' plugins and their folders will be deleted.\n";
+        } else {
+            warningText += "The 'voicechat' plugin and its folder will be deleted.\n";
+        }
+        if (hasCustomDomain) {
+            warningText += "\n⚠ YOU MUST DELETE THE SRV RECORD ⚠\n";
+            if (addonType.equals("bedrock")) {
+                warningText += "_minecraft._udp." + server.getCustomDomain();
+            } else {
+                warningText += "_voicechat._udp." + server.getCustomDomain();
+            }
+            warningText += "\nfrom your DNS provider manually!";
+        }
+        tvWarningText.setText(warningText);
+        
+        TextView tvCountdown = dialog.findViewById(R.id.tv_addon_countdown);
+        com.google.android.material.button.MaterialButton btnConfirm = dialog.findViewById(R.id.btn_addon_confirm_off);
+        
+        new android.os.CountDownTimer(10000, 1000) {
+            public void onTick(long millisUntilFinished) {
+                tvCountdown.setText(String.valueOf(millisUntilFinished / 1000));
+            }
+            public void onFinish() {
+                tvCountdown.setVisibility(View.GONE);
+                btnConfirm.setEnabled(true);
+            }
+        }.start();
+        
+        btnConfirm.setOnClickListener(confirmView -> {
+            if (addonType.equals("bedrock")) {
+                server.setBedrockSupport(false);
+                View layoutBedrockPort = findViewById(R.id.layout_bedrock_port);
+                if (layoutBedrockPort != null) layoutBedrockPort.setVisibility(View.GONE);
+            } else {
+                server.setVoicechat(false);
+            }
+            repo.update(server);
+            toggleSwitch.setChecked(false);
+            
+            cleanupAddonFiles(addonType);
+            dialog.dismiss();
+        });
+        
+        dialog.findViewById(R.id.btn_addon_cancel).setOnClickListener(cancelView -> {
+            dialog.dismiss();
+        });
+        
+        dialog.show();
+    }
+
+    private void cleanupAddonFiles(String addonType) {
+        if (server.isRunning()) {
+            android.content.Intent intent = new android.content.Intent(this, eu.kodanetwork.mchost.service.KodaServerService.class);
+            intent.setAction(eu.kodanetwork.mchost.service.KodaServerService.ACTION_STOP);
+            intent.putExtra(eu.kodanetwork.mchost.service.KodaServerService.EXTRA_ID, server.getId());
+            startService(intent);
+        }
+        
+        new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
+            File pluginsDir = new File(server.getServerDir(), "plugins");
+            if (addonType.equals("bedrock")) {
+                File geyserJar = new File(pluginsDir, "Geyser.jar");
+                File geyserSpigotJar = new File(pluginsDir, "Geyser-Spigot.jar");
+                File floodgateJar = new File(pluginsDir, "Floodgate.jar");
+                File floodgateBukkitJar = new File(pluginsDir, "floodgate-bukkit.jar");
+                File floodgateOldJar = new File(pluginsDir, "floodgate-spigot.jar");
+                if (geyserJar.exists()) geyserJar.delete();
+                if (geyserSpigotJar.exists()) geyserSpigotJar.delete();
+                if (floodgateJar.exists()) floodgateJar.delete();
+                if (floodgateBukkitJar.exists()) floodgateBukkitJar.delete();
+                if (floodgateOldJar.exists()) floodgateOldJar.delete();
+                deleteRecursive(new File(pluginsDir, "Geyser-Spigot"));
+                deleteRecursive(new File(pluginsDir, "floodgate"));
+            } else {
+                File vcJar = new File(pluginsDir, "Voicechat.jar");
+                File vcJarOld = new File(pluginsDir, "voicechat-bukkit.jar");
+                if (vcJar.exists()) vcJar.delete();
+                if (vcJarOld.exists()) vcJarOld.delete();
+                deleteRecursive(new File(pluginsDir, "voicechat"));
+            }
+            android.widget.Toast.makeText(this, "Addon removed and files cleaned up.", android.widget.Toast.LENGTH_SHORT).show();
+        }, server.isRunning() ? 4000 : 500);
     }
 
     private void setupGameplaySettings() {
@@ -2113,6 +2727,9 @@ public class ServerDetailActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        if (tvJoinAddr != null && server != null) {
+            updateJoinAddressDisplay();
+        }
         android.content.SharedPreferences prefs = eu.kodanetwork.mchost.App.getPrefs(this);
         String currentTheme = prefs.getString("app_theme", "modern");
         String currentMode = prefs.getString("theme_mode", "dark");
@@ -2124,6 +2741,24 @@ public class ServerDetailActivity extends AppCompatActivity {
             lastTheme = currentTheme;
             lastThemeMode = currentMode;
             recreate();
+        }
+        
+        checkForUpdatesAsync();
+    }
+
+    private void updateJoinAddressDisplay() {
+        if (tvJoinAddr == null || server == null) return;
+        String customDomain = server.getCustomDomain();
+        String defaultDomain = server.getJoinAddress();
+        
+        if (customDomain != null && !customDomain.trim().isEmpty() && !customDomain.contains("koda.network")) {
+            String html = "<b>" + customDomain + "</b><br><small><font color='#AAAAAA'>" + defaultDomain + "</font></small>";
+            tvJoinAddr.setText(android.text.Html.fromHtml(html, android.text.Html.FROM_HTML_MODE_LEGACY));
+            tvJoinAddr.setOnClickListener(v -> copyToClipboard("Join Address", customDomain));
+        } else {
+            String displayDomain = (customDomain != null && !customDomain.trim().isEmpty()) ? customDomain : defaultDomain;
+            tvJoinAddr.setText(displayDomain);
+            tvJoinAddr.setOnClickListener(v -> copyToClipboard("Join Address", displayDomain));
         }
     }
 
@@ -2312,6 +2947,39 @@ public class ServerDetailActivity extends AppCompatActivity {
             unbindService(conn);
             bound = false;
         }
+    }
+
+    private void showNameEditDialog() {
+        if (!eu.kodanetwork.mchost.security.PraetorSystem.checkNetwork(this)) return;
+        android.app.Dialog dialog = new android.app.Dialog(this);
+        dialog.setContentView(R.layout.dialog_praetor_input);
+        dialog.getWindow().setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT));
+        dialog.getWindow().setLayout(android.view.ViewGroup.LayoutParams.MATCH_PARENT, android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
+        
+        String praetorHtml = "<font color=\"#555555\">P.R.</font><font color=\"#AAAAAA\">A</font><font color=\"#555555\">.</font><font color=\"#AAAAAA\">E</font><font color=\"#555555\">.</font><font color=\"#FFFFFF\">T</font><font color=\"#555555\">.</font><font color=\"#FFFFFF\">O</font><font color=\"#555555\">.</font><font color=\"#FFFFFF\">R.</font>";
+        ((android.widget.TextView) dialog.findViewById(R.id.tv_dialog_title)).setText(android.text.Html.fromHtml(praetorHtml, android.text.Html.FROM_HTML_MODE_LEGACY));
+        ((android.widget.TextView) dialog.findViewById(R.id.tv_dialog_subtitle)).setText(R.string.praetor_subtitle_change_name);
+        ((android.widget.TextView) dialog.findViewById(R.id.tv_dialog_message)).setText(R.string.praetor_message_change_name);
+        
+        android.widget.EditText input = dialog.findViewById(R.id.et_dialog_input);
+        input.setText(server.getName());
+        input.setHint(R.string.praetor_hint_change_name);
+        
+        dialog.findViewById(R.id.btn_dialog_cancel).setOnClickListener(view -> dialog.dismiss());
+        dialog.findViewById(R.id.btn_dialog_confirm).setOnClickListener(view -> {
+            String newName = input.getText().toString().trim();
+            if (!newName.isEmpty()) {
+                server.setName(newName);
+                repo.update(server);
+                TextView tvTitle = findViewById(R.id.tv_title);
+                if (tvTitle != null) tvTitle.setText(newName);
+                android.widget.Toast.makeText(this, getString(R.string.praetor_change_name_success), android.widget.Toast.LENGTH_SHORT).show();
+                dialog.dismiss();
+            } else {
+                android.widget.Toast.makeText(this, getString(R.string.praetor_change_name_error), android.widget.Toast.LENGTH_SHORT).show();
+            }
+        });
+        dialog.show();
     }
 
     private void copyToClipboard(String label, String text) {

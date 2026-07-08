@@ -1164,6 +1164,21 @@ public class CreateServerActivity extends AppCompatActivity {
                         DocumentFile sourceDir = DocumentFile.fromTreeUri(this, sourceUri);
                         if (sourceDir != null) copyRecursive(sourceDir, new File(dir));
                     }
+
+                    File pluginsDir = new File(dir, "plugins");
+                    if (pluginsDir.exists() && pluginsDir.isDirectory()) {
+                        File[] jarFiles = pluginsDir.listFiles((d, fileName) -> fileName.endsWith(".jar"));
+                        if (jarFiles != null && jarFiles.length > 0) {
+                            for (int i = 0; i < jarFiles.length; i++) {
+                                File jar = jarFiles[i];
+                                int step = i + 1;
+                                mainHandler.post(() -> {
+                                    if (loadingText != null) loadingText.setText("Scanning Plugins (" + step + "/" + jarFiles.length + "): " + jar.getName());
+                                });
+                                eu.kodanetwork.mchost.util.ModrinthHelper.scanAndUpdateImportedPluginSync(jar, s, mainHandler, loadingText);
+                            }
+                        }
+                    }
                 }
                 
                 mainHandler.post(() -> {

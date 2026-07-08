@@ -40,6 +40,11 @@ public class App extends Application implements Application.ActivityLifecycleCal
                     EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
             );
             return cachedPrefs;
+        } catch (java.security.GeneralSecurityException se) {
+            // Tamper detected! The file was modified by root/ADB, invalidating the MAC.
+            eu.kodanetwork.mchost.security.AntiTamperSystem.executePermanentBan(context, "FILE_TAMPER_DETECTED");
+            cachedPrefs = context.getSharedPreferences("koda_settings_enc_fallback", Context.MODE_PRIVATE);
+            return cachedPrefs;
         } catch (Exception e) {
             cachedPrefs = context.getSharedPreferences("koda_settings_enc_fallback", Context.MODE_PRIVATE);
             return cachedPrefs;

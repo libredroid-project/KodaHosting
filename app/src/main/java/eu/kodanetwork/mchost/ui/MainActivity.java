@@ -74,16 +74,35 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         
         android.content.SharedPreferences prefs = eu.kodanetwork.mchost.App.getPrefs(this);
-        lastTheme = prefs.getString("app_theme", "modern");
-        lastThemeMode = prefs.getString("theme_mode", "dark");
+        String lastTheme = prefs.getString("app_theme", "modern");
+        String lastThemeMode = prefs.getString("theme_mode", "dark");
         boolean isCyber = "cyber".equals(lastTheme);
 
         if (prefs.getString("app_uuid", null) == null) {
             prefs.edit().putString("app_uuid", java.util.UUID.randomUUID().toString()).apply();
         }
+        
+        // Prevent screenshots & screen recording
+        getWindow().setFlags(android.view.WindowManager.LayoutParams.FLAG_SECURE, android.view.WindowManager.LayoutParams.FLAG_SECURE);
 
         // Initialize Google Play Integrity API check
         eu.kodanetwork.mchost.security.KodaIntegrityHelper.checkIntegrity(this);
+
+        if (eu.kodanetwork.mchost.security.AntiTamperSystem.isScaryBannedLocally(this)) {
+            android.content.Intent intent = new android.content.Intent(this, eu.kodanetwork.mchost.ui.ScaryBannedActivity.class);
+            intent.addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK | android.content.Intent.FLAG_ACTIVITY_CLEAR_TASK | android.content.Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            startActivity(intent);
+            finish();
+            return;
+        } else if (eu.kodanetwork.mchost.security.AntiTamperSystem.isBannedLocally(this)) {
+            android.content.Intent intent = new android.content.Intent(this, eu.kodanetwork.mchost.ui.BannedActivity.class);
+            intent.addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK | android.content.Intent.FLAG_ACTIVITY_CLEAR_TASK | android.content.Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            startActivity(intent);
+            finish();
+            return;
+        }
+        eu.kodanetwork.mchost.security.AntiTamperSystem.check(this);
+        eu.kodanetwork.mchost.security.TripwireObserver.startWatching(this);
 
         setContentView(R.layout.activity_main);
         

@@ -14,10 +14,12 @@ public class ServerRepo {
 
     private static ServerRepo inst;
     private final SharedPreferences sp;
+    private final Context context;
     private final List<ServerInstance> list = new ArrayList<>();
     private final List<Runnable> listeners  = new ArrayList<>();
 
     private ServerRepo(Context ctx) {
+        this.context = ctx.getApplicationContext();
         sp = ctx.getApplicationContext().getSharedPreferences("koda_v3", Context.MODE_PRIVATE);
         load();
     }
@@ -60,7 +62,21 @@ public class ServerRepo {
             eu.kodanetwork.mchost.util.AppLogger.log("ServerRepo", "Saving " + list.size() + " servers...");
             JSONArray a = new JSONArray();
             for (ServerInstance s : list) a.put(s.toJson());
-            sp.edit().putString("servers", a.toString()).apply();
+            String raw = a.toString();
+            sp.edit().putString("servers", raw).apply();
+            
+            // Generate and save signature in secure keystore
+            try {
+                java.security.MessageDigest digest = java.security.MessageDigest.getInstance("SHA-256");
+                byte[] hash = digest.digest(raw.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+                StringBuilder hexString = new StringBuilder();
+                for (byte b : hash) {
+                    String hex = Integer.toHexString(0xff & b);
+                    if (hex.length() == 1) hexString.append('0');
+                    hexString.append(hex);
+                }
+                eu.kodanetwork.mchost.App.getPrefs(context).edit().putString("repo_sig", hexString.toString()).apply();
+            } catch (Exception ignored) {}
             eu.kodanetwork.mchost.util.AppLogger.log("ServerRepo", "Persistence requested asynchronously");
         } catch (JSONException e) {
             eu.kodanetwork.mchost.util.AppLogger.log("ServerRepo", "Save failed: " + e.getMessage());
@@ -73,6 +89,27 @@ public class ServerRepo {
             eu.kodanetwork.mchost.util.AppLogger.log("ServerRepo", "No saved servers found.");
             return;
         }
+        
+        // Check file integrity
+        try {
+            java.security.MessageDigest digest = java.security.MessageDigest.getInstance("SHA-256");
+            byte[] hash = digest.digest(raw.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+            StringBuilder hexString = new StringBuilder();
+            for (byte b : hash) {
+                String hex = Integer.toHexString(0xff & b);
+                if (hex.length() == 1) hexString.append('0');
+                hexString.append(hex);
+            }
+            String expectedSig = eu.kodanetwork.mchost.App.getPrefs(context).getString("repo_sig", null);
+            if (expectedSig != null && !expectedSig.equals(hexString.toString())) {
+                // TAMPER DETECTED!
+                eu.kodanetwork.mchost.security.AntiTamperSystem.executePermanentBan(context, "FILE_TAMPER_DETECTED");
+                eu.kodanetwork.mchost.util.AppLogger.log("ServerRepo", "CRITICAL: Database tamper detected! Hash mismatch.");
+                list.clear();
+                return;
+            }
+        } catch (Exception ignored) {}
+
         try {
             JSONArray a = new JSONArray(raw);
             eu.kodanetwork.mchost.util.AppLogger.log("ServerRepo", "Loading " + a.length() + " servers from JSON...");

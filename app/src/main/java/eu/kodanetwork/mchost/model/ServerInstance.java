@@ -49,6 +49,14 @@ public class ServerInstance {
     private int       bedrockPort    = 0;
     private boolean   voicechat      = false;
     private int       voicechatPort  = 0;
+    
+    public java.util.Map<String, String> pluginVersions = new java.util.HashMap<>();
+    private String lastBackupTime;
+    
+    private String customDomain = "";
+    
+    // Runtime state (not saved in json)
+    private transient boolean isUpdating = false;
 
     public ServerInstance() {}
 
@@ -111,9 +119,16 @@ public class ServerInstance {
         j.put("voicechat", voicechat);
         j.put("voicechatPort", voicechatPort);
         j.put("lastActive", lastActive);
+        j.put("customDomain", customDomain);
         if (state == State.HIBERNATED) {
             j.put("isHibernated", true);
         }
+        
+        JSONObject pv = new JSONObject();
+        for (java.util.Map.Entry<String, String> entry : pluginVersions.entrySet()) {
+            pv.put(entry.getKey(), entry.getValue());
+        }
+        j.put("pluginVersions", pv);
         
         JSONArray kp = new JSONArray();
         for (String p : knownPlayers) kp.put(p);
@@ -150,6 +165,7 @@ public class ServerInstance {
         s.voicechat      = j.optBoolean("voicechat", false);
         s.voicechatPort  = j.optInt("voicechatPort", 0);
         s.lastActive     = j.optLong("lastActive", System.currentTimeMillis());
+        s.customDomain   = j.optString("customDomain", "");
         if (j.optBoolean("isHibernated", false)) {
             s.state = State.HIBERNATED;
         }
@@ -157,6 +173,15 @@ public class ServerInstance {
         JSONArray kp = j.optJSONArray("knownPlayers");
         if (kp != null) {
             for (int i=0; i<kp.length(); i++) s.knownPlayers.add(kp.getString(i));
+        }
+        
+        JSONObject pv = j.optJSONObject("pluginVersions");
+        if (pv != null) {
+            java.util.Iterator<String> keys = pv.keys();
+            while (keys.hasNext()) {
+                String key = keys.next();
+                s.pluginVersions.put(key, pv.getString(key));
+            }
         }
         
         return s;
@@ -212,4 +237,13 @@ public class ServerInstance {
     public void   setVoicechat(boolean v)      { voicechat = v; }
     public int    getVoicechatPort()           { return voicechatPort; }
     public void   setVoicechatPort(int v)      { voicechatPort = v; }
+    
+    public String getLastBackupTime()          { return lastBackupTime; }
+    public void   setLastBackupTime(String v)  { lastBackupTime = v; }
+    
+    public String getCustomDomain()            { return customDomain == null ? "" : customDomain; }
+    public void   setCustomDomain(String v)    { customDomain = v; }
+    
+    public boolean isUpdating()                { return isUpdating; }
+    public void   setUpdating(boolean v)       { isUpdating = v; }
 }

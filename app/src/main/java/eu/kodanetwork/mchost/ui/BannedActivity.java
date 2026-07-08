@@ -4,7 +4,6 @@ import android.os.Bundle;
 import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 import eu.kodanetwork.mchost.R;
-import eu.kodanetwork.mchost.security.KodaIntegrityHelper;
 
 public class BannedActivity extends AppCompatActivity {
 

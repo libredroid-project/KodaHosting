@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="@drawable/bg_dialog_custom"
+    android:padding="32dp"
+    android:gravity="center">
+
+    <!-- Title: P.R.A.E.T.O.R. -->
+    <TextView
+        android:id="@+id/tv_praetor_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/praetor_title"
+        android:textColor="#FF3333"
+        android:textSize="28sp"
+        android:textStyle="bold"
+        android:letterSpacing="0.1"
+        android:gravity="center" />
+
+    <!-- Subtitle -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/praetor_subtitle"
+        android:textColor="#8A8A9A"
+        android:textSize="10sp"
+        android:textStyle="bold"
+        android:letterSpacing="0.05"
+        android:gravity="center"
+        android:layout_marginTop="8dp" />
+
+    <View
+        android:layout_width="40dp"
+        android:layout_height="2dp"
+        android:background="#FF6B00"
+        android:layout_marginTop="24dp"
+        android:layout_marginBottom="24dp" />
+
+    <!-- Addon Title -->
+    <TextView
+        android:id="@+id/tv_addon_title"
+        android:layout_width="match_parent" 
+        android:layout_height="wrap_content"
+        android:text="BEDROCK SUPPORT"
+        android:textColor="#F0F0F0" 
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:gravity="center" 
+        android:layout_marginBottom="24dp"/>
+
+    <LinearLayout
+        android:id="@+id/layout_addon_options"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_addon_toggle"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            style="@style/KodaButton"
+            android:text="TURN OFF"
+            android:stateListAnimator="@null"
+            android:layout_marginBottom="8dp"/>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_addon_change_domain"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            style="@style/KodaButton.Outline"
+            android:text="CHANGE DOMAIN"
+            android:stateListAnimator="@null"
+            android:layout_marginBottom="8dp"/>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_addon_unlink_domain"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            style="@style/KodaButton.Danger"
+            android:text="UNLINK DOMAIN"
+            android:stateListAnimator="@null" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/layout_addon_warning"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:visibility="gone">
+        
+        <TextView
+            android:id="@+id/tv_addon_warning_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="#F0F0F0"
+            android:textSize="14sp"
+            android:gravity="center"
+            android:layout_marginBottom="24dp"/>
+
+        <TextView
+            android:id="@+id/tv_addon_countdown"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="#FFA500"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="16dp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_addon_confirm_off"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            style="@style/KodaButton.Danger"
+            android:text="CONFIRM DISABLE"
+            android:enabled="false"
+            android:stateListAnimator="@null"
+            android:layout_marginBottom="8dp"/>
+            
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_addon_cancel"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            style="@style/KodaButton.Outline"
+            android:text="CANCEL"
+            android:stateListAnimator="@null" />
+    </LinearLayout>
+
+</LinearLayout>

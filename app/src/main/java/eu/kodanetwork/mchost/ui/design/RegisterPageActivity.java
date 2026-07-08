@@ -42,6 +42,7 @@ public class RegisterPageActivity extends AppCompatActivity {
         eu.kodanetwork.mchost.util.ThemeHelper.apply(this);
 
         btnCreate.setOnClickListener(v -> {
+            if (!eu.kodanetwork.mchost.security.PraetorSystem.checkNetwork(this)) return;
             String email = etEmail.getText().toString().trim();
             String pwd = etPassword.getText().toString().trim();
             if (email.isEmpty() || pwd.isEmpty()) {

@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#000000">
+
+    <eu.kodanetwork.mchost.ui.GlitchBackgroundView
+        android:id="@+id/glitchBackgroundView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_margin="32dp"
+        android:background="@drawable/bg_dialog_custom"
+        android:padding="32dp"
+        android:orientation="vertical"
+        android:gravity="center">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="P.R.A.E.T.O.R."
+            android:textColor="#FF3333"
+            android:textSize="36sp"
+            android:textStyle="bold"
+            android:letterSpacing="0.1"
+            android:gravity="center" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="ACCOUNT SUSPENDED"
+            android:textColor="#8A8A9A"
+            android:textSize="10sp"
+            android:textStyle="bold"
+            android:letterSpacing="0.05"
+            android:gravity="center"
+            android:layout_marginTop="8dp" />
+        
+        <View
+            android:layout_width="40dp"
+            android:layout_height="2dp"
+            android:background="#FF3333"
+            android:layout_marginTop="24dp"
+            android:layout_marginBottom="24dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="CRITICAL SECURITY VIOLATION.\n\nUnauthorized root/tampering detected. Your Hardware ID has been permanently blacklisted across the KodaHosting infrastructure.\n\nAll associated server instances are subject to termination without refund.\n\nTHIS ACTION IS IRREVERSIBLE."
+            android:textSize="14sp"
+            android:textColor="#cccccc"
+            android:gravity="center"
+            android:textStyle="bold"
+            android:layout_marginBottom="24dp" />
+
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/glitchText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:text="FATAL ERROR"
+        android:textColor="#FF0000"
+        android:textSize="48sp"
+        android:textStyle="bold"
+        android:visibility="invisible"
+        android:fontFamily="monospace"
+        android:gravity="center"
+        android:shadowColor="#FF0000"
+        android:shadowDx="5"
+        android:shadowDy="5"
+        android:shadowRadius="10" />
+
+    <TextView
+        android:id="@+id/bannedHwidText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|center_horizontal"
+        android:layout_marginBottom="32dp"
+        android:text="HWID: ..."
+        android:textSize="10sp"
+        android:textColor="#666666"
+        android:fontFamily="monospace" />
+
+</FrameLayout>

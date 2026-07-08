@@ -59,9 +59,13 @@ public class DatabaseOrchestrator {
                 // chmod all files recursively to avoid permission denied
                 makeExecutableRecursive(destDir);
                 
+                // create symlinks for executables in jniLibs to bypass W^X
+                symlinkNativeLibs(context, destDir);
+                
                 // create the .ready marker
                 new File(destDir, ".symlinks_fixed_2").createNewFile();
                 AppLogger.log(TAG, "[DB Setup] ✓ " + assetName + " extracted successfully.");
+
             } catch (Exception ex) {
                 AppLogger.log(TAG, "[DB Setup] ✗ extraction failed for " + assetName + ": " + ex.getMessage());
             } finally {
@@ -97,6 +101,33 @@ public class DatabaseOrchestrator {
                     makeExecutableRecursive(child);
                 }
             }
+        }
+    }
+
+    private static void symlinkNativeLibs(Context context, File destDir) {
+        try {
+            File nativeDir = new File(context.getApplicationInfo().nativeLibraryDir);
+            File binDir = new File(destDir, "usr/bin");
+            if (!binDir.exists()) binDir.mkdirs();
+
+            File[] libs = nativeDir.listFiles();
+            if (libs == null) return;
+
+            for (File lib : libs) {
+                String name = lib.getName();
+                if (name.startsWith("lib") && name.endsWith(".so")) {
+                    String binName = name.substring(3, name.length() - 3);
+                    File linkTarget = new File(binDir, binName);
+                    if (linkTarget.exists()) linkTarget.delete();
+                    try {
+                        android.system.Os.symlink(lib.getAbsolutePath(), linkTarget.getAbsolutePath());
+                    } catch (Exception e) {
+                        AppLogger.log(TAG, "[DB Setup] Failed to symlink " + binName + ": " + e.getMessage());
+                    }
+                }
+            }
+        } catch (Exception e) {
+            AppLogger.log(TAG, "[DB Setup] Error during symlinking: " + e.getMessage());
         }
     }
 }

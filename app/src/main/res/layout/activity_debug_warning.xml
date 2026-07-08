@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#000000">
+
+    <eu.kodanetwork.mchost.ui.GlitchBackgroundView
+        android:id="@+id/glitchBackgroundView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_margin="32dp"
+        android:background="@drawable/bg_dialog_custom"
+        android:padding="32dp"
+        android:orientation="vertical"
+        android:gravity="center">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="P.R.A.E.T.O.R."
+            android:textColor="#FF9800"
+            android:textSize="36sp"
+            android:textStyle="bold"
+            android:letterSpacing="0.1"
+            android:gravity="center" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="USB DEBUGGING DETECTED"
+            android:textColor="#8A8A9A"
+            android:textSize="10sp"
+            android:textStyle="bold"
+            android:letterSpacing="0.05"
+            android:gravity="center"
+            android:layout_marginTop="8dp" />
+        
+        <View
+            android:layout_width="40dp"
+            android:layout_height="2dp"
+            android:background="#FF9800"
+            android:layout_marginTop="24dp"
+            android:layout_marginBottom="24dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="SECURITY PROTOCOL ENGAGED.\n\nUSB Debugging enables unauthorized access to runtime memory and API keys.\n\nDisable USB Debugging in your device settings to continue using KodaHosting."
+            android:textSize="14sp"
+            android:textColor="#cccccc"
+            android:gravity="center"
+            android:textStyle="bold"
+            android:layout_marginBottom="24dp" />
+
+        <TextView
+            android:id="@+id/countdownText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="SHUTDOWN IN 10"
+            android:textColor="#FF3333"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:gravity="center" />
+
+    </LinearLayout>
+
+</FrameLayout>

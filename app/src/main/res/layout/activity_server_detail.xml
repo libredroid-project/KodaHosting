@@ -36,26 +36,36 @@
                 android:textSize="11sp" android:fontFamily="sans-serif-medium"
                 android:textStyle="bold" android:letterSpacing="0.04"/>
         </LinearLayout>
-
-        <LinearLayout android:id="@+id/layout_header_restart"
-            android:layout_width="0dp" android:layout_height="match_parent"
-            android:layout_weight="1" android:orientation="horizontal" android:gravity="center_vertical"
-            android:visibility="gone">
-            <TextView android:layout_width="0dp" android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="@string/plugin_installed_restart_needed"
-                android:textColor="#FFCC00" android:textSize="13sp"
-                android:fontFamily="sans-serif-medium" android:paddingStart="8dp"
-                android:singleLine="true" android:ellipsize="end"/>
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btn_header_restart"
-                android:layout_width="wrap_content" android:layout_height="36dp"
-                android:text="@string/restart" app:backgroundTint="#FFCC00" android:textColor="#000000"
-                android:textSize="11sp" app:cornerRadius="6dp" android:insetTop="0dp" android:insetBottom="0dp"/>
-        </LinearLayout>
     </LinearLayout>
     <View android:layout_width="match_parent" android:layout_height="2dp"
         android:background="#FF6B00" android:alpha="0.6"/>
+
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/layout_header_restart"
+        android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:layout_margin="12dp"
+        app:cardBackgroundColor="#221100"
+        app:cardCornerRadius="8dp"
+        app:strokeWidth="1dp"
+        app:strokeColor="#FF6B00"
+        android:visibility="gone">
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:orientation="horizontal" android:gravity="center_vertical" android:padding="12dp">
+            <TextView android:id="@+id/tv_header_restart_msg"
+                android:layout_width="0dp" android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/plugin_installed_restart_needed"
+                android:textColor="#FF6B00" android:textSize="14sp"
+                android:fontFamily="sans-serif-medium"
+                android:lineSpacingExtra="2dp"/>
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_header_restart"
+                android:layout_width="wrap_content" android:layout_height="36dp"
+                android:layout_marginStart="12dp"
+                android:text="@string/restart" app:backgroundTint="#FF6B00" android:textColor="#FFFFFF"
+                android:textSize="12sp" app:cornerRadius="6dp" android:insetTop="0dp" android:insetBottom="0dp"/>
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
 
     <!-- ┌─ TABS ─────────────────────────────────────────────────────────┐ -->
     <com.google.android.material.tabs.TabLayout
@@ -318,6 +328,18 @@
                             android:textSize="13sp"
                             app:cornerRadius="12dp"/>
                     </LinearLayout>
+                    
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btn_dashboard_update"
+                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                        android:layout_width="match_parent" android:layout_height="48dp"
+                        android:layout_marginTop="16dp"
+                        android:text="Updates Available (Update Now)"
+                        android:textColor="#00E676"
+                        app:strokeColor="#00E676"
+                        app:strokeWidth="1dp"
+                        app:cornerRadius="12dp"
+                        android:visibility="gone"/>
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 
@@ -577,6 +599,17 @@
                         android:textColor="#8A8A9A" android:textSize="12sp"
                         android:fontFamily="sans-serif" android:lineSpacingMultiplier="1.6"/>
                         
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btn_settings_update"
+                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                        android:layout_width="match_parent" android:layout_height="48dp"
+                        android:layout_marginTop="16dp"
+                        android:text="Check for Updates"
+                        android:textColor="#FF6B00"
+                        app:strokeColor="#FF6B00"
+                        app:strokeWidth="1dp"
+                        app:cornerRadius="8dp"/>
+                        
                     <View android:layout_width="match_parent" android:layout_height="1dp"
                         android:background="#332A24" android:layout_marginTop="16dp" android:layout_marginBottom="16dp"/>
 
@@ -674,25 +707,34 @@
 
                     <LinearLayout android:id="@+id/ll_domain_input_container"
                         android:layout_width="match_parent" android:layout_height="wrap_content"
-                        android:orientation="horizontal" android:gravity="center_vertical"
-                        android:background="#1B1613" android:padding="2dp" android:layout_marginBottom="12dp">
-
-                        <EditText android:id="@+id/et_domain_prefix"
-                            android:layout_width="0dp" android:layout_height="40dp"
-                            android:layout_weight="1"
-                            android:hint="play.mydomain.com"
-                            android:textColor="#FFFFFF" android:textColorHint="#555566"
-                            android:background="@null" android:textSize="13sp"
-                            android:paddingStart="10dp" android:paddingEnd="10dp"
-                            android:inputType="textUri" android:fontFamily="sans-serif"/>
+                        android:orientation="vertical" android:gravity="center_vertical"
+                        android:layout_marginBottom="12dp">
 
                         <com.google.android.material.button.MaterialButton
                             android:id="@+id/btn_link_domain"
-                            style="@style/Widget.MaterialComponents.Button.TextButton"
-                            android:layout_width="wrap_content" android:layout_height="40dp"
-                            android:text="@string/set_domain" android:textColor="#FF6B00"
-                            android:textAllCaps="false"
-                            android:textSize="13sp" android:fontFamily="sans-serif-medium"/>
+                            android:layout_width="match_parent" android:layout_height="50dp"
+                            android:text="@string/change_join_address" android:textColor="#111111"
+                            app:backgroundTint="#FF6B00" app:cornerRadius="6dp"
+                            android:textAllCaps="true"
+                            android:textSize="14sp" android:fontFamily="sans-serif-black"/>
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btn_custom_dns_wizard"
+                            android:layout_width="match_parent" android:layout_height="50dp"
+                            android:layout_marginTop="8dp"
+                            android:text="@string/link_custom_domain" android:textColor="#111111"
+                            app:backgroundTint="#FF6B00" app:cornerRadius="6dp"
+                            android:textAllCaps="true"
+                            android:textSize="14sp" android:fontFamily="sans-serif-black"/>
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btn_change_name"
+                            android:layout_width="match_parent" android:layout_height="50dp"
+                            android:layout_marginTop="8dp"
+                            android:text="@string/change_server_name" android:textColor="#111111"
+                            app:backgroundTint="#FF6B00" app:cornerRadius="6dp"
+                            android:textAllCaps="true"
+                            android:textSize="14sp" android:fontFamily="sans-serif-black"/>
                     </LinearLayout>
 
                     <!-- DNS Configuration Panel (Hidden by default) -->
@@ -732,7 +774,7 @@
                     <View android:layout_width="match_parent" android:layout_height="1dp"
                         android:background="#332A24" android:layout_marginTop="16dp" android:layout_marginBottom="16dp"/>
 
-                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                    <LinearLayout android:id="@+id/row_bedrock" android:layout_width="match_parent" android:layout_height="wrap_content"
                         android:orientation="horizontal" android:gravity="center_vertical">
                         <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
                             android:layout_weight="1" android:orientation="vertical">
@@ -753,7 +795,7 @@
                     <View android:layout_width="match_parent" android:layout_height="1dp"
                         android:background="#332A24" android:layout_marginTop="12dp" android:layout_marginBottom="12dp"/>
 
-                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                    <LinearLayout android:id="@+id/row_voicechat" android:layout_width="match_parent" android:layout_height="wrap_content"
                         android:orientation="horizontal" android:gravity="center_vertical">
                         <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
                             android:layout_weight="1" android:orientation="vertical">

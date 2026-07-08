@@ -91,6 +91,59 @@ public class PaperMCDownloader {
         }).start();
     }
 
+    public static File downloadLatestPaperSync(String version, File serverDir, DownloadCallback callback) throws Exception {
+        if (callback != null) callback.onProgress("Prüfe aktuelle PaperMC Version für " + version + "...");
+        
+        String buildsUrl = API_BASE_URL + "/versions/" + version + "/builds";
+        String buildsJson = fetchJson(buildsUrl);
+        if (buildsJson == null) {
+            throw new Exception("Fehler beim Abrufen der Builds für Version " + version);
+        }
+
+        JSONArray buildsArray = new JSONArray(buildsJson);
+        if (buildsArray.length() == 0) {
+            throw new Exception("Keine Builds gefunden für " + version);
+        }
+        
+        JSONObject latestBuildObj = buildsArray.getJSONObject(0);
+        int latestBuild = latestBuildObj.getInt("id");
+        
+        String jarFileName = "paper-" + version + "-" + latestBuild + ".jar";
+        File targetJar = new File(serverDir, jarFileName);
+
+        if (targetJar.exists()) {
+            if (callback != null) callback.onProgress("Aktuellste Version (" + latestBuild + ") ist bereits installiert.");
+            return targetJar;
+        }
+
+        File[] existingJars = serverDir.listFiles((dir, name) -> name.startsWith("paper-") && name.endsWith(".jar"));
+        if (existingJars != null) {
+            for (File oldJar : existingJars) {
+                oldJar.delete();
+            }
+        }
+
+        if (callback != null) callback.onProgress("Lade PaperMC Build " + latestBuild + " herunter...");
+        String downloadUrl = latestBuildObj.getJSONObject("downloads").getJSONObject("server:default").getString("url");
+        
+        HttpURLConnection conn = (HttpURLConnection) new URL(downloadUrl).openConnection();
+        conn.setInstanceFollowRedirects(true);
+        conn.connect();
+        
+        if (conn.getResponseCode() != 200) {
+            throw new Exception("Download fehlgeschlagen mit HTTP " + conn.getResponseCode());
+        }
+
+        try (InputStream is = conn.getInputStream(); FileOutputStream fos = new FileOutputStream(targetJar)) {
+            byte[] buffer = new byte[8192];
+            int len;
+            while ((len = is.read(buffer)) > 0) {
+                fos.write(buffer, 0, len);
+            }
+        }
+        return targetJar;
+    }
+
     private static String fetchJson(String urlString) {
         try {
             HttpURLConnection conn = (HttpURLConnection) new URL(urlString).openConnection();

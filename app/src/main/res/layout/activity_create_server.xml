@@ -411,6 +411,8 @@
                 android:textSize="18sp"
                 android:fontFamily="sans-serif-medium"
                 android:textStyle="bold"
+                android:gravity="center"
+                android:textAlignment="center"
                 android:letterSpacing="0.05"/>
         </LinearLayout>
     </FrameLayout>

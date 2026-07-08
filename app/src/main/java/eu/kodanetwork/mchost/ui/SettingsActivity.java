@@ -30,8 +30,6 @@ public class SettingsActivity extends Activity {
 
         prefs = eu.kodanetwork.mchost.App.getPrefs(this);
         boolean isCyber = "cyber".equals(prefs.getString("app_theme", "modern"));
-
-        setContentView(R.layout.activity_settings);
         
         findViewById(R.id.card_legal).setOnClickListener(v -> {
             startActivity(new android.content.Intent(this, LicensesActivity.class));
@@ -839,6 +837,7 @@ public class SettingsActivity extends Activity {
 
         if (btnDeleteServers != null) {
             btnDeleteServers.setOnClickListener(v -> {
+                if (!eu.kodanetwork.mchost.security.PraetorSystem.checkNetwork(this)) return;
                 eu.kodanetwork.mchost.util.HapticUtil.forceVibrate(this, 80);
                 Intent i = new Intent(this, PraetorConfirmActivity.class);
                 i.putExtra("action", "delete_servers");
@@ -848,6 +847,7 @@ public class SettingsActivity extends Activity {
 
         if (btnRevokeTos != null) {
             btnRevokeTos.setOnClickListener(v -> {
+                if (!eu.kodanetwork.mchost.security.PraetorSystem.checkNetwork(this)) return;
                 eu.kodanetwork.mchost.util.HapticUtil.forceVibrate(this, 80);
                 Intent i = new Intent(this, PraetorConfirmActivity.class);
                 i.putExtra("action", "revoke_tos");

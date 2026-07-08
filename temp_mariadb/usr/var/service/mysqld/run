@@ -1,0 +1,2 @@
+#!/data/data/com.termux/files/usr/bin/sh
+exec mysqld --basedir=/data/data/com.termux/files/usr --datadir=/data/data/com.termux/files/usr/var/lib/mysql 2>&1

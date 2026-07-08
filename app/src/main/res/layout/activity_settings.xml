@@ -27,7 +27,7 @@
         <View android:layout_width="0dp" android:layout_height="0dp" android:layout_weight="1"/>
         <TextView android:id="@+id/tv_settings_version"
             android:layout_width="wrap_content" android:layout_height="wrap_content"
-            android:text="v1.8485" android:textColor="#888899"
+            android:text="v1.8494" android:textColor="#888899"
             android:textSize="11sp" android:fontFamily="sans-serif"/>
     </LinearLayout>
     

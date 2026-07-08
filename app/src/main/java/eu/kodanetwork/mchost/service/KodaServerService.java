@@ -68,7 +68,7 @@ public class KodaServerService extends Service {
     public static final String ACTION_INSTALL_PLUGIN_FLOW = "INSTALL_PLUGIN_FLOW";
 
     private final IBinder binder = new LocalBinder();
-    private final Map<String, RT> runtimes = new HashMap<>();
+    private final Map<String, RT> runtimes = new java.util.concurrent.ConcurrentHashMap<>();
     private final Map<String, Integer> setupPhase = new HashMap<>();
     private final ExecutorService exec = Executors.newCachedThreadPool();
     private final java.util.concurrent.ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
@@ -516,6 +516,47 @@ public class KodaServerService extends Service {
         }
     }
 
+    private void linkNativeBinaries(File binDir) {
+        if (!binDir.exists()) binDir.mkdirs();
+        File nativeDir = new File(getApplicationInfo().nativeLibraryDir);
+        File[] libs = nativeDir.listFiles();
+        if (libs != null) {
+            for (File lib : libs) {
+                String name = lib.getName();
+                if (name.startsWith("lib") && name.endsWith(".so")) {
+                    String originalName = name.substring(3, name.length() - 3);
+                    File symlink = new File(binDir, originalName);
+                    if (symlink.exists() || java.nio.file.Files.isSymbolicLink(symlink.toPath())) {
+                        symlink.delete();
+                    }
+                    try {
+                        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
+                            android.system.Os.symlink(lib.getAbsolutePath(), symlink.getAbsolutePath());
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                    
+                    // Specific mapping for mysql to mariadb as we deduplicated them
+                    if (originalName.startsWith("mariadb")) {
+                        String mysqlName = originalName.replace("mariadb", "mysql");
+                        File mysqlSymlink = new File(binDir, mysqlName);
+                        if (mysqlSymlink.exists() || java.nio.file.Files.isSymbolicLink(mysqlSymlink.toPath())) {
+                            mysqlSymlink.delete();
+                        }
+                        try {
+                            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
+                                android.system.Os.symlink(lib.getAbsolutePath(), mysqlSymlink.getAbsolutePath());
+                            }
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     private void startDatabaseFlow(ServerInstance srv) {
         String id = srv.getId();
         File dir = new File(srv.getServerDir());
@@ -538,6 +579,10 @@ public class KodaServerService extends Service {
                 
                 // Ensure everything in usrDir is executable just in case Tar extraction lost permissions
                 setExecutableRecursive(usrDir);
+                
+                // Link native libraries to bin directory to bypass targetSdk 35 W^X restrictions
+                linkNativeBinaries(new File(usrDir, "bin"));
+                linkNativeBinaries(new File(usrDir, "libexec"));
                 
                 String ldPath = usrDir.getAbsolutePath() + "/lib:" + getApplicationInfo().nativeLibraryDir + ":/system/lib64:/system/lib:/vendor/lib64";
                 String inFifo = new File(dir, "in.fifo").getAbsolutePath();
@@ -581,6 +626,8 @@ public class KodaServerService extends Service {
                                 content = content.replace("$dirname0/" + usrDir.getAbsolutePath(), "$basedir");
                                 content = content.replace("$dirname0//" + usrDir.getAbsolutePath(), "$basedir");
                                 content = content.replace("/data/data/com.termux/files/usr", usrDir.getAbsolutePath());
+                                content = content.replace("$basedir/" + usrDir.getAbsolutePath(), "$basedir");
+                                content = content.replace("$basedir//" + usrDir.getAbsolutePath(), "$basedir");
                                 raf.seek(0);
                                 raf.write(content.getBytes());
                                 raf.setLength(content.getBytes().length);
@@ -597,6 +644,8 @@ public class KodaServerService extends Service {
                                 content = content.replace("$dirname0/" + usrDir.getAbsolutePath(), "$basedir");
                                 content = content.replace("$dirname0//" + usrDir.getAbsolutePath(), "$basedir");
                                 content = content.replace("/data/data/com.termux/files/usr", usrDir.getAbsolutePath());
+                                content = content.replace("$basedir/" + usrDir.getAbsolutePath(), "$basedir");
+                                content = content.replace("$basedir//" + usrDir.getAbsolutePath(), "$basedir");
                                 raf.seek(0);
                                 raf.write(content.getBytes());
                                 raf.setLength(content.getBytes().length);
@@ -605,6 +654,10 @@ public class KodaServerService extends Service {
                         } catch (Exception e) {}
 
                         log(id, "  ℹ Initializing MariaDB data directory...");
+                        script += "chmod -R +x \"" + usrDir.getAbsolutePath() + "/bin\"\n";
+                        if (new File(usrDir, "libexec").exists()) {
+                            script += "chmod -R +x \"" + usrDir.getAbsolutePath() + "/libexec\"\n";
+                        }
                         script += "sh \"" + usrDir.getAbsolutePath() + "/bin/mariadb-install-db\" --datadir=\"" + dataDir.getAbsolutePath() + "\" --basedir=\"" + usrDir.getAbsolutePath() + "\" --auth-root-authentication-method=normal\n";
                         script += "echo \"CREATE USER IF NOT EXISTS '" + srv.getDbUsername() + "'@'%' IDENTIFIED BY '" + srv.getDbPassword() + "';\" > init.sql\n";
                         script += "echo \"GRANT ALL PRIVILEGES ON *.* TO '" + srv.getDbUsername() + "'@'%' WITH GRANT OPTION;\" >> init.sql\n";
@@ -613,12 +666,19 @@ public class KodaServerService extends Service {
 
                     log(id, "  ℹ Fixing execution permissions...");
                     makeExecutable(new File(usrDir, "bin"));
-                    makeExecutable(new File(usrDir, "libexec"));
+                    if (new File(usrDir, "libexec").exists()) {
+                        makeExecutable(new File(usrDir, "libexec"));
+                    }
 
                     script += "echo \"Starting MariaDB on port " + srv.getPort() + "...\"\n";
-                    script += "exec mysqld --datadir=\"" + dataDir.getAbsolutePath() + "\" " +
+                    script += "chmod -R +x \"" + usrDir.getAbsolutePath() + "/bin\"\n";
+                    if (new File(usrDir, "libexec").exists()) {
+                        script += "chmod -R +x \"" + usrDir.getAbsolutePath() + "/libexec\"\n";
+                    }
+                    script += "exec mariadbd --datadir=\"" + dataDir.getAbsolutePath() + "\" " +
                               "--basedir=\"" + usrDir.getAbsolutePath() + "\" " +
                               "--lc-messages-dir=\"" + usrDir.getAbsolutePath() + "/share/mariadb\" " +
+                              "--plugin-dir=\"" + getApplicationInfo().nativeLibraryDir + "\" " +
                               "--tmpdir=\"" + dp + "\" " +
                               "--port=" + srv.getPort() + " " +
                               "--bind-address=0.0.0.0 " +
@@ -744,7 +804,7 @@ public class KodaServerService extends Service {
     }
 
     private void startEmbeddedJvmFlow(ServerInstance srv, File jar, File logFile) {
-        exec.submit(() -> {
+        new Thread(() -> {
             String id = srv.getId();
             log(id, "  ℹ INITIATING EMBEDDED JNI DEPLOYMENT (JDK 21 NDK)...");
             
@@ -1001,11 +1061,11 @@ public class KodaServerService extends Service {
                     try { unbindService(jvmConnRef[0]); } catch (Exception ignored) {}
                 }
             }
-        });
+        }).start();
     }
 
     private void startNativeFlow(ServerInstance srv, File jar, File logFile) {
-        exec.submit(() -> {
+        new Thread(() -> {
             String[] abis = android.os.Build.SUPPORTED_ABIS;
             boolean is64 = false;
             for (String abi : abis) {

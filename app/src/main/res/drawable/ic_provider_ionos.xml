@@ -1,0 +1,11 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24"
+    android:tint="#FFFFFF">
+  <!-- Stylized geometric squares forming "I" and "O" representation -->
+  <path
+      android:fillColor="@android:color/white"
+      android:pathData="M3,4h4v16H3z M9,4h12v16H9V4zM11,6v12h8V6H11z"/>
+</vector>

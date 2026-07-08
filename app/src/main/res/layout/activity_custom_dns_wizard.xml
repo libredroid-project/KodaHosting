@@ -1,0 +1,553 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <!-- Animated floating squares background -->
+    <eu.kodanetwork.mchost.ui.FloatingSquaresView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <!-- Main content -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <!-- Top bar -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingHorizontal="20dp"
+            android:paddingTop="48dp"
+            android:paddingBottom="8dp"
+            android:gravity="center_vertical">
+
+            <ImageView
+                android:id="@+id/btn_back"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:padding="6dp"
+                android:src="@drawable/ic_back_custom"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:clickable="true"
+                android:focusable="true"
+                app:tint="#AAAAAA" />
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:layout_marginStart="14dp">
+
+                <TextView
+                    android:id="@+id/tv_title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/cdns_wizard_title"
+                    android:textColor="#F0F0F0"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:fontFamily="sans-serif-medium" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="DNS CONFIGURATION"
+                    android:textColor="#555555"
+                    android:textSize="10sp"
+                    android:letterSpacing="0.15"
+                    android:fontFamily="sans-serif-medium" />
+            </LinearLayout>
+
+            <!-- Step indicator dots -->
+            <LinearLayout
+                android:id="@+id/layout_step_dots"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+
+                <View
+                    android:id="@+id/dot_step1"
+                    android:layout_width="8dp"
+                    android:layout_height="8dp"
+                    android:background="@drawable/dot_online"
+                    android:layout_marginEnd="6dp" />
+
+                <View
+                    android:id="@+id/dot_step2"
+                    android:layout_width="6dp"
+                    android:layout_height="6dp"
+                    android:background="@drawable/dot_offline"
+                    android:layout_marginEnd="6dp" />
+
+                <View
+                    android:id="@+id/dot_step3"
+                    android:layout_width="6dp"
+                    android:layout_height="6dp"
+                    android:background="@drawable/dot_offline" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- Orange accent line -->
+        <View
+            android:layout_width="40dp"
+            android:layout_height="2dp"
+            android:background="#FF6B00"
+            android:layout_marginStart="70dp"
+            android:layout_marginTop="4dp" />
+
+        <!-- ScrollView to prevent keyboard and card layout overflows -->
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:fillViewport="true"
+            android:overScrollMode="never"
+            android:scrollbars="none">
+
+            <FrameLayout
+                android:id="@+id/container_cards"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:paddingTop="16dp">
+
+            <!-- ═══ STEP 1: Domain Input ═══ -->
+            <LinearLayout
+                android:id="@+id/card_step1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="20dp"
+                android:layout_marginRight="20dp"
+                android:layout_gravity="center"
+                android:layout_marginBottom="20dp"
+                android:orientation="vertical"
+                android:background="@drawable/bg_wizard_card"
+                android:padding="28dp"
+                android:visibility="visible">
+
+                <TextView
+                    android:id="@+id/tv_step1_title"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/cdns_step1_title"
+                    android:textColor="#F0F0F0"
+                    android:textSize="22sp"
+                    android:textStyle="bold"
+                    android:fontFamily="sans-serif-medium" />
+
+                <View
+                    android:layout_width="32dp"
+                    android:layout_height="2dp"
+                    android:background="#FF6B00"
+                    android:layout_marginTop="12dp"
+                    android:layout_marginBottom="12dp" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/cdns_step1_desc"
+                    android:textColor="#777777"
+                    android:textSize="13sp"
+                    android:lineSpacingExtra="3dp"
+                    android:fontFamily="sans-serif" />
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chip_existing_domain"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:visibility="gone"
+                    android:textColor="#FF6B00"
+                    android:textSize="13sp" />
+
+                <!-- Domain input field -->
+                <eu.kodanetwork.mchost.ui.AnimatedBorderLayout
+                    android:id="@+id/layout_input_wrapper"
+                    android:layout_width="match_parent"
+                    android:layout_height="52dp"
+                    android:orientation="horizontal"
+                    android:layout_marginTop="24dp"
+                    android:background="@drawable/bg_input"
+                    android:gravity="center_vertical">
+
+                    <EditText
+                        android:id="@+id/et_domain"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:background="@null"
+                        android:hint="@string/cdns_domain_hint"
+                        android:textColorHint="#444444"
+                        android:textColor="#F0F0F0"
+                        android:paddingHorizontal="16dp"
+                        android:inputType="textUri|textNoSuggestions"
+                        android:gravity="center_vertical|start"
+                        android:textSize="15sp"
+                        android:fontFamily="sans-serif" />
+                </eu.kodanetwork.mchost.ui.AnimatedBorderLayout>
+
+                <eu.kodanetwork.mchost.ui.AnimatedBorderLayout
+                    android:id="@+id/layout_btn_next_wrapper"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="20dp"
+                    android:orientation="vertical">
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btn_next_step1"
+                        style="@style/KodaButton"
+                        android:layout_width="match_parent"
+                        android:layout_height="52dp"
+                        android:text="@string/cdns_btn_next"
+                        android:stateListAnimator="@null" />
+                </eu.kodanetwork.mchost.ui.AnimatedBorderLayout>
+            </LinearLayout>
+
+            <!-- ═══ STEP 2: Instructions ═══ -->
+            <LinearLayout
+                android:id="@+id/card_step2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="20dp"
+                android:orientation="vertical"
+                android:background="@drawable/bg_wizard_card"
+                android:padding="28dp"
+                android:visibility="gone">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/cdns_step2_title"
+                    android:textColor="#F0F0F0"
+                    android:textSize="22sp"
+                    android:textStyle="bold"
+                    android:fontFamily="sans-serif-medium" />
+
+                <View
+                    android:layout_width="32dp"
+                    android:layout_height="2dp"
+                    android:background="#FF6B00"
+                    android:layout_marginTop="12dp"
+                    android:layout_marginBottom="12dp" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/cdns_step2_desc"
+                    android:textColor="#777777"
+                    android:textSize="13sp"
+                    android:lineSpacingExtra="3dp"
+                    android:fontFamily="sans-serif" />
+
+                <!-- SRV data block -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_marginTop="20dp"
+                    android:background="@drawable/bg_wizard_data"
+                    android:padding="12dp">
+
+                    <TextView
+                        android:id="@+id/tv_srv_type"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:padding="10dp"
+                        android:text="@string/cdns_copy_type"
+                        android:textColor="#CCCCCC"
+                        android:textSize="13sp"
+                        android:fontFamily="monospace"
+                        android:background="?attr/selectableItemBackground"
+                        android:clickable="true"
+                        android:focusable="true" />
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="#1AFF6B00" />
+
+                    <TextView
+                        android:id="@+id/tv_srv_service"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:padding="10dp"
+                        android:textColor="#CCCCCC"
+                        android:textSize="13sp"
+                        android:fontFamily="monospace"
+                        android:background="?attr/selectableItemBackground"
+                        android:clickable="true"
+                        android:focusable="true" />
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="#1AFF6B00" />
+
+                    <TextView
+                        android:id="@+id/tv_srv_protocol"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:padding="10dp"
+                        android:textColor="#CCCCCC"
+                        android:textSize="13sp"
+                        android:fontFamily="monospace"
+                        android:background="?attr/selectableItemBackground"
+                        android:clickable="true"
+                        android:focusable="true" />
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="#1AFF6B00" />
+
+                    <TextView
+                        android:id="@+id/tv_srv_name"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:padding="10dp"
+                        android:textColor="#CCCCCC"
+                        android:textSize="13sp"
+                        android:fontFamily="monospace"
+                        android:background="?attr/selectableItemBackground"
+                        android:clickable="true"
+                        android:focusable="true" />
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="#1AFF6B00" />
+
+                    <TextView
+                        android:id="@+id/tv_srv_target"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:padding="10dp"
+                        android:textColor="#CCCCCC"
+                        android:textSize="13sp"
+                        android:fontFamily="monospace"
+                        android:background="?attr/selectableItemBackground"
+                        android:clickable="true"
+                        android:focusable="true" />
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="#1AFF6B00" />
+
+                    <TextView
+                        android:id="@+id/tv_srv_priority"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:padding="10dp"
+                        android:textColor="#CCCCCC"
+                        android:textSize="13sp"
+                        android:fontFamily="monospace"
+                        android:background="?attr/selectableItemBackground"
+                        android:clickable="true"
+                        android:focusable="true" />
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="#1AFF6B00" />
+
+                    <TextView
+                        android:id="@+id/tv_srv_weight"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:padding="10dp"
+                        android:textColor="#CCCCCC"
+                        android:textSize="13sp"
+                        android:fontFamily="monospace"
+                        android:background="?attr/selectableItemBackground"
+                        android:clickable="true"
+                        android:focusable="true" />
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="#1AFF6B00" />
+
+                    <TextView
+                        android:id="@+id/tv_srv_port"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:padding="10dp"
+                        android:textColor="#CCCCCC"
+                        android:textSize="13sp"
+                        android:fontFamily="monospace"
+                        android:background="?attr/selectableItemBackground"
+                        android:clickable="true"
+                        android:focusable="true" />
+                </LinearLayout>
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_goto_provider"
+                    style="@style/KodaButton.Outline"
+                    android:layout_width="match_parent"
+                    android:layout_height="52dp"
+                    android:layout_marginTop="16dp"
+                    android:text="Configure on provider"
+                    android:stateListAnimator="@null"
+                    android:visibility="gone" />
+
+                <!-- Setup Guide Section (Always visible) -->
+                <LinearLayout
+                    android:id="@+id/layout_guide_content"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:visibility="visible"
+                    android:layout_marginTop="20dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Animated Setup Guide"
+                        android:textColor="#F0F0F0"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        android:layout_marginBottom="8dp"
+                        android:fontFamily="sans-serif-medium" />
+
+                    <eu.kodanetwork.mchost.ui.AnimatedTutorialView
+                        android:id="@+id/animated_tutorial_view"
+                        android:layout_width="match_parent"
+                        android:layout_height="180dp" />
+
+                    <!-- Pager Controls -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_marginTop="8dp"
+                        android:gravity="center_vertical">
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btn_prev_tutorial"
+                            style="@style/Widget.MaterialComponents.Button.TextButton"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Prev"
+                            android:textColor="#FF6B00" />
+
+                        <Space
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1" />
+
+                        <TextView
+                            android:id="@+id/tv_tutorial_step"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Step 1/3"
+                            android:textColor="#FFFFFF"
+                            android:textSize="14sp" />
+
+                        <Space
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1" />
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btn_next_tutorial"
+                            style="@style/Widget.MaterialComponents.Button.TextButton"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Next"
+                            android:textColor="#FF6B00" />
+                    </LinearLayout>
+
+                    <TextView
+                        android:id="@+id/tv_guide_text"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:textColor="#8A8A9A"
+                        android:textSize="12sp"
+                        android:lineSpacingExtra="2dp"
+                        android:gravity="center" />
+                </LinearLayout>
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_verify"
+                    style="@style/KodaButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="52dp"
+                    android:layout_marginTop="12dp"
+                    android:text="@string/cdns_btn_verify"
+                    android:stateListAnimator="@null" />
+            </LinearLayout>
+
+            <!-- ═══ STEP 3: Verification ═══ -->
+            <LinearLayout
+                android:id="@+id/card_step3"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="20dp"
+                android:layout_gravity="center"
+                android:orientation="vertical"
+                android:background="@drawable/bg_wizard_card"
+                android:padding="28dp"
+                android:gravity="center"
+                android:visibility="gone">
+
+                <ProgressBar
+                    android:id="@+id/pb_verify"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:layout_marginBottom="20dp"
+                    android:indeterminateTint="#FF6B00" />
+
+                <TextView
+                    android:id="@+id/tv_step3_title"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:text="@string/cdns_step3_title"
+                    android:textColor="#F0F0F0"
+                    android:textSize="22sp"
+                    android:textStyle="bold"
+                    android:fontFamily="sans-serif-medium" />
+
+                <View
+                    android:layout_width="32dp"
+                    android:layout_height="2dp"
+                    android:background="#FF6B00"
+                    android:layout_gravity="center"
+                    android:layout_marginTop="12dp"
+                    android:layout_marginBottom="12dp" />
+
+                <TextView
+                    android:id="@+id/tv_step3_desc"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:text="@string/cdns_step3_desc"
+                    android:textColor="#777777"
+                    android:textSize="13sp"
+                    android:lineSpacingExtra="3dp"
+                    android:fontFamily="sans-serif" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_finish"
+                    style="@style/KodaButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="52dp"
+                    android:layout_marginTop="20dp"
+                    android:text="@string/cdns_btn_finish"
+                    android:stateListAnimator="@null"
+                    android:visibility="gone" />
+            </LinearLayout>
+
+        </FrameLayout>
+        </ScrollView>
+    </LinearLayout>
+</FrameLayout>
+
+
