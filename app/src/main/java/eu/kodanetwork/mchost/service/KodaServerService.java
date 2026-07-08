@@ -629,7 +629,10 @@ public class KodaServerService extends Service {
                     if (!dataDir.exists()) {
                         log(id, "  ℹ Patching Termux paths in MariaDB scripts...");
                         log(id, "  ℹ Patching Termux paths in MariaDB scripts safely...");
-                        script += "sed 's|/data/data/com.termux/files/usr|" + usrDir.getAbsolutePath() + "|g' \"" + usrDir.getAbsolutePath() + "/bin/mariadb-install-db\" > \"" + dir.getAbsolutePath() + "/mariadb-install-db.sh\"\n";
+                        script += "sed -e 's|\\$dirname0//data/data/com.termux/files/usr|\\$basedir|g' " +
+                                       "-e 's|\\$basedir//data/data/com.termux/files/usr|\\$basedir|g' " +
+                                       "-e 's|/data/data/com.termux/files/usr|" + usrDir.getAbsolutePath() + "|g' " +
+                                       "\"" + usrDir.getAbsolutePath() + "/bin/mariadb-install-db\" > \"" + dir.getAbsolutePath() + "/mariadb-install-db.sh\"\n";
                         script += "chmod +x \"" + dir.getAbsolutePath() + "/mariadb-install-db.sh\"\n";
 
                         log(id, "  ? Initializing MariaDB data directory...");
