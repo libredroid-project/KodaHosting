@@ -677,9 +677,10 @@ public class KodaServerService extends Service {
                               "--lc-messages-dir=\"" + usrDir.getAbsolutePath() + "/share/mariadb\" " +
                               "--plugin-dir=\"" + getApplicationInfo().nativeLibraryDir + "\" " +
                               "--tmpdir=\"" + dp + "\" " +
+                              "--socket=\"" + dp + "/mysqld.sock\" " +
+                              "--pid-file=\"" + dp + "/mariadbd.pid\" " +
                               "--port=" + srv.getPort() + " " +
                               "--bind-address=0.0.0.0 " +
-                              "--log-error=\"" + dp + "/server.log\" " +
                               (dataDir.exists() ? "" : "--init-file=\"" + dp + "/init.sql\" ") +
                               "< " + inFifo + "\n";
                 }
