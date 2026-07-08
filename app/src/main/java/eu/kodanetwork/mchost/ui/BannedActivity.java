@@ -15,6 +15,15 @@ public class BannedActivity extends AppCompatActivity {
         TextView hwidText = findViewById(R.id.bannedHwidText);
         String uuid = eu.kodanetwork.mchost.App.getPrefs(this).getString("app_uuid", "");
         hwidText.setText("HWID: " + uuid);
+        
+        TextView reasonText = findViewById(R.id.bannedReasonText);
+        String reason = getIntent().getStringExtra("reason");
+        if (reason == null) {
+            reason = eu.kodanetwork.mchost.App.getPrefs(this).getString("BANNED_REASON", null);
+        }
+        if (reason != null && !reason.isEmpty()) {
+            reasonText.setText(reason);
+        }
     }
 
     @Override

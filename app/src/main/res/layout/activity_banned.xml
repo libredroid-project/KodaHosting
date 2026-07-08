@@ -47,6 +47,7 @@
             android:layout_marginBottom="24dp" />
 
         <TextView
+            android:id="@+id/bannedReasonText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Your device has been permanently banned from the KodaHosting network due to violations of our terms of service."

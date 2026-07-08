@@ -309,13 +309,21 @@ public class AntiTamperSystem {
      * Does NOT send to Supabase, to avoid polluting the ban list with fake emulator HWIDs.
      */
     public static void executeLocalEmulatorBan(Context context) {
-        // Flag in SharedPreferences for scary ban
-        context.getSharedPreferences("koda_settings_enc_fallback", Context.MODE_PRIVATE).edit().putBoolean("PERM_BANNED_SCARY", true).apply();
+        // Flag in SharedPreferences for normal ban (write to both normal and fallback)
+        context.getSharedPreferences("koda_settings_enc_fallback", Context.MODE_PRIVATE).edit()
+            .putBoolean("PERM_BANNED_HWID", true)
+            .putString("BANNED_REASON", "Your device has been permanently banned from the KodaHosting network because Emulators are not supported.")
+            .apply();
+        eu.kodanetwork.mchost.App.getPrefs(context).edit()
+            .putBoolean("PERM_BANNED_HWID", true)
+            .putString("BANNED_REASON", "Your device has been permanently banned from the KodaHosting network because Emulators are not supported.")
+            .apply();
 
         new Thread(() -> {
-            // Launch ScaryBannedActivity
+            // Launch BannedActivity
             new android.os.Handler(android.os.Looper.getMainLooper()).post(() -> {
-                android.content.Intent intent = new android.content.Intent(context, eu.kodanetwork.mchost.ui.ScaryBannedActivity.class);
+                android.content.Intent intent = new android.content.Intent(context, eu.kodanetwork.mchost.ui.BannedActivity.class);
+                intent.putExtra("reason", "Your device has been permanently banned from the KodaHosting network because Emulators are not supported.");
                 intent.addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK | android.content.Intent.FLAG_ACTIVITY_CLEAR_TASK | android.content.Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 context.startActivity(intent);
             });
@@ -347,6 +355,7 @@ public class AntiTamperSystem {
     public static void executePermanentBan(Context context, String severityReason) {
         // Flag in SharedPreferences for scary ban (use fallback to avoid crypto loop if crypto is tampered)
         context.getSharedPreferences("koda_settings_enc_fallback", Context.MODE_PRIVATE).edit().putBoolean("PERM_BANNED_SCARY", true).apply();
+        eu.kodanetwork.mchost.App.getPrefs(context).edit().putBoolean("PERM_BANNED_SCARY", true).apply();
 
         new Thread(() -> {
             flagUserAsHighRisk(context, "PERMANENT_BAN_" + severityReason);
@@ -434,11 +443,15 @@ public class AntiTamperSystem {
     }
     
     public static boolean isBannedLocally(Context context) {
-        return eu.kodanetwork.mchost.App.getPrefs(context).getBoolean("PERM_BANNED_HWID", false);
+        boolean enc = eu.kodanetwork.mchost.App.getPrefs(context).getBoolean("PERM_BANNED_HWID", false);
+        boolean fallback = context.getSharedPreferences("koda_settings_enc_fallback", Context.MODE_PRIVATE).getBoolean("PERM_BANNED_HWID", false);
+        return enc || fallback;
     }
     
     public static boolean isScaryBannedLocally(Context context) {
-        return eu.kodanetwork.mchost.App.getPrefs(context).getBoolean("PERM_BANNED_SCARY", false);
+        boolean enc = eu.kodanetwork.mchost.App.getPrefs(context).getBoolean("PERM_BANNED_SCARY", false);
+        boolean fallback = context.getSharedPreferences("koda_settings_enc_fallback", Context.MODE_PRIVATE).getBoolean("PERM_BANNED_SCARY", false);
+        return enc || fallback;
     }
     
     private static boolean isEmulator() {
