@@ -101,24 +101,21 @@ void checkTracerPidThread() {
     }
 }
 
-void inotifyWatcherThread(std::string dataDir) {
-    LOGI("Inotify watcher started for %s", dataDir.c_str());
+void inotifyWatcherThread(std::vector<std::string> filesToWatch) {
+    LOGI("Inotify watcher started for %zu files", filesToWatch.size());
     int fd = inotify_init();
     if (fd < 0) {
         LOGE("inotify_init failed");
         return;
     }
 
-    std::string honeypot = dataDir + "/koda_backend_auth.xml";
-    // We do NOT watch shared_prefs directory because Android's SharedPreferencesImpl 
-    // often calls listDir() to check for .bak files, triggering IN_OPEN and causing false-positive bans!
-    
-    int wd_honeypot = inotify_add_watch(fd, honeypot.c_str(), IN_OPEN | IN_ACCESS);
-
-    if (wd_honeypot < 0) {
-        LOGE("inotify_add_watch failed for honeypot");
-        close(fd);
-        return;
+    for (const std::string& file : filesToWatch) {
+        int wd = inotify_add_watch(fd, file.c_str(), IN_OPEN | IN_ACCESS);
+        if (wd < 0) {
+            LOGE("inotify_add_watch failed for %s", file.c_str());
+        } else {
+            LOGI("Watching %s", file.c_str());
+        }
     }
 
     char buffer[4096] __attribute__ ((aligned(__alignof__(struct inotify_event))));
@@ -164,7 +161,7 @@ extern "C" JNIEXPORT void JNICALL
 Java_eu_kodanetwork_mchost_security_PraetorSecurity_startInotifyWatcher(
         JNIEnv* env,
         jclass clazz,
-        jstring dataDirStr) {
+        jobjectArray filesToWatchArray) {
         
     // Cache the class and method ID using the application classloader
     if (gAntiTamperClass == nullptr) {
@@ -176,12 +173,19 @@ Java_eu_kodanetwork_mchost_security_PraetorSecurity_startInotifyWatcher(
         }
     }
 
-    if (dataDirStr == nullptr) return;
-    const char *dataDir = env->GetStringUTFChars(dataDirStr, 0);
-    std::string dir(dataDir);
-    env->ReleaseStringUTFChars(dataDirStr, dataDir);
+    if (filesToWatchArray == nullptr) return;
     
-    std::thread watcher(inotifyWatcherThread, dir);
+    std::vector<std::string> filesToWatch;
+    int count = env->GetArrayLength(filesToWatchArray);
+    for (int i = 0; i < count; i++) {
+        jstring jstr = (jstring) env->GetObjectArrayElement(filesToWatchArray, i);
+        const char *str = env->GetStringUTFChars(jstr, 0);
+        filesToWatch.push_back(std::string(str));
+        env->ReleaseStringUTFChars(jstr, str);
+        env->DeleteLocalRef(jstr);
+    }
+    
+    std::thread watcher(inotifyWatcherThread, filesToWatch);
     watcher.detach();
     
     std::thread antiDebugger(checkTracerPidThread);

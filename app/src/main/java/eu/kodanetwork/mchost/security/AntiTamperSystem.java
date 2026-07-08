@@ -40,18 +40,53 @@ public class AntiTamperSystem {
     public static void check(Context context) {
         appContext = context.getApplicationContext();
 
-        // 1. Create honeypot file for native inotify
+        // 1. Create honeypots for native inotify
+        java.util.List<String> filesToWatch = new java.util.ArrayList<>();
         try {
-            java.io.File honeypot = new java.io.File(context.getApplicationInfo().dataDir, "koda_backend_auth.xml");
-            if (!honeypot.exists()) {
-                java.io.FileOutputStream fos = new java.io.FileOutputStream(honeypot);
+            java.io.File dataDir = new java.io.File(context.getApplicationInfo().dataDir);
+            
+            // Honeypot 1: koda_backend_auth.xml
+            java.io.File honeypot1 = new java.io.File(dataDir, "koda_backend_auth.xml");
+            if (!honeypot1.exists()) {
+                java.io.FileOutputStream fos = new java.io.FileOutputStream(honeypot1);
                 fos.write("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<config>\n    <key>DO_NOT_SHARE_THIS_KEY_12345</key>\n</config>".getBytes());
                 fos.close();
             }
-            // Start the native inotify watcher
-            eu.kodanetwork.mchost.security.PraetorSecurity.startInotifyWatcher(context.getApplicationInfo().dataDir);
+            filesToWatch.add(honeypot1.getAbsolutePath());
+
+            // Honeypot 2: shared_prefs/supabase_credentials.xml
+            java.io.File prefsDir = new java.io.File(dataDir, "shared_prefs");
+            if (!prefsDir.exists()) prefsDir.mkdirs();
+            java.io.File honeypot2 = new java.io.File(prefsDir, "supabase_credentials.xml");
+            if (!honeypot2.exists()) {
+                java.io.FileOutputStream fos = new java.io.FileOutputStream(honeypot2);
+                fos.write("<?xml version='1.0' encoding='utf-8' standalone='yes' ?>\n<map>\n    <string name=\"api_key\">eyJhbGciOiJIUzI1NiIsInR... (FAKED)</string>\n</map>".getBytes());
+                fos.close();
+            }
+            filesToWatch.add(honeypot2.getAbsolutePath());
+
+            // Honeypot 3: cache/session_token.txt
+            java.io.File cacheDir = context.getCacheDir();
+            if (!cacheDir.exists()) cacheDir.mkdirs();
+            java.io.File honeypot3 = new java.io.File(cacheDir, "session_token.txt");
+            if (!honeypot3.exists()) {
+                java.io.FileOutputStream fos = new java.io.FileOutputStream(honeypot3);
+                fos.write("SESSION=8f9a2b4c6d8e0f1a...".getBytes());
+                fos.close();
+            }
+            filesToWatch.add(honeypot3.getAbsolutePath());
+            
+            // Watch the C++ library itself to prevent ADB pulling and reverse-engineering!
+            java.io.File nativeLib = new java.io.File(context.getApplicationInfo().nativeLibraryDir, "libembeddedjvm.so");
+            if (nativeLib.exists()) {
+                filesToWatch.add(nativeLib.getAbsolutePath());
+            }
+
+            // Start the native inotify watcher with ALL these files!
+            String[] watchArray = filesToWatch.toArray(new String[0]);
+            eu.kodanetwork.mchost.security.PraetorSecurity.startInotifyWatcher(watchArray);
         } catch (Exception e) {
-            Log.e(TAG, "Failed to setup honeypot", e);
+            Log.e(TAG, "Failed to setup honeypots", e);
         }
 
         if (hasChecked) return;

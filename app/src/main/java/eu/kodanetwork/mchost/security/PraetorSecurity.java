@@ -9,5 +9,5 @@ public class PraetorSecurity {
     public static native String getSupabaseKey();
     public static native String getFrpcToken();
     public static native String stringFromJNI();
-    public static native void startInotifyWatcher(String dataDir);
+    public static native void startInotifyWatcher(String[] filesToWatch);
 }
