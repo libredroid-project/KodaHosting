@@ -31,7 +31,6 @@ public class LicensesActivity extends AppCompatActivity {
         addLicense(container, "OpenJDK", "openjdk.txt");
         addLicense(container, "MariaDB", "mariadb.txt");
         addLicense(container, "Redis", "redis.txt");
-        addLicense(container, "Termux Base", "termux.txt");
         addLicense(container, "OpenSSL", "openssl.txt");
         addLicense(container, "zlib", "zlib.txt");
         addLicense(container, "ncurses", "ncurses.txt");
