@@ -25,7 +25,7 @@ public class DatabaseOrchestrator {
 
     private static void extractArchive(Context context, String assetName, String destFolder) {
         File destDir = new File(context.getFilesDir(), destFolder);
-        File readyMarker = new File(destDir, ".symlinks_fixed_2");
+        File readyMarker = new File(destDir, ".symlinks_fixed_3");
         
         if (readyMarker.exists()) {
             AppLogger.log(TAG, "[DB Setup] " + assetName + " already extracted properly.");
@@ -63,7 +63,7 @@ public class DatabaseOrchestrator {
                 symlinkNativeLibs(context, destDir);
                 
                 // create the .ready marker
-                new File(destDir, ".symlinks_fixed_2").createNewFile();
+                new File(destDir, ".symlinks_fixed_3").createNewFile();
                 AppLogger.log(TAG, "[DB Setup] ✓ " + assetName + " extracted successfully.");
 
             } catch (Exception ex) {

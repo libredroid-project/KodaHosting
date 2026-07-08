@@ -31,6 +31,7 @@ public class LicensesActivity extends AppCompatActivity {
         addLicense(container, "OpenJDK", "openjdk.txt");
         addLicense(container, "MariaDB", "mariadb.txt");
         addLicense(container, "Redis", "redis.txt");
+        addLicense(container, "Termux Base Libraries", "termux_libs.txt");
         addLicense(container, "Fast Reverse Proxy (FRP)", "frp.txt");
         addLicense(container, "Press Start 2P Font", "press_start_2p.txt");
     }
