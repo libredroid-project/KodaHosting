@@ -634,7 +634,7 @@ public class KodaServerService extends Service {
                 String dp = dir.getAbsolutePath();
                 
                 String script = "#!/system/bin/sh\n" +
-                    "exec > server.log 2>&1\n" + 
+                    "exec > server.log 2>&1\n" +
                     "export LD_LIBRARY_PATH=\"" + ldPath + "\"\n" +
                     "export PATH=\"" + usrDir.getAbsolutePath() + "/bin:$PATH\"\n" +
                     "export HOME=\"" + dp + "\"\n" +
@@ -695,6 +695,7 @@ public class KodaServerService extends Service {
                               "--tmpdir=\"" + dp + "\" " +
                               "--port=" + srv.getPort() + " " +
                               "--bind-address=0.0.0.0 " +
+                              "--log-error=\"" + dp + "/server.log\" " +
                               (dataDir.exists() ? "" : "--init-file=\"" + dp + "/init.sql\" ") +
                               "< " + inFifo + "\n";
                 }
