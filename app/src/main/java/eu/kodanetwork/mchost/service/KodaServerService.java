@@ -584,16 +584,23 @@ public class KodaServerService extends Service {
                 linkNativeBinaries(new File(usrDir, "bin"));
                 linkNativeBinaries(new File(usrDir, "libexec"));
                 
-                // Symlink libandroid-support.so to usr/lib to satisfy Termux DT_RUNPATH linker requirements
+                // Symlink all native libraries into usr/lib to satisfy Termux DT_RUNPATH linker requirements
                 File usrLibDir = new File(usrDir, "lib");
                 if (!usrLibDir.exists()) usrLibDir.mkdirs();
-                File nativeLibAndroidSupport = new File(getApplicationInfo().nativeLibraryDir, "libandroid-support.so");
-                File targetLibAndroidSupport = new File(usrLibDir, "libandroid-support.so");
-                if (nativeLibAndroidSupport.exists() && !targetLibAndroidSupport.exists()) {
-                    try {
-                        java.nio.file.Files.createSymbolicLink(targetLibAndroidSupport.toPath(), nativeLibAndroidSupport.toPath());
-                    } catch (Exception ignored) {
-                        try { java.nio.file.Files.copy(nativeLibAndroidSupport.toPath(), targetLibAndroidSupport.toPath()); } catch (Exception ignored2) {}
+                File nativeDir = new File(getApplicationInfo().nativeLibraryDir);
+                File[] nativeLibs = nativeDir.listFiles();
+                if (nativeLibs != null) {
+                    for (File lib : nativeLibs) {
+                        if (lib.getName().endsWith(".so")) {
+                            File targetLib = new File(usrLibDir, lib.getName());
+                            if (!targetLib.exists()) {
+                                try {
+                                    java.nio.file.Files.createSymbolicLink(targetLib.toPath(), lib.toPath());
+                                } catch (Exception ignored) {
+                                    try { java.nio.file.Files.copy(lib.toPath(), targetLib.toPath()); } catch (Exception ignored2) {}
+                                }
+                            }
+                        }
                     }
                 }
                 
