@@ -584,6 +584,19 @@ public class KodaServerService extends Service {
                 linkNativeBinaries(new File(usrDir, "bin"));
                 linkNativeBinaries(new File(usrDir, "libexec"));
                 
+                // Symlink libandroid-support.so to usr/lib to satisfy Termux DT_RUNPATH linker requirements
+                File usrLibDir = new File(usrDir, "lib");
+                if (!usrLibDir.exists()) usrLibDir.mkdirs();
+                File nativeLibAndroidSupport = new File(getApplicationInfo().nativeLibraryDir, "libandroid-support.so");
+                File targetLibAndroidSupport = new File(usrLibDir, "libandroid-support.so");
+                if (nativeLibAndroidSupport.exists() && !targetLibAndroidSupport.exists()) {
+                    try {
+                        java.nio.file.Files.createSymbolicLink(targetLibAndroidSupport.toPath(), nativeLibAndroidSupport.toPath());
+                    } catch (Exception ignored) {
+                        try { java.nio.file.Files.copy(nativeLibAndroidSupport.toPath(), targetLibAndroidSupport.toPath()); } catch (Exception ignored2) {}
+                    }
+                }
+                
                 String ldPath = usrDir.getAbsolutePath() + "/lib:" + getApplicationInfo().nativeLibraryDir + ":/system/lib64:/system/lib:/vendor/lib64";
                 String inFifo = new File(dir, "in.fifo").getAbsolutePath();
                 File startSh = new File(dir, "start_native.sh");
