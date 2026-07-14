@@ -658,25 +658,10 @@ public class SettingsActivity extends Activity {
             });
 
             dialog.findViewById(R.id.btn_dialog_delete_account).setOnClickListener(btn -> {
-                new android.app.AlertDialog.Builder(this)
-                    .setTitle("Account löschen?")
-                    .setMessage("Bist du sicher? Alle deine Server und Backups werden unwiderruflich gelöscht!")
-                    .setPositiveButton("Löschen", (d, w) -> {
-                        eu.kodanetwork.mchost.network.supabase.SupabaseAuth.deleteUser(this, new eu.kodanetwork.mchost.network.supabase.SupabaseAuth.AuthCallback() {
-                            @Override public void onSuccess() {
-                                runOnUiThread(() -> {
-                                    eu.kodanetwork.mchost.network.supabase.SupabaseAuth.logout(SettingsActivity.this);
-                                    Toast.makeText(SettingsActivity.this, "Account gelöscht.", Toast.LENGTH_SHORT).show();
-                                    recreate();
-                                });
-                            }
-                            @Override public void onError(String msg) {
-                                runOnUiThread(() -> Toast.makeText(SettingsActivity.this, "Fehler: " + msg, Toast.LENGTH_LONG).show());
-                            }
-                        });
-                        dialog.dismiss();
-                    })
-                    .setNegativeButton("Abbrechen", null).show();
+                Intent intent = new Intent(this, eu.kodanetwork.mchost.ui.PraetorConfirmActivity.class);
+                intent.putExtra("action", "delete_account");
+                startActivity(intent);
+                dialog.dismiss();
             });
 
             dialog.findViewById(R.id.btn_dialog_logout).setOnClickListener(btn -> {

@@ -63,6 +63,17 @@
             android:textColor="#F0F0F0"
             android:textSize="16sp"
             android:gravity="center"
+            android:layout_marginBottom="16dp" />
+
+        <TextView
+            android:id="@+id/tv_fact"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="#FF8800"
+            android:textSize="14sp"
+            android:textStyle="italic"
+            android:gravity="center"
+            android:visibility="gone"
             android:layout_marginBottom="24dp" />
 
         <ProgressBar

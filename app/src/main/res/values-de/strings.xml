@@ -239,4 +239,12 @@
     <string name="cdns_lbl_save">Speichern</string>
     <string name="link_custom_domain">Eigene Domain verknÃ¼pfen</string>
     <string name="cdns_use_existing">Vorhandene nutzen: %1$s</string>
+    <string-array name="praetor_delete_account_facts">
+        <item>FAKT 1: Alle deine Server, Welten und Plugin-Daten werden unwiderruflich gelöscht.</item>
+        <item>FAKT 2: Diese Aktion kann nicht rückgängig gemacht werden. Der Support kann gelöschte Accounts nicht wiederherstellen.</item>
+        <item>FAKT 3: Alle aktiven Abonnements oder Rechnungsverbindungen werden automatisch gekündigt.</item>
+        <item>FAKT 4: Alle registrierten Subdomains deines Accounts werden wieder freigegeben.</item>
+        <item>FAKT 5: Deine persönlichen Daten werden gemäß der DSGVO-Richtlinien entfernt.</item>
+    </string-array>
 </resources>
+

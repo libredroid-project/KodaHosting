@@ -29,6 +29,9 @@ public class PraetorConfirmActivity extends Activity {
     private TextView tvCountdown;
     private CountDownTimer timer;
     private boolean isConnected = false;
+    private int currentFactIndex = 0;
+    private android.os.Handler factHandler;
+    private Runnable factRunnable;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,6 +52,11 @@ public class PraetorConfirmActivity extends Activity {
         TextView tvExplanation = findViewById(R.id.tv_explanation);
         if ("revoke_tos".equals(action)) {
             tvExplanation.setText("You are about to revoke your acceptance of the Terms of Service. This will permanently delete all your servers and require you to accept the terms again to continue using KodaHosting. This action cannot be undone.");
+        } else if ("delete_account".equals(action)) {
+            tvExplanation.setText("You are about to permanently delete your KodaHosting account. This action cannot be undone.");
+            TextView tvFact = findViewById(R.id.tv_fact);
+            tvFact.setVisibility(View.VISIBLE);
+            startFactsRotation(tvFact);
         } else {
             tvExplanation.setText("You are about to permanently delete all servers from this device. All world data, plugins, and configurations will be completely erased. This action cannot be undone.");
         }
@@ -144,6 +152,22 @@ public class PraetorConfirmActivity extends Activity {
         }.start();
     }
 
+    private void startFactsRotation(TextView tvFact) {
+        String[] facts = getResources().getStringArray(R.array.praetor_delete_account_facts);
+        factHandler = new android.os.Handler(android.os.Looper.getMainLooper());
+        factRunnable = new Runnable() {
+            @Override
+            public void run() {
+                if (facts.length > 0) {
+                    tvFact.setText(facts[currentFactIndex % facts.length]);
+                    currentFactIndex++;
+                }
+                factHandler.postDelayed(this, 4000);
+            }
+        };
+        factHandler.post(factRunnable);
+    }
+
     private void executeDestructiveAction() {
         ServerRepo repo = ServerRepo.get(this);
         List<ServerInstance> allServers = repo.all();
@@ -210,6 +234,28 @@ public class PraetorConfirmActivity extends Activity {
             }
 
             runOnUiThread(() -> {
+                if ("delete_account".equals(action)) {
+                    eu.kodanetwork.mchost.network.supabase.SupabaseAuth.deleteUser(PraetorConfirmActivity.this, new eu.kodanetwork.mchost.network.supabase.SupabaseAuth.AuthCallback() {
+                        @Override public void onSuccess() {
+                            runOnUiThread(() -> {
+                                eu.kodanetwork.mchost.network.supabase.SupabaseAuth.logout(PraetorConfirmActivity.this);
+                                Toast.makeText(PraetorConfirmActivity.this, "Account deleted.", Toast.LENGTH_SHORT).show();
+                                Intent intent = new Intent(PraetorConfirmActivity.this, MainActivity.class);
+                                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                                startActivity(intent);
+                                finish();
+                            });
+                        }
+                        @Override public void onError(String msg) {
+                            runOnUiThread(() -> {
+                                Toast.makeText(PraetorConfirmActivity.this, "Error: " + msg, Toast.LENGTH_LONG).show();
+                                finish();
+                            });
+                        }
+                    });
+                    return;
+                }
+
                 Toast.makeText(PraetorConfirmActivity.this, "All servers deleted.", Toast.LENGTH_SHORT).show();
 
                 if ("revoke_tos".equals(action)) {
@@ -248,6 +294,9 @@ public class PraetorConfirmActivity extends Activity {
         super.onDestroy();
         if (timer != null) {
             timer.cancel();
+        }
+        if (factHandler != null && factRunnable != null) {
+            factHandler.removeCallbacks(factRunnable);
         }
     }
 }
