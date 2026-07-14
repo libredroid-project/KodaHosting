@@ -223,7 +223,8 @@
     <string name="cdns_use_existing">Use existing: %1$s</string>
     <string name="cdns_open_app">Open %1$s App</string>
     <string name="cdns_open_settings">%1$s Settings</string>
-    <string name="praetor_delete_account_explanation">You are about to permanently delete your KodaHosting account. This action cannot be undone.\n\n• All your servers, worlds, and plugin data will be irrevocably deleted.\n• KodaHosting support cannot restore deleted accounts.\n• All active subscriptions or billing connections will be automatically terminated.\n• Any subdomains registered under your account will be released to the public pool.\n• Your personal data will be purged in compliance with GDPR guidelines.</string>
+    <string name="praetor_delete_account_explanation">You are about to permanently delete your KodaHosting account. This action cannot be undone.\n\n• All your servers, worlds, and plugin data will be irrevocably deleted.\n• KodaHosting support cannot restore deleted accounts.\n• Any subdomains registered under your account will be released to the public pool.\n• Your personal data will be purged in compliance with GDPR guidelines.</string>
 </resources>
+
 
 
