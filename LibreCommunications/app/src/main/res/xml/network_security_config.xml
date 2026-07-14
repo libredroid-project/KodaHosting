@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+
+    <!-- Disallow cleartext (HTTP) traffic globally -->
+    <base-config cleartextTrafficPermitted="false">
+        <trust-anchors>
+            <certificates src="system" />
+        </trust-anchors>
+    </base-config>
+
+    <!-- Certificate pinning for Libre Communications relay servers -->
+    <domain-config>
+        <domain includeSubdomains="true">relay.librecommunications.org</domain>
+        <pin-set expiration="2027-01-01">
+            <!--
+                Replace with your actual SHA-256 pin hashes.
+                Generate with: openssl x509 -in cert.pem -pubkey -noout |
+                               openssl pkey -pubin -outform der |
+                               openssl dgst -sha256 -binary | openssl enc -base64
+            -->
+            <pin digest="SHA-256">AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</pin>
+            <!-- Backup pin -->
+            <pin digest="SHA-256">BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB=</pin>
+        </pin-set>
+        <trust-anchors>
+            <certificates src="system" />
+        </trust-anchors>
+    </domain-config>
+
+    <!-- Certificate pinning for KodaNetwork infrastructure -->
+    <domain-config>
+        <domain includeSubdomains="true">kodanetwork.org</domain>
+        <pin-set expiration="2027-01-01">
+            <pin digest="SHA-256">CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC=</pin>
+            <pin digest="SHA-256">DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD=</pin>
+        </pin-set>
+        <trust-anchors>
+            <certificates src="system" />
+        </trust-anchors>
+    </domain-config>
+
+</network-security-config>

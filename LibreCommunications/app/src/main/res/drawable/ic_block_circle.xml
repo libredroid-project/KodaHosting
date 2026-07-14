@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="280dp"
+    android:height="280dp"
+    android:viewportWidth="280"
+    android:viewportHeight="280">
+    <!-- Red circle outline -->
+    <path
+        android:strokeColor="#FF3344"
+        android:strokeWidth="18"
+        android:pathData="M140,20 A120,120 0 1 1 139.99,20" />
+    <!-- Diagonal strike line -->
+    <path
+        android:strokeColor="#FF3344"
+        android:strokeWidth="18"
+        android:strokeLineCap="round"
+        android:pathData="M55,55 L225,225" />
+</vector>

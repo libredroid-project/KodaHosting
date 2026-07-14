@@ -1,0 +1,72 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="1024dp"
+    android:height="1024dp"
+    android:viewportWidth="1024"
+    android:viewportHeight="1024">
+
+    <!-- Deep Blue Background (EU flag color but darker for cyberpunk vibe) -->
+    <path android:fillColor="#001B54" android:pathData="M0,0h1024v1024h-1024z" />
+
+    <!-- 12 EU Stars (in a circle, radius ~ 300) -->
+    <!-- We'll draw 12 stars using SVG path data. -->
+    <group android:translateX="512" android:translateY="512">
+        <!-- 12 O'clock -->
+        <path android:fillColor="#FFCC00" android:pathData="M0,-300 l9,28 h29 l-23,17 l9,28 l-24,-17 l-24,17 l9,-28 l-23,-17 h29 z" />
+        <!-- 1 O'clock -->
+        <path android:fillColor="#FFCC00" android:pathData="M150,-260 l9,28 h29 l-23,17 l9,28 l-24,-17 l-24,17 l9,-28 l-23,-17 h29 z" />
+        <!-- 2 O'clock -->
+        <path android:fillColor="#FFCC00" android:pathData="M260,-150 l9,28 h29 l-23,17 l9,28 l-24,-17 l-24,17 l9,-28 l-23,-17 h29 z" />
+        <!-- 3 O'clock -->
+        <path android:fillColor="#FFCC00" android:pathData="M300,0 l9,28 h29 l-23,17 l9,28 l-24,-17 l-24,17 l9,-28 l-23,-17 h29 z" />
+        <!-- 4 O'clock -->
+        <path android:fillColor="#FFCC00" android:pathData="M260,150 l9,28 h29 l-23,17 l9,28 l-24,-17 l-24,17 l9,-28 l-23,-17 h29 z" />
+        <!-- 5 O'clock -->
+        <path android:fillColor="#FFCC00" android:pathData="M150,260 l9,28 h29 l-23,17 l9,28 l-24,-17 l-24,17 l9,-28 l-23,-17 h29 z" />
+        <!-- 6 O'clock -->
+        <path android:fillColor="#FFCC00" android:pathData="M0,300 l9,28 h29 l-23,17 l9,28 l-24,-17 l-24,17 l9,-28 l-23,-17 h29 z" />
+        <!-- 7 O'clock -->
+        <path android:fillColor="#FFCC00" android:pathData="M-150,260 l9,28 h29 l-23,17 l9,28 l-24,-17 l-24,17 l9,-28 l-23,-17 h29 z" />
+        <!-- 8 O'clock -->
+        <path android:fillColor="#FFCC00" android:pathData="M-260,150 l9,28 h29 l-23,17 l9,28 l-24,-17 l-24,17 l9,-28 l-23,-17 h29 z" />
+        <!-- 9 O'clock -->
+        <path android:fillColor="#FFCC00" android:pathData="M-300,0 l9,28 h29 l-23,17 l9,28 l-24,-17 l-24,17 l9,-28 l-23,-17 h29 z" />
+        <!-- 10 O'clock -->
+        <path android:fillColor="#FFCC00" android:pathData="M-260,-150 l9,28 h29 l-23,17 l9,28 l-24,-17 l-24,17 l9,-28 l-23,-17 h29 z" />
+        <!-- 11 O'clock -->
+        <path android:fillColor="#FFCC00" android:pathData="M-150,-260 l9,28 h29 l-23,17 l9,28 l-24,-17 l-24,17 l9,-28 l-23,-17 h29 z" />
+    </group>
+
+    <!-- Heavy Block/Cancel Symbol in Red/Orange to signify "Blocking Chat Control" -->
+    <path
+        android:strokeColor="#FF3344"
+        android:strokeWidth="80"
+        android:pathData="M250,512 A262,262 0 1 1 774,512 A262,262 0 1 1 250,512" />
+        
+    <path
+        android:strokeColor="#FF3344"
+        android:strokeWidth="80"
+        android:pathData="M320,320 L704,704" />
+        
+    <!-- Heavy Cyberpunk Padlock over everything -->
+    <path
+        android:fillColor="#0A0807"
+        android:pathData="M380,480 h264 v220 h-264 z" />
+    <path
+        android:strokeColor="#FF6B00"
+        android:strokeWidth="16"
+        android:pathData="M380,480 h264 v220 h-264 z" />
+        
+    <!-- Lock shackle -->
+    <path
+        android:strokeColor="#FF6B00"
+        android:strokeWidth="40"
+        android:pathData="M440,480 V360 A72,72 0 0,1 584,360 V480" />
+
+    <path
+        android:fillColor="#FF6B00"
+        android:pathData="M512,540 a20,20 0 1,0 0,40 a20,20 0 1,0 0,-40" />
+    <path
+        android:fillColor="#FF6B00"
+        android:pathData="M504,570 h16 v40 h-16 z" />
+
+</vector>

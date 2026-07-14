@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- ══════════════════════════════════════════════════════════════════
+         LIBRE COMMUNICATIONS — COLOR PALETTE
+         KodaNetwork Cyberpunk Dark UI
+         ══════════════════════════════════════════════════════════════════ -->
+
+    <!-- Primary Orange -->
+    <color name="libre_orange">#FF6B00</color>
+    <color name="libre_orange_dim">#CC5500</color>
+    <color name="libre_orange_glow">#FF8C38</color>
+    <color name="libre_orange_10">#1AFF6B00</color>
+    <color name="libre_orange_26">#44FF6B00</color>
+
+    <!-- Backgrounds -->
+    <color name="bg_void">#0A0A0F</color>
+    <color name="bg_dark">#0A0807</color>
+    <color name="bg_panel">#12121A</color>
+    <color name="bg_cell">#1A1A24</color>
+    <color name="bg_card">#241C18</color>
+    <color name="bg_card_warm">#1A1412</color>
+    <color name="bg_input">#1A1A1A</color>
+
+    <!-- Text -->
+    <color name="txt_primary">#F0F0F0</color>
+    <color name="txt_secondary">#8A8A9A</color>
+    <color name="txt_muted">#555566</color>
+    <color name="txt_orange">#FF6B00</color>
+
+    <!-- Borders -->
+    <color name="border_dim">#2A2A35</color>
+    <color name="border_mid">#3A3A48</color>
+    <color name="border_warm">#2B221E</color>
+    <color name="border_orange">#FF6B0044</color>
+
+    <!-- State Colors -->
+    <color name="state_online">#00E676</color>
+    <color name="state_offline">#555555</color>
+    <color name="state_warn">#FFB800</color>
+    <color name="state_err">#FF3344</color>
+    <color name="state_info">#2277FF</color>
+
+    <!-- Semantic -->
+    <color name="danger_bg">#1A0000</color>
+    <color name="cancel_bg">#333344</color>
+
+    <!-- Base -->
+    <color name="white">#FFFFFF</color>
+    <color name="black">#000000</color>
+    <color name="transparent">#00000000</color>
+
+</resources>

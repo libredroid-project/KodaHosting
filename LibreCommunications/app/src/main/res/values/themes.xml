@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- ══════════════════════════════════════════════════════════════════
+         LIBRE COMMUNICATIONS — THEME
+         Dark-only, KodaNetwork Cyberpunk UI
+         ══════════════════════════════════════════════════════════════════ -->
+
+    <style name="Theme.LibreCommunications" parent="Theme.MaterialComponents.NoActionBar">
+
+        <!-- Material Color Attributes -->
+        <item name="colorPrimary">@color/libre_orange</item>
+        <item name="colorPrimaryDark">@color/bg_void</item>
+        <item name="colorPrimaryVariant">@color/libre_orange_dim</item>
+        <item name="colorSecondary">@color/libre_orange_glow</item>
+        <item name="colorSecondaryVariant">@color/libre_orange_dim</item>
+        <item name="colorSurface">@color/bg_panel</item>
+        <item name="colorOnPrimary">@color/white</item>
+        <item name="colorOnSecondary">@color/white</item>
+        <item name="colorOnSurface">@color/txt_primary</item>
+        <item name="colorOnBackground">@color/txt_primary</item>
+        <item name="colorError">@color/state_err</item>
+        <item name="colorOnError">@color/white</item>
+        <item name="android:colorBackground">@color/bg_void</item>
+
+        <!-- System Bars -->
+        <item name="android:windowBackground">@color/bg_void</item>
+        <item name="android:statusBarColor">@color/bg_void</item>
+        <item name="android:navigationBarColor">@color/bg_void</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:windowLightNavigationBar">false</item>
+
+        <!-- Default Text Colors -->
+        <item name="android:textColor">@color/txt_primary</item>
+        <item name="android:textColorPrimary">@color/txt_primary</item>
+        <item name="android:textColorSecondary">@color/txt_secondary</item>
+        <item name="android:textColorHint">@color/txt_muted</item>
+        <item name="android:textColorTertiary">@color/txt_muted</item>
+
+        <!-- Ripple -->
+        <item name="android:colorControlHighlight">@color/libre_orange_26</item>
+
+        <!-- Divider -->
+        <item name="android:listDivider">@drawable/bg_top_divider</item>
+
+    </style>
+
+    <!-- Splash / Onboarding theme (fullscreen, no system bar interference) -->
+    <style name="Theme.LibreCommunications.Onboarding" parent="Theme.LibreCommunications">
+        <item name="android:windowTranslucentStatus">true</item>
+        <item name="android:windowTranslucentNavigation">true</item>
+    </style>
+
+</resources>

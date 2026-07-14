@@ -29,9 +29,6 @@ public class PraetorConfirmActivity extends Activity {
     private TextView tvCountdown;
     private CountDownTimer timer;
     private boolean isConnected = false;
-    private int currentFactIndex = 0;
-    private android.os.Handler factHandler;
-    private Runnable factRunnable;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,10 +50,7 @@ public class PraetorConfirmActivity extends Activity {
         if ("revoke_tos".equals(action)) {
             tvExplanation.setText("You are about to revoke your acceptance of the Terms of Service. This will permanently delete all your servers and require you to accept the terms again to continue using KodaHosting. This action cannot be undone.");
         } else if ("delete_account".equals(action)) {
-            tvExplanation.setText("You are about to permanently delete your KodaHosting account. This action cannot be undone.");
-            TextView tvFact = findViewById(R.id.tv_fact);
-            tvFact.setVisibility(View.VISIBLE);
-            startFactsRotation(tvFact);
+            tvExplanation.setText(getString(R.string.praetor_delete_account_explanation));
         } else {
             tvExplanation.setText("You are about to permanently delete all servers from this device. All world data, plugins, and configurations will be completely erased. This action cannot be undone.");
         }
@@ -150,22 +144,6 @@ public class PraetorConfirmActivity extends Activity {
                 }
             }
         }.start();
-    }
-
-    private void startFactsRotation(TextView tvFact) {
-        String[] facts = getResources().getStringArray(R.array.praetor_delete_account_facts);
-        factHandler = new android.os.Handler(android.os.Looper.getMainLooper());
-        factRunnable = new Runnable() {
-            @Override
-            public void run() {
-                if (facts.length > 0) {
-                    tvFact.setText(facts[currentFactIndex % facts.length]);
-                    currentFactIndex++;
-                }
-                factHandler.postDelayed(this, 4000);
-            }
-        };
-        factHandler.post(factRunnable);
     }
 
     private void executeDestructiveAction() {
@@ -294,9 +272,6 @@ public class PraetorConfirmActivity extends Activity {
         super.onDestroy();
         if (timer != null) {
             timer.cancel();
-        }
-        if (factHandler != null && factRunnable != null) {
-            factHandler.removeCallbacks(factRunnable);
         }
     }
 }

@@ -1,0 +1,206 @@
+[
+    {
+        "merged": "C:\\Users\\Home\\.gradle\\daemon\\8.9\\org.librecommunications.app-debug-51:\\layout_activity_chat.xml.flat",
+        "source": "C:\\Users\\Home\\.gradle\\daemon\\8.9\\org.librecommunications.app-main-53:\\layout\\activity_chat.xml"
+    },
+    {
+        "merged": "C:\\Users\\Home\\.gradle\\daemon\\8.9\\org.librecommunications.app-debug-51:\\drawable_bg_status_dot_online.xml.flat",
+        "source": "C:\\Users\\Home\\.gradle\\daemon\\8.9\\org.librecommunications.app-main-53:\\drawable\\bg_status_dot_online.xml"
+    },
+    {
+        "merged": "C:\\Users\\Home\\.gradle\\daemon\\8.9\\org.librecommunications.app-debug-51:\\drawable_ic_block_circle.xml.flat",
+        "source": "C:\\Users\\Home\\.gradle\\daemon\\8.9\\org.librecommunications.app-main-53:\\drawable\\ic_block_circle.xml"
+    },
+    {
+        "merged": "C:\\Users\\Home\\.gradle\\daemon\\8.9\\org.librecommunications.app-debug-51:\\drawable_ic_launcher_background.xml.flat",
+        "source": "C:\\Users\\Home\\.gradle\\daemon\\8.9\\org.librecommunications.app-main-53:\\drawable\\ic_launcher_background.xml"
+    },
+    {
+        "merged": "C:\\Users\\Home\\.gradle\\daemon\\8.9\\org.librecommunications.app-debug-51:\\drawable_bg_card_glow.xml.flat",
+        "source": "C:\\Users\\Home\\.gradle\\daemon\\8.9\\org.librecommunications.app-main-53:\\drawable\\bg_card_glow.xml"
+    },
+    {
+        "merged": "C:\\Users\\Home\\.gradle\\daemon\\8.9\\org.librecommunications.app-debug-51:\\drawable_ic_attach.xml.flat",
+        "source": "C:\\Users\\Home\\.gradle\\daemon\\8.9\\org.librecommunications.app-main-53:\\drawable\\ic_attach.xml"
+    },
+    {
+        "merged": "C:\\Users\\Home\\.gradle\\daemon\\8.9\\org.librecommunications.app-debug-51:\\layout_fragment_emergency.xml.flat",
+        "source": "C:\\Users\\Home\\.gradle\\daemon\\8.9\\org.librecommunications.app-main-53:\\layout\\fragment_emergency.xml"
+    },
+    {
+        "merged": "C:\\Users\\Home\\.gradle\\daemon\\8.9\\org.librecommunications.app-debug-51:\\xml_network_security_config.xml.flat",
+        "source": "C:\\Users\\Home\\.gradle\\daemon\\8.9\\org.librecommunications.app-main-53:\\xml\\network_security_config.xml"
+    },
+    {
+        "merged": "C:\\Users\\Home\\.gradle\\daemon\\8.9\\org.librecommunications.app-debug-51:\\drawable_ic_radar.xml.flat",
+        "source": "C:\\Users\\Home\\.gradle\\daemon\\8.9\\org.librecommunications.app-main-53:\\drawable\\ic_radar.xml"
+    },
+    {
+        "merged": "C:\\Users\\Home\\.gradle\\daemon\\8.9\\org.librecommunications.app-debug-51:\\drawable_bg_input_field.xml.flat",
+        "source": "C:\\Users\\Home\\.gradle\\daemon\\8.9\\org.librecommunications.app-main-53:\\drawable\\bg_input_field.xml"
+    },
+    {
+        "merged": "C:\\Users\\Home\\.gradle\\daemon\\8.9\\org.librecommunications.app-debug-51:\\drawable_bg_button_primary.xml.flat",
+        "source": "C:\\Users\\Home\\.gradle\\daemon\\8.9\\org.librecommunications.app-main-53:\\drawable\\bg_button_primary.xml"
+    },
+    {
+        "merged": "C:\\Users\\Home\\.gradle\\daemon\\8.9\\org.librecommunications.app-debug-51:\\layout_activity_splash.xml.flat",
+        "source": "C:\\Users\\Home\\.gradle\\daemon\\8.9\\org.librecommunications.app-main-53:\\layout\\activity_splash.xml"
+    },
+    {
+        "merged": "C:\\Users\\Home\\.gradle\\daemon\\8.9\\org.librecommunications.app-debug-51:\\drawable_bg_status_dot_offline.xml.flat",
+        "source": "C:\\Users\\Home\\.gradle\\daemon\\8.9\\org.librecommunications.app-main-53:\\drawable\\bg_status_dot_offline.xml"
+    },
+    {
+        "merged": "C:\\Users\\Home\\.gradle\\daemon\\8.9\\org.librecommunications.app-debug-51:\\drawable_ic_lock.xml.flat",
+        "source": "C:\\Users\\Home\\.gradle\\daemon\\8.9\\org.librecommunications.app-main-53:\\drawable\\ic_lock.xml"
+    },
+    {
+        "merged": "C:\\Users\\Home\\.gradle\\daemon\\8.9\\org.librecommunications.app-debug-51:\\layout_activity_main.xml.flat",
+        "source": "C:\\Users\\Home\\.gradle\\daemon\\8.9\\org.librecommunications.app-main-53:\\layout\\activity_main.xml"
+    },
+    {
+        "merged": "C:\\Users\\Home\\.gradle\\daemon\\8.9\\org.librecommunications.app-debug-51:\\layout_item_message_sent.xml.flat",
+        "source": "C:\\Users\\Home\\.gradle\\daemon\\8.9\\org.librecommunications.app-main-53:\\layout\\item_message_sent.xml"
+    },
+    {
+        "merged": "C:\\Users\\Home\\.gradle\\daemon\\8.9\\org.librecommunications.app-debug-51:\\layout_item_nearby_device.xml.flat",
+        "source": "C:\\Users\\Home\\.gradle\\daemon\\8.9\\org.librecommunications.app-main-53:\\layout\\item_nearby_device.xml"
+    },
+    {
+        "merged": "C:\\Users\\Home\\.gradle\\daemon\\8.9\\org.librecommunications.app-debug-51:\\drawable_ic_send.xml.flat",
+        "source": "C:\\Users\\Home\\.gradle\\daemon\\8.9\\org.librecommunications.app-main-53:\\drawable\\ic_send.xml"
+    },
+    {
+        "merged": "C:\\Users\\Home\\.gradle\\daemon\\8.9\\org.librecommunications.app-debug-51:\\drawable_ic_launcher_foreground.xml.flat",
+        "source": "C:\\Users\\Home\\.gradle\\daemon\\8.9\\org.librecommunications.app-main-53:\\drawable\\ic_launcher_foreground.xml"
+    },
+    {
+        "merged": "C:\\Users\\Home\\.gradle\\daemon\\8.9\\org.librecommunications.app-debug-51:\\drawable_ic_back.xml.flat",
+        "source": "C:\\Users\\Home\\.gradle\\daemon\\8.9\\org.librecommunications.app-main-53:\\drawable\\ic_back.xml"
+    },
+    {
+        "merged": "C:\\Users\\Home\\.gradle\\daemon\\8.9\\org.librecommunications.app-debug-51:\\layout_fragment_chat_list.xml.flat",
+        "source": "C:\\Users\\Home\\.gradle\\daemon\\8.9\\org.librecommunications.app-main-53:\\layout\\fragment_chat_list.xml"
+    },
+    {
+        "merged": "C:\\Users\\Home\\.gradle\\daemon\\8.9\\org.librecommunications.app-debug-51:\\menu_bottom_nav_menu.xml.flat",
+        "source": "C:\\Users\\Home\\.gradle\\daemon\\8.9\\org.librecommunications.app-main-53:\\menu\\bottom_nav_menu.xml"
+    },
+    {
+        "merged": "C:\\Users\\Home\\.gradle\\daemon\\8.9\\org.librecommunications.app-debug-51:\\layout_activity_connection_request.xml.flat",
+        "source": "C:\\Users\\Home\\.gradle\\daemon\\8.9\\org.librecommunications.app-main-53:\\layout\\activity_connection_request.xml"
+    },
+    {
+        "merged": "C:\\Users\\Home\\.gradle\\daemon\\8.9\\org.librecommunications.app-debug-51:\\layout_fragment_nearby.xml.flat",
+        "source": "C:\\Users\\Home\\.gradle\\daemon\\8.9\\org.librecommunications.app-main-53:\\layout\\fragment_nearby.xml"
+    },
+    {
+        "merged": "C:\\Users\\Home\\.gradle\\daemon\\8.9\\org.librecommunications.app-debug-51:\\mipmap-anydpi-v26_ic_launcher.xml.flat",
+        "source": "C:\\Users\\Home\\.gradle\\daemon\\8.9\\org.librecommunications.app-main-53:\\mipmap-anydpi-v26\\ic_launcher.xml"
+    },
+    {
+        "merged": "C:\\Users\\Home\\.gradle\\daemon\\8.9\\org.librecommunications.app-debug-51:\\drawable_ic_eu_star.xml.flat",
+        "source": "C:\\Users\\Home\\.gradle\\daemon\\8.9\\org.librecommunications.app-main-53:\\drawable\\ic_eu_star.xml"
+    },
+    {
+        "merged": "C:\\Users\\Home\\.gradle\\daemon\\8.9\\org.librecommunications.app-debug-51:\\font_press_start_2p.xml.flat",
+        "source": "C:\\Users\\Home\\.gradle\\daemon\\8.9\\org.librecommunications.app-main-53:\\font\\press_start_2p.xml"
+    },
+    {
+        "merged": "C:\\Users\\Home\\.gradle\\daemon\\8.9\\org.librecommunications.app-debug-51:\\drawable_ic_add.xml.flat",
+        "source": "C:\\Users\\Home\\.gradle\\daemon\\8.9\\org.librecommunications.app-main-53:\\drawable\\ic_add.xml"
+    },
+    {
+        "merged": "C:\\Users\\Home\\.gradle\\daemon\\8.9\\org.librecommunications.app-debug-51:\\layout_item_message_received.xml.flat",
+        "source": "C:\\Users\\Home\\.gradle\\daemon\\8.9\\org.librecommunications.app-main-53:\\layout\\item_message_received.xml"
+    },
+    {
+        "merged": "C:\\Users\\Home\\.gradle\\daemon\\8.9\\org.librecommunications.app-debug-51:\\drawable_bg_button_outline.xml.flat",
+        "source": "C:\\Users\\Home\\.gradle\\daemon\\8.9\\org.librecommunications.app-main-53:\\drawable\\bg_button_outline.xml"
+    },
+    {
+        "merged": "C:\\Users\\Home\\.gradle\\daemon\\8.9\\org.librecommunications.app-debug-51:\\drawable_ic_settings.xml.flat",
+        "source": "C:\\Users\\Home\\.gradle\\daemon\\8.9\\org.librecommunications.app-main-53:\\drawable\\ic_settings.xml"
+    },
+    {
+        "merged": "C:\\Users\\Home\\.gradle\\daemon\\8.9\\org.librecommunications.app-debug-51:\\drawable_bg_cell.xml.flat",
+        "source": "C:\\Users\\Home\\.gradle\\daemon\\8.9\\org.librecommunications.app-main-53:\\drawable\\bg_cell.xml"
+    },
+    {
+        "merged": "C:\\Users\\Home\\.gradle\\daemon\\8.9\\org.librecommunications.app-debug-51:\\drawable_ic_notification.xml.flat",
+        "source": "C:\\Users\\Home\\.gradle\\daemon\\8.9\\org.librecommunications.app-main-53:\\drawable\\ic_notification.xml"
+    },
+    {
+        "merged": "C:\\Users\\Home\\.gradle\\daemon\\8.9\\org.librecommunications.app-debug-51:\\drawable_bg_top_divider.xml.flat",
+        "source": "C:\\Users\\Home\\.gradle\\daemon\\8.9\\org.librecommunications.app-main-53:\\drawable\\bg_top_divider.xml"
+    },
+    {
+        "merged": "C:\\Users\\Home\\.gradle\\daemon\\8.9\\org.librecommunications.app-debug-51:\\layout_activity_onboarding.xml.flat",
+        "source": "C:\\Users\\Home\\.gradle\\daemon\\8.9\\org.librecommunications.app-main-53:\\layout\\activity_onboarding.xml"
+    },
+    {
+        "merged": "C:\\Users\\Home\\.gradle\\daemon\\8.9\\org.librecommunications.app-debug-51:\\layout_item_conversation.xml.flat",
+        "source": "C:\\Users\\Home\\.gradle\\daemon\\8.9\\org.librecommunications.app-main-53:\\layout\\item_conversation.xml"
+    },
+    {
+        "merged": "C:\\Users\\Home\\.gradle\\daemon\\8.9\\org.librecommunications.app-debug-51:\\drawable_ic_emergency.xml.flat",
+        "source": "C:\\Users\\Home\\.gradle\\daemon\\8.9\\org.librecommunications.app-main-53:\\drawable\\ic_emergency.xml"
+    },
+    {
+        "merged": "C:\\Users\\Home\\.gradle\\daemon\\8.9\\org.librecommunications.app-debug-51:\\drawable_ic_padlock_orange.xml.flat",
+        "source": "C:\\Users\\Home\\.gradle\\daemon\\8.9\\org.librecommunications.app-main-53:\\drawable\\ic_padlock_orange.xml"
+    },
+    {
+        "merged": "C:\\Users\\Home\\.gradle\\daemon\\8.9\\org.librecommunications.app-debug-51:\\drawable_bg_message_received.xml.flat",
+        "source": "C:\\Users\\Home\\.gradle\\daemon\\8.9\\org.librecommunications.app-main-53:\\drawable\\bg_message_received.xml"
+    },
+    {
+        "merged": "C:\\Users\\Home\\.gradle\\daemon\\8.9\\org.librecommunications.app-debug-51:\\drawable_bg_button_danger.xml.flat",
+        "source": "C:\\Users\\Home\\.gradle\\daemon\\8.9\\org.librecommunications.app-main-53:\\drawable\\bg_button_danger.xml"
+    },
+    {
+        "merged": "C:\\Users\\Home\\.gradle\\daemon\\8.9\\org.librecommunications.app-debug-51:\\drawable_ic_chat.xml.flat",
+        "source": "C:\\Users\\Home\\.gradle\\daemon\\8.9\\org.librecommunications.app-main-53:\\drawable\\ic_chat.xml"
+    },
+    {
+        "merged": "C:\\Users\\Home\\.gradle\\daemon\\8.9\\org.librecommunications.app-debug-51:\\mipmap-anydpi-v26_ic_launcher_round.xml.flat",
+        "source": "C:\\Users\\Home\\.gradle\\daemon\\8.9\\org.librecommunications.app-main-53:\\mipmap-anydpi-v26\\ic_launcher_round.xml"
+    },
+    {
+        "merged": "C:\\Users\\Home\\.gradle\\daemon\\8.9\\org.librecommunications.app-debug-51:\\drawable_bg_bottom_bar.xml.flat",
+        "source": "C:\\Users\\Home\\.gradle\\daemon\\8.9\\org.librecommunications.app-main-53:\\drawable\\bg_bottom_bar.xml"
+    },
+    {
+        "merged": "C:\\Users\\Home\\.gradle\\daemon\\8.9\\org.librecommunications.app-debug-51:\\drawable_bg_avatar_circle.xml.flat",
+        "source": "C:\\Users\\Home\\.gradle\\daemon\\8.9\\org.librecommunications.app-main-53:\\drawable\\bg_avatar_circle.xml"
+    },
+    {
+        "merged": "C:\\Users\\Home\\.gradle\\daemon\\8.9\\org.librecommunications.app-debug-51:\\drawable_ic_call.xml.flat",
+        "source": "C:\\Users\\Home\\.gradle\\daemon\\8.9\\org.librecommunications.app-main-53:\\drawable\\ic_call.xml"
+    },
+    {
+        "merged": "C:\\Users\\Home\\.gradle\\daemon\\8.9\\org.librecommunications.app-debug-51:\\layout_dialog_medical_config.xml.flat",
+        "source": "C:\\Users\\Home\\.gradle\\daemon\\8.9\\org.librecommunications.app-main-53:\\layout\\dialog_medical_config.xml"
+    },
+    {
+        "merged": "C:\\Users\\Home\\.gradle\\daemon\\8.9\\org.librecommunications.app-debug-51:\\drawable_bg_message_sent.xml.flat",
+        "source": "C:\\Users\\Home\\.gradle\\daemon\\8.9\\org.librecommunications.app-main-53:\\drawable\\bg_message_sent.xml"
+    },
+    {
+        "merged": "C:\\Users\\Home\\.gradle\\daemon\\8.9\\org.librecommunications.app-debug-51:\\layout_fragment_settings.xml.flat",
+        "source": "C:\\Users\\Home\\.gradle\\daemon\\8.9\\org.librecommunications.app-main-53:\\layout\\fragment_settings.xml"
+    },
+    {
+        "merged": "C:\\Users\\Home\\.gradle\\daemon\\8.9\\org.librecommunications.app-debug-51:\\navigation_nav_graph.xml.flat",
+        "source": "C:\\Users\\Home\\.gradle\\daemon\\8.9\\org.librecommunications.app-main-53:\\navigation\\nav_graph.xml"
+    },
+    {
+        "merged": "org.librecommunications.app-debug-51:/drawable_ic_call.xml.flat",
+        "source": "org.librecommunications.app-main-53:/drawable/ic_call.xml"
+    },
+    {
+        "merged": "C:\\Users\\Home\\.gradle\\daemon\\8.9\\org.librecommunications.app-debug-51:\\color_nav_item_color_state.xml.flat",
+        "source": "C:\\Users\\Home\\.gradle\\daemon\\8.9\\org.librecommunications.app-main-53:\\color\\nav_item_color_state.xml"
+    }
+]

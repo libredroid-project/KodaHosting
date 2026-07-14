@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- ══════════════════════════════════════════════════════════════════
+         LIBRE COMMUNICATIONS — COMPONENT STYLES
+         ══════════════════════════════════════════════════════════════════ -->
+
+    <!-- ── Primary Button ─────────────────────────────────────────────── -->
+    <style name="LibreButton" parent="Widget.MaterialComponents.Button">
+        <item name="android:background">@drawable/bg_button_primary</item>
+        <item name="android:textColor">@color/white</item>
+        <item name="android:textSize">13sp</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textAllCaps">true</item>
+        <item name="android:letterSpacing">0.04</item>
+        <item name="android:minHeight">48dp</item>
+        <item name="android:paddingStart">24dp</item>
+        <item name="android:paddingEnd">24dp</item>
+        <item name="android:gravity">center</item>
+        <item name="android:stateListAnimator">@null</item>
+        <item name="cornerRadius">12dp</item>
+    </style>
+
+    <!-- ── Outline Button ─────────────────────────────────────────────── -->
+    <style name="LibreButton.Outline">
+        <item name="android:background">@drawable/bg_button_outline</item>
+        <item name="android:textColor">@color/libre_orange_glow</item>
+    </style>
+
+    <!-- ── Danger Button ──────────────────────────────────────────────── -->
+    <style name="LibreButton.Danger">
+        <item name="android:background">@drawable/bg_button_danger</item>
+        <item name="android:textColor">@color/state_err</item>
+    </style>
+
+    <!-- ── Card ───────────────────────────────────────────────────────── -->
+    <style name="LibreCard" parent="Widget.MaterialComponents.CardView">
+        <item name="cardBackgroundColor">@color/bg_card</item>
+        <item name="cardElevation">0dp</item>
+        <item name="cardCornerRadius">16dp</item>
+        <item name="strokeColor">@color/border_warm</item>
+        <item name="strokeWidth">1dp</item>
+        <item name="android:layout_marginStart">@dimen/spacing_lg</item>
+        <item name="android:layout_marginEnd">@dimen/spacing_lg</item>
+        <item name="android:layout_marginBottom">@dimen/spacing_md</item>
+        <item name="contentPadding">@dimen/spacing_lg</item>
+    </style>
+
+    <!-- ── Input Field ────────────────────────────────────────────────── -->
+    <style name="LibreInput" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+        <item name="android:background">@drawable/bg_input_field</item>
+        <item name="android:textColor">@color/txt_primary</item>
+        <item name="android:textColorHint">@color/txt_muted</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:padding">14dp</item>
+        <item name="android:minHeight">48dp</item>
+        <item name="android:fontFamily">sans-serif</item>
+        <item name="android:gravity">center_vertical</item>
+        <item name="android:singleLine">true</item>
+    </style>
+
+    <!-- ── Section Header ─────────────────────────────────────────────── -->
+    <style name="SectionHeader">
+        <item name="android:textSize">11sp</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:textAllCaps">true</item>
+        <item name="android:letterSpacing">0.1</item>
+        <item name="android:textColor">@color/txt_orange</item>
+        <item name="android:paddingStart">@dimen/spacing_lg</item>
+        <item name="android:paddingEnd">@dimen/spacing_lg</item>
+        <item name="android:paddingTop">@dimen/spacing_xl</item>
+        <item name="android:paddingBottom">@dimen/spacing_sm</item>
+    </style>
+
+    <!-- ── Brand Title (Press Start 2P) ───────────────────────────────── -->
+    <style name="BrandTitle">
+        <item name="android:textSize">12sp</item>
+        <item name="android:fontFamily">@font/press_start_2p</item>
+        <item name="android:textColor">@color/libre_orange</item>
+        <item name="android:shadowColor">@color/libre_orange_26</item>
+        <item name="android:shadowDx">0</item>
+        <item name="android:shadowDy">0</item>
+        <item name="android:shadowRadius">12</item>
+        <item name="android:textAllCaps">true</item>
+    </style>
+
+    <!-- ── Timestamp Text ─────────────────────────────────────────────── -->
+    <style name="TimestampText">
+        <item name="android:textSize">10sp</item>
+        <item name="android:textColor">@color/txt_muted</item>
+        <item name="android:fontFamily">sans-serif</item>
+    </style>
+
+    <!-- ── Badge (unread count) ───────────────────────────────────────── -->
+    <style name="UnreadBadge">
+        <item name="android:textSize">10sp</item>
+        <item name="android:textColor">@color/white</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:gravity">center</item>
+        <item name="android:background">@color/libre_orange</item>
+        <item name="android:minWidth">20dp</item>
+        <item name="android:minHeight">20dp</item>
+    </style>
+
+</resources>

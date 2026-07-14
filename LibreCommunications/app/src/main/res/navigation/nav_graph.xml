@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/nav_chats">
+
+    <fragment
+        android:id="@+id/nav_chats"
+        android:name="org.librecommunications.app.ui.chat.ChatListFragment"
+        android:label="@string/nav_chats"
+        tools:layout="@layout/fragment_chat_list" />
+
+    <fragment
+        android:id="@+id/nav_nearby"
+        android:name="org.librecommunications.app.ui.nearby.NearbyFragment"
+        android:label="@string/nav_nearby"
+        tools:layout="@layout/fragment_nearby" />
+
+    <fragment
+        android:id="@+id/nav_emergency"
+        android:name="org.librecommunications.app.ui.emergency.EmergencyFragment"
+        android:label="@string/nav_emergency"
+        tools:layout="@layout/fragment_emergency" />
+
+    <fragment
+        android:id="@+id/nav_settings"
+        android:name="org.librecommunications.app.ui.settings.SettingsFragment"
+        android:label="@string/nav_settings"
+        tools:layout="@layout/fragment_settings" />
+
+</navigation>

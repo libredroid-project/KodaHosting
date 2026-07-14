@@ -24,6 +24,7 @@ public class LicensesActivity extends AppCompatActivity {
         findViewById(R.id.btn_back).setOnClickListener(v -> finish());
 
         LinearLayout topContainer = findViewById(R.id.ll_legal_top_container);
+        addLicense(topContainer, "Imprint (Impressum)", "impressum.txt");
         addLicense(topContainer, "Terms of Service", "tos.txt");
         addLicense(topContainer, "Privacy Policy", "privacy.txt");
 

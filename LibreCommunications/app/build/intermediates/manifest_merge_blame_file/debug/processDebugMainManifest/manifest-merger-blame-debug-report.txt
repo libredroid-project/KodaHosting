@@ -1,0 +1,380 @@
+1<?xml version="1.0" encoding="utf-8"?>
+2<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+3    package="org.librecommunications.app"
+4    android:versionCode="1"
+5    android:versionName="1.0.0" >
+6
+7    <uses-sdk
+8        android:minSdkVersion="26"
+9        android:targetSdkVersion="35" />
+10
+11    <!-- Permissions for Offline Comm / P2P -->
+12    <uses-permission android:name="android.permission.BLUETOOTH" />
+12-->C:\Users\Home\KodaHosting\KodaNetwork\LibreCommunications\app\src\main\AndroidManifest.xml:6:5-68
+12-->C:\Users\Home\KodaHosting\KodaNetwork\LibreCommunications\app\src\main\AndroidManifest.xml:6:22-65
+13    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
+13-->C:\Users\Home\KodaHosting\KodaNetwork\LibreCommunications\app\src\main\AndroidManifest.xml:7:5-74
+13-->C:\Users\Home\KodaHosting\KodaNetwork\LibreCommunications\app\src\main\AndroidManifest.xml:7:22-71
+14    <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
+14-->C:\Users\Home\KodaHosting\KodaNetwork\LibreCommunications\app\src\main\AndroidManifest.xml:8:5-76
+14-->C:\Users\Home\KodaHosting\KodaNetwork\LibreCommunications\app\src\main\AndroidManifest.xml:8:22-73
+15    <uses-permission android:name="android.permission.BLUETOOTH_ADVERTISE" />
+15-->C:\Users\Home\KodaHosting\KodaNetwork\LibreCommunications\app\src\main\AndroidManifest.xml:9:5-78
+15-->C:\Users\Home\KodaHosting\KodaNetwork\LibreCommunications\app\src\main\AndroidManifest.xml:9:22-75
+16    <uses-permission android:name="android.permission.BLUETOOTH_SCAN" />
+16-->C:\Users\Home\KodaHosting\KodaNetwork\LibreCommunications\app\src\main\AndroidManifest.xml:10:5-73
+16-->C:\Users\Home\KodaHosting\KodaNetwork\LibreCommunications\app\src\main\AndroidManifest.xml:10:22-70
+17    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+17-->C:\Users\Home\KodaHosting\KodaNetwork\LibreCommunications\app\src\main\AndroidManifest.xml:12:5-76
+17-->C:\Users\Home\KodaHosting\KodaNetwork\LibreCommunications\app\src\main\AndroidManifest.xml:12:22-73
+18    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
+18-->C:\Users\Home\KodaHosting\KodaNetwork\LibreCommunications\app\src\main\AndroidManifest.xml:13:5-76
+18-->C:\Users\Home\KodaHosting\KodaNetwork\LibreCommunications\app\src\main\AndroidManifest.xml:13:22-73
+19    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+19-->C:\Users\Home\KodaHosting\KodaNetwork\LibreCommunications\app\src\main\AndroidManifest.xml:14:5-79
+19-->C:\Users\Home\KodaHosting\KodaNetwork\LibreCommunications\app\src\main\AndroidManifest.xml:14:22-76
+20    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+20-->C:\Users\Home\KodaHosting\KodaNetwork\LibreCommunications\app\src\main\AndroidManifest.xml:15:5-81
+20-->C:\Users\Home\KodaHosting\KodaNetwork\LibreCommunications\app\src\main\AndroidManifest.xml:15:22-78
+21    <uses-permission android:name="android.permission.NEARBY_WIFI_DEVICES" />
+21-->C:\Users\Home\KodaHosting\KodaNetwork\LibreCommunications\app\src\main\AndroidManifest.xml:16:5-78
+21-->C:\Users\Home\KodaHosting\KodaNetwork\LibreCommunications\app\src\main\AndroidManifest.xml:16:22-75
+22    <uses-permission android:name="android.permission.INTERNET" />
+22-->C:\Users\Home\KodaHosting\KodaNetwork\LibreCommunications\app\src\main\AndroidManifest.xml:17:5-67
+22-->C:\Users\Home\KodaHosting\KodaNetwork\LibreCommunications\app\src\main\AndroidManifest.xml:17:22-64
+23    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+23-->C:\Users\Home\KodaHosting\KodaNetwork\LibreCommunications\app\src\main\AndroidManifest.xml:18:5-79
+23-->C:\Users\Home\KodaHosting\KodaNetwork\LibreCommunications\app\src\main\AndroidManifest.xml:18:22-76
+24
+25    <!-- Permissions for Device features -->
+26    <uses-permission android:name="android.permission.CAMERA" />
+26-->C:\Users\Home\KodaHosting\KodaNetwork\LibreCommunications\app\src\main\AndroidManifest.xml:21:5-65
+26-->C:\Users\Home\KodaHosting\KodaNetwork\LibreCommunications\app\src\main\AndroidManifest.xml:21:22-62
+27    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+27-->C:\Users\Home\KodaHosting\KodaNetwork\LibreCommunications\app\src\main\AndroidManifest.xml:22:5-71
+27-->C:\Users\Home\KodaHosting\KodaNetwork\LibreCommunications\app\src\main\AndroidManifest.xml:22:22-68
+28    <uses-permission android:name="android.permission.VIBRATE" />
+28-->C:\Users\Home\KodaHosting\KodaNetwork\LibreCommunications\app\src\main\AndroidManifest.xml:23:5-66
+28-->C:\Users\Home\KodaHosting\KodaNetwork\LibreCommunications\app\src\main\AndroidManifest.xml:23:22-63
+29    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+29-->C:\Users\Home\KodaHosting\KodaNetwork\LibreCommunications\app\src\main\AndroidManifest.xml:24:5-77
+29-->C:\Users\Home\KodaHosting\KodaNetwork\LibreCommunications\app\src\main\AndroidManifest.xml:24:22-74
+30    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_CONNECTED_DEVICE" />
+30-->C:\Users\Home\KodaHosting\KodaNetwork\LibreCommunications\app\src\main\AndroidManifest.xml:25:5-94
+30-->C:\Users\Home\KodaHosting\KodaNetwork\LibreCommunications\app\src\main\AndroidManifest.xml:25:22-91
+31    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION" />
+31-->C:\Users\Home\KodaHosting\KodaNetwork\LibreCommunications\app\src\main\AndroidManifest.xml:26:5-86
+31-->C:\Users\Home\KodaHosting\KodaNetwork\LibreCommunications\app\src\main\AndroidManifest.xml:26:22-83
+32    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+32-->C:\Users\Home\KodaHosting\KodaNetwork\LibreCommunications\app\src\main\AndroidManifest.xml:27:5-77
+32-->C:\Users\Home\KodaHosting\KodaNetwork\LibreCommunications\app\src\main\AndroidManifest.xml:27:22-74
+33
+34    <!-- Optional hardware features -->
+35    <uses-feature
+35-->C:\Users\Home\KodaHosting\KodaNetwork\LibreCommunications\app\src\main\AndroidManifest.xml:30:5-91
+36        android:name="android.hardware.bluetooth_le"
+36-->C:\Users\Home\KodaHosting\KodaNetwork\LibreCommunications\app\src\main\AndroidManifest.xml:30:19-63
+37        android:required="false" />
+37-->C:\Users\Home\KodaHosting\KodaNetwork\LibreCommunications\app\src\main\AndroidManifest.xml:30:64-88
+38    <uses-feature
+38-->C:\Users\Home\KodaHosting\KodaNetwork\LibreCommunications\app\src\main\AndroidManifest.xml:31:5-90
+39        android:name="android.hardware.wifi.direct"
+39-->C:\Users\Home\KodaHosting\KodaNetwork\LibreCommunications\app\src\main\AndroidManifest.xml:31:19-62
+40        android:required="false" />
+40-->C:\Users\Home\KodaHosting\KodaNetwork\LibreCommunications\app\src\main\AndroidManifest.xml:31:63-87
+41    <uses-feature
+41-->C:\Users\Home\KodaHosting\KodaNetwork\LibreCommunications\app\src\main\AndroidManifest.xml:32:5-85
+42        android:name="android.hardware.camera"
+42-->C:\Users\Home\KodaHosting\KodaNetwork\LibreCommunications\app\src\main\AndroidManifest.xml:32:19-57
+43        android:required="false" />
+43-->C:\Users\Home\KodaHosting\KodaNetwork\LibreCommunications\app\src\main\AndroidManifest.xml:32:58-82
+44
+45    <uses-permission android:name="android.permission.USE_BIOMETRIC" /> <!-- suppress DeprecatedClassUsageInspection -->
+45-->[androidx.biometric:biometric:1.2.0-alpha05] C:\Users\Home\.gradle\caches\8.9\transforms\8010e5b83b54809b1774258ef86455bc\transformed\biometric-1.2.0-alpha05\AndroidManifest.xml:22:5-72
+45-->[androidx.biometric:biometric:1.2.0-alpha05] C:\Users\Home\.gradle\caches\8.9\transforms\8010e5b83b54809b1774258ef86455bc\transformed\biometric-1.2.0-alpha05\AndroidManifest.xml:22:22-69
+46    <uses-permission android:name="android.permission.USE_FINGERPRINT" />
+46-->[androidx.biometric:biometric:1.2.0-alpha05] C:\Users\Home\.gradle\caches\8.9\transforms\8010e5b83b54809b1774258ef86455bc\transformed\biometric-1.2.0-alpha05\AndroidManifest.xml:25:5-74
+46-->[androidx.biometric:biometric:1.2.0-alpha05] C:\Users\Home\.gradle\caches\8.9\transforms\8010e5b83b54809b1774258ef86455bc\transformed\biometric-1.2.0-alpha05\AndroidManifest.xml:25:22-71
+47
+48    <permission
+48-->[androidx.core:core:1.13.0] C:\Users\Home\.gradle\caches\8.9\transforms\b203f511e6f88234a93304f4ae9934a6\transformed\core-1.13.0\AndroidManifest.xml:22:5-24:47
+49        android:name="org.librecommunications.app.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"
+49-->[androidx.core:core:1.13.0] C:\Users\Home\.gradle\caches\8.9\transforms\b203f511e6f88234a93304f4ae9934a6\transformed\core-1.13.0\AndroidManifest.xml:23:9-81
+50        android:protectionLevel="signature" />
+50-->[androidx.core:core:1.13.0] C:\Users\Home\.gradle\caches\8.9\transforms\b203f511e6f88234a93304f4ae9934a6\transformed\core-1.13.0\AndroidManifest.xml:24:9-44
+51
+52    <uses-permission android:name="org.librecommunications.app.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION" />
+52-->[androidx.core:core:1.13.0] C:\Users\Home\.gradle\caches\8.9\transforms\b203f511e6f88234a93304f4ae9934a6\transformed\core-1.13.0\AndroidManifest.xml:26:5-97
+52-->[androidx.core:core:1.13.0] C:\Users\Home\.gradle\caches\8.9\transforms\b203f511e6f88234a93304f4ae9934a6\transformed\core-1.13.0\AndroidManifest.xml:26:22-94
+53
+54    <uses-feature
+54-->[com.journeyapps:zxing-android-embedded:4.3.0] C:\Users\Home\.gradle\caches\8.9\transforms\1b046687b34884ab630ec5b77d76db20\transformed\zxing-android-embedded-4.3.0\AndroidManifest.xml:28:5-30:36
+55        android:name="android.hardware.camera.front"
+55-->[com.journeyapps:zxing-android-embedded:4.3.0] C:\Users\Home\.gradle\caches\8.9\transforms\1b046687b34884ab630ec5b77d76db20\transformed\zxing-android-embedded-4.3.0\AndroidManifest.xml:29:9-53
+56        android:required="false" /> <!-- TODO replace above two with next line after Android 4.2 -->
+56-->[com.journeyapps:zxing-android-embedded:4.3.0] C:\Users\Home\.gradle\caches\8.9\transforms\1b046687b34884ab630ec5b77d76db20\transformed\zxing-android-embedded-4.3.0\AndroidManifest.xml:30:9-33
+57    <!-- <uses-feature android:name="android.hardware.camera.any"/> -->
+58    <uses-feature
+58-->[com.journeyapps:zxing-android-embedded:4.3.0] C:\Users\Home\.gradle\caches\8.9\transforms\1b046687b34884ab630ec5b77d76db20\transformed\zxing-android-embedded-4.3.0\AndroidManifest.xml:33:5-35:36
+59        android:name="android.hardware.camera.autofocus"
+59-->[com.journeyapps:zxing-android-embedded:4.3.0] C:\Users\Home\.gradle\caches\8.9\transforms\1b046687b34884ab630ec5b77d76db20\transformed\zxing-android-embedded-4.3.0\AndroidManifest.xml:34:9-57
+60        android:required="false" />
+60-->[com.journeyapps:zxing-android-embedded:4.3.0] C:\Users\Home\.gradle\caches\8.9\transforms\1b046687b34884ab630ec5b77d76db20\transformed\zxing-android-embedded-4.3.0\AndroidManifest.xml:35:9-33
+61    <uses-feature
+61-->[com.journeyapps:zxing-android-embedded:4.3.0] C:\Users\Home\.gradle\caches\8.9\transforms\1b046687b34884ab630ec5b77d76db20\transformed\zxing-android-embedded-4.3.0\AndroidManifest.xml:36:5-38:36
+62        android:name="android.hardware.camera.flash"
+62-->[com.journeyapps:zxing-android-embedded:4.3.0] C:\Users\Home\.gradle\caches\8.9\transforms\1b046687b34884ab630ec5b77d76db20\transformed\zxing-android-embedded-4.3.0\AndroidManifest.xml:37:9-53
+63        android:required="false" />
+63-->[com.journeyapps:zxing-android-embedded:4.3.0] C:\Users\Home\.gradle\caches\8.9\transforms\1b046687b34884ab630ec5b77d76db20\transformed\zxing-android-embedded-4.3.0\AndroidManifest.xml:38:9-33
+64    <uses-feature
+64-->[com.journeyapps:zxing-android-embedded:4.3.0] C:\Users\Home\.gradle\caches\8.9\transforms\1b046687b34884ab630ec5b77d76db20\transformed\zxing-android-embedded-4.3.0\AndroidManifest.xml:39:5-41:36
+65        android:name="android.hardware.screen.landscape"
+65-->[com.journeyapps:zxing-android-embedded:4.3.0] C:\Users\Home\.gradle\caches\8.9\transforms\1b046687b34884ab630ec5b77d76db20\transformed\zxing-android-embedded-4.3.0\AndroidManifest.xml:40:9-57
+66        android:required="false" />
+66-->[com.journeyapps:zxing-android-embedded:4.3.0] C:\Users\Home\.gradle\caches\8.9\transforms\1b046687b34884ab630ec5b77d76db20\transformed\zxing-android-embedded-4.3.0\AndroidManifest.xml:41:9-33
+67    <uses-feature
+67-->[com.journeyapps:zxing-android-embedded:4.3.0] C:\Users\Home\.gradle\caches\8.9\transforms\1b046687b34884ab630ec5b77d76db20\transformed\zxing-android-embedded-4.3.0\AndroidManifest.xml:42:5-44:36
+68        android:name="android.hardware.wifi"
+68-->[com.journeyapps:zxing-android-embedded:4.3.0] C:\Users\Home\.gradle\caches\8.9\transforms\1b046687b34884ab630ec5b77d76db20\transformed\zxing-android-embedded-4.3.0\AndroidManifest.xml:43:9-45
+69        android:required="false" />
+69-->[com.journeyapps:zxing-android-embedded:4.3.0] C:\Users\Home\.gradle\caches\8.9\transforms\1b046687b34884ab630ec5b77d76db20\transformed\zxing-android-embedded-4.3.0\AndroidManifest.xml:44:9-33
+70
+71    <application
+71-->C:\Users\Home\KodaHosting\KodaNetwork\LibreCommunications\app\src\main\AndroidManifest.xml:34:5-106:19
+72        android:name="org.librecommunications.app.LibreApp"
+72-->C:\Users\Home\KodaHosting\KodaNetwork\LibreCommunications\app\src\main\AndroidManifest.xml:35:9-33
+73        android:allowBackup="false"
+73-->C:\Users\Home\KodaHosting\KodaNetwork\LibreCommunications\app\src\main\AndroidManifest.xml:36:9-36
+74        android:appComponentFactory="androidx.core.app.CoreComponentFactory"
+74-->[androidx.core:core:1.13.0] C:\Users\Home\.gradle\caches\8.9\transforms\b203f511e6f88234a93304f4ae9934a6\transformed\core-1.13.0\AndroidManifest.xml:28:18-86
+75        android:debuggable="true"
+76        android:extractNativeLibs="false"
+77        android:icon="@mipmap/ic_launcher"
+77-->C:\Users\Home\KodaHosting\KodaNetwork\LibreCommunications\app\src\main\AndroidManifest.xml:37:9-43
+78        android:label="@string/app_name"
+78-->C:\Users\Home\KodaHosting\KodaNetwork\LibreCommunications\app\src\main\AndroidManifest.xml:39:9-41
+79        android:networkSecurityConfig="@xml/network_security_config"
+79-->C:\Users\Home\KodaHosting\KodaNetwork\LibreCommunications\app\src\main\AndroidManifest.xml:42:9-69
+80        android:roundIcon="@mipmap/ic_launcher_round"
+80-->C:\Users\Home\KodaHosting\KodaNetwork\LibreCommunications\app\src\main\AndroidManifest.xml:38:9-54
+81        android:supportsRtl="true"
+81-->C:\Users\Home\KodaHosting\KodaNetwork\LibreCommunications\app\src\main\AndroidManifest.xml:40:9-35
+82        android:testOnly="true"
+83        android:theme="@style/Theme.LibreCommunications" >
+83-->C:\Users\Home\KodaHosting\KodaNetwork\LibreCommunications\app\src\main\AndroidManifest.xml:41:9-57
+84        <activity
+84-->C:\Users\Home\KodaHosting\KodaNetwork\LibreCommunications\app\src\main\AndroidManifest.xml:70:9-78:20
+85            android:name="org.librecommunications.app.ui.SplashActivity"
+85-->C:\Users\Home\KodaHosting\KodaNetwork\LibreCommunications\app\src\main\AndroidManifest.xml:71:13-46
+86            android:exported="true"
+86-->C:\Users\Home\KodaHosting\KodaNetwork\LibreCommunications\app\src\main\AndroidManifest.xml:72:13-36
+87            android:theme="@style/Theme.LibreCommunications" >
+87-->C:\Users\Home\KodaHosting\KodaNetwork\LibreCommunications\app\src\main\AndroidManifest.xml:73:13-61
+88            <intent-filter>
+88-->C:\Users\Home\KodaHosting\KodaNetwork\LibreCommunications\app\src\main\AndroidManifest.xml:52:13-55:29
+89                <action android:name="android.intent.action.MAIN" />
+89-->C:\Users\Home\KodaHosting\KodaNetwork\LibreCommunications\app\src\main\AndroidManifest.xml:53:17-69
+89-->C:\Users\Home\KodaHosting\KodaNetwork\LibreCommunications\app\src\main\AndroidManifest.xml:53:25-66
+90
+91                <category android:name="android.intent.category.LAUNCHER" />
+91-->C:\Users\Home\KodaHosting\KodaNetwork\LibreCommunications\app\src\main\AndroidManifest.xml:54:17-77
+91-->C:\Users\Home\KodaHosting\KodaNetwork\LibreCommunications\app\src\main\AndroidManifest.xml:54:27-74
+92            </intent-filter>
+93        </activity>
+94        <activity
+94-->C:\Users\Home\KodaHosting\KodaNetwork\LibreCommunications\app\src\main\AndroidManifest.xml:80:9-84:64
+95            android:name="org.librecommunications.app.ui.MainActivity"
+95-->C:\Users\Home\KodaHosting\KodaNetwork\LibreCommunications\app\src\main\AndroidManifest.xml:81:13-44
+96            android:exported="false"
+96-->C:\Users\Home\KodaHosting\KodaNetwork\LibreCommunications\app\src\main\AndroidManifest.xml:82:13-37
+97            android:theme="@style/Theme.LibreCommunications"
+97-->C:\Users\Home\KodaHosting\KodaNetwork\LibreCommunications\app\src\main\AndroidManifest.xml:84:13-61
+98            android:windowSoftInputMode="adjustResize" />
+98-->C:\Users\Home\KodaHosting\KodaNetwork\LibreCommunications\app\src\main\AndroidManifest.xml:83:13-55
+99
+100        <activity-alias
+100-->C:\Users\Home\KodaHosting\KodaNetwork\LibreCommunications\app\src\main\AndroidManifest.xml:58:9-68:26
+101            android:name="org.librecommunications.app.StealthNotesActivity"
+101-->C:\Users\Home\KodaHosting\KodaNetwork\LibreCommunications\app\src\main\AndroidManifest.xml:59:13-49
+102            android:enabled="false"
+102-->C:\Users\Home\KodaHosting\KodaNetwork\LibreCommunications\app\src\main\AndroidManifest.xml:60:13-36
+103            android:exported="true"
+103-->C:\Users\Home\KodaHosting\KodaNetwork\LibreCommunications\app\src\main\AndroidManifest.xml:61:13-36
+104            android:label="Notes"
+104-->C:\Users\Home\KodaHosting\KodaNetwork\LibreCommunications\app\src\main\AndroidManifest.xml:62:13-34
+105            android:targetActivity="org.librecommunications.app.ui.MainActivity" >
+105-->C:\Users\Home\KodaHosting\KodaNetwork\LibreCommunications\app\src\main\AndroidManifest.xml:63:13-54
+106            <intent-filter>
+106-->C:\Users\Home\KodaHosting\KodaNetwork\LibreCommunications\app\src\main\AndroidManifest.xml:52:13-55:29
+107                <action android:name="android.intent.action.MAIN" />
+107-->C:\Users\Home\KodaHosting\KodaNetwork\LibreCommunications\app\src\main\AndroidManifest.xml:53:17-69
+107-->C:\Users\Home\KodaHosting\KodaNetwork\LibreCommunications\app\src\main\AndroidManifest.xml:53:25-66
+108
+109                <category android:name="android.intent.category.LAUNCHER" />
+109-->C:\Users\Home\KodaHosting\KodaNetwork\LibreCommunications\app\src\main\AndroidManifest.xml:54:17-77
+109-->C:\Users\Home\KodaHosting\KodaNetwork\LibreCommunications\app\src\main\AndroidManifest.xml:54:27-74
+110            </intent-filter>
+111        </activity-alias> <!-- Stealth Aliases (Disabled by default) -->
+112        <activity-alias
+112-->C:\Users\Home\KodaHosting\KodaNetwork\LibreCommunications\app\src\main\AndroidManifest.xml:46:9-56:26
+113            android:name="org.librecommunications.app.StealthCalculatorActivity"
+113-->C:\Users\Home\KodaHosting\KodaNetwork\LibreCommunications\app\src\main\AndroidManifest.xml:47:13-54
+114            android:enabled="false"
+114-->C:\Users\Home\KodaHosting\KodaNetwork\LibreCommunications\app\src\main\AndroidManifest.xml:48:13-36
+115            android:exported="true"
+115-->C:\Users\Home\KodaHosting\KodaNetwork\LibreCommunications\app\src\main\AndroidManifest.xml:49:13-36
+116            android:label="Calculator"
+116-->C:\Users\Home\KodaHosting\KodaNetwork\LibreCommunications\app\src\main\AndroidManifest.xml:50:13-39
+117            android:targetActivity="org.librecommunications.app.ui.MainActivity" >
+117-->C:\Users\Home\KodaHosting\KodaNetwork\LibreCommunications\app\src\main\AndroidManifest.xml:51:13-54
+118            <intent-filter>
+118-->C:\Users\Home\KodaHosting\KodaNetwork\LibreCommunications\app\src\main\AndroidManifest.xml:52:13-55:29
+119                <action android:name="android.intent.action.MAIN" />
+119-->C:\Users\Home\KodaHosting\KodaNetwork\LibreCommunications\app\src\main\AndroidManifest.xml:53:17-69
+119-->C:\Users\Home\KodaHosting\KodaNetwork\LibreCommunications\app\src\main\AndroidManifest.xml:53:25-66
+120
+121                <category android:name="android.intent.category.LAUNCHER" />
+121-->C:\Users\Home\KodaHosting\KodaNetwork\LibreCommunications\app\src\main\AndroidManifest.xml:54:17-77
+121-->C:\Users\Home\KodaHosting\KodaNetwork\LibreCommunications\app\src\main\AndroidManifest.xml:54:27-74
+122            </intent-filter>
+123        </activity-alias>
+124
+125        <activity
+125-->C:\Users\Home\KodaHosting\KodaNetwork\LibreCommunications\app\src\main\AndroidManifest.xml:86:9-89:64
+126            android:name="org.librecommunications.app.ui.onboarding.OnboardingActivity"
+126-->C:\Users\Home\KodaHosting\KodaNetwork\LibreCommunications\app\src\main\AndroidManifest.xml:87:13-61
+127            android:exported="false"
+127-->C:\Users\Home\KodaHosting\KodaNetwork\LibreCommunications\app\src\main\AndroidManifest.xml:88:13-37
+128            android:theme="@style/Theme.LibreCommunications" />
+128-->C:\Users\Home\KodaHosting\KodaNetwork\LibreCommunications\app\src\main\AndroidManifest.xml:89:13-61
+129        <activity
+129-->C:\Users\Home\KodaHosting\KodaNetwork\LibreCommunications\app\src\main\AndroidManifest.xml:91:9-94:58
+130            android:name="org.librecommunications.app.ui.chat.ChatActivity"
+130-->C:\Users\Home\KodaHosting\KodaNetwork\LibreCommunications\app\src\main\AndroidManifest.xml:92:13-49
+131            android:exported="false"
+131-->C:\Users\Home\KodaHosting\KodaNetwork\LibreCommunications\app\src\main\AndroidManifest.xml:93:13-37
+132            android:windowSoftInputMode="adjustResize" />
+132-->C:\Users\Home\KodaHosting\KodaNetwork\LibreCommunications\app\src\main\AndroidManifest.xml:94:13-55
+133        <activity
+133-->C:\Users\Home\KodaHosting\KodaNetwork\LibreCommunications\app\src\main\AndroidManifest.xml:96:9-99:79
+134            android:name="org.librecommunications.app.ui.ConnectionRequestActivity"
+134-->C:\Users\Home\KodaHosting\KodaNetwork\LibreCommunications\app\src\main\AndroidManifest.xml:97:13-57
+135            android:exported="false"
+135-->C:\Users\Home\KodaHosting\KodaNetwork\LibreCommunications\app\src\main\AndroidManifest.xml:98:13-37
+136            android:theme="@style/Theme.MaterialComponents.Dialog.MinWidth" />
+136-->C:\Users\Home\KodaHosting\KodaNetwork\LibreCommunications\app\src\main\AndroidManifest.xml:99:13-76
+137
+138        <service
+138-->C:\Users\Home\KodaHosting\KodaNetwork\LibreCommunications\app\src\main\AndroidManifest.xml:101:9-104:63
+139            android:name="org.librecommunications.app.network.NetworkService"
+139-->C:\Users\Home\KodaHosting\KodaNetwork\LibreCommunications\app\src\main\AndroidManifest.xml:102:13-51
+140            android:exported="false"
+140-->C:\Users\Home\KodaHosting\KodaNetwork\LibreCommunications\app\src\main\AndroidManifest.xml:103:13-37
+141            android:foregroundServiceType="connectedDevice" />
+141-->C:\Users\Home\KodaHosting\KodaNetwork\LibreCommunications\app\src\main\AndroidManifest.xml:104:13-60
+142
+143        <provider
+143-->[androidx.emoji2:emoji2:1.3.0] C:\Users\Home\.gradle\caches\8.9\transforms\061aa1b4584afb90d8d45613ef7cf7c1\transformed\emoji2-1.3.0\AndroidManifest.xml:24:9-32:20
+144            android:name="androidx.startup.InitializationProvider"
+144-->[androidx.emoji2:emoji2:1.3.0] C:\Users\Home\.gradle\caches\8.9\transforms\061aa1b4584afb90d8d45613ef7cf7c1\transformed\emoji2-1.3.0\AndroidManifest.xml:25:13-67
+145            android:authorities="org.librecommunications.app.androidx-startup"
+145-->[androidx.emoji2:emoji2:1.3.0] C:\Users\Home\.gradle\caches\8.9\transforms\061aa1b4584afb90d8d45613ef7cf7c1\transformed\emoji2-1.3.0\AndroidManifest.xml:26:13-68
+146            android:exported="false" >
+146-->[androidx.emoji2:emoji2:1.3.0] C:\Users\Home\.gradle\caches\8.9\transforms\061aa1b4584afb90d8d45613ef7cf7c1\transformed\emoji2-1.3.0\AndroidManifest.xml:27:13-37
+147            <meta-data
+147-->[androidx.emoji2:emoji2:1.3.0] C:\Users\Home\.gradle\caches\8.9\transforms\061aa1b4584afb90d8d45613ef7cf7c1\transformed\emoji2-1.3.0\AndroidManifest.xml:29:13-31:52
+148                android:name="androidx.emoji2.text.EmojiCompatInitializer"
+148-->[androidx.emoji2:emoji2:1.3.0] C:\Users\Home\.gradle\caches\8.9\transforms\061aa1b4584afb90d8d45613ef7cf7c1\transformed\emoji2-1.3.0\AndroidManifest.xml:30:17-75
+149                android:value="androidx.startup" />
+149-->[androidx.emoji2:emoji2:1.3.0] C:\Users\Home\.gradle\caches\8.9\transforms\061aa1b4584afb90d8d45613ef7cf7c1\transformed\emoji2-1.3.0\AndroidManifest.xml:31:17-49
+150            <meta-data
+150-->[androidx.lifecycle:lifecycle-process:2.8.7] C:\Users\Home\.gradle\caches\8.9\transforms\34911420adecec8beebaefaf3fec2838\transformed\lifecycle-process-2.8.7\AndroidManifest.xml:29:13-31:52
+151                android:name="androidx.lifecycle.ProcessLifecycleInitializer"
+151-->[androidx.lifecycle:lifecycle-process:2.8.7] C:\Users\Home\.gradle\caches\8.9\transforms\34911420adecec8beebaefaf3fec2838\transformed\lifecycle-process-2.8.7\AndroidManifest.xml:30:17-78
+152                android:value="androidx.startup" />
+152-->[androidx.lifecycle:lifecycle-process:2.8.7] C:\Users\Home\.gradle\caches\8.9\transforms\34911420adecec8beebaefaf3fec2838\transformed\lifecycle-process-2.8.7\AndroidManifest.xml:31:17-49
+153            <meta-data
+153-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\Home\.gradle\caches\8.9\transforms\557751d422c4fcd1f5ebbbf54b63babd\transformed\profileinstaller-1.3.1\AndroidManifest.xml:29:13-31:52
+154                android:name="androidx.profileinstaller.ProfileInstallerInitializer"
+154-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\Home\.gradle\caches\8.9\transforms\557751d422c4fcd1f5ebbbf54b63babd\transformed\profileinstaller-1.3.1\AndroidManifest.xml:30:17-85
+155                android:value="androidx.startup" />
+155-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\Home\.gradle\caches\8.9\transforms\557751d422c4fcd1f5ebbbf54b63babd\transformed\profileinstaller-1.3.1\AndroidManifest.xml:31:17-49
+156        </provider>
+157
+158        <uses-library
+158-->[androidx.window:window:1.0.0] C:\Users\Home\.gradle\caches\8.9\transforms\d38b70129c9be11a1abe8318a3cda931\transformed\window-1.0.0\AndroidManifest.xml:25:9-27:40
+159            android:name="androidx.window.extensions"
+159-->[androidx.window:window:1.0.0] C:\Users\Home\.gradle\caches\8.9\transforms\d38b70129c9be11a1abe8318a3cda931\transformed\window-1.0.0\AndroidManifest.xml:26:13-54
+160            android:required="false" />
+160-->[androidx.window:window:1.0.0] C:\Users\Home\.gradle\caches\8.9\transforms\d38b70129c9be11a1abe8318a3cda931\transformed\window-1.0.0\AndroidManifest.xml:27:13-37
+161        <uses-library
+161-->[androidx.window:window:1.0.0] C:\Users\Home\.gradle\caches\8.9\transforms\d38b70129c9be11a1abe8318a3cda931\transformed\window-1.0.0\AndroidManifest.xml:28:9-30:40
+162            android:name="androidx.window.sidecar"
+162-->[androidx.window:window:1.0.0] C:\Users\Home\.gradle\caches\8.9\transforms\d38b70129c9be11a1abe8318a3cda931\transformed\window-1.0.0\AndroidManifest.xml:29:13-51
+163            android:required="false" />
+163-->[androidx.window:window:1.0.0] C:\Users\Home\.gradle\caches\8.9\transforms\d38b70129c9be11a1abe8318a3cda931\transformed\window-1.0.0\AndroidManifest.xml:30:13-37
+164
+165        <service
+165-->[androidx.room:room-runtime:2.6.1] C:\Users\Home\.gradle\caches\8.9\transforms\470c6cdf6506c0b1b7763278765866c4\transformed\room-runtime-2.6.1\AndroidManifest.xml:24:9-28:63
+166            android:name="androidx.room.MultiInstanceInvalidationService"
+166-->[androidx.room:room-runtime:2.6.1] C:\Users\Home\.gradle\caches\8.9\transforms\470c6cdf6506c0b1b7763278765866c4\transformed\room-runtime-2.6.1\AndroidManifest.xml:25:13-74
+167            android:directBootAware="true"
+167-->[androidx.room:room-runtime:2.6.1] C:\Users\Home\.gradle\caches\8.9\transforms\470c6cdf6506c0b1b7763278765866c4\transformed\room-runtime-2.6.1\AndroidManifest.xml:26:13-43
+168            android:exported="false" />
+168-->[androidx.room:room-runtime:2.6.1] C:\Users\Home\.gradle\caches\8.9\transforms\470c6cdf6506c0b1b7763278765866c4\transformed\room-runtime-2.6.1\AndroidManifest.xml:27:13-37
+169
+170        <activity
+170-->[com.journeyapps:zxing-android-embedded:4.3.0] C:\Users\Home\.gradle\caches\8.9\transforms\1b046687b34884ab630ec5b77d76db20\transformed\zxing-android-embedded-4.3.0\AndroidManifest.xml:47:9-53:63
+171            android:name="com.journeyapps.barcodescanner.CaptureActivity"
+171-->[com.journeyapps:zxing-android-embedded:4.3.0] C:\Users\Home\.gradle\caches\8.9\transforms\1b046687b34884ab630ec5b77d76db20\transformed\zxing-android-embedded-4.3.0\AndroidManifest.xml:48:13-74
+172            android:clearTaskOnLaunch="true"
+172-->[com.journeyapps:zxing-android-embedded:4.3.0] C:\Users\Home\.gradle\caches\8.9\transforms\1b046687b34884ab630ec5b77d76db20\transformed\zxing-android-embedded-4.3.0\AndroidManifest.xml:49:13-45
+173            android:screenOrientation="sensorLandscape"
+173-->[com.journeyapps:zxing-android-embedded:4.3.0] C:\Users\Home\.gradle\caches\8.9\transforms\1b046687b34884ab630ec5b77d76db20\transformed\zxing-android-embedded-4.3.0\AndroidManifest.xml:50:13-56
+174            android:stateNotNeeded="true"
+174-->[com.journeyapps:zxing-android-embedded:4.3.0] C:\Users\Home\.gradle\caches\8.9\transforms\1b046687b34884ab630ec5b77d76db20\transformed\zxing-android-embedded-4.3.0\AndroidManifest.xml:51:13-42
+175            android:theme="@style/zxing_CaptureTheme"
+175-->[com.journeyapps:zxing-android-embedded:4.3.0] C:\Users\Home\.gradle\caches\8.9\transforms\1b046687b34884ab630ec5b77d76db20\transformed\zxing-android-embedded-4.3.0\AndroidManifest.xml:52:13-54
+176            android:windowSoftInputMode="stateAlwaysHidden" />
+176-->[com.journeyapps:zxing-android-embedded:4.3.0] C:\Users\Home\.gradle\caches\8.9\transforms\1b046687b34884ab630ec5b77d76db20\transformed\zxing-android-embedded-4.3.0\AndroidManifest.xml:53:13-60
+177
+178        <receiver
+178-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\Home\.gradle\caches\8.9\transforms\557751d422c4fcd1f5ebbbf54b63babd\transformed\profileinstaller-1.3.1\AndroidManifest.xml:34:9-52:20
+179            android:name="androidx.profileinstaller.ProfileInstallReceiver"
+179-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\Home\.gradle\caches\8.9\transforms\557751d422c4fcd1f5ebbbf54b63babd\transformed\profileinstaller-1.3.1\AndroidManifest.xml:35:13-76
+180            android:directBootAware="false"
+180-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\Home\.gradle\caches\8.9\transforms\557751d422c4fcd1f5ebbbf54b63babd\transformed\profileinstaller-1.3.1\AndroidManifest.xml:36:13-44
+181            android:enabled="true"
+181-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\Home\.gradle\caches\8.9\transforms\557751d422c4fcd1f5ebbbf54b63babd\transformed\profileinstaller-1.3.1\AndroidManifest.xml:37:13-35
+182            android:exported="true"
+182-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\Home\.gradle\caches\8.9\transforms\557751d422c4fcd1f5ebbbf54b63babd\transformed\profileinstaller-1.3.1\AndroidManifest.xml:38:13-36
+183            android:permission="android.permission.DUMP" >
+183-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\Home\.gradle\caches\8.9\transforms\557751d422c4fcd1f5ebbbf54b63babd\transformed\profileinstaller-1.3.1\AndroidManifest.xml:39:13-57
+184            <intent-filter>
+184-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\Home\.gradle\caches\8.9\transforms\557751d422c4fcd1f5ebbbf54b63babd\transformed\profileinstaller-1.3.1\AndroidManifest.xml:40:13-42:29
+185                <action android:name="androidx.profileinstaller.action.INSTALL_PROFILE" />
+185-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\Home\.gradle\caches\8.9\transforms\557751d422c4fcd1f5ebbbf54b63babd\transformed\profileinstaller-1.3.1\AndroidManifest.xml:41:17-91
+185-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\Home\.gradle\caches\8.9\transforms\557751d422c4fcd1f5ebbbf54b63babd\transformed\profileinstaller-1.3.1\AndroidManifest.xml:41:25-88
+186            </intent-filter>
+187            <intent-filter>
+187-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\Home\.gradle\caches\8.9\transforms\557751d422c4fcd1f5ebbbf54b63babd\transformed\profileinstaller-1.3.1\AndroidManifest.xml:43:13-45:29
+188                <action android:name="androidx.profileinstaller.action.SKIP_FILE" />
+188-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\Home\.gradle\caches\8.9\transforms\557751d422c4fcd1f5ebbbf54b63babd\transformed\profileinstaller-1.3.1\AndroidManifest.xml:44:17-85
+188-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\Home\.gradle\caches\8.9\transforms\557751d422c4fcd1f5ebbbf54b63babd\transformed\profileinstaller-1.3.1\AndroidManifest.xml:44:25-82
+189            </intent-filter>
+190            <intent-filter>
+190-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\Home\.gradle\caches\8.9\transforms\557751d422c4fcd1f5ebbbf54b63babd\transformed\profileinstaller-1.3.1\AndroidManifest.xml:46:13-48:29
+191                <action android:name="androidx.profileinstaller.action.SAVE_PROFILE" />
+191-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\Home\.gradle\caches\8.9\transforms\557751d422c4fcd1f5ebbbf54b63babd\transformed\profileinstaller-1.3.1\AndroidManifest.xml:47:17-88
+191-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\Home\.gradle\caches\8.9\transforms\557751d422c4fcd1f5ebbbf54b63babd\transformed\profileinstaller-1.3.1\AndroidManifest.xml:47:25-85
+192            </intent-filter>
+193            <intent-filter>
+193-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\Home\.gradle\caches\8.9\transforms\557751d422c4fcd1f5ebbbf54b63babd\transformed\profileinstaller-1.3.1\AndroidManifest.xml:49:13-51:29
+194                <action android:name="androidx.profileinstaller.action.BENCHMARK_OPERATION" />
+194-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\Home\.gradle\caches\8.9\transforms\557751d422c4fcd1f5ebbbf54b63babd\transformed\profileinstaller-1.3.1\AndroidManifest.xml:50:17-95
+194-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\Home\.gradle\caches\8.9\transforms\557751d422c4fcd1f5ebbbf54b63babd\transformed\profileinstaller-1.3.1\AndroidManifest.xml:50:25-92
+195            </intent-filter>
+196        </receiver>
+197    </application>
+198
+199</manifest>

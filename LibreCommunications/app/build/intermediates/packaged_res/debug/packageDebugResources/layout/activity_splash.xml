@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#001B54">
+
+    <!-- Container for the 12 EU Stars that will animate outward from center -->
+    <FrameLayout
+        android:id="@+id/starsContainer"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <!-- Single initial star in the center (starting point) -->
+        <ImageView
+            android:id="@+id/starCenter"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_gravity="center"
+            android:src="@drawable/ic_eu_star"
+            android:alpha="0" />
+
+        <!-- 12 EU stars, all start at center, animate outward -->
+        <ImageView android:id="@+id/star0" android:layout_width="28dp" android:layout_height="28dp" android:layout_gravity="center" android:src="@drawable/ic_eu_star" android:alpha="0" />
+        <ImageView android:id="@+id/star1" android:layout_width="28dp" android:layout_height="28dp" android:layout_gravity="center" android:src="@drawable/ic_eu_star" android:alpha="0" />
+        <ImageView android:id="@+id/star2" android:layout_width="28dp" android:layout_height="28dp" android:layout_gravity="center" android:src="@drawable/ic_eu_star" android:alpha="0" />
+        <ImageView android:id="@+id/star3" android:layout_width="28dp" android:layout_height="28dp" android:layout_gravity="center" android:src="@drawable/ic_eu_star" android:alpha="0" />
+        <ImageView android:id="@+id/star4" android:layout_width="28dp" android:layout_height="28dp" android:layout_gravity="center" android:src="@drawable/ic_eu_star" android:alpha="0" />
+        <ImageView android:id="@+id/star5" android:layout_width="28dp" android:layout_height="28dp" android:layout_gravity="center" android:src="@drawable/ic_eu_star" android:alpha="0" />
+        <ImageView android:id="@+id/star6" android:layout_width="28dp" android:layout_height="28dp" android:layout_gravity="center" android:src="@drawable/ic_eu_star" android:alpha="0" />
+        <ImageView android:id="@+id/star7" android:layout_width="28dp" android:layout_height="28dp" android:layout_gravity="center" android:src="@drawable/ic_eu_star" android:alpha="0" />
+        <ImageView android:id="@+id/star8" android:layout_width="28dp" android:layout_height="28dp" android:layout_gravity="center" android:src="@drawable/ic_eu_star" android:alpha="0" />
+        <ImageView android:id="@+id/star9" android:layout_width="28dp" android:layout_height="28dp" android:layout_gravity="center" android:src="@drawable/ic_eu_star" android:alpha="0" />
+        <ImageView android:id="@+id/star10" android:layout_width="28dp" android:layout_height="28dp" android:layout_gravity="center" android:src="@drawable/ic_eu_star" android:alpha="0" />
+        <ImageView android:id="@+id/star11" android:layout_width="28dp" android:layout_height="28dp" android:layout_gravity="center" android:src="@drawable/ic_eu_star" android:alpha="0" />
+
+    </FrameLayout>
+
+    <!-- Block / Cancel circle (red circle + diagonal) -->
+    <ImageView
+        android:id="@+id/blockSymbol"
+        android:layout_width="280dp"
+        android:layout_height="280dp"
+        android:layout_gravity="center"
+        android:src="@drawable/ic_block_circle"
+        android:alpha="0"
+        android:scaleX="0.3"
+        android:scaleY="0.3" />
+
+    <!-- Padlock overlay -->
+    <ImageView
+        android:id="@+id/padlock"
+        android:layout_width="120dp"
+        android:layout_height="120dp"
+        android:layout_gravity="center"
+        android:src="@drawable/ic_padlock_orange"
+        android:alpha="0"
+        android:translationY="200dp" />
+
+    <!-- "CHAT CONTROL 2.0" with strikethrough in a wrapper for correct positioning -->
+    <FrameLayout
+        android:id="@+id/chatControlWrapper"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="100dp"
+        android:alpha="0">
+
+        <TextView
+            android:id="@+id/tvChatControl"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="CHAT CONTROL 2.0"
+            android:textColor="#FF3344"
+            android:textSize="22sp"
+            android:fontFamily="sans-serif-bold"
+            android:letterSpacing="0.12"
+            android:paddingHorizontal="4dp" />
+
+        <!-- Strikethrough line directly overlaid on the text, centered vertically -->
+        <View
+            android:id="@+id/strikethrough"
+            android:layout_width="0dp"
+            android:layout_height="4dp"
+            android:layout_gravity="center_vertical"
+            android:background="#FF3344" />
+
+    </FrameLayout>
+
+    <!-- App branding at bottom -->
+    <LinearLayout
+        android:id="@+id/brandingLayout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal|bottom"
+        android:layout_marginBottom="120dp"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:alpha="0">
+
+        <TextView
+            android:id="@+id/tvAppName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="LIBRE COMMS"
+            android:textColor="#FF6B00"
+            android:textSize="28sp"
+            android:fontFamily="sans-serif-black"
+            android:letterSpacing="0.2" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Your communication. Your freedom."
+            android:textColor="#8A8A9A"
+            android:textSize="13sp"
+            android:fontFamily="sans-serif-light"
+            android:layout_marginTop="4dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="by Libredroid"
+            android:textColor="#555566"
+            android:textSize="11sp"
+            android:layout_marginTop="8dp" />
+
+    </LinearLayout>
+
+</FrameLayout>
