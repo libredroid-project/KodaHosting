@@ -1,0 +1,39 @@
+# Exclude JNI/C++ code from language statistics so Java dominates
+app/src/main/cpp/* linguist-vendored
+
+# Exclude temporary data, downloads, test scripts, and archives
+data/* linguist-vendored
+proot_bundle/* linguist-vendored
+proot_final/* linguist-vendored
+frp/* linguist-vendored
+bundle_libs/* linguist-vendored
+LibreCommunications/* linguist-vendored
+KodaLobbyPlugin/* linguist-vendored
+KodaTransferPlugin/* linguist-vendored
+bootstrap_check/* linguist-vendored
+bootstrap_ext/* linguist-vendored
+anvil_extracted/* linguist-vendored
+temp_mariadb/* linguist-vendored
+temp_mariadb2/* linguist-vendored
+temp_redis/* linguist-vendored
+temp-mariadb/* linguist-vendored
+temp-mariadb2/* linguist-vendored
+temp-redis/* linguist-vendored
+jni_extract/* linguist-vendored
+bundle_final/* linguist-vendored
+jadx/* linguist-vendored
+java_export/* linguist-vendored
+
+# Exclude specific files from repository analysis
+*.py linguist-vendored
+*.sh linguist-vendored
+*.deb linguist-vendored
+*.xz linguist-vendored
+*.zip linguist-vendored
+*.txt linguist-vendored
+*.apk linguist-vendored
+*.sql linguist-vendored
+*.log linguist-vendored
+*.exe linguist-vendored
+*.jar linguist-vendored
+*.java_export linguist-vendored
