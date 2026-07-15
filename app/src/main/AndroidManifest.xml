@@ -41,6 +41,9 @@
         <activity android:name=".ui.PraetorConfirmActivity" 
             android:theme="@style/Theme.KodaNetwork.Translucent"
             android:screenOrientation="portrait"/>
+        <activity android:name=".ui.PraetorMemoryLimitActivity" 
+            android:theme="@style/Theme.KodaNetwork.Translucent"
+            android:screenOrientation="portrait"/>
         <activity android:name=".ui.ScreensaverActivity" android:screenOrientation="portrait"/>
         <activity android:name=".ui.CrashAlertActivity" android:screenOrientation="portrait"/>
 

@@ -101,6 +101,34 @@ public class MainActivity extends AppCompatActivity {
             finish();
             return;
         }
+
+        // Check for Android 17+ Memory Limiter process terminations
+        if (android.os.Build.VERSION.SDK_INT >= 30) {
+            try {
+                android.app.ActivityManager am = (android.app.ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+                if (am != null) {
+                    java.util.List<android.app.ApplicationExitInfo> exits = am.getHistoricalProcessExitReasons(getPackageName(), 0, 1);
+                    if (exits != null && !exits.isEmpty()) {
+                        android.app.ApplicationExitInfo lastExit = exits.get(0);
+                        if (lastExit.getReason() == android.app.ApplicationExitInfo.REASON_OTHER) {
+                            String desc = lastExit.getDescription();
+                            if (desc != null && desc.contains("MemoryLimiter")) {
+                                long lastExitTime = lastExit.getTimestamp();
+                                long lastShownTime = prefs.getLong("last_shown_memory_limiter_warning", 0);
+                                if (lastExitTime > lastShownTime) {
+                                    prefs.edit().putLong("last_shown_memory_limiter_warning", lastExitTime).apply();
+                                    Intent memoryIntent = new Intent(this, eu.kodanetwork.mchost.ui.PraetorMemoryLimitActivity.class);
+                                    startActivity(memoryIntent);
+                                }
+                            }
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
         eu.kodanetwork.mchost.security.AntiTamperSystem.check(this);
         eu.kodanetwork.mchost.security.TripwireObserver.startWatching(this);
 
