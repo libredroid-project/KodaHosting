@@ -73,12 +73,18 @@ public class SupabaseFunctionsClient {
         return new PlayitBootstrapResponse(str(map.get("token")), str(map.get("mode")));
     }
 
-    public void createDnsLink(String userJwt, String host, String target, int port, String type) throws IOException {
+    public void createDnsLink(String userJwt, String host, String baseDomain, String target, int port, String type) throws IOException {
+        createDnsLink(userJwt, host, baseDomain, target, port, type, "_minecraft");
+    }
+
+    public void createDnsLink(String userJwt, String host, String baseDomain, String target, int port, String type, String service) throws IOException {
         Map<String, Object> body = new HashMap<>();
         body.put("host", host);
+        body.put("base_domain", baseDomain);
         body.put("target", target);
         body.put("port", port);
         body.put("type", type);
+        body.put("service", service);
         Response<Map<String, Object>> response = api.callFunction(
             "create-dns-link",
             anonKey,
@@ -92,9 +98,10 @@ public class SupabaseFunctionsClient {
         }
     }
 
-    public String deleteDnsLink(String userJwt, String host) throws IOException {
+    public String deleteDnsLink(String userJwt, String host, String baseDomain) throws IOException {
         Map<String, Object> body = new HashMap<>();
         body.put("host", host);
+        body.put("base_domain", baseDomain);
         Response<Map<String, Object>> response = api.callFunction(
             "delete-dns-link",
             anonKey,
@@ -115,9 +122,10 @@ public class SupabaseFunctionsClient {
         return result;
     }
 
-    public boolean checkServerName(String userJwt, String host) throws IOException {
+    public boolean checkServerName(String userJwt, String host, String baseDomain) throws IOException {
         Map<String, Object> body = new HashMap<>();
         body.put("host", host);
+        body.put("base_domain", baseDomain);
         Response<Map<String, Object>> response = api.callFunction(
             "check-server-name",
             anonKey,
@@ -130,6 +138,30 @@ public class SupabaseFunctionsClient {
         }
         Map<String, Object> map = response.body();
         return "taken".equals(map.get("status"));
+    }
+
+    public int allocatePort(String userJwt, String host, String type) throws IOException {
+        Map<String, Object> body = new HashMap<>();
+        body.put("host", host);
+        body.put("type", type);
+        
+        Response<Map<String, Object>> response = api.callFunction(
+            "allocate-port",
+            anonKey,
+            withBearer(userJwt),
+            body
+        ).execute();
+        
+        if (!response.isSuccessful() || response.body() == null) {
+            if (response.code() == 409) {
+                throw new IOException("ports_exhausted");
+            }
+            throw new IOException("allocate-port failed: HTTP " + response.code());
+        }
+        
+        Number portNum = (Number) response.body().get("port");
+        if (portNum == null) throw new IOException("allocate-port returned null port");
+        return portNum.intValue();
     }
 
     private String withBearer(String jwt) {

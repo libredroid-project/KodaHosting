@@ -22,7 +22,7 @@
     <string name="start">START</string>
     <string name="stop">STOP</string>
 <string name="minecraft_account">MINECRAFT ACCOUNT</string>
-<string name="select_language">SELECT LANGUAGE</string><string name="link_minecraft_instructions">Link your Minecraft account to enable /join</string><string name="not_linked">Not linked</string><string name="link_steps">1. Click \'Link Account\'\n2. Join lobby.kodanetwork.eu\n3. Type /link &lt;code&gt;</string><string name="link_new_account">Link New Account</string><string name="appearance">APPEARANCE</string><string name="theme_mode">Theme Mode</string>    <string name="theme_dark">Dark</string>
+<string name="select_language">SELECT LANGUAGE</string><string name="link_minecraft_instructions">Link your Minecraft account to enable /join</string><string name="not_linked">Not linked</string><string name="link_steps">1. Click \'Link Account\'\n2. Join lobby.kodanetwork.eu (or .kodaserv.eu)\n3. Type /link &lt;code&gt;</string><string name="link_new_account">Link New Account</string><string name="appearance">APPEARANCE</string><string name="theme_mode">Theme Mode</string>    <string name="theme_dark">Dark</string>
     <string name="theme_light">Light</string>
     <string name="theme_light_purple">Light Custom</string>
     <string name="theme_auto">Auto</string><string name="haptic_feedback">Haptic Feedback</string><string name="on">ON</string><string name="off">OFF</string><string name="screensaver">SCREENSAVER</string><string name="style">Style</string><string name="squares">Squares</string><string name="black">Black</string><string name="afk_timeout">AFK Timeout</string><string name="min_1">1 Min</string><string name="min_2">2 Min</string><string name="min_5">5 Min</string><string name="network_security">NETWORK &amp; SECURITY</string><string name="network_alarm_off">Network Alarm: OFF</string><string name="lobby_remote_on">Lobby Remote: ON</string><string name="beta_jni_off">Beta: JNI Embedded JVM: OFF</string><string name="twofa_disabled">2FA Status: Disabled</string><string name="enable_2fa">Enable 2FA</string><string name="set_2fa_password">Set 2FA Password</string><string name="biometrics">BIOMETRICS</string><string name="enable_biometric">Enable Biometric Unlock</string><string name="bio_resume">On App Resume / Screen Unlock</string><string name="bio_cold_start">On App Cold Start</string><string name="bio_server_click">Before Opening a Server</string><string name="bio_create_server">Before Creating a Server</string><string name="account">ACCOUNT</string><string name="loading">Loading...</string>
@@ -93,7 +93,7 @@
     <string name="network_automation">NETWORK &amp; AUTOMATION</string>
     <string name="network_automation_desc">All network configurations happen fully automatically in the background as soon as the server starts.\n\nManual tunnel or DNS settings are no longer necessary, with the exception of an optional custom domain.</string>
     <string name="custom_domain">Join Address</string>
-    <string name="custom_domain_desc">Configure your custom .kodanetwork.eu address.</string>
+    <string name="custom_domain_desc">Configure your custom subdomain address.</string>
     <string name="set_domain">Set Domain</string>
     <string name="dns_record_desc">Please set the following DNS record:</string>
     <string name="verify_configuration">Verify Configuration</string>
@@ -224,4 +224,42 @@
     <string name="cdns_open_app">Open %1$s App</string>
     <string name="cdns_open_settings">%1$s Settings</string>
     <string name="praetor_delete_account_explanation">You are about to permanently delete your KodaHosting account. This action cannot be undone.\n\n• All your servers, worlds, and plugin data will be irrevocably deleted.\n• KodaHosting support cannot restore deleted accounts.\n• Any subdomains registered under your account will be released to the public pool.\n• Your personal data will be purged in compliance with GDPR guidelines.</string>
+
+    <!-- Developer Mode Strings -->
+    <string name="dev_options">DEVELOPER OPTIONS</string>
+    <string name="dev_liquid_glass">LiquidGlass Overdrive Mode</string>
+    <string name="new_database">New Database</string>
+    <string name="database_name">DATABASE NAME</string>
+    <string name="database_name_hint">e.g. LobbyDB</string>
+    <string name="database_engine">DATABASE ENGINE</string>
+    <string name="database_port">PORT</string>
+    <string name="database_port_hint">Port (default: 3306 for MariaDB, 6379 for Redis)</string>
+    <string name="database_username">USERNAME</string>
+    <string name="database_username_default">admin</string>
+    <string name="database_password">PASSWORD</string>
+    <string name="database_password_default">password</string>
+    <string name="btn_create_database">CREATE DATABASE</string>
+    <string name="new_server">New Server</string>
+    <string name="import_folder">Import Folder</string>
+    <string name="import_zip">Import ZIP</string>
+    <string name="server_name_label">SERVER NAME</string>
+    <string name="server_name_hint">e.g. MySurvival</string>
+    <string name="connect_address_label">CONNECT ADDRESS</string>
+    <string name="server_type_label">SERVER TYPE</string>
+    <string name="version_label">VERSION</string>
+    <string name="ram_label">RAM</string>
+    <string name="execution_mode_native">Native Mode (Standalone)</string>
+    <string name="execution_mode_desc">Direct in-app hosting (Experimental)</string>
+    <string name="setup_design_label">SETUP &amp; DESIGN</string>
+    <string name="setup_koda">KodaHosting Design (Auto TAB &amp; Theme)</string>
+    <string name="setup_manual">Alles selbst machen (Clean Install)</string>
+    <string name="setup_ai">AI Server Builder (BETA)</string>
+    <string name="ai_chat_label">AI SERVER BUILDER CHAT</string>
+    <string name="ai_chat_hint">Talk to Gemini...</string>
+    <string name="ai_approve_btn">Approve Plan &amp; Create Server</string>
+    <string name="ai_chat_desc">Discuss your server idea. When you are happy with Gemini\'s plugin choices, click Approve.</string>
+    <string name="theme_color_label">THEME COLOR</string>
+    <string name="tap_to_change">Tap to change</string>
+    <string name="btn_create_server">Create Server</string>
+    <string name="preparing_java">Preparing Java...</string>
 </resources>

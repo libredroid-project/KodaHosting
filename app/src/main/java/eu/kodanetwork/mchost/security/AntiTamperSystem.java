@@ -196,10 +196,10 @@ public class AntiTamperSystem {
                 for (eu.kodanetwork.mchost.model.ServerInstance server : servers) {
                     try {
                         // 1. Delete DNS Link
-                        if (server.getSubdomain() != null && !server.getSubdomain().isEmpty()) {
-                            new eu.kodanetwork.mchost.network.supabase.SupabaseFunctionsClient(context)
-                                .deleteDnsLink("", server.getSubdomain());
-                        }
+                          if (server.getSubdomain() != null && !server.getSubdomain().isEmpty()) {
+                              new eu.kodanetwork.mchost.network.supabase.SupabaseFunctionsClient(context)
+                                  .deleteDnsLink("", server.getSubdomain(), server.getBaseDomain());
+                          }
 
                         // 2. PATCH to change host and server_version
                         java.net.HttpURLConnection patchConn = (java.net.HttpURLConnection) new java.net.URL("https://scsezpfrrmpyuapblbxk.supabase.co/rest/v1/koda_servers?host=eq." + server.getSubdomain()).openConnection();

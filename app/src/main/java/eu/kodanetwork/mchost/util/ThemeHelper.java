@@ -63,8 +63,39 @@ public class ThemeHelper {
         return nightMode != Configuration.UI_MODE_NIGHT_YES;
     }
 
+    public static boolean isLiquidGlass(android.content.Context context) {
+        android.content.SharedPreferences prefs = eu.kodanetwork.mchost.App.getPrefs(context);
+        return prefs != null && prefs.getBoolean("dev_liquid_glass", false);
+    }
+
     public static void apply(Activity activity) {
         apply(activity, null);
+    }
+
+    public static void apply(android.app.Dialog dialog) {
+        if (dialog == null || !dialog.isShowing()) return;
+        main.postDelayed(() -> {
+            try {
+                android.content.Context ctx = dialog.getContext();
+                android.content.SharedPreferences prefs = eu.kodanetwork.mchost.App.getPrefs(ctx);
+                boolean lightMode = isLightMode(ctx);
+                int themeColor = 0xFFFF6A00;
+                boolean isCyber = "cyber".equals(prefs.getString("app_theme", "modern"));
+                
+                boolean isLiquidGlass = prefs.getBoolean("dev_liquid_glass", false);
+                if (isLiquidGlass) {
+                    // Optional: make dialog window translucent
+                    if (dialog.getWindow() != null) {
+                        dialog.getWindow().setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT));
+                    }
+                }
+                
+                View root = dialog.findViewById(android.R.id.content);
+                if (root != null) {
+                    applyToView(root, lightMode, themeColor, isCyber);
+                }
+            } catch (Exception ignored) {}
+        }, 50);
     }
 
     public static void apply(Activity activity, String colorHex) {
@@ -85,7 +116,10 @@ public class ThemeHelper {
                 Log.d(TAG, "Protocol Execute: " + themeName + " light=" + lightMode + " on " + activity.getClass().getSimpleName());
                 
                 int themeColor = 0xFFFF6A00; // Tactical Orange
-                if (colorHex != null && !colorHex.isEmpty()) {
+                boolean isLiquidGlass = prefs.getBoolean("dev_liquid_glass", false);
+                if (isLiquidGlass) {
+                    themeColor = 0xFFB388FF; // dev_purple
+                } else if (colorHex != null && !colorHex.isEmpty()) {
                     try { themeColor = Color.parseColor(colorHex); } catch (Exception ignored) {}
                 }
                 boolean isPraetorDesign = activity instanceof eu.kodanetwork.mchost.ui.design.LoginPageActivity || 
@@ -95,12 +129,14 @@ public class ThemeHelper {
                 if (root == null) return;
                 
                 // 1. Background
-                if (!isPraetorDesign) {
+                if (!isPraetorDesign && !isLiquidGlass) {
                     if (lightMode) {
                         root.setBackgroundColor(LIGHT_BG);
                     } else {
                         root.setBackgroundResource(R.drawable.bg_cyber_grid);
                     }
+                } else if (isLiquidGlass) {
+                    root.setBackgroundResource(R.drawable.bg_liquid_glass);
                 }
 
                 // 2. Iterative Traversal (BFS)
@@ -132,7 +168,7 @@ public class ThemeHelper {
 
                             // Apply Styling
                             boolean isCyberLocal = "cyber".equals(themeName);
-                            styleView(v, themeColor, isCyberLocal, lightMode);
+                            styleView(v, themeColor, isCyberLocal, lightMode, isLiquidGlass);
                         }
                     }
 
@@ -161,6 +197,11 @@ public class ThemeHelper {
                                 View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
                             );
                         }
+                    } else if (isLiquidGlass) {
+                        activity.getWindow().addFlags(android.view.WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+                        activity.getWindow().setStatusBarColor(android.graphics.Color.TRANSPARENT);
+                        activity.getWindow().setNavigationBarColor(android.graphics.Color.TRANSPARENT);
+                        activity.getWindow().getDecorView().setBackgroundResource(R.drawable.bg_liquid_glass);
                     } else if (lightMode) {
                         activity.getWindow().setStatusBarColor(LIGHT_STATUS);
                         activity.getWindow().setNavigationBarColor(LIGHT_STATUS);
@@ -183,6 +224,11 @@ public class ThemeHelper {
 
     public static void applyToView(View root, boolean lightMode, int themeColor, boolean isCyber) {
         if (root == null) return;
+        android.content.SharedPreferences prefs = eu.kodanetwork.mchost.App.getPrefs(root.getContext());
+        boolean isLiquidGlass = prefs.getBoolean("dev_liquid_glass", false);
+        if (isLiquidGlass) {
+            themeColor = 0xFFB388FF;
+        }
         Deque<View> stack = new ArrayDeque<>();
         stack.push(root);
 
@@ -201,7 +247,7 @@ public class ThemeHelper {
 
             if (!"STYLED".equals(tag)) {
                 v.setTag(R.id.tag_themed, "STYLED");
-                styleView(v, themeColor, isCyber, lightMode);
+                styleView(v, themeColor, isCyber, lightMode, isLiquidGlass);
             }
 
             if (v instanceof ViewGroup) {
@@ -211,9 +257,11 @@ public class ThemeHelper {
         }
     }
 
-    private static void styleView(View v, int themeColor, boolean isCyber, boolean lightMode) {
+    private static void styleView(View v, int themeColor, boolean isCyber, boolean lightMode, boolean isLiquidGlass) {
         try {
-            boolean isButton = v instanceof Button || v instanceof MaterialButton || v.getClass().getSimpleName().contains("Button");
+            boolean isButton = (v instanceof Button || v instanceof MaterialButton || v.getClass().getSimpleName().contains("Button"))
+                               && !(v instanceof android.widget.CompoundButton);
+            boolean isSwitch = v instanceof android.widget.Switch || v instanceof androidx.appcompat.widget.SwitchCompat;
 
             // ═══════════════════════════════════════════════════════
             // DARK / LIGHT / CYBER paths
@@ -263,8 +311,42 @@ public class ThemeHelper {
                 }
             }
 
+            if (isSwitch) {
+                if (isLiquidGlass && v instanceof androidx.appcompat.widget.SwitchCompat) {
+                    androidx.appcompat.widget.SwitchCompat sw = (androidx.appcompat.widget.SwitchCompat) v;
+                    int[][] states = new int[][] {
+                        new int[] { android.R.attr.state_checked },
+                        new int[] { -android.R.attr.state_checked }
+                    };
+                    int[] thumbColors = new int[] {
+                        0xFFB388FF, // dev_purple checked
+                        0xFFE0E0E0  // light gray unchecked
+                    };
+                    int[] trackColors = new int[] {
+                        0x88B388FF, // semi-transparent purple checked
+                        0x44FFFFFF  // translucent white glass unchecked
+                    };
+                    sw.setThumbTintList(new android.content.res.ColorStateList(states, thumbColors));
+                    sw.setTrackTintList(new android.content.res.ColorStateList(states, trackColors));
+                }
+            }
+
             if (isButton) {
-                if (isCyber && !lightMode) {
+                if (isLiquidGlass) {
+                    v.setBackgroundResource(R.drawable.bg_glass_button);
+                    v.setOnTouchListener((view, motionEvent) -> {
+                        switch (motionEvent.getAction()) {
+                            case android.view.MotionEvent.ACTION_DOWN:
+                                view.animate().scaleX(0.92f).scaleY(0.92f).setDuration(100).start();
+                                break;
+                            case android.view.MotionEvent.ACTION_UP:
+                            case android.view.MotionEvent.ACTION_CANCEL:
+                                view.animate().scaleX(1f).scaleY(1f).setDuration(100).start();
+                                break;
+                        }
+                        return false;
+                    });
+                } else if (isCyber && !lightMode) {
                     v.setBackgroundResource(R.drawable.cyber_button_bg);
                 }
                 
@@ -370,6 +452,39 @@ public class ThemeHelper {
                     } catch (Exception e) {
                         v.setBackgroundColor(LIGHT_CELL);
                     }
+                } else if (isLiquidGlass) {
+                    try {
+                        String idName = "";
+                        if (v.getId() != android.view.View.NO_ID) {
+                            idName = v.getResources().getResourceEntryName(v.getId());
+                        }
+                        boolean isFullScreen = v.getLayoutParams() != null && v.getLayoutParams().width == ViewGroup.LayoutParams.MATCH_PARENT && v.getLayoutParams().height == ViewGroup.LayoutParams.MATCH_PARENT;
+                        
+                        if (isFullScreen || "tabs".equals(idName) || v.getClass().getSimpleName().contains("Tab") 
+                                || "app_top_bar".equals(idName) || "main_top_bar".equals(idName) || "main_bottom_bar".equals(idName)
+                                || "card_players".equals(idName) || "top_bar_container".equals(idName) || "files_path_container".equals(idName) || idName.startsWith("layout_header")) {
+                            // Don't draw the glass panel box on full screen roots or tab bars
+                            if ("main_top_bar".equals(idName) || "app_top_bar".equals(idName) || "top_bar_container".equals(idName)) {
+                                v.setBackgroundColor(Color.TRANSPARENT);
+                            } else if (android.os.Build.VERSION.SDK_INT >= 21 && !idName.equals("card_players") && !idName.startsWith("layout_header")) {
+                                v.setBackgroundTintList(android.content.res.ColorStateList.valueOf(0x33000000));
+                            } else {
+                                v.setBackgroundColor(Color.TRANSPARENT);
+                            }
+                        } else {
+                            if (v instanceof android.widget.EditText) {
+                                ((android.widget.EditText) v).setHintTextColor(0x88FFFFFF);
+                            }
+                            int pL = v.getPaddingLeft(), pT = v.getPaddingTop(), pR = v.getPaddingRight(), pB = v.getPaddingBottom();
+                            v.setBackgroundResource(R.drawable.bg_glass_panel);
+                            v.setPadding(pL, pT, pR, pB);
+                            
+                            if (v instanceof androidx.cardview.widget.CardView) {
+                                ((androidx.cardview.widget.CardView) v).setCardElevation(0f);
+                                ((androidx.cardview.widget.CardView) v).setCardBackgroundColor(Color.TRANSPARENT);
+                            }
+                        }
+                    } catch (Exception e) {}
                 } else if (isCyber) {
                     v.setBackgroundResource(R.drawable.cell_cyber_bg);
                     v.setPadding(40, 40, 40, 40);

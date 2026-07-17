@@ -1,3 +1,4 @@
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.6";
 import { corsHeaders } from "../_shared/cors.ts";
 
 Deno.serve(async (req) => {
@@ -18,7 +19,7 @@ Deno.serve(async (req) => {
     const apiKeyPrefix = Deno.env.get("IONOS_API_PREFIX") ?? "";
     const apiSecret = Deno.env.get("IONOS_API_SECRET") ?? "";
     const fullApiKey = `${apiKeyPrefix}.${apiSecret}`;
-    const domain = "kodanetwork.eu";
+    const domain = String(body.base_domain || "kodanetwork.eu").toLowerCase();
     
     // 1. Get Zone ID
     const zonesRes = await fetch("https://api.hosting.ionos.com/dns/v1/zones", {
@@ -26,20 +27,22 @@ Deno.serve(async (req) => {
     });
     const zonesData = await zonesRes.json();
     const zone = (zonesData as any[])?.find((z: any) => z.name === domain);
-    if (!zone) throw new Error("Zone kodanetwork.eu not found");
+    if (!zone) throw new Error(`Zone ${domain} not found`);
     const zoneId = zone.id;
 
     // 3. SURGICAL matching: Fetch and delete exactly
     const fqdn = `${host}.${domain}`;
     const srvFqdnTcp = `_minecraft._tcp.${fqdn}`;
     const srvFqdnUdp = `_minecraft._udp.${fqdn}`;
+    const srvVoiceChatUdp = `_voicechat._udp.${fqdn}`;
     let deletedCount = 0;
     
     const recordsToCheck = [
       { type: "A", name: fqdn },
       { type: "CNAME", name: fqdn },
       { type: "SRV", name: srvFqdnTcp },
-      { type: "SRV", name: srvFqdnUdp }
+      { type: "SRV", name: srvFqdnUdp },
+      { type: "SRV", name: srvVoiceChatUdp }
     ];
     
     // Fetch all records concurrently
@@ -71,6 +74,13 @@ Deno.serve(async (req) => {
     
     const delResults = await Promise.all(deletePromises);
     deletedCount = delResults.filter(r => r.ok).length;
+
+    // Delete allocated ports from koda_ports table
+    const supabaseAdmin = createClient(
+      Deno.env.get("SUPABASE_URL") ?? "",
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
+    );
+    await supabaseAdmin.from('koda_ports').delete().eq('host', host);
 
     return new Response(JSON.stringify({ 
         ok: true, 

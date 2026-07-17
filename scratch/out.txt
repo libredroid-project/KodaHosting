@@ -1,0 +1,2 @@
+我: {'p': 'wo3', 'e': 'I; me; my'}
+国: {'p': 'Guo2', 'e': 'surname Guo'}

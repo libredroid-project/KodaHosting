@@ -353,6 +353,24 @@ public class ServerCardAdapter extends RecyclerView.Adapter<ServerCardAdapter.VH
 
             // Apply theme LAST so that dynamic colors on btnAction are properly styled for light mode
             eu.kodanetwork.mchost.util.ThemeHelper.applyToView(itemView, isLight, themeColor, isCyber);
+
+            // LiquidGlass Tilt Effect
+            if (prefs.getBoolean("dev_liquid_glass", false)) {
+                TiltEffectHelper tiltHelper = (TiltEffectHelper) itemView.getTag(R.id.container_main);
+                if (tiltHelper == null) {
+                    tiltHelper = new TiltEffectHelper(ctx, itemView, true);
+                    tiltHelper.register();
+                    itemView.setTag(R.id.container_main, tiltHelper);
+                }
+            } else {
+                TiltEffectHelper tiltHelper = (TiltEffectHelper) itemView.getTag(R.id.container_main);
+                if (tiltHelper != null) {
+                    tiltHelper.unregister();
+                    itemView.setTag(R.id.container_main, null);
+                    itemView.setRotationX(0f);
+                    itemView.setRotationY(0f);
+                }
+            }
         }
     }
 }

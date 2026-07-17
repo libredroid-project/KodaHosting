@@ -18,7 +18,7 @@ Deno.serve(async (req) => {
     const apiKeyPrefix = Deno.env.get("IONOS_API_PREFIX") ?? "";
     const apiSecret = Deno.env.get("IONOS_API_SECRET") ?? "";
     const fullApiKey = `${apiKeyPrefix}.${apiSecret}`;
-    const domain = "kodanetwork.eu";
+    const domain = String(body.base_domain || "kodanetwork.eu").toLowerCase();
     
     // 1. Get Zone ID
     const zonesRes = await fetch("https://api.hosting.ionos.com/dns/v1/zones", {
@@ -26,7 +26,7 @@ Deno.serve(async (req) => {
     });
     const zonesData = await zonesRes.json();
     const zone = (zonesData as any[])?.find((z: any) => z.name === domain);
-    if (!zone) throw new Error("Zone kodanetwork.eu not found");
+    if (!zone) throw new Error(`Zone ${domain} not found`);
     const zoneId = zone.id;
 
     const fqdn = `${host}.${domain}`;

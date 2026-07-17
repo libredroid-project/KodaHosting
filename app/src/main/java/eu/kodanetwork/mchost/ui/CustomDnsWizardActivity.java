@@ -106,7 +106,7 @@ public class CustomDnsWizardActivity extends AppCompatActivity {
         }
 
         vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
-        targetHostname = server.getSubdomain() + ".kodanetwork.eu";
+        targetHostname = server.getSubdomain() + "." + server.getBaseDomain();
 
         targetRecord = getIntent().getStringExtra("TARGET_RECORD");
         if (targetRecord == null) targetRecord = "all";
@@ -418,7 +418,7 @@ public class CustomDnsWizardActivity extends AppCompatActivity {
                                 JSONObject answer = answers.getJSONObject(i);
                                 String data = answer.getString("data");
                                 // Data usually format: priority weight port target
-                                if (data.contains(String.valueOf(task.port)) && (data.contains("85.215.180.87") || data.contains("kodanetwork.eu"))) {
+                                if (data.contains(String.valueOf(task.port)) && (data.contains("85.215.180.87") || data.contains(server.getBaseDomain()))) {
                                     taskSuccess = true;
                                     break;
                                 }

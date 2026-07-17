@@ -25,4 +25,8 @@
     <color name="state_warn">#FFB800</color>
     <color name="state_err">#FF3344</color>
     <color name="state_info">#2277FF</color>
+    
+    <!-- Developer Mode Colors -->
+    <color name="dev_purple">#B388FF</color>
+    <color name="dev_purple_dark">#311B92</color>
 </resources>

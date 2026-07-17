@@ -136,10 +136,27 @@ public class MainActivity extends AppCompatActivity {
         
         eu.kodanetwork.mchost.orchestration.DatabaseOrchestrator.ensureDatabasesExtracted(this);
 
-        // Apply light mode background early
         eu.kodanetwork.mchost.util.NetworkMonitorManager.init(this);
-        if (ThemeHelper.isLightMode(this)) {
-            findViewById(android.R.id.content).setBackgroundColor(0xFFF5F5F5);
+        View rootLayout = findViewById(R.id.main_root_layout);
+        View topBar = findViewById(R.id.main_top_bar);
+        View bottomBar = findViewById(R.id.main_bottom_bar);
+        
+        if (prefs.getBoolean("dev_liquid_glass", false)) {
+            // Overdrive Mode LiquidGlass Background
+            if (rootLayout != null) rootLayout.setBackgroundResource(R.drawable.bg_liquid_glass);
+            if (topBar != null) topBar.setBackgroundColor(0x33000000);
+            if (bottomBar != null) bottomBar.setBackgroundColor(0x33000000);
+            getWindow().getDecorView().setBackgroundResource(R.drawable.bg_liquid_glass);
+            
+            // Make system bars transparent
+            if (android.os.Build.VERSION.SDK_INT >= 21) {
+                getWindow().setStatusBarColor(0x00000000);
+                getWindow().setNavigationBarColor(0x00000000);
+            }
+        } else if (ThemeHelper.isLightMode(this)) {
+            if (rootLayout != null) rootLayout.setBackgroundColor(0xFFF5F5F5);
+            if (topBar != null) topBar.setBackgroundColor(0xFFF5F5F5);
+            if (bottomBar != null) bottomBar.setBackgroundColor(0xFFF5F5F5);
             if (android.os.Build.VERSION.SDK_INT >= 23) {
                 getWindow().setStatusBarColor(0xFFF5F5F5);
                 getWindow().getDecorView().setSystemUiVisibility(

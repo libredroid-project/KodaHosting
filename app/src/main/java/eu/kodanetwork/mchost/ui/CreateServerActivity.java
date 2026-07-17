@@ -91,6 +91,7 @@ public class CreateServerActivity extends AppCompatActivity {
     private org.json.JSONArray aiSelectedPlugins = new org.json.JSONArray();
     private String aiSelectedTheme = "#FF6B00";
     private String aiSuggestedName = null;
+    private String selectedBaseDomain = "kodanetwork.eu";
 
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
@@ -252,6 +253,42 @@ public class CreateServerActivity extends AppCompatActivity {
         setupRam();
         
         setupNameWatcher();
+
+        android.widget.TextView btnKodaNetwork = findViewById(R.id.btn_domain_kodanetwork);
+        android.widget.TextView btnKodaServ = findViewById(R.id.btn_domain_kodaserv);
+        android.view.View wrapperKodaNetwork = findViewById(R.id.wrapper_domain_kodanetwork);
+        android.view.View wrapperKodaServ = findViewById(R.id.wrapper_domain_kodaserv);
+
+        if (btnKodaNetwork != null && btnKodaServ != null && wrapperKodaNetwork != null && wrapperKodaServ != null) {
+            android.view.View.OnClickListener listener = v -> {
+                eu.kodanetwork.mchost.util.HapticUtil.forceVibrate(this, 40);
+                selectedBaseDomain = (v.getId() == R.id.wrapper_domain_kodaserv || v.getId() == R.id.btn_domain_kodaserv) ? "kodaserv.eu" : "kodanetwork.eu";
+                updateDomainUI();
+                updatePreview();
+            };
+            btnKodaNetwork.setOnClickListener(listener);
+            btnKodaServ.setOnClickListener(listener);
+            wrapperKodaNetwork.setOnClickListener(listener);
+            wrapperKodaServ.setOnClickListener(listener);
+            
+            // Initial UI state
+            btnKodaNetwork.setTextColor(android.graphics.Color.parseColor("#888899"));
+            btnKodaServ.setTextColor(android.graphics.Color.parseColor("#888899"));
+            android.widget.TextView activeText = "kodanetwork.eu".equals(selectedBaseDomain) ? btnKodaNetwork : btnKodaServ;
+            android.view.View activeWrapper = "kodanetwork.eu".equals(selectedBaseDomain) ? wrapperKodaNetwork : wrapperKodaServ;
+            
+            activeText.setTextColor(android.graphics.Color.parseColor("#FFFFFF"));
+            android.view.View pill = findViewById(R.id.pill_domain);
+            if (pill != null) {
+                activeWrapper.post(() -> {
+                    pill.setTranslationX(activeWrapper.getX());
+                    android.view.ViewGroup.LayoutParams params = pill.getLayoutParams();
+                    params.width = activeWrapper.getWidth();
+                    pill.requestLayout();
+                });
+            }
+        }
+
         setupThemeColors();
         
         String email = eu.kodanetwork.mchost.App.getPrefs(this).getString("account_email", "");
@@ -857,10 +894,39 @@ public class CreateServerActivity extends AppCompatActivity {
         etName.addTextChangedListener(w); updatePreview();
     }
 
+    
+    private void updateDomainUI() {
+        android.widget.TextView btnKodaNetwork = findViewById(R.id.btn_domain_kodanetwork);
+        android.widget.TextView btnKodaServ = findViewById(R.id.btn_domain_kodaserv);
+        android.view.View wrapperKodaNetwork = findViewById(R.id.wrapper_domain_kodanetwork);
+        android.view.View wrapperKodaServ = findViewById(R.id.wrapper_domain_kodaserv);
+        android.view.View pill = findViewById(R.id.pill_domain);
+        
+        if (btnKodaNetwork == null || btnKodaServ == null || wrapperKodaNetwork == null || wrapperKodaServ == null || pill == null) return;
+        
+        android.widget.TextView activeText = "kodanetwork.eu".equals(selectedBaseDomain) ? btnKodaNetwork : btnKodaServ;
+        android.view.View activeWrapper = "kodanetwork.eu".equals(selectedBaseDomain) ? wrapperKodaNetwork : wrapperKodaServ;
+        
+        btnKodaNetwork.setTextColor(android.graphics.Color.parseColor("#888899"));
+        btnKodaServ.setTextColor(android.graphics.Color.parseColor("#888899"));
+        activeText.setTextColor(android.graphics.Color.parseColor("#FFFFFF"));
+
+        activeWrapper.post(() -> {
+            pill.animate()
+                .translationX(activeWrapper.getX())
+                .setDuration(200)
+                .setInterpolator(new android.view.animation.DecelerateInterpolator())
+                .start();
+            android.view.ViewGroup.LayoutParams params = pill.getLayoutParams();
+            params.width = activeWrapper.getWidth();
+            pill.requestLayout();
+        });
+    }
+
     private void updatePreview() {
         String name = etName.getText().toString(); String sub = name.toLowerCase().trim().replaceAll("[^a-z0-9]", "-").replaceAll("-+", "-").replaceAll("^-|-$", "");
         if (sub.isEmpty()) sub = "yourserver";
-        tvAddressPreview.setText(sub + ".kodanetwork.eu");
+        tvAddressPreview.setText(sub + "." + getSelectedBaseDomain());
     }
     
     private void setupAiChat() {
@@ -990,8 +1056,8 @@ public class CreateServerActivity extends AppCompatActivity {
                     
                     org.json.JSONObject sysInst = new org.json.JSONObject();
                     String serverType = TYPE_VALS[selectedTypeIndex].name();
-                    String generatedIp = ((EditText) findViewById(R.id.et_name)).getText().toString().trim().replaceAll("[^a-zA-Z0-9-]", "").toLowerCase() + ".kodanetwork.eu";
-                    if (generatedIp.equals(".kodanetwork.eu")) generatedIp = "play.kodanetwork.eu";
+                    String generatedIp = ((EditText) findViewById(R.id.et_name)).getText().toString().trim().replaceAll("[^a-zA-Z0-9-]", "").toLowerCase() + "." + getSelectedBaseDomain();
+                    if (generatedIp.equals("." + getSelectedBaseDomain())) generatedIp = "play." + getSelectedBaseDomain();
 
                     String promptText = "You are a Minecraft server expert building a comprehensive server. " +
                         "The server is running " + serverType + " version " + selectedVersion + ". The server IP is " + generatedIp + ". " +
@@ -1097,6 +1163,11 @@ public class CreateServerActivity extends AppCompatActivity {
         return tv;
     }
 
+    
+    private String getSelectedBaseDomain() {
+        return selectedBaseDomain != null ? selectedBaseDomain : "kodanetwork.eu";
+    }
+
     private void createServer() {
         if (!eu.kodanetwork.mchost.security.PraetorSystem.checkNetwork(this)) return;
         if (!eu.kodanetwork.mchost.security.PraetorSystem.checkConcurrentServer(this)) return;
@@ -1110,6 +1181,7 @@ public class CreateServerActivity extends AppCompatActivity {
         String dir = useNative ? new File(getFilesDir(), "servers/" + id).getAbsolutePath() : android.os.Environment.getExternalStoragePublicDirectory(android.os.Environment.DIRECTORY_DOCUMENTS) + "/KodaNetwork/servers/" + id;
 
         ServerInstance s = new ServerInstance(id, name, type, version, ramMB, port, dir);
+                    s.setBaseDomain(getSelectedBaseDomain());
         int checkedId = rgSetupType.getCheckedRadioButtonId();
         s.setUseNative(useNative);
         s.setAutoSetup(checkedId == R.id.rb_setup_koda || checkedId == R.id.rb_setup_ai);
@@ -1137,7 +1209,7 @@ public class CreateServerActivity extends AppCompatActivity {
             try {
                 boolean isTaken = false;
                 try {
-                    isTaken = new eu.kodanetwork.mchost.network.supabase.SupabaseFunctionsClient(this).checkServerName("", s.getSubdomain());
+                    isTaken = new eu.kodanetwork.mchost.network.supabase.SupabaseFunctionsClient(this).checkServerName("", s.getSubdomain(), s.getBaseDomain());
                 } catch (Exception e) {
                     mainHandler.post(() -> {
                         if (loadingOverlay != null) loadingOverlay.setVisibility(android.view.View.GONE);
@@ -1153,6 +1225,22 @@ public class CreateServerActivity extends AppCompatActivity {
                     });
                     return;
                 }
+
+                try {
+                    int allocatedPort = new eu.kodanetwork.mchost.network.supabase.SupabaseFunctionsClient(CreateServerActivity.this).allocatePort("", s.getSubdomain(), "main");
+                    s.setPort(allocatedPort);
+                } catch (Exception e) {
+                    mainHandler.post(() -> {
+                        if (loadingOverlay != null) loadingOverlay.setVisibility(android.view.View.GONE);
+                        if (e.getMessage() != null && e.getMessage().contains("ports_exhausted")) {
+                            eu.kodanetwork.mchost.ui.components.PraetorDialog.showApology(CreateServerActivity.this, "P.R.A.E.T.O.R.", "Alle KodaNetwork Proxy-Ports sind derzeit belegt. Bitte versuche es später erneut.");
+                        } else {
+                            android.widget.Toast.makeText(CreateServerActivity.this, "Fehler bei der Port-Zuweisung: " + e.getMessage(), android.widget.Toast.LENGTH_LONG).show();
+                        }
+                    });
+                    return;
+                }
+
 
                 if (sourceUri != null) {
                     mainHandler.post(() -> {
@@ -1186,7 +1274,7 @@ public class CreateServerActivity extends AppCompatActivity {
                     // DnsLink creation runs asynchronously because we already secured the name availability check
                     new Thread(() -> {
                         try {
-                            new eu.kodanetwork.mchost.network.supabase.SupabaseFunctionsClient(this).createDnsLink("", s.getSubdomain(), "85.215.180.87", s.getPort(), "tcp");
+                            new eu.kodanetwork.mchost.network.supabase.SupabaseFunctionsClient(this).createDnsLink("", s.getSubdomain(), s.getBaseDomain(), "85.215.180.87", s.getPort(), "tcp");
                         } catch (Exception ignored) {}
                         try {
                             String appUuid = eu.kodanetwork.mchost.App.getPrefs(this).getString("app_uuid", "unknown");
@@ -1199,7 +1287,7 @@ public class CreateServerActivity extends AppCompatActivity {
                             conn.setRequestProperty("apikey", anonKey);
                             conn.setRequestProperty("Authorization", "Bearer " + anonKey);
                             conn.setDoOutput(true);
-                            String json = "{\"host\":\"" + s.getSubdomain() + "\", \"owner_app_uuid\":\"" + appUuid + "\"}";
+                            String json = "{\"host\":\"" + s.getSubdomain() + "\", \"owner_app_uuid\":\"" + appUuid + "\", \"base_domain\":\"" + s.getBaseDomain() + "\"}";
                             java.io.OutputStream os = conn.getOutputStream();
                             os.write(json.getBytes());
                             os.flush(); os.close();

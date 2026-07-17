@@ -18,7 +18,7 @@ public class HibernationManager {
                 String token = prefs.getString("koda_session_token", null);
                 if (token == null) token = eu.kodanetwork.mchost.security.PraetorSecurity.getSupabaseKey();
                 
-                new SupabaseFunctionsClient(context).deleteDnsLink(token, server.getSubdomain());
+                new SupabaseFunctionsClient(context).deleteDnsLink(token, server.getSubdomain(), server.getBaseDomain());
                 
                 // Update Supabase to show HIBERNATED
                 String domain = server.getSubdomain();
@@ -68,7 +68,7 @@ public class HibernationManager {
             if (token == null) token = eu.kodanetwork.mchost.security.PraetorSecurity.getSupabaseKey();
             
             try {
-                boolean isTaken = new SupabaseFunctionsClient(context).checkServerName(token, server.getSubdomain());
+                boolean isTaken = new SupabaseFunctionsClient(context).checkServerName(token, server.getSubdomain(), server.getBaseDomain());
                 if (isTaken) {
                     throw new RuntimeException("DNS_OCCUPIED");
                 }

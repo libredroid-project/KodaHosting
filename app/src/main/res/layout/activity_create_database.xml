@@ -22,7 +22,7 @@
                 android:scaleType="centerInside"/>
             <TextView android:layout_width="0dp" android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="New Database" android:textColor="#F0F0F0"
+                android:text="@string/new_database" android:textColor="#F0F0F0"
                 android:textSize="18sp" android:fontFamily="sans-serif-medium"
                 android:textStyle="bold" android:layout_marginStart="4dp"/>
         </LinearLayout>
@@ -41,7 +41,7 @@
                 android:layout_width="match_parent" android:layout_height="wrap_content"
                 android:orientation="vertical">
                 <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                    android:text="DATABASE NAME" android:textColor="#F0F0F0"
+                    android:text="@string/database_name" android:textColor="#F0F0F0"
                     android:textSize="11sp" android:fontFamily="sans-serif-medium"
                     android:letterSpacing="0.1" android:layout_marginBottom="8dp"/>
                 <EditText android:id="@+id/et_name"
@@ -49,7 +49,7 @@
                     android:background="@drawable/input_field"
                     android:textColor="#F0F0F0" android:textSize="15sp"
                     android:fontFamily="sans-serif"
-                    android:hint="e.g. LobbyDB"
+                    android:hint="@string/database_name_hint"
                     android:textColorHint="#3A3A48"
                     android:paddingStart="16dp" android:paddingEnd="16dp"
                     android:inputType="text" android:singleLine="true"
@@ -60,7 +60,7 @@
             <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
                 android:orientation="vertical" android:layout_marginBottom="16dp">
                 <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                    android:text="DATABASE ENGINE" android:textColor="#F0F0F0"
+                    android:text="@string/database_engine" android:textColor="#F0F0F0"
                     android:textSize="11sp" android:fontFamily="sans-serif-medium"
                     android:letterSpacing="0.1" android:layout_marginBottom="8dp"/>
                 <RadioGroup
@@ -93,7 +93,7 @@
                 android:background="#1A1A24" android:layout_marginBottom="24dp"/>
 
             <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                android:text="PORT" android:textColor="#F0F0F0"
+                android:text="@string/database_port" android:textColor="#F0F0F0"
                 android:textSize="11sp" android:fontFamily="sans-serif-medium"
                 android:letterSpacing="0.1" android:layout_marginBottom="8dp"/>
             <EditText android:id="@+id/et_port"
@@ -101,14 +101,14 @@
                 android:background="@drawable/input_field"
                 android:textColor="#F0F0F0" android:textSize="15sp"
                 android:fontFamily="sans-serif"
-                android:hint="Port (default: 3306 for MariaDB, 6379 for Redis)"
+                android:hint="@string/database_port_hint"
                 android:textColorHint="#3A3A48"
                 android:paddingStart="16dp" android:paddingEnd="16dp"
                 android:inputType="number" android:singleLine="true"
                 android:layout_marginBottom="16dp"/>
 
             <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                android:text="USERNAME" android:textColor="#F0F0F0"
+                android:text="@string/database_username" android:textColor="#F0F0F0"
                 android:textSize="11sp" android:fontFamily="sans-serif-medium"
                 android:letterSpacing="0.1" android:layout_marginBottom="8dp"/>
             <EditText android:id="@+id/et_username"
@@ -116,14 +116,14 @@
                 android:background="@drawable/input_field"
                 android:textColor="#F0F0F0" android:textSize="15sp"
                 android:fontFamily="sans-serif"
-                android:text="admin"
+                android:text="@string/database_username_default"
                 android:textColorHint="#3A3A48"
                 android:paddingStart="16dp" android:paddingEnd="16dp"
                 android:inputType="text" android:singleLine="true"
                 android:layout_marginBottom="16dp"/>
 
             <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                android:text="PASSWORD" android:textColor="#F0F0F0"
+                android:text="@string/database_password" android:textColor="#F0F0F0"
                 android:textSize="11sp" android:fontFamily="sans-serif-medium"
                 android:letterSpacing="0.1" android:layout_marginBottom="8dp"/>
             <EditText android:id="@+id/et_password"
@@ -131,7 +131,7 @@
                 android:background="@drawable/input_field"
                 android:textColor="#F0F0F0" android:textSize="15sp"
                 android:fontFamily="sans-serif"
-                android:text="password"
+                android:text="@string/database_password_default"
                 android:textColorHint="#3A3A48"
                 android:paddingStart="16dp" android:paddingEnd="16dp"
                 android:inputType="textVisiblePassword" android:singleLine="true"
@@ -141,7 +141,7 @@
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btn_create"
                 android:layout_width="match_parent" android:layout_height="60dp"
-                android:text="CREATE DATABASE"
+                android:text="@string/btn_create_database"
                 android:backgroundTint="#FF6B00"
                 android:textColor="#FFFFFF"
                 android:fontFamily="sans-serif-black"

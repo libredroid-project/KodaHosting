@@ -764,11 +764,11 @@ public class KodaServerService extends Service {
         try { 
             if (writePluginConfigs) {
                 if (srv.isBedrockSupport() && srv.getBedrockPort() == 0) {
-                    srv.setBedrockPort(getFreePort(40000, 50000));
+                    srv.setBedrockPort(allocatePortSync(srv, "bedrock", 40000, 50000));
                     ServerRepo.get(this).update(srv);
                 }
                 if (srv.isVoicechat() && srv.getVoicechatPort() == 0) {
-                    srv.setVoicechatPort(getFreePort(55000, 65000));
+                    srv.setVoicechatPort(allocatePortSync(srv, "voicechat", 55000, 65000));
                     ServerRepo.get(this).update(srv);
                 }
             }
@@ -1493,23 +1493,23 @@ public class KodaServerService extends Service {
                             Pattern p = Pattern.compile("bore\\.pub:(\\d+)");
                             Matcher m = p.matcher(c);
                             if (m.find()) port = Integer.parseInt(m.group(1));
-                            new SupabaseFunctionsClient(this).createDnsLink("", srv.getSubdomain(), "bore.pub", port, "tcp");
+                            new SupabaseFunctionsClient(this).createDnsLink("", srv.getSubdomain(), srv.getBaseDomain(), "bore.pub", port, "tcp");
                             if (srv.isBedrockSupport() && srv.getBedrockPort() > 0) {
-                                new SupabaseFunctionsClient(this).createDnsLink("", srv.getSubdomain(), "bore.pub", srv.getBedrockPort(), "udp");
+                                new SupabaseFunctionsClient(this).createDnsLink("", srv.getSubdomain(), srv.getBaseDomain(), "bore.pub", srv.getBedrockPort(), "udp");
                             }
                             if (srv.isVoicechat() && srv.getVoicechatPort() > 0) {
-                                new SupabaseFunctionsClient(this).createDnsLink("", srv.getSubdomain(), "bore.pub", srv.getVoicechatPort(), "udp");
+                                new SupabaseFunctionsClient(this).createDnsLink("", srv.getSubdomain(), srv.getBaseDomain(), "bore.pub", srv.getVoicechatPort(), "udp", "_voicechat");
                             }
                         } else {
-                            new SupabaseFunctionsClient(this).createDnsLink("", srv.getSubdomain(), BORE_HOST, port, "tcp");
+                            new SupabaseFunctionsClient(this).createDnsLink("", srv.getSubdomain(), srv.getBaseDomain(), BORE_HOST, port, "tcp");
                             if (srv.isBedrockSupport() && srv.getBedrockPort() > 0) {
-                                new SupabaseFunctionsClient(this).createDnsLink("", srv.getSubdomain(), BORE_HOST, srv.getBedrockPort(), "udp");
+                                new SupabaseFunctionsClient(this).createDnsLink("", srv.getSubdomain(), srv.getBaseDomain(), BORE_HOST, srv.getBedrockPort(), "udp");
                             }
                             if (srv.isVoicechat() && srv.getVoicechatPort() > 0) {
-                                new SupabaseFunctionsClient(this).createDnsLink("", srv.getSubdomain(), BORE_HOST, srv.getVoicechatPort(), "udp");
+                                new SupabaseFunctionsClient(this).createDnsLink("", srv.getSubdomain(), srv.getBaseDomain(), BORE_HOST, srv.getVoicechatPort(), "udp", "_voicechat");
                             }
                         }
-                        log(id, "  ✓ DNS Join: " + srv.getSubdomain() + ".kodanetwork.eu");
+                        log(id, "  ✓ DNS Join: " + srv.getJoinAddress());
                     } catch (Exception e) {
                         Log.e(TAG, "DNS update failed", e);
                     }
@@ -1702,14 +1702,14 @@ public class KodaServerService extends Service {
                                     if (pidLower.contains("geyser") || pidLower.contains("floodgate")) {
                                         log(id, "  🛡️ Intercepted: " + pid + " -> Enabling Native Bedrock Support!");
                                         srv.setBedrockSupport(true);
-                                        if (srv.getBedrockPort() == 0) srv.setBedrockPort(getFreePort(40000, 50000));
+                                        if (srv.getBedrockPort() == 0) srv.setBedrockPort(allocatePortSync(srv, "bedrock", 40000, 50000));
                                         eu.kodanetwork.mchost.model.ServerRepo.get(KodaServerService.this).update(srv);
                                         continue;
                                     }
                                     if (pidLower.contains("voicechat") || pidLower.contains("simple-voice-chat")) {
                                         log(id, "  🎙️ Intercepted: " + pid + " -> Enabling Native VoiceChat!");
                                         srv.setVoicechat(true);
-                                        if (srv.getVoicechatPort() == 0) srv.setVoicechatPort(getFreePort(55000, 65000));
+                                        if (srv.getVoicechatPort() == 0) srv.setVoicechatPort(allocatePortSync(srv, "voicechat", 55000, 65000));
                                         eu.kodanetwork.mchost.model.ServerRepo.get(KodaServerService.this).update(srv);
                                         continue;
                                     }
@@ -2031,7 +2031,7 @@ public class KodaServerService extends Service {
         tabDir.mkdirs();
         String theme = srv.getThemeColor();
         if (theme == null || theme.isEmpty()) theme = "#FF6B00";
-        String domain = srv.getSubdomain() + ".kodanetwork.eu";
+        String domain = srv.getSubdomain() + "." + srv.getBaseDomain();
         String sName = srv.getName().toUpperCase();
 
         String config =
@@ -2219,6 +2219,15 @@ public class KodaServerService extends Service {
                     write(new File(vcDir, "voicechat-server.properties"), vcConfig);
                 } catch (Exception e) { Log.e(TAG, "Failed to write Voicechat config", e); }
             }
+        }
+    }
+
+    private int allocatePortSync(ServerInstance srv, String type, int min, int max) {
+        try {
+            return new SupabaseFunctionsClient(this).allocatePort("", srv.getSubdomain(), type);
+        } catch (Exception e) {
+            log(srv.getId(), "❌ Proxy Port Allocation failed: " + e.getMessage() + ". Falling back to local port.");
+            return getFreePort(min, max);
         }
     }
 

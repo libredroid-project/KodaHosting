@@ -170,7 +170,7 @@ public class PraetorConfirmActivity extends Activity {
                 try {
                     if (srv.getSubdomain() != null && !srv.getSubdomain().isEmpty()) {
                         new eu.kodanetwork.mchost.network.supabase.SupabaseFunctionsClient(PraetorConfirmActivity.this)
-                            .deleteDnsLink("", srv.getSubdomain());
+                            .deleteDnsLink("", srv.getSubdomain(), srv.getBaseDomain());
                     }
                 } catch (Exception e) {
                     android.util.Log.e("PraetorConfirm", "Failed to delete DNS link", e);

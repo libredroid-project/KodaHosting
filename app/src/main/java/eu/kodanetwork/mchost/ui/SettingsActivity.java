@@ -63,6 +63,7 @@ public class SettingsActivity extends Activity {
         setupBiometrics();
         setupGeminiApi();
         setupNetworkAlarmOptions();
+        setupDeveloperOptions();
         
         styleTrack(findViewById(R.id.container_theme));
         styleTrack(findViewById(R.id.container_style));
@@ -76,6 +77,45 @@ public class SettingsActivity extends Activity {
 
     private boolean isLight() {
         return eu.kodanetwork.mchost.util.ThemeHelper.isLightMode(this);
+    }
+
+    private int devClicks = 0;
+    private long lastDevClickTime = 0;
+
+    private void setupDeveloperOptions() {
+        View cardAppInfo = findViewById(R.id.card_app_info);
+        View cardDevOptions = findViewById(R.id.card_developer_options);
+        com.google.android.material.switchmaterial.SwitchMaterial switchLiquidGlass = findViewById(R.id.switch_dev_liquid_glass);
+
+        if (cardAppInfo == null || cardDevOptions == null || switchLiquidGlass == null) return;
+
+        boolean isDevModeUnlocked = prefs.getBoolean("dev_mode_unlocked", false);
+        if (isDevModeUnlocked) {
+            cardDevOptions.setVisibility(View.VISIBLE);
+        }
+
+        switchLiquidGlass.setChecked(prefs.getBoolean("dev_liquid_glass", false));
+        switchLiquidGlass.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            prefs.edit().putBoolean("dev_liquid_glass", isChecked).apply();
+            eu.kodanetwork.mchost.util.HapticUtil.forceVibrate(this, 80);
+            Toast.makeText(this, "LiquidGlass Mode requires app restart.", Toast.LENGTH_SHORT).show();
+        });
+
+        cardAppInfo.setOnClickListener(v -> {
+            long now = System.currentTimeMillis();
+            if (now - lastDevClickTime > 500) {
+                devClicks = 0;
+            }
+            lastDevClickTime = now;
+            devClicks++;
+
+            if (devClicks >= 10 && !prefs.getBoolean("dev_mode_unlocked", false)) {
+                prefs.edit().putBoolean("dev_mode_unlocked", true).apply();
+                cardDevOptions.setVisibility(View.VISIBLE);
+                Toast.makeText(this, "Du bist jetzt ein Entwickler!", Toast.LENGTH_LONG).show();
+                eu.kodanetwork.mchost.util.HapticUtil.forceVibrate(this, 100);
+            }
+        });
     }
 
     // Colors for light/dark
@@ -302,7 +342,7 @@ public class SettingsActivity extends Activity {
             tvStatus.setText("Code generated: " + currentCode);
             tvStatus.setTextColor(0xFFFFCC00);
             tvStatus.setVisibility(View.VISIBLE);
-            tvInstructions.setText("1. Join lobby.kodanetwork.eu\n2. Type /link " + currentCode);
+            tvInstructions.setText(getString(R.string.link_steps).replace("<code\\>", currentCode).replace("<code>", currentCode).replace("<代码>", currentCode));
             tvInstructions.setVisibility(View.VISIBLE);
         } else {
             tvStatus.setVisibility(View.GONE);
@@ -1284,7 +1324,7 @@ public class SettingsActivity extends Activity {
                 pill.setLayoutParams(params);
             }
             pill.animate()
-                .x(target.getX())
+                .translationX(target.getX())
                 .setDuration(250)
                 .setInterpolator(new android.view.animation.DecelerateInterpolator(1.5f))
                 .start();
@@ -1413,8 +1453,8 @@ public class SettingsActivity extends Activity {
         TextView btnSelector = findViewById(R.id.btn_lang_selector);
         if (btnSelector == null) return;
         
-        String[] displayLangs = {getString(R.string.system_default), "English", "Deutsch"};
-        final String[] codes = {"system", "en", "de"};
+        String[] displayLangs = {getString(R.string.system_default), "English", "Deutsch", "简体中文"};
+        final String[] codes = {"system", "en", "de", "zh"};
         
         String currentLang = prefs.getString("language", "system");
         for (int i=0; i<codes.length; i++) {

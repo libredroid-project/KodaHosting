@@ -587,6 +587,59 @@
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 
+            <!-- APP INFO -->
+            <androidx.cardview.widget.CardView
+                android:id="@+id/card_app_info"
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                android:clickable="true" android:focusable="true"
+                android:foreground="?attr/selectableItemBackground"
+                app:cardBackgroundColor="#241C18"
+                app:cardCornerRadius="12dp" app:cardElevation="0dp">
+
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:orientation="vertical" android:padding="16dp" android:gravity="center">
+
+                    <TextView android:id="@+id/tv_app_version_card"
+                        android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:text="v1.8495" android:textColor="#FFFFFF"
+                        android:textSize="18sp" android:fontFamily="sans-serif-medium"
+                        android:layout_marginBottom="4dp"/>
+
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:text="by libredroid" android:textColor="#888899"
+                        android:textSize="12sp" android:fontFamily="sans-serif"/>
+
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- DEVELOPER OPTIONS (HIDDEN) -->
+            <androidx.cardview.widget.CardView
+                android:id="@+id/card_developer_options"
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                android:visibility="gone"
+                app:cardBackgroundColor="#1A0D2A"
+                app:cardCornerRadius="12dp" app:cardElevation="0dp">
+
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:orientation="vertical" android:padding="16dp">
+
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:text="@string/dev_options" android:textColor="@color/dev_purple"
+                        android:textSize="11sp" android:fontFamily="sans-serif-medium"
+                        android:letterSpacing="0.1" android:layout_marginBottom="12dp"/>
+
+                    <com.google.android.material.switchmaterial.SwitchMaterial android:id="@+id/switch_dev_liquid_glass"
+                        android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:text="@string/dev_liquid_glass" android:textColor="#FFFFFF"
+                        android:textSize="14sp" android:fontFamily="sans-serif-medium"
+                        app:thumbTint="@color/dev_purple_dark"
+                        app:trackTint="@color/dev_purple"
+                        android:layout_marginBottom="8dp"/>
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
             <!-- DANGER ZONE -->
             <androidx.cardview.widget.CardView
                 android:layout_width="match_parent" android:layout_height="wrap_content"

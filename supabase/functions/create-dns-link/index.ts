@@ -20,7 +20,7 @@ Deno.serve(async (req) => {
     const apiKeyPrefix = Deno.env.get("IONOS_API_PREFIX") ?? "";
     const apiSecret = Deno.env.get("IONOS_API_SECRET") ?? "";
     const fullApiKey = `${apiKeyPrefix}.${apiSecret}`;
-    const domain = "kodanetwork.eu";
+    const domain = String(body.base_domain || "kodanetwork.eu").toLowerCase();
     
     // 1. Get Zone ID
     const zonesRes = await fetch("https://api.hosting.ionos.com/dns/v1/zones", {
@@ -28,13 +28,14 @@ Deno.serve(async (req) => {
     });
     const zonesData = await zonesRes.json();
     const zone = (zonesData as any[])?.find((z: any) => z.name === domain);
-    if (!zone) throw new Error("Zone kodanetwork.eu not found");
+    if (!zone) throw new Error(`Zone ${domain} not found`);
     const zoneId = zone.id;
 
     // Use absolute FQDNs for IONOS API
+    const service = String(body.service ?? "_minecraft").toLowerCase();
     const type = String(body.type ?? "tcp").toLowerCase();
     const fqdn = `${host}.${domain}`;
-    const srvFqdn = `_minecraft._${type}.${fqdn}`;
+    const srvFqdn = `${service}._${type}.${fqdn}`;
 
     // We no longer blindly delete existing records. If the record exists, the POST will fail and that is the desired behavior to prevent subdomain stealing.
 

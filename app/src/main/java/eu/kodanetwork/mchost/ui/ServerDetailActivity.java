@@ -88,6 +88,7 @@ public class ServerDetailActivity extends AppCompatActivity {
     private TextView tvTermuxStatus, tvTunnelStatus, tvDomainStatus;
     private MaterialButton btnDlJar, btnDelServer;
     private MaterialButton btnTermuxSetup, btnStartTunnel, btnLinkDomain;
+    private java.util.List<TiltEffectHelper> tiltHelpers = new java.util.ArrayList<>();
     private final ExecutorService io = Executors.newSingleThreadExecutor();
     private android.view.View layoutFullLoading;
     private TextView tvFullLoadingMsg;
@@ -1093,13 +1094,18 @@ public class ServerDetailActivity extends AppCompatActivity {
         input.setHint(R.string.praetor_hint_change_domain);
         
         android.view.View suffix = dialog.findViewById(R.id.tv_dialog_suffix);
-        if (suffix != null) suffix.setVisibility(android.view.View.VISIBLE);
+        if (suffix != null) {
+            suffix.setVisibility(android.view.View.VISIBLE);
+            if (suffix instanceof android.widget.TextView) {
+                ((android.widget.TextView) suffix).setText("." + server.getBaseDomain());
+            }
+        }
         
         dialog.findViewById(R.id.btn_dialog_cancel).setOnClickListener(view -> dialog.dismiss());
         dialog.findViewById(R.id.btn_dialog_confirm).setOnClickListener(view -> {
             String newSubdomain = input.getText().toString().trim().toLowerCase();
             if (newSubdomain.matches("^[a-z0-9-]+$") && newSubdomain.length() >= 3) {
-                String domain = newSubdomain + ".kodanetwork.eu";
+                String domain = newSubdomain + "." + server.getBaseDomain();
                 server.setSubdomain(newSubdomain);
                 server.setDomainLink(domain);
                 repo.update(server);
@@ -1677,22 +1683,46 @@ public class ServerDetailActivity extends AppCompatActivity {
                 }
                 boolean isChecked = swBedrock.isChecked();
                 if (isChecked) {
-                    server.setBedrockSupport(true);
-                    repo.update(server);
-                    
-                    View layoutBedrockPort = findViewById(R.id.layout_bedrock_port);
-                    if (layoutBedrockPort != null && tvBedrockPortDash != null) {
-                        layoutBedrockPort.setVisibility(View.VISIBLE);
-                        tvBedrockPortDash.setText(String.valueOf(server.getBedrockPort()));
+                    if (server.getBedrockPort() > 0) {
+                        server.setBedrockSupport(true);
+                        repo.update(server);
+                        
+                        View layoutBedrockPort = findViewById(R.id.layout_bedrock_port);
+                        if (layoutBedrockPort != null && tvBedrockPortDash != null) {
+                            layoutBedrockPort.setVisibility(View.VISIBLE);
+                            tvBedrockPortDash.setText(String.valueOf(server.getBedrockPort()));
+                        }
+                        triggerAddonRestart();
+                    } else {
+                        // Allocate port
+                        android.widget.Toast.makeText(this, "Allocating proxy port...", android.widget.Toast.LENGTH_SHORT).show();
+                        new Thread(() -> {
+                            try {
+                                int allocatedPort = new eu.kodanetwork.mchost.network.supabase.SupabaseFunctionsClient(this).allocatePort("", server.getSubdomain(), "bedrock");
+                                runOnUiThread(() -> {
+                                    server.setBedrockPort(allocatedPort);
+                                    server.setBedrockSupport(true);
+                                    repo.update(server);
+                                    
+                                    View layoutBedrockPort = findViewById(R.id.layout_bedrock_port);
+                                    if (layoutBedrockPort != null && tvBedrockPortDash != null) {
+                                        layoutBedrockPort.setVisibility(View.VISIBLE);
+                                        tvBedrockPortDash.setText(String.valueOf(server.getBedrockPort()));
+                                    }
+                                    triggerAddonRestart();
+                                });
+                            } catch (Exception e) {
+                                runOnUiThread(() -> {
+                                    swBedrock.setChecked(false);
+                                    if (e.getMessage() != null && e.getMessage().contains("ports_exhausted")) {
+                                        eu.kodanetwork.mchost.ui.components.PraetorDialog.showApology(ServerDetailActivity.this, "P.R.A.E.T.O.R.", "Alle Bedrock Proxy-Ports sind derzeit belegt. Bitte versuche es später erneut.");
+                                    } else {
+                                        android.widget.Toast.makeText(ServerDetailActivity.this, "Error: " + e.getMessage(), android.widget.Toast.LENGTH_LONG).show();
+                                    }
+                                });
+                            }
+                        }).start();
                     }
-                    
-                    triggerAddonRestart();
-                    
-                    android.content.Intent intent = new android.content.Intent(ServerDetailActivity.this, CustomDnsWizardActivity.class);
-                    intent.putExtra("SERVER_ID", server.getId());
-                    intent.putExtra("SERVER_PORT", server.getPort());
-                    intent.putExtra("TARGET_RECORD", "bedrock");
-                    startActivity(intent);
                 } else {
                     swBedrock.setChecked(true); // REVERT visually!
                     showAddonWarningDialog("bedrock", swBedrock);
@@ -1717,15 +1747,33 @@ public class ServerDetailActivity extends AppCompatActivity {
                 }
                 boolean isChecked = swVoicechat.isChecked();
                 if (isChecked) {
-                    server.setVoicechat(true);
-                    repo.update(server);
-                    triggerAddonRestart();
-                    
-                    android.content.Intent intent = new android.content.Intent(ServerDetailActivity.this, CustomDnsWizardActivity.class);
-                    intent.putExtra("SERVER_ID", server.getId());
-                    intent.putExtra("SERVER_PORT", server.getPort());
-                    intent.putExtra("TARGET_RECORD", "voicechat");
-                    startActivity(intent);
+                    if (server.getVoicechatPort() > 0) {
+                        server.setVoicechat(true);
+                        repo.update(server);
+                        triggerAddonRestart();
+                    } else {
+                        android.widget.Toast.makeText(this, "Allocating voicechat port...", android.widget.Toast.LENGTH_SHORT).show();
+                        new Thread(() -> {
+                            try {
+                                int allocatedPort = new eu.kodanetwork.mchost.network.supabase.SupabaseFunctionsClient(this).allocatePort("", server.getSubdomain(), "voicechat");
+                                runOnUiThread(() -> {
+                                    server.setVoicechatPort(allocatedPort);
+                                    server.setVoicechat(true);
+                                    repo.update(server);
+                                    triggerAddonRestart();
+                                });
+                            } catch (Exception e) {
+                                runOnUiThread(() -> {
+                                    swVoicechat.setChecked(false);
+                                    if (e.getMessage() != null && e.getMessage().contains("ports_exhausted")) {
+                                        eu.kodanetwork.mchost.ui.components.PraetorDialog.showApology(ServerDetailActivity.this, "P.R.A.E.T.O.R.", "Alle Voicechat Proxy-Ports sind derzeit belegt. Bitte versuche es später erneut.");
+                                    } else {
+                                        android.widget.Toast.makeText(ServerDetailActivity.this, "Error: " + e.getMessage(), android.widget.Toast.LENGTH_LONG).show();
+                                    }
+                                });
+                            }
+                        }).start();
+                    }
                 } else {
                     swVoicechat.setChecked(true); // REVERT visually!
                     showAddonWarningDialog("voicechat", swVoicechat);
@@ -1870,7 +1918,7 @@ public class ServerDetailActivity extends AppCompatActivity {
                             try {
                                 if (server.getSubdomain() != null && !server.getSubdomain().isEmpty()) {
                                     new eu.kodanetwork.mchost.network.supabase.SupabaseFunctionsClient(ServerDetailActivity.this)
-                                        .deleteDnsLink("", server.getSubdomain());
+                                        .deleteDnsLink("", server.getSubdomain(), server.getBaseDomain());
                                 }
                             } catch (Exception e) {
                                 android.util.Log.e("ServerDetail", "Failed to delete DNS link", e);
@@ -1969,6 +2017,13 @@ public class ServerDetailActivity extends AppCompatActivity {
             }
             @Override public void onBindViewHolder(androidx.recyclerview.widget.RecyclerView.ViewHolder holder, int position) {
                 eu.kodanetwork.mchost.util.ModrinthHelper.ModrinthProject p = pluginList.get(position);
+                
+                android.content.SharedPreferences prefs = eu.kodanetwork.mchost.App.getPrefs(ServerDetailActivity.this);
+                boolean lightMode = eu.kodanetwork.mchost.util.ThemeHelper.isLightMode(ServerDetailActivity.this);
+                boolean isCyber = prefs.getBoolean("dev_cyber", false);
+                int themeColor = prefs.getInt("app_theme_color", 0xFFFF6B00);
+                eu.kodanetwork.mchost.util.ThemeHelper.applyToView(holder.itemView, lightMode, themeColor, isCyber);
+
                 TextView tvTitle = holder.itemView.findViewById(R.id.tv_project_title);
                 TextView tvAuthor = holder.itemView.findViewById(R.id.tv_project_author);
                 TextView tvDesc = holder.itemView.findViewById(R.id.tv_project_desc);
@@ -2278,7 +2333,23 @@ public class ServerDetailActivity extends AppCompatActivity {
             } catch (Exception e) {
                 runOnUiThread(() -> tvTunnelStatus.setText("Tunnel error: " + e.getMessage()));
             }
+            repo.update(server);
         });
+        
+        // Add TiltEffect to controls if LiquidGlass
+        if (eu.kodanetwork.mchost.util.ThemeHelper.isLiquidGlass(this)) {
+            android.view.View[] controlsToTilt = new android.view.View[] {
+                btnStart, btnStop, btnRestart, btnKill, 
+                btnDlJar, btnTermuxSetup, btnStartTunnel, btnLinkDomain
+            };
+            for (android.view.View v : controlsToTilt) {
+                if (v != null) {
+                    TiltEffectHelper helper = new TiltEffectHelper(this, v, true);
+                    tiltHelpers.add(helper);
+                    helper.register(); // Ensure it starts working right away
+                }
+            }
+        }
     }
 
     private void handleDomainLink() {
@@ -2314,7 +2385,7 @@ public class ServerDetailActivity extends AppCompatActivity {
                 dialog.dismiss();
                 io.execute(() -> {
                     try {
-                        String domain = newSubdomain + ".kodanetwork.eu";
+                        String domain = newSubdomain + "." + server.getBaseDomain();
                         String oldSubdomain = server.getSubdomain();
                         
                         if (server.getPlayitAddress() != null && !server.getPlayitAddress().isEmpty()) {
@@ -2323,7 +2394,7 @@ public class ServerDetailActivity extends AppCompatActivity {
                             // Delete old record if it exists
                             if (oldSubdomain != null && !oldSubdomain.isEmpty()) {
                                 try {
-                                    client.deleteDnsLink("", oldSubdomain);
+                                    client.deleteDnsLink("", oldSubdomain, server.getBaseDomain());
                                 } catch (Exception ignored) {}
                             }
                             
@@ -2331,7 +2402,7 @@ public class ServerDetailActivity extends AppCompatActivity {
                             String target = parts[0];
                             int port = parts.length > 1 ? Integer.parseInt(parts[1]) : server.getPort();
                             
-                            client.createDnsLink("", newSubdomain, target, port, "tcp");
+                            client.createDnsLink("", newSubdomain, server.getBaseDomain(), target, port, "tcp");
                             server.setDomainLink(domain + " -> " + server.getPlayitAddress());
                         } else {
                             server.setDomainLink("");
@@ -2743,7 +2814,19 @@ public class ServerDetailActivity extends AppCompatActivity {
             recreate();
         }
         
+        
         checkForUpdatesAsync();
+        for (TiltEffectHelper helper : tiltHelpers) {
+            helper.register();
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        for (TiltEffectHelper helper : tiltHelpers) {
+            helper.unregister();
+        }
     }
 
     private void updateJoinAddressDisplay() {

@@ -2,12 +2,15 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:fitsSystemWindows="true"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/main_root_layout"
     android:layout_width="match_parent" android:layout_height="match_parent"
-    android:orientation="vertical" android:background="#0A0807">
+    android:background="#0A0807"
+    android:orientation="vertical">
 
     <!-- ┌─ TOP BAR ─────────────────────────────────────────────────────┐ -->
     <LinearLayout android:layout_width="match_parent" android:layout_height="64dp"
         android:orientation="horizontal" android:gravity="center_vertical"
+        android:id="@+id/main_top_bar"
         android:background="#0A0807"
         android:paddingStart="20dp" android:paddingEnd="20dp"
         android:elevation="4dp">
@@ -96,7 +99,8 @@
         android:layout_width="match_parent" android:layout_height="wrap_content"
         android:minHeight="60dp"
         android:orientation="horizontal" android:gravity="center_vertical"
-        android:background="#16110D" android:paddingStart="16dp" android:paddingEnd="16dp"
+        android:background="#16110D"
+        android:paddingStart="16dp" android:paddingEnd="16dp"
         android:paddingTop="6dp" android:paddingBottom="6dp">
         <TextView android:layout_width="0dp" android:layout_height="wrap_content"
             android:layout_weight="1"

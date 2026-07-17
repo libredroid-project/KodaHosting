@@ -177,6 +177,7 @@ public class App extends Application implements Application.ActivityLifecycleCal
     @Override public void onActivityResumed(@NonNull Activity activity) {
         currentActivity = activity;
         doResetAfkTimer();
+        eu.kodanetwork.mchost.util.ChineseDictionaryHelper.applyToActivity(activity);
     }
     @Override public void onActivityPaused(@NonNull Activity activity) {
         if (currentActivity == activity) currentActivity = null;

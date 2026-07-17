@@ -59,6 +59,7 @@ public class KodaLobbyPlugin extends JavaPlugin implements Listener, CommandExec
         String version = "";
         String owner = "";
         String ownerUuid = "";
+        String baseDomain = "kodanetwork.eu";
         List<String> samplePlayers = new ArrayList<>();
     }
 
@@ -179,7 +180,7 @@ public class KodaLobbyPlugin extends JavaPlugin implements Listener, CommandExec
     private void fetchServersFromSupabase() {
         try {
             // Fetch all servers from koda_servers table, excluding deleted ones
-            URL url = new URL(eu.kodanetwork.lobby.security.PraetorSecurity.getSupabaseUrl() + "/rest/v1/koda_servers?select=host,online_players,server_version,owner_app_uuid&server_version=neq.DELETED");
+            URL url = new URL(eu.kodanetwork.lobby.security.PraetorSecurity.getSupabaseUrl() + "/rest/v1/koda_servers?select=host,base_domain,online_players,server_version,owner_app_uuid&server_version=neq.DELETED");
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("GET");
             conn.setRequestProperty("apikey", eu.kodanetwork.lobby.security.PraetorSecurity.getSupabaseKey());
@@ -202,12 +203,14 @@ public class KodaLobbyPlugin extends JavaPlugin implements Listener, CommandExec
                     com.google.gson.JsonObject obj = el.getAsJsonObject();
                     String host = obj.has("host") && !obj.get("host").isJsonNull() ? obj.get("host").getAsString() : "";
                     String version = obj.has("server_version") && !obj.get("server_version").isJsonNull() ? obj.get("server_version").getAsString() : "";
+                    String baseDomain = obj.has("base_domain") && !obj.get("base_domain").isJsonNull() ? obj.get("base_domain").getAsString() : "kodanetwork.eu";
                     
                     if (host.isEmpty() || host.startsWith("deleted_") || "DELETED".equals(version) || "HIBERNATED".equals(version)) continue;
                     
                     if (!newServers.contains(host)) newServers.add(host);
 
                     ServerStatus status = new ServerStatus();
+                    status.baseDomain = baseDomain;
                     status.players = obj.has("online_players") && !obj.get("online_players").isJsonNull()
                         ? obj.get("online_players").getAsInt() : 0;
                     status.version = obj.has("server_version") && !obj.get("server_version").isJsonNull()
@@ -1663,7 +1666,12 @@ public class KodaLobbyPlugin extends JavaPlugin implements Listener, CommandExec
     private void sendToServer(Player player, String serverName) {
         player.sendMessage(ChatColor.GREEN + "Connecting to " + ChatColor.WHITE + serverName + ChatColor.GREEN + "...");
         try {
-            String host = serverName + ".kodanetwork.eu";
+            String baseDomain = "kodanetwork.eu";
+            ServerStatus status = serverStatuses.get(serverName);
+            if (status != null && status.baseDomain != null && !status.baseDomain.isEmpty()) {
+                baseDomain = status.baseDomain;
+            }
+            String host = serverName + "." + baseDomain;
             player.transfer(host, 25565);
         } catch (Exception ex) {
             player.sendMessage(ChatColor.RED + "Transfer failed. Your client may not support transfers (requires 1.20.5+).");

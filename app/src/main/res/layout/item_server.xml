@@ -1,10 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="match_parent" android:layout_height="wrap_content"
-    android:orientation="vertical"
-    android:background="#0A0807"
-    android:padding="16dp">
+    android:layout_width="match_parent" android:layout_height="wrap_content">
+
+    <LinearLayout
+        android:id="@+id/container_main"
+        android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="#0A0807"
+        android:padding="16dp">
 
     <!-- Top Row: Dot, Status, Address -->
     <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
@@ -138,7 +142,8 @@
     </LinearLayout>
 
     <!-- Divider for next server -->
-    <View android:layout_width="match_parent" android:layout_height="1dp"
+    <View android:id="@+id/divider" android:layout_width="match_parent" android:layout_height="1dp"
         android:background="#222222"
         android:layout_marginTop="16dp" />
-</LinearLayout>
+    </LinearLayout>
+</FrameLayout>

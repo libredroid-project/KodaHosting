@@ -22,7 +22,7 @@
                 android:scaleType="centerInside"/>
             <TextView android:layout_width="0dp" android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="New Server" android:textColor="#F0F0F0"
+                android:text="@string/new_server" android:textColor="#F0F0F0"
                 android:textSize="18sp" android:fontFamily="sans-serif-medium"
                 android:textStyle="bold" android:layout_marginStart="4dp"/>
         </LinearLayout>
@@ -44,7 +44,7 @@
                     style="@style/KodaButton"
                     android:layout_width="0dp" android:layout_height="52dp"
                     android:layout_weight="1"
-                    android:text="Import Folder"
+                    android:text="@string/import_folder"
                     android:backgroundTint="#1A1A24"
                     android:textColor="#8A8A9A"
                     android:fontFamily="sans-serif-medium"
@@ -58,7 +58,7 @@
                     style="@style/KodaButton"
                     android:layout_width="0dp" android:layout_height="52dp"
                     android:layout_weight="1"
-                    android:text="Import ZIP"
+                    android:text="@string/import_zip"
                     android:backgroundTint="#1A1A24"
                     android:textColor="#8A8A9A"
                     android:fontFamily="sans-serif-medium"
@@ -76,7 +76,7 @@
                 android:layout_width="match_parent" android:layout_height="wrap_content"
                 android:orientation="vertical">
                 <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                    android:text="SERVER NAME" android:textColor="#F0F0F0"
+                    android:text="@string/server_name_label" android:textColor="#F0F0F0"
                     android:textSize="11sp" android:fontFamily="sans-serif-medium"
                     android:letterSpacing="0.1" android:layout_marginBottom="8dp"/>
                 <EditText android:id="@+id/et_name"
@@ -84,7 +84,7 @@
                     android:background="@drawable/input_field"
                     android:textColor="#F0F0F0" android:textSize="15sp"
                     android:fontFamily="sans-serif"
-                    android:hint="e.g. MySurvival"
+                    android:hint="@string/server_name_hint"
                     android:textColorHint="#3A3A48"
                     android:paddingStart="16dp" android:paddingEnd="16dp"
                     android:inputType="text" android:singleLine="true"
@@ -92,33 +92,78 @@
             </LinearLayout>
 
             <!-- ADDRESS PREVIEW -->
-            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
-                android:orientation="vertical" android:background="@drawable/preview_bg"
-                android:padding="16dp" android:layout_marginBottom="20dp">
-                <TextView android:id="@+id/tv_address_preview_label"
-                    android:layout_width="wrap_content" android:layout_height="wrap_content"
-                    android:text="CONNECT ADDRESS" android:textColor="#8A8A9A"
-                    android:textSize="10sp" android:fontFamily="sans-serif-medium"
-                    android:letterSpacing="0.1"/>
-                <TextView android:id="@+id/tv_address_preview"
-                    android:layout_width="wrap_content" android:layout_height="wrap_content"
-                    android:text="yourserver.kodanetwork.eu"
-                    android:textColor="#F0F0F0" android:textSize="15sp"
-                    android:fontFamily="sans-serif-medium" android:textStyle="bold"
-                    android:layout_marginTop="6dp"/>
-                <TextView android:id="@+id/tv_velocity_label"
-                    android:layout_width="wrap_content" android:layout_height="wrap_content"
-                    android:text="Velocity: kodanetwork.eu"
-                    android:textColor="#555566" android:textSize="10sp"
-                    android:fontFamily="sans-serif" android:layout_marginTop="4dp"/>
-            </LinearLayout>
+            <LinearLayout
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:layout_marginBottom="20dp"
+                android:background="@drawable/address_preview_bg"
+                android:orientation="vertical" android:padding="16dp">
+                    <TextView android:id="@+id/tv_address_preview_label"
+                        android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:text="@string/connect_address_label" android:textColor="#8A8A9A"
+                        android:textSize="10sp" android:fontFamily="sans-serif-medium"
+                        android:letterSpacing="0.1"/>
+                    <TextView android:id="@+id/tv_address_preview"
+                        android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:text="yourserver.kodanetwork.eu"
+                        android:textColor="#F0F0F0" android:textSize="15sp"
+                        android:fontFamily="sans-serif-medium" android:textStyle="bold"
+                        android:layout_marginTop="6dp"/>
+                    <TextView android:id="@+id/tv_velocity_label"
+                        android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:text="Velocity: kodanetwork.eu"
+                        android:textColor="#555566" android:textSize="10sp"
+                        android:fontFamily="sans-serif" android:layout_marginTop="4dp"
+                        android:layout_marginBottom="12dp"/>
+                    <FrameLayout android:id="@+id/container_domain"
+                        android:layout_width="match_parent" android:layout_height="40dp"
+                        android:layout_marginBottom="12dp"
+                        android:background="@drawable/domain_switch_bg" android:padding="4dp">
+                        
+                        <!-- The sliding pill -->
+                        <View android:id="@+id/pill_domain"
+                            android:layout_width="0dp" android:layout_height="match_parent"
+                            android:background="@drawable/pill_bg" />
+
+                        <LinearLayout android:layout_width="match_parent" android:layout_height="match_parent"
+                            android:orientation="horizontal">
+                            <FrameLayout android:id="@+id/wrapper_domain_kodanetwork"
+                                android:layout_width="0dp" android:layout_height="match_parent"
+                                android:layout_weight="1">
+                                <TextView android:id="@+id/btn_domain_kodanetwork"
+                                    android:layout_width="match_parent" android:layout_height="match_parent"
+                                    android:text="kodanetwork.eu"
+                                    android:gravity="center" android:textSize="11sp"
+                                    android:maxLines="1" android:ellipsize="end"
+                                    android:textColor="#FFFFFF" android:fontFamily="sans-serif-medium" />
+                            </FrameLayout>
+                            <FrameLayout android:id="@+id/wrapper_domain_kodaserv"
+                                android:layout_width="0dp" android:layout_height="match_parent"
+                                android:layout_weight="1">
+                                <TextView android:id="@+id/btn_domain_kodaserv"
+                                    android:layout_width="match_parent" android:layout_height="match_parent"
+                                    android:text="kodaserv.eu"
+                                    android:gravity="center" android:textSize="11sp"
+                                    android:maxLines="1" android:ellipsize="end"
+                                    android:textColor="#888899" android:fontFamily="sans-serif-medium" />
+                                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                                    android:text="NEW" android:textSize="8sp" android:textColor="#FFFFFF"
+                                    android:background="@drawable/badge_new_bg"
+                                    android:paddingStart="4dp" android:paddingEnd="4dp"
+                                    android:paddingTop="2dp" android:paddingBottom="2dp"
+                                    android:layout_gravity="top|end"
+                                    android:layout_marginTop="2dp" android:layout_marginEnd="6dp"
+                                    android:fontFamily="sans-serif-bold"/>
+                            </FrameLayout>
+                        </LinearLayout>
+                    </FrameLayout>
+                </LinearLayout>
 
             <!-- SERVER TYPE -->
             <LinearLayout android:id="@+id/layout_type_section"
                 android:layout_width="match_parent" android:layout_height="wrap_content"
                 android:orientation="vertical">
             <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                    android:text="SERVER TYPE" android:textColor="#F0F0F0"
+                    android:text="@string/server_type_label" android:textColor="#F0F0F0"
                     android:textSize="11sp" android:fontFamily="sans-serif-medium"
                     android:letterSpacing="0.1" android:layout_marginBottom="10dp"/>
                 <NumberPicker android:id="@+id/np_server_type"
@@ -136,7 +181,7 @@
                     android:layout_marginBottom="8dp">
                     <TextView android:layout_width="0dp" android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="VERSION" android:textColor="#F0F0F0"
+                        android:text="@string/version_label" android:textColor="#F0F0F0"
                         android:textSize="11sp" android:fontFamily="sans-serif-medium"
                         android:letterSpacing="0.1"/>
                     <TextView android:id="@+id/tv_version_loading"
@@ -169,7 +214,7 @@
                 android:layout_marginBottom="10dp">
                 <TextView android:layout_width="0dp" android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="RAM" android:textColor="#F0F0F0"
+                    android:text="@string/ram_label" android:textColor="#F0F0F0"
                     android:textSize="11sp" android:fontFamily="sans-serif-medium"
                     android:letterSpacing="0.1"/>
                 <TextView android:id="@+id/tv_ram_value"
@@ -204,11 +249,11 @@
                 <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
                     android:layout_weight="1" android:orientation="vertical">
                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                        android:text="Native Mode (Standalone)" android:textColor="#F0F0F0"
+                        android:text="@string/execution_mode_native" android:textColor="#F0F0F0"
                         android:textSize="14sp" android:fontFamily="sans-serif-medium"
                         android:textStyle="bold"/>
                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                        android:text="Direct in-app hosting (Experimental)"
+                        android:text="@string/execution_mode_desc"
                         android:textColor="#8A8A9A" android:textSize="12sp"
                         android:fontFamily="sans-serif"
                         android:layout_marginTop="3dp"/>
@@ -224,7 +269,7 @@
                 android:layout_width="match_parent" android:layout_height="wrap_content"
                 android:orientation="vertical">
                 <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                    android:text="SETUP &amp; DESIGN" android:textColor="#F0F0F0"
+                    android:text="@string/setup_design_label" android:textColor="#F0F0F0"
                     android:textSize="11sp" android:fontFamily="sans-serif-medium"
                     android:letterSpacing="0.1" android:layout_marginBottom="10dp"/>
                 <RadioGroup android:id="@+id/rg_setup_type"
@@ -234,7 +279,7 @@
                     android:padding="16dp">
                     <RadioButton android:id="@+id/rb_setup_koda"
                         android:layout_width="match_parent" android:layout_height="wrap_content"
-                        android:text="KodaHosting Design (Auto TAB &amp; Theme)"
+                        android:text="@string/setup_koda"
                         android:textColor="#F0F0F0" android:fontFamily="sans-serif"
                         android:textSize="13sp"
                         android:checked="true" android:buttonTint="#FF6B00"
@@ -242,7 +287,7 @@
                         android:paddingBottom="4dp"/>
                     <RadioButton android:id="@+id/rb_setup_manual"
                         android:layout_width="match_parent" android:layout_height="wrap_content"
-                        android:text="Alles selbst machen (Clean Install)"
+                        android:text="@string/setup_manual"
                         android:textColor="#F0F0F0" android:fontFamily="sans-serif"
                         android:textSize="13sp"
                         android:buttonTint="#FF6B00"
@@ -250,7 +295,7 @@
                         android:paddingBottom="4dp"/>
                     <RadioButton android:id="@+id/rb_setup_ai"
                         android:layout_width="match_parent" android:layout_height="wrap_content"
-                        android:text="AI Server Builder (BETA)"
+                        android:text="@string/setup_ai"
                         android:textColor="#F0F0F0" android:fontFamily="sans-serif"
                         android:textSize="13sp"
                         android:buttonTint="#FF6B00"
@@ -267,7 +312,7 @@
                 android:layout_marginBottom="20dp">
                 <RelativeLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginBottom="8dp">
                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                        android:text="AI SERVER BUILDER CHAT" android:textColor="#F0F0F0"
+                        android:text="@string/ai_chat_label" android:textColor="#F0F0F0"
                         android:textSize="11sp" android:fontFamily="sans-serif-medium"
                         android:letterSpacing="0.1" android:layout_centerVertical="true"/>
                     <ImageButton android:id="@+id/btn_ai_fullscreen"
@@ -294,7 +339,7 @@
                         android:background="@drawable/input_field"
                         android:textColor="#F0F0F0" android:textSize="14sp"
                         android:fontFamily="sans-serif"
-                        android:hint="Talk to Gemini..."
+                        android:hint="@string/ai_chat_hint"
                         android:textColorHint="#3A3A48"
                         android:paddingStart="16dp" android:paddingEnd="16dp"
                         android:inputType="text" android:singleLine="true"/>
@@ -316,7 +361,7 @@
                     android:id="@+id/btn_ai_approve"
                     android:layout_width="match_parent" android:layout_height="54dp"
                     android:layout_marginTop="12dp"
-                    android:text="Approve Plan &amp; Create Server"
+                    android:text="@string/ai_approve_btn"
                     android:textSize="14sp" android:fontFamily="sans-serif-medium"
                     android:textColor="#FFFFFF"
                     app:backgroundTint="#00E676"
@@ -324,7 +369,7 @@
                     android:visibility="gone"/>
                 
                 <TextView android:id="@+id/tv_ai_chat_hint" android:layout_width="match_parent" android:layout_height="wrap_content"
-                    android:text="Discuss your server idea. When you are happy with Gemini's plugin choices, click Approve."
+                    android:text="@string/ai_chat_desc"
                     android:textColor="#8A8A9A" android:textSize="11sp"
                     android:layout_marginTop="8dp" android:gravity="center_horizontal"/>
             </LinearLayout>
@@ -334,7 +379,7 @@
                 android:layout_width="match_parent" android:layout_height="wrap_content"
                 android:orientation="vertical" android:layout_marginBottom="32dp">
                 <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                    android:text="THEME COLOR" android:textColor="#F0F0F0"
+                    android:text="@string/theme_color_label" android:textColor="#F0F0F0"
                     android:textSize="11sp" android:fontFamily="sans-serif-medium"
                     android:letterSpacing="0.1" android:layout_marginBottom="10dp"/>
                 <LinearLayout android:id="@+id/btn_color_picker"
@@ -353,7 +398,7 @@
                         android:fontFamily="sans-serif-medium"
                         android:textSize="14sp"/>
                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                        android:text="Tap to change" android:textColor="#555566"
+                        android:text="@string/tap_to_change" android:textColor="#555566"
                         android:textSize="11sp" android:fontFamily="sans-serif"/>
                 </LinearLayout>
             </LinearLayout>
@@ -363,7 +408,7 @@
                 android:id="@+id/btn_create"
                 style="@style/KodaButton"
                 android:layout_width="match_parent" android:layout_height="56dp"
-                android:text="Create Server"
+                android:text="@string/btn_create_server"
                 android:textColor="#FFFFFF"
                 android:textSize="15sp"
                 android:fontFamily="sans-serif-medium"
@@ -406,7 +451,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="20dp"
-                android:text="Preparing Java..."
+                android:text="@string/preparing_java"
                 android:textColor="#F0F0F0"
                 android:textSize="18sp"
                 android:fontFamily="sans-serif-medium"
