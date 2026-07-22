@@ -1,3 +1,3 @@
 {
-  "query": "ALTER TABLE public.koda_users ADD COLUMN two_fa_enabled BOOLEAN DEFAULT false, ADD COLUMN two_fa_password VARCHAR(255) DEFAULT NULL;"
+  "query": "SELECT schemaname, tablename, policyname, permissive, roles, cmd, qual, with_check FROM pg_policies WHERE schemaname = 'public';"
 }
