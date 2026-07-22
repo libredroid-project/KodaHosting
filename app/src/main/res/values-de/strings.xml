@@ -282,4 +282,21 @@
     <string name="err_server_create_cooldown">Bitte warte noch %1$d Sekunden, bevor du einen neuen Server erstellst.</string>
     <string name="err_server_limit_reached">Du hast das Limit von %1$d aktiven Servern erreicht.</string>
     <string name="err_wakeup_limit_reached">Server-Limit erreicht. Du kannst maximal %1$d aktive Server gleichzeitig betreiben. Bitte friere einen anderen Server ein.</string>
+    <string name="delete_server_msg">Server wird gelöscht...</string>
+    <string name="delete_server_stopping">Server wird gestoppt...</string>
+    <string name="delete_server_stopping_sub">Warten, bis der Server offline geht.</string>
+    <string name="delete_server_dns">DNS-Eintrag wird gelöscht...</string>
+    <string name="delete_server_dns_sub">IONOS API wird kontaktiert</string>
+    <string name="delete_server_db">Datenbank wird aktualisiert...</string>
+    <string name="delete_server_db_sub">Wird als gelöscht markiert</string>
+    <string name="delete_server_db_failed">Datenbankfehler</string>
+    <string name="delete_server_exporting">Server wird exportiert...</string>
+    <string name="delete_server_exporting_sub">Dateien werden gezippt, dies kann eine Weile dauern</string>
+    <string name="delete_server_cleaning">Aufräumen...</string>
+    <string name="delete_server_cleaning_sub">Lokale Dateien werden gelöscht</string>
+    <string name="delete_server_permanent">Server wird gelöscht...</string>
+    <string name="delete_server_permanent_sub">Lokale Dateien werden entfernt</string>
+    <string name="delete_server_btn_retry">Wiederholen</string>
+    <string name="delete_server_btn_export">Exportieren &amp; Löschen (ZIP)</string>
+    <string name="delete_server_btn_permanent">Dauerhaft löschen</string>
 </resources>

@@ -297,4 +297,21 @@
     <string name="err_server_create_cooldown">请等待 %1$d 秒后再创建新服务器。</string>
     <string name="err_server_limit_reached">您已达到 %1$d 个活跃服务器的限制。</string>
     <string name="err_wakeup_limit_reached">达到服务器限制。您最多可以同时运行 %1$d 个活跃服务器。请先休眠另一个服务器。</string>
+    <string name="delete_server_msg">正在删除服务器...</string>
+    <string name="delete_server_stopping">正在停止服务器...</string>
+    <string name="delete_server_stopping_sub">等待服务器离线。</string>
+    <string name="delete_server_dns">正在删除 DNS 记录...</string>
+    <string name="delete_server_dns_sub">正在联系 IONOS API</string>
+    <string name="delete_server_db">正在更新数据库...</string>
+    <string name="delete_server_db_sub">标记为已删除</string>
+    <string name="delete_server_db_failed">数据库错误</string>
+    <string name="delete_server_exporting">正在导出服务器...</string>
+    <string name="delete_server_exporting_sub">正在压缩文件，这可能需要一段时间</string>
+    <string name="delete_server_cleaning">清理中...</string>
+    <string name="delete_server_cleaning_sub">删除本地文件</string>
+    <string name="delete_server_permanent">正在删除服务器...</string>
+    <string name="delete_server_permanent_sub">删除本地文件</string>
+    <string name="delete_server_btn_retry">重试</string>
+    <string name="delete_server_btn_export">导出并删除 (ZIP)</string>
+    <string name="delete_server_btn_permanent">永久删除</string>
 </resources>
