@@ -283,4 +283,43 @@ public class SupabaseAuth {
     public static boolean isLoggedIn(Context ctx) {
         return eu.kodanetwork.mchost.App.getPrefs(ctx).contains("koda_session_token");
     }
+
+    public static boolean refreshTokenSync(Context ctx) {
+        try {
+            SharedPreferences prefs = eu.kodanetwork.mchost.App.getPrefs(ctx);
+            String refreshToken = prefs.getString("koda_refresh_token", null);
+            if (refreshToken == null) return false;
+
+            URL url = new URL(eu.kodanetwork.mchost.security.PraetorSecurity.getSupabaseUrl() + "/auth/v1/token?grant_type=refresh_token");
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod("POST");
+            conn.setRequestProperty("Content-Type", "application/json");
+            conn.setRequestProperty("apikey", eu.kodanetwork.mchost.security.PraetorSecurity.getSupabaseKey());
+            conn.setDoOutput(true);
+
+            String json = "{\"refresh_token\":\"" + refreshToken + "\"}";
+            OutputStream os = conn.getOutputStream();
+            os.write(json.getBytes());
+            os.flush(); os.close();
+
+            if (conn.getResponseCode() >= 200 && conn.getResponseCode() < 300) {
+                InputStreamReader r = new InputStreamReader(conn.getInputStream());
+                StringBuilder sb = new StringBuilder();
+                int c; while ((c = r.read()) != -1) sb.append((char) c);
+                r.close();
+                
+                JSONObject resp = new JSONObject(sb.toString());
+                String newAccessToken = resp.optString("access_token", null);
+                String newRefreshToken = resp.optString("refresh_token", null);
+                if (newAccessToken != null) {
+                    prefs.edit()
+                        .putString("koda_session_token", newAccessToken)
+                        .putString("koda_refresh_token", newRefreshToken)
+                        .apply();
+                    return true;
+                }
+            }
+        } catch (Exception e) {}
+        return false;
+    }
 }

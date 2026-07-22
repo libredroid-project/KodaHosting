@@ -1294,7 +1294,11 @@ public class KodaServerService extends Service {
             "mkfifo " + inFifo + "\n";
             
         String aikar = "-XX:+UseG1GC -XX:+ParallelRefProcEnabled -XX:MaxGCPauseMillis=200 -XX:+UnlockExperimentalVMOptions -XX:+DisableExplicitGC -XX:G1NewSizePercent=30 -XX:G1MaxNewSizePercent=40 -XX:G1HeapRegionSize=8M -XX:G1ReservePercent=20 -XX:G1HeapWastePercent=5 -XX:G1MixedGCCountTarget=4 -XX:InitiatingHeapOccupancyPercent=15 -XX:G1MixedGCLiveThresholdPercent=90 -XX:G1RSetUpdatingPauseTimePercent=5 -XX:SurvivorRatio=32 -XX:+PerfDisableSharedMem -XX:MaxTenuringThreshold=1 -Dusing.aikars.flags=https://mcflags.emc.gs -Daikars.new.flags=true";
-        script += "tail -f " + inFifo + " | java -DPaper.IgnoreJavaVersion=true -Dkoda.dir=\"" + dp + "\" -Xmx" + srv.getRamMB() + "M -Xms" + srv.getRamMB() + "M " + aikar + " -jar \"" + jar.getAbsolutePath() + "\" nogui > server.log 2>&1 &\n";
+        String extraArgs = "";
+        if (srv.getType() == ServerInstance.Type.FABRIC) {
+            extraArgs = "-Djna.nosys=true -Djna.nounpack=true -Dterminal.jline=false -Dterminal.ansi=true ";
+        }
+        script += "tail -f " + inFifo + " | java " + extraArgs + "-DPaper.IgnoreJavaVersion=true -Dkoda.dir=\"" + dp + "\" -Xmx" + srv.getRamMB() + "M -Xms" + srv.getRamMB() + "M " + aikar + " -jar \"" + jar.getAbsolutePath() + "\" nogui > server.log 2>&1 &\n";
         script += "echo $! > server.pid\n";
         script += "wait $!\n";
             

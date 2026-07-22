@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/settings_root"
-    android:fitsSystemWindows="true"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent" android:layout_height="match_parent"
     android:orientation="vertical" android:background="#1B1613">
 
     <!-- TOP BAR -->
-    <LinearLayout android:layout_width="match_parent" android:layout_height="56dp"
+    <LinearLayout android:id="@+id/settings_top_bar"
+        android:layout_width="match_parent" android:layout_height="56dp"
         android:orientation="horizontal" android:gravity="center_vertical"
         android:background="#1B1613"
         android:paddingStart="16dp" android:paddingEnd="16dp">
@@ -35,7 +35,7 @@
 
     <ScrollView android:id="@+id/settings_scroll"
         android:layout_width="match_parent" android:layout_height="match_parent"
-        android:scrollbars="none" android:fillViewport="true">
+        android:scrollbars="none" android:fillViewport="true" android:clipToPadding="false">
         
         <LinearLayout android:id="@+id/settings_content"
             android:layout_width="match_parent" android:layout_height="wrap_content"

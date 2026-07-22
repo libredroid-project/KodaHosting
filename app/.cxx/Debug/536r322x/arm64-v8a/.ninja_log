@@ -64,3 +64,9 @@
 762	853	8052162859837964	C:/Users/Home/KodaHosting/KodaNetwork/app/build/intermediates/cxx/Debug/536r322x/obj/arm64-v8a/libembeddedjvm.so	5f72c953a3729823
 5	816	8052443916331803	CMakeFiles/embeddedjvm.dir/PraetorSecurity.cpp.o	afbfffcbd2bdbb5c
 816	977	8052443917952142	C:/Users/Home/KodaHosting/KodaNetwork/app/build/intermediates/cxx/Debug/536r322x/obj/arm64-v8a/libembeddedjvm.so	5f72c953a3729823
+0	8	0	clean	5317178f812570d5
+10	1090	8062723353780567	CMakeFiles/embeddedjvm.dir/EmbeddedJvm.cpp.o	810d3e807a36a74b
+20	1229	8062723355164743	CMakeFiles/embeddedjvm.dir/PraetorSecurity.cpp.o	afbfffcbd2bdbb5c
+1229	1454	8062723357427054	C:/Users/Home/KodaHosting/KodaNetwork/app/build/intermediates/cxx/Debug/536r322x/obj/arm64-v8a/libembeddedjvm.so	5f72c953a3729823
+5	814	8062761063400616	CMakeFiles/embeddedjvm.dir/EmbeddedJvm.cpp.o	810d3e807a36a74b
+814	905	8062761064330608	C:/Users/Home/KodaHosting/KodaNetwork/app/build/intermediates/cxx/Debug/536r322x/obj/arm64-v8a/libembeddedjvm.so	5f72c953a3729823

@@ -274,4 +274,12 @@
     <string name="tap_to_change">Tippen zum Ändern</string>
     <string name="btn_create_server">Server erstellen</string>
     <string name="preparing_java">Java wird vorbereitet...</string>
+    <string name="pm_feed">Füttern</string>
+    <string name="pm_heal">Heilen</string>
+    <string name="pm_starve">Hunger</string>
+    <string name="pm_kill">Töten</string>
+    <string name="pm_wipe">Daten löschen</string>
+    <string name="err_server_create_cooldown">Bitte warte noch %1$d Sekunden, bevor du einen neuen Server erstellst.</string>
+    <string name="err_server_limit_reached">Du hast das Limit von %1$d aktiven Servern erreicht.</string>
+    <string name="err_wakeup_limit_reached">Server-Limit erreicht. Du kannst maximal %1$d aktive Server gleichzeitig betreiben. Bitte friere einen anderen Server ein.</string>
 </resources>

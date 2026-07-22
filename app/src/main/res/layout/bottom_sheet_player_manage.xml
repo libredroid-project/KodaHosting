@@ -1,0 +1,274 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="#0A0807"
+    android:padding="16dp">
+
+    <!-- We wrap the entire content in a NestedScrollView so it won't be cut off -->
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <!-- Header -->
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_gravity="center_horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginBottom="16dp">
+
+                <ImageView
+                    android:id="@+id/iv_pm_player_head"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_marginEnd="8dp"
+                    android:visibility="gone" />
+
+                <TextView
+                    android:id="@+id/tv_pm_player_name"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Player Name"
+                    android:textColor="#FFFFFF"
+                    android:textSize="20sp"
+                    android:fontFamily="sans-serif-medium" />
+            </LinearLayout>
+
+            <!-- Actions Row 1 -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:weightSum="4"
+                android:layout_marginBottom="12dp">
+                
+                <Button
+                    android:id="@+id/btn_pm_heal"
+                    android:layout_width="0dp"
+                    android:layout_height="48dp"
+                    android:layout_weight="1"
+                    android:text="@string/pm_heal"
+                    android:textSize="12sp"
+                    android:layout_marginEnd="4dp"
+                    android:backgroundTint="#00C853"
+                    android:textColor="#FFFFFF"/>
+                    
+                <Button
+                    android:id="@+id/btn_pm_feed"
+                    android:layout_width="0dp"
+                    android:layout_height="48dp"
+                    android:layout_weight="1"
+                    android:text="@string/pm_feed"
+                    android:textSize="12sp"
+                    android:layout_marginEnd="4dp"
+                    android:backgroundTint="#64DD17"
+                    android:textColor="#FFFFFF"/>
+                    
+                <Button
+                    android:id="@+id/btn_pm_starve"
+                    android:layout_width="0dp"
+                    android:layout_height="48dp"
+                    android:layout_weight="1"
+                    android:text="@string/pm_starve"
+                    android:textSize="12sp"
+                    android:layout_marginEnd="4dp"
+                    android:backgroundTint="#FFAB00"
+                    android:textColor="#FFFFFF"/>
+                    
+                <Button
+                    android:id="@+id/btn_pm_kill"
+                    android:layout_width="0dp"
+                    android:layout_height="48dp"
+                    android:layout_weight="1"
+                    android:text="@string/pm_kill"
+                    android:textSize="12sp"
+                    android:backgroundTint="#D50000"
+                    android:textColor="#FFFFFF"/>
+            </LinearLayout>
+
+            <!-- Actions Row 2 -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:weightSum="4"
+                android:layout_marginBottom="12dp">
+                
+                <Button
+                    android:id="@+id/btn_pm_op"
+                    android:layout_width="0dp"
+                    android:layout_height="48dp"
+                    android:layout_weight="1"
+                    android:text="OP"
+                    android:textSize="12sp"
+                    android:layout_marginEnd="4dp"
+                    android:backgroundTint="#00B0FF"
+                    android:textColor="#FFFFFF"/>
+                    
+                <Button
+                    android:id="@+id/btn_pm_kick"
+                    android:layout_width="0dp"
+                    android:layout_height="48dp"
+                    android:layout_weight="1"
+                    android:text="Kick"
+                    android:textSize="12sp"
+                    android:layout_marginEnd="4dp"
+                    android:backgroundTint="#FF9100"
+                    android:textColor="#FFFFFF"/>
+                    
+                <Button
+                    android:id="@+id/btn_pm_ban"
+                    android:layout_width="0dp"
+                    android:layout_height="48dp"
+                    android:layout_weight="1"
+                    android:text="Ban"
+                    android:textSize="12sp"
+                    android:layout_marginEnd="4dp"
+                    android:backgroundTint="#AA00FF"
+                    android:textColor="#FFFFFF"/>
+                    
+                <Button
+                    android:id="@+id/btn_pm_delete"
+                    android:layout_width="0dp"
+                    android:layout_height="48dp"
+                    android:layout_weight="1"
+                    android:text="@string/pm_wipe"
+                    android:textSize="12sp"
+                    android:backgroundTint="#B71C1C"
+                    android:textColor="#FFFFFF"/>
+            </LinearLayout>
+
+            <!-- Whitelist Toggle -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginBottom="16dp"
+                android:background="@drawable/bg_rounded_card"
+                android:padding="12dp">
+                
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/pm_whitelisted"
+                    android:textColor="#FFFFFF"
+                    android:textSize="16sp"/>
+                    
+                <Switch
+                    android:id="@+id/switch_pm_whitelist"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+            </LinearLayout>
+
+            <!-- Stats Grid -->
+            <GridLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:columnCount="2"
+                android:rowCount="3"
+                android:background="@drawable/bg_rounded_card"
+                android:padding="16dp"
+                android:layout_marginBottom="16dp">
+                
+                <TextView android:text="@string/pm_deaths" android:textColor="#888899" android:layout_marginEnd="8dp"/>
+                <TextView android:id="@+id/tv_pm_stat_deaths" android:text="0" android:textColor="#F0F0F0" android:textStyle="bold" android:layout_gravity="fill_horizontal" android:gravity="end"/>
+
+                <TextView android:text="@string/pm_blocks_mined" android:textColor="#888899" android:layout_marginEnd="8dp" android:layout_marginTop="8dp"/>
+                <TextView android:id="@+id/tv_pm_stat_mined" android:text="0" android:textColor="#F0F0F0" android:textStyle="bold" android:layout_gravity="fill_horizontal" android:gravity="end" android:layout_marginTop="8dp"/>
+
+                <TextView android:text="@string/pm_hours_played" android:textColor="#888899" android:layout_marginEnd="8dp" android:layout_marginTop="8dp"/>
+                <TextView android:id="@+id/tv_pm_stat_hours" android:text="0" android:textColor="#F0F0F0" android:textStyle="bold" android:layout_gravity="fill_horizontal" android:gravity="end" android:layout_marginTop="8dp"/>
+                
+                <TextView android:text="@string/pm_mobs_killed" android:textColor="#888899" android:layout_marginEnd="8dp" android:layout_marginTop="8dp"/>
+                <TextView android:id="@+id/tv_pm_stat_mobs" android:text="0" android:textColor="#F0F0F0" android:textStyle="bold" android:layout_gravity="fill_horizontal" android:gravity="end" android:layout_marginTop="8dp"/>
+                
+                <TextView android:text="@string/pm_damage_taken" android:textColor="#888899" android:layout_marginEnd="8dp" android:layout_marginTop="8dp"/>
+                <TextView android:id="@+id/tv_pm_stat_dmg" android:text="0" android:textColor="#F0F0F0" android:textStyle="bold" android:layout_gravity="fill_horizontal" android:gravity="end" android:layout_marginTop="8dp"/>
+            </GridLayout>
+
+            <!-- Inventory Section -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/pm_inventory"
+                android:textColor="#FFFFFF"
+                android:textSize="16sp"
+                android:layout_marginBottom="8dp"
+                android:fontFamily="sans-serif-medium"/>
+
+            <HorizontalScrollView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:scrollbars="none">
+
+                <!-- Minecraft Inventory Layout Container -->
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:background="#C6C6C6"
+                    android:padding="8dp">
+
+                    <!-- Left Column (Armor & Offhand) -->
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:orientation="vertical"
+                        android:layout_marginEnd="8dp"
+                        android:gravity="bottom">
+                        
+                        <LinearLayout android:id="@+id/container_armor"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical"
+                            android:layout_marginBottom="8dp">
+                            <!-- 4 Armor slots will be added here programmatically -->
+                        </LinearLayout>
+
+                        <FrameLayout android:id="@+id/container_offhand"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content">
+                            <!-- 1 Offhand slot will be added here programmatically -->
+                        </FrameLayout>
+                    </LinearLayout>
+
+                    <!-- Right Column (Main Inventory & Hotbar) -->
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical">
+                        
+                        <GridLayout android:id="@+id/grid_inventory_main"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:columnCount="9"
+                            android:rowCount="3"
+                            android:layout_marginBottom="8dp">
+                            <!-- 27 slots will be added here -->
+                        </GridLayout>
+
+                        <GridLayout android:id="@+id/grid_inventory_hotbar"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:columnCount="9"
+                            android:rowCount="1">
+                            <!-- 9 slots will be added here -->
+                        </GridLayout>
+                    </LinearLayout>
+
+                </LinearLayout>
+            </HorizontalScrollView>
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+
+</LinearLayout>

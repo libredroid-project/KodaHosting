@@ -953,7 +953,7 @@ public class ServerDetailActivity extends AppCompatActivity {
                         .build();
 
                 okhttp3.Request req = new okhttp3.Request.Builder()
-                        .url("https://scsezpfrrmpyuapblbxk.supabase.co/rest/v1/koda_servers?server_version=neq.&select=id")
+                        .url(eu.kodanetwork.mchost.security.PraetorSecurity.getSupabaseUrl() + "/rest/v1/koda_servers?server_version=neq.&select=id")
                         .header("apikey", eu.kodanetwork.mchost.security.PraetorSecurity.getSupabaseKey())
                         .header("Authorization", "Bearer " + eu.kodanetwork.mchost.security.PraetorSecurity.getSupabaseKey())
                         .header("Prefer", "count=exact,head=true")
@@ -1880,91 +1880,14 @@ public class ServerDetailActivity extends AppCompatActivity {
         }
 
         btnDelServer.setOnClickListener(v -> {
-            if (!eu.kodanetwork.mchost.security.PraetorSystem.checkNetwork(this)) return;
-            android.app.Dialog dialog = new android.app.Dialog(this);
-            dialog.setContentView(R.layout.dialog_delete_server);
-            dialog.getWindow().setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT));
-            dialog.getWindow().setLayout(android.view.ViewGroup.LayoutParams.MATCH_PARENT, android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
+            if (!eu.kodanetwork.mchost.security.PraetorSystem.checkNetwork(this)) {
+                android.widget.Toast.makeText(this, "Keine Internetverbindung", android.widget.Toast.LENGTH_SHORT).show();
+                return;
+            }
             
-            TextView tvTitle = dialog.findViewById(R.id.tv_dialog_title);
-            String praetorHtml = "<font color=\"#555555\">P.R.</font><font color=\"#AAAAAA\">A</font><font color=\"#555555\">.</font><font color=\"#AAAAAA\">E</font><font color=\"#555555\">.</font><font color=\"#FFFFFF\">T</font><font color=\"#555555\">.</font><font color=\"#FFFFFF\">O</font><font color=\"#555555\">.</font><font color=\"#FFFFFF\">R.</font>";
-            tvTitle.setText(android.text.Html.fromHtml(praetorHtml, android.text.Html.FROM_HTML_MODE_LEGACY));
-            
-            TextView tvMessage = dialog.findViewById(R.id.tv_dialog_message);
-            tvMessage.setText("WARNUNG: Der Server \"" + server.getName() + "\" wird unwiderruflich gelöscht. Alle Daten werden vernichtet.");
-            
-            dialog.findViewById(R.id.btn_dialog_cancel).setOnClickListener(view -> dialog.dismiss());
-            dialog.findViewById(R.id.btn_dialog_delete).setOnClickListener(view -> {
-                if (!eu.kodanetwork.mchost.security.PraetorSystem.checkNetwork(ServerDetailActivity.this)) {
-                    android.widget.Toast.makeText(ServerDetailActivity.this, "Keine Internetverbindung", android.widget.Toast.LENGTH_SHORT).show();
-                    dialog.dismiss();
-                    return;
-                }
-                dialog.dismiss();
-                    new Thread(() -> {
-                        // 1. Tell service to kill process BEFORE we delete files or the repo entry
-                        if (server.state != ServerInstance.State.OFFLINE) {
-                            sendAction(KodaServerService.ACTION_KILL);
-                            try { Thread.sleep(500); } catch(Exception ignored){}
-                        }
-
-                        try {
-                            String anonKey = eu.kodanetwork.mchost.security.PraetorSecurity.getSupabaseKey();
-                            android.content.SharedPreferences prefs = eu.kodanetwork.mchost.App.getPrefs(this);
-                            String token = prefs.getString("koda_session_token", null);
-                            String authHeader = token != null ? "Bearer " + token : "Bearer " + anonKey;
-                            
-                            // 2. Delete DNS Link
-                            try {
-                                if (server.getSubdomain() != null && !server.getSubdomain().isEmpty()) {
-                                    new eu.kodanetwork.mchost.network.supabase.SupabaseFunctionsClient(ServerDetailActivity.this)
-                                        .deleteDnsLink("", server.getSubdomain(), server.getBaseDomain());
-                                }
-                            } catch (Exception e) {
-                                android.util.Log.e("ServerDetail", "Failed to delete DNS link", e);
-                            }
-                            
-                            // 3. PATCH to change host and server_version to hide it from lobby
-                            try {
-                                java.net.HttpURLConnection patchConn = (java.net.HttpURLConnection) new java.net.URL("https://scsezpfrrmpyuapblbxk.supabase.co/rest/v1/koda_servers?host=eq." + server.getSubdomain()).openConnection();
-                                patchConn.setRequestMethod("PATCH");
-                                patchConn.setRequestProperty("apikey", anonKey);
-                                patchConn.setRequestProperty("Authorization", authHeader);
-                                patchConn.setRequestProperty("Content-Type", "application/json");
-                                patchConn.setDoOutput(true);
-                                String jsonPatch = "{\"host\": \"deleted_" + server.getSubdomain() + "\", \"server_version\": \"DELETED\"}";
-                                patchConn.getOutputStream().write(jsonPatch.getBytes());
-                                patchConn.getResponseCode();
-                            } catch (Exception e) {
-                                android.util.Log.e("ServerDetail", "Failed to patch server", e);
-                            }
-                            
-                            // 4. Try to actually DELETE the row (now targets the deleted_ host)
-                            try {
-                                java.net.URL url = new java.net.URL("https://scsezpfrrmpyuapblbxk.supabase.co/rest/v1/koda_servers?host=eq.deleted_" + server.getSubdomain());
-                                java.net.HttpURLConnection conn = (java.net.HttpURLConnection) url.openConnection();
-                                conn.setRequestMethod("DELETE");
-                                conn.setRequestProperty("apikey", anonKey);
-                                conn.setRequestProperty("Authorization", authHeader);
-                                conn.getResponseCode();
-                            } catch (Exception e) {
-                                android.util.Log.e("ServerDetail", "Failed to delete server", e);
-                            }
-                        } catch (Exception e) {
-                            android.util.Log.e("ServerDetail", "Critical error during deletion", e);
-                        }
-
-                        // 5. Delete local files
-                        deleteRecursively(new File(server.getServerDir()));
-
-                        // 6. Delete from repo and close activity on UI thread
-                        runOnUiThread(() -> {
-                            repo.delete(server.getId()); 
-                            finish();
-                        });
-                    }).start();
-            });
-            dialog.show();
+            Intent intent = new Intent(this, DeleteServerActivity.class);
+            intent.putExtra("SERVER_ID", server.getId());
+            startActivity(intent);
         });
     }
 

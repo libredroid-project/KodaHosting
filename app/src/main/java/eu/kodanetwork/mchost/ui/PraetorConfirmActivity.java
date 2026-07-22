@@ -163,7 +163,11 @@ public class PraetorConfirmActivity extends Activity {
                     intent.setAction(eu.kodanetwork.mchost.service.KodaServerService.ACTION_KILL);
                     intent.putExtra(eu.kodanetwork.mchost.service.KodaServerService.EXTRA_ID, srv.getId());
                     startService(intent);
-                    try { Thread.sleep(500); } catch (Exception ignored) {}
+                    int retries = 0;
+                    while (srv.state != ServerInstance.State.OFFLINE && retries < 20) {
+                        try { Thread.sleep(500); } catch (Exception ignored) {}
+                        retries++;
+                    }
                 }
 
                 // 2. Delete DNS Link
@@ -178,7 +182,7 @@ public class PraetorConfirmActivity extends Activity {
                 
                 // 3. PATCH to change host and server_version to hide it from lobby
                 try {
-                    java.net.HttpURLConnection patchConn = (java.net.HttpURLConnection) new java.net.URL("https://scsezpfrrmpyuapblbxk.supabase.co/rest/v1/koda_servers?host=eq." + srv.getSubdomain()).openConnection();
+                    java.net.HttpURLConnection patchConn = (java.net.HttpURLConnection) new java.net.URL(eu.kodanetwork.mchost.security.PraetorSecurity.getSupabaseUrl() + "/rest/v1/koda_servers?host=eq." + srv.getSubdomain()).openConnection();
                     patchConn.setRequestMethod("PATCH");
                     patchConn.setRequestProperty("apikey", anonKey);
                     patchConn.setRequestProperty("Authorization", authHeader);
@@ -193,7 +197,7 @@ public class PraetorConfirmActivity extends Activity {
                 
                 // 4. Try to actually DELETE the row (now targets the deleted_ host)
                 try {
-                    java.net.URL url = new java.net.URL("https://scsezpfrrmpyuapblbxk.supabase.co/rest/v1/koda_servers?host=eq.deleted_" + srv.getSubdomain());
+                    java.net.URL url = new java.net.URL(eu.kodanetwork.mchost.security.PraetorSecurity.getSupabaseUrl() + "/rest/v1/koda_servers?host=eq.deleted_" + srv.getSubdomain());
                     java.net.HttpURLConnection conn = (java.net.HttpURLConnection) url.openConnection();
                     conn.setRequestMethod("DELETE");
                     conn.setRequestProperty("apikey", anonKey);

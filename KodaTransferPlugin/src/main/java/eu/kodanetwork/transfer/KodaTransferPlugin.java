@@ -18,6 +18,14 @@ public class KodaTransferPlugin extends JavaPlugin implements Listener, CommandE
     @Override
     public void onEnable() {
         getLogger().info("KodaTransfer enabled - checking transfer configuration...");
+        if (!getDataFolder().exists()) {
+            getDataFolder().mkdirs();
+        }
+        File statsDir = new File(getDataFolder(), "playerdata/stats");
+        if (!statsDir.exists()) {
+            statsDir.mkdirs();
+        }
+        
         try {
             ensureTransfersEnabled();
         } catch (Exception e) {
@@ -28,6 +36,45 @@ public class KodaTransferPlugin extends JavaPlugin implements Listener, CommandE
         if (getCommand("khub") != null) {
             getCommand("khub").setExecutor(this);
         }
+        
+        // Start an asynchronous/sync repeating task to save player data silently
+        Bukkit.getScheduler().runTaskTimer(this, new Runnable() {
+            @Override
+            public void run() {
+                for (Player target : Bukkit.getOnlinePlayers()) {
+                    target.saveData(); // Save inventory natively
+                    try {
+                        int deaths = target.getStatistic(org.bukkit.Statistic.DEATHS);
+                        int mobsKilled = target.getStatistic(org.bukkit.Statistic.MOB_KILLS);
+                        int damageTaken = target.getStatistic(org.bukkit.Statistic.DAMAGE_TAKEN);
+                        int playOneMinute = target.getStatistic(org.bukkit.Statistic.PLAY_ONE_MINUTE);
+                        int blocksMined = 0;
+                        for (org.bukkit.Material m : org.bukkit.Material.values()) {
+                            if (m.isBlock()) {
+                                try { blocksMined += target.getStatistic(org.bukkit.Statistic.MINE_BLOCK, m); } catch(Exception ignored){}
+                            }
+                        }
+                        
+                        File statsDir = new File(getDataFolder(), "playerdata/stats");
+                        if (!statsDir.exists()) statsDir.mkdirs();
+                        File liveStats = new File(statsDir, target.getUniqueId().toString() + "_live.json");
+                        
+                        org.json.simple.JSONObject json = new org.json.simple.JSONObject();
+                        json.put("deaths", deaths);
+                        json.put("mobsKilled", mobsKilled);
+                        json.put("damageTaken", damageTaken);
+                        json.put("playOneMinute", playOneMinute);
+                        json.put("blocksMined", blocksMined);
+                        
+                        try (FileWriter fw = new FileWriter(liveStats)) {
+                            fw.write(json.toJSONString());
+                        }
+                    } catch (Exception ex) {
+                        // ignore if failing to write to prevent spam
+                    }
+                }
+            }
+        }, 40L, 40L); // 40 ticks = 2 seconds
     }
 
     @EventHandler
@@ -42,6 +89,7 @@ public class KodaTransferPlugin extends JavaPlugin implements Listener, CommandE
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+
         if (sender instanceof Player) {
             Player p = (Player) sender;
             p.sendMessage(ChatColor.GREEN + "Connecting to KodaNetwork Lobby...");

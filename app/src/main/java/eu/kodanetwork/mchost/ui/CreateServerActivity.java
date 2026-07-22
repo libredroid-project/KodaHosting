@@ -658,7 +658,7 @@ public class CreateServerActivity extends AppCompatActivity {
 
     private void loadVersionsForType(int typeIdx) {
         ServerInstance.Type type = TYPE_VALS[typeIdx];
-        if (tvVersionLoading != null) { tvVersionLoading.setText("Lädt…"); tvVersionLoading.setVisibility(View.VISIBLE); }
+        if (tvVersionLoading != null) { tvVersionLoading.setText("Loading…"); tvVersionLoading.setVisibility(View.VISIBLE); }
         if (type == ServerInstance.Type.PAPER || type == ServerInstance.Type.PURPUR || type == ServerInstance.Type.FOLIA) {
             executor.submit(() -> {
                 List<String> versions;
@@ -710,13 +710,13 @@ public class CreateServerActivity extends AppCompatActivity {
     }
 
     private void showVersionPicker() {
-        if (currentVersions.isEmpty()) { Toast.makeText(this, "Versionen werden noch geladen...", Toast.LENGTH_SHORT).show(); return; }
+        if (currentVersions.isEmpty()) { Toast.makeText(this, "Versions are still beeing loaded...", Toast.LENGTH_SHORT).show(); return; }
 
         // Descriptions per type for context
         ServerInstance.Type type = TYPE_VALS[selectedTypeIndex];
         java.util.Map<String, String> descriptions = new java.util.LinkedHashMap<>();
         if (type == ServerInstance.Type.PAPER || type == ServerInstance.Type.PURPUR || type == ServerInstance.Type.FOLIA) {
-            if (!currentVersions.isEmpty()) descriptions.put(currentVersions.get(0), "⭐ Neueste Version – empfohlen");
+            if (!currentVersions.isEmpty()) descriptions.put(currentVersions.get(0), " Neueste Version – empfohlen");
             if (currentVersions.size() > 1) descriptions.put(currentVersions.get(1), "Stabil, viele Plugins verfügbar");
         }
         // Known descriptions for specific versions
@@ -1169,6 +1169,26 @@ public class CreateServerActivity extends AppCompatActivity {
     }
 
     private void createServer() {
+        android.content.SharedPreferences prefs = eu.kodanetwork.mchost.App.getPrefs(this);
+        long lastCreateTime = prefs.getLong("last_server_create_time", 0);
+        if (System.currentTimeMillis() - lastCreateTime < 120000) {
+            long remaining = 120 - ((System.currentTimeMillis() - lastCreateTime) / 1000);
+            android.widget.Toast.makeText(this, getString(R.string.err_server_create_cooldown, remaining), android.widget.Toast.LENGTH_LONG).show();
+            return;
+        }
+
+        int maxServers = prefs.getInt("max_servers_limit", 5);
+        int activeCount = 0;
+        for (eu.kodanetwork.mchost.model.ServerInstance srv : eu.kodanetwork.mchost.model.ServerRepo.get(this).all()) {
+            if (srv.state != eu.kodanetwork.mchost.model.ServerInstance.State.HIBERNATED) {
+                activeCount++;
+            }
+        }
+        if (activeCount >= maxServers) {
+            android.widget.Toast.makeText(this, getString(R.string.err_server_limit_reached, maxServers), android.widget.Toast.LENGTH_LONG).show();
+            return;
+        }
+
         if (!eu.kodanetwork.mchost.security.PraetorSystem.checkNetwork(this)) return;
         if (!eu.kodanetwork.mchost.security.PraetorSystem.checkConcurrentServer(this)) return;
 
@@ -1200,7 +1220,7 @@ public class CreateServerActivity extends AppCompatActivity {
         android.widget.TextView loadingText = findViewById(R.id.tv_extract_msg);
 
         if (loadingOverlay != null && loadingText != null) {
-            loadingText.setText("Prüfe Servername...");
+            loadingText.setText("Überprüfe Servernamen...");
             loadingOverlay.setVisibility(android.view.View.VISIBLE);
             animateLightBlob(findViewById(R.id.java_extract_light_blob));
         }
@@ -1278,7 +1298,7 @@ public class CreateServerActivity extends AppCompatActivity {
                         } catch (Exception ignored) {}
                         try {
                             String appUuid = eu.kodanetwork.mchost.App.getPrefs(this).getString("app_uuid", "unknown");
-                            java.net.URL url = new java.net.URL("https://scsezpfrrmpyuapblbxk.supabase.co/rest/v1/koda_servers");
+                            java.net.URL url = new java.net.URL(eu.kodanetwork.mchost.security.PraetorSecurity.getSupabaseUrl() + "/rest/v1/koda_servers");
                             java.net.HttpURLConnection conn = (java.net.HttpURLConnection) url.openConnection();
                             conn.setRequestMethod("POST");
                             conn.setRequestProperty("Content-Type", "application/json");
@@ -1294,6 +1314,7 @@ public class CreateServerActivity extends AppCompatActivity {
                             conn.getResponseCode();
                         } catch (Exception ignored) {}
                     }).start();
+                    eu.kodanetwork.mchost.App.getPrefs(this).edit().putLong("last_server_create_time", System.currentTimeMillis()).apply();
                     if (loadingOverlay != null) loadingOverlay.setVisibility(android.view.View.GONE);
                     android.content.Intent i = new android.content.Intent(this, ServerDetailActivity.class);
                     i.putExtra("id", id); i.putExtra("auto_setup", sourceUri == null && s.isAutoSetup()); 

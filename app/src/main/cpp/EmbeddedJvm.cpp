@@ -149,8 +149,13 @@ Java_eu_kodanetwork_mchost_service_IsolatedJvmService_startEmbeddedJvmNative(
         char noNativeNettyGeyser[64] = "-Dorg.cloudburstmc.netty.transport.noNative=true";
         char ipv4Stack[64] = "-Djava.net.preferIPv4Stack=true";
         char noJline[64] = "-Dorg.jline.terminal.jansi=false";
+        
+        char jnaNosys[64] = "-Djna.nosys=true";
+        char jnaNoUnpack[64] = "-Djna.nounpack=true";
+        char jlineFalse[64] = "-Dterminal.jline=false";
+        char ansiTrue[64] = "-Dterminal.ansi=true";
 
-        JavaVMOption options[32];
+        JavaVMOption options[64];
         int optCount = 0;
         options[optCount++].optionString = ramStr;
         options[optCount++].optionString = classPath;
@@ -164,6 +169,11 @@ Java_eu_kodanetwork_mchost_service_IsolatedJvmService_startEmbeddedJvmNative(
         options[optCount++].optionString = noNativeNettyGeyser;
         options[optCount++].optionString = ipv4Stack;
         options[optCount++].optionString = noJline;
+        
+        options[optCount++].optionString = jnaNosys;
+        options[optCount++].optionString = jnaNoUnpack;
+        options[optCount++].optionString = jlineFalse;
+        options[optCount++].optionString = ansiTrue;
         
         options[optCount].optionString = (char*)"exit";
         options[optCount].extraInfo = (void*) jvm_exit_hook;
@@ -237,14 +247,22 @@ Java_eu_kodanetwork_mchost_service_IsolatedJvmService_startEmbeddedJvmNative(
     }
 
     LOGI("Calling main method. The embedded server should now start in this thread!");
+    bool isFabric = strstr(main_class, "fabric") != nullptr || strstr(main_class, "Fabric") != nullptr;
     jclass stringClass = vmEnv->FindClass("java/lang/String");
-    jobjectArray args = vmEnv->NewObjectArray(3, stringClass, nullptr);
-    jstring arg1 = vmEnv->NewStringUTF("--nogui");
-    jstring arg2 = vmEnv->NewStringUTF("--add-plugin");
-    jstring arg3 = vmEnv->NewStringUTF(".sys/koda_core.jar");
-    vmEnv->SetObjectArrayElement(args, 0, arg1);
-    vmEnv->SetObjectArrayElement(args, 1, arg2);
-    vmEnv->SetObjectArrayElement(args, 2, arg3);
+    jobjectArray args;
+    if (isFabric) {
+        args = vmEnv->NewObjectArray(1, stringClass, nullptr);
+        jstring arg1 = vmEnv->NewStringUTF("--nogui");
+        vmEnv->SetObjectArrayElement(args, 0, arg1);
+    } else {
+        args = vmEnv->NewObjectArray(3, stringClass, nullptr);
+        jstring arg1 = vmEnv->NewStringUTF("--nogui");
+        jstring arg2 = vmEnv->NewStringUTF("--add-plugin");
+        jstring arg3 = vmEnv->NewStringUTF(".sys/koda_core.jar");
+        vmEnv->SetObjectArrayElement(args, 0, arg1);
+        vmEnv->SetObjectArrayElement(args, 1, arg2);
+        vmEnv->SetObjectArrayElement(args, 2, arg3);
+    }
     
     vmEnv->CallStaticVoidMethod(mainClass, mainMethod, args);
 

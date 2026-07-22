@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#0A0807">
+    
+    <ImageButton
+        android:id="@+id/btn_close_update"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_gravity="top|end"
+        android:layout_marginTop="24dp"
+        android:layout_marginEnd="24dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:src="@android:drawable/ic_menu_close_clear_cancel"
+        app:tint="#F0F0F0"
+        android:padding="12dp"
+        android:scaleType="fitCenter"/>
+        
+    <View
+        android:id="@+id/update_light_blob"
+        android:layout_width="300dp"
+        android:layout_height="300dp"
+        android:layout_gravity="center"
+        android:background="@drawable/bg_light_blob"/>
+        
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_gravity="center"
+        android:gravity="center">
+        
+        <ProgressBar
+            android:id="@+id/pb_delete"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
+            android:indeterminateTint="#FF2222"/>
+            
+        <TextView
+            android:id="@+id/tv_delete_msg"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:text="@string/delete_server_msg"
+            android:textColor="#F0F0F0"
+            android:textSize="18sp"
+            android:fontFamily="sans-serif-medium"
+            android:textStyle="bold"
+            android:letterSpacing="0.05"
+            android:gravity="center"/>
+            
+        <TextView
+            android:id="@+id/tv_delete_submsg"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text=""
+            android:textColor="#888888"
+            android:textSize="14sp"
+            android:fontFamily="sans-serif"
+            android:gravity="center"/>
+            
+        <Button
+            android:id="@+id/btn_retry_delete"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:text="@string/delete_server_btn_retry"
+            android:visibility="gone"
+            style="@style/KodaButton"/>
+            
+        <LinearLayout
+            android:id="@+id/ll_delete_actions"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginTop="30dp"
+            android:visibility="gone">
+            
+            <Button
+                android:id="@+id/btn_export_delete"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/delete_server_btn_export"
+                style="@style/KodaButton.Outline"
+                android:layout_marginBottom="12dp"
+                android:layout_marginHorizontal="30dp"/>
+                
+            <Button
+                android:id="@+id/btn_permanent_delete"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/delete_server_btn_permanent"
+                style="@style/KodaButton.Danger"
+                android:layout_marginHorizontal="30dp"/>
+        </LinearLayout>
+            
+    </LinearLayout>
+</FrameLayout>

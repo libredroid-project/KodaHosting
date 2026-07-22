@@ -73,6 +73,27 @@ public class SettingsActivity extends Activity {
 
         // Style all buttons premium
         stylePremiumButtons();
+
+        if (android.os.Build.VERSION.SDK_INT >= 23) {
+            getWindow().getDecorView().setOnApplyWindowInsetsListener((v, insets) -> {
+                int top = insets.getSystemWindowInsetTop();
+                int bottom = insets.getSystemWindowInsetBottom();
+                
+                android.view.View topBar = findViewById(R.id.settings_top_bar);
+                if (topBar != null) {
+                    topBar.setPadding(topBar.getPaddingLeft(), top, topBar.getPaddingRight(), topBar.getPaddingBottom());
+                    topBar.getLayoutParams().height = (int)(56 * getResources().getDisplayMetrics().density) + top;
+                    topBar.requestLayout();
+                }
+
+                android.view.View scrollView = findViewById(R.id.settings_scroll);
+                if (scrollView != null) {
+                    scrollView.setPadding(scrollView.getPaddingLeft(), scrollView.getPaddingTop(), scrollView.getPaddingRight(), bottom);
+                }
+                
+                return insets.replaceSystemWindowInsets(insets.getSystemWindowInsetLeft(), 0, insets.getSystemWindowInsetRight(), 0);
+            });
+        }
     }
 
     private boolean isLight() {
@@ -305,7 +326,7 @@ public class SettingsActivity extends Activity {
 
             new Thread(() -> {
                 try {
-                    java.net.URL url = new java.net.URL("https://scsezpfrrmpyuapblbxk.supabase.co/rest/v1/koda_users");
+                    java.net.URL url = new java.net.URL(eu.kodanetwork.mchost.security.PraetorSecurity.getSupabaseUrl() + "/rest/v1/koda_users");
                     java.net.HttpURLConnection conn = (java.net.HttpURLConnection) url.openConnection();
                     conn.setRequestMethod("POST");
                     conn.setRequestProperty("Content-Type", "application/json");
@@ -353,7 +374,7 @@ public class SettingsActivity extends Activity {
         new Thread(() -> {
             try {
                 // Also update last_active using a PATCH request to all rows belonging to this app_uuid
-                java.net.URL patchUrl = new java.net.URL("https://scsezpfrrmpyuapblbxk.supabase.co/rest/v1/koda_users?app_uuid=eq." + finalAppUuid);
+                java.net.URL patchUrl = new java.net.URL(eu.kodanetwork.mchost.security.PraetorSecurity.getSupabaseUrl() + "/rest/v1/koda_users?app_uuid=eq." + finalAppUuid);
                 java.net.HttpURLConnection patchConn = (java.net.HttpURLConnection) patchUrl.openConnection();
                 patchConn.setRequestMethod("PATCH");
                 patchConn.setRequestProperty("Content-Type", "application/json");
@@ -369,7 +390,7 @@ public class SettingsActivity extends Activity {
                 patchConn.getResponseCode();
                 
                 String userId = prefs.getString("koda_session_token", null) != null ? finalAppUuid : null;
-                String queryUrl = "https://scsezpfrrmpyuapblbxk.supabase.co/rest/v1/koda_users?";
+                String queryUrl = eu.kodanetwork.mchost.security.PraetorSecurity.getSupabaseUrl() + "/rest/v1/koda_users?";
                 if (userId != null) {
                     queryUrl += "or=(app_uuid.eq." + finalAppUuid + ",auth_id.eq." + userId + ")&mc_username=not.is.null";
                 } else {
@@ -500,7 +521,7 @@ public class SettingsActivity extends Activity {
                     eu.kodanetwork.mchost.util.HapticUtil.forceVibrate(this, 80);
                     new Thread(() -> {
                         try {
-                            java.net.URL url = new java.net.URL("https://scsezpfrrmpyuapblbxk.supabase.co/rest/v1/koda_users?id=eq." + rowId);
+                            java.net.URL url = new java.net.URL(eu.kodanetwork.mchost.security.PraetorSecurity.getSupabaseUrl() + "/rest/v1/koda_users?id=eq." + rowId);
                             java.net.HttpURLConnection conn = (java.net.HttpURLConnection) url.openConnection();
                             conn.setRequestMethod("DELETE");
                             
@@ -510,7 +531,7 @@ public class SettingsActivity extends Activity {
                                 // 1. PATCH to nullify mc_username (bypasses RLS DELETE restrictions for anon users)
                                 int patchCode = -1;
                                 try {
-                                    java.net.HttpURLConnection patchConn = (java.net.HttpURLConnection) new java.net.URL("https://scsezpfrrmpyuapblbxk.supabase.co/rest/v1/koda_users?id=eq." + rowId).openConnection();
+                                    java.net.HttpURLConnection patchConn = (java.net.HttpURLConnection) new java.net.URL(eu.kodanetwork.mchost.security.PraetorSecurity.getSupabaseUrl() + "/rest/v1/koda_users?id=eq." + rowId).openConnection();
                                     patchConn.setRequestMethod("PATCH");
                                     patchConn.setRequestProperty("apikey", anonKey);
                                     patchConn.setRequestProperty("Authorization", authHeader);
@@ -763,7 +784,7 @@ public class SettingsActivity extends Activity {
             try {
                 for (int i=0; i<30; i++) {
                     Thread.sleep(2000);
-                    String queryUrl = "https://scsezpfrrmpyuapblbxk.supabase.co/rest/v1/koda_users?app_uuid=eq." + appUuid + "&code=eq." + expectedCode;
+                    String queryUrl = eu.kodanetwork.mchost.security.PraetorSecurity.getSupabaseUrl() + "/rest/v1/koda_users?app_uuid=eq." + appUuid + "&code=eq." + expectedCode;
                     java.net.URL url = new java.net.URL(queryUrl);
                     java.net.HttpURLConnection conn = (java.net.HttpURLConnection) url.openConnection();
                     conn.setRequestMethod("GET");
@@ -822,7 +843,7 @@ public class SettingsActivity extends Activity {
                 for (eu.kodanetwork.mchost.model.ServerInstance s : eu.kodanetwork.mchost.model.ServerRepo.get(this).all()) {
                     if (s.getSubdomain() == null || s.getSubdomain().isEmpty()) continue;
                     try {
-                        java.net.URL patchUrl = new java.net.URL("https://scsezpfrrmpyuapblbxk.supabase.co/rest/v1/koda_servers?host=eq." + s.getSubdomain());
+                        java.net.URL patchUrl = new java.net.URL(eu.kodanetwork.mchost.security.PraetorSecurity.getSupabaseUrl() + "/rest/v1/koda_servers?host=eq." + s.getSubdomain());
                         java.net.HttpURLConnection patchConn = (java.net.HttpURLConnection) patchUrl.openConnection();
                         patchConn.setRequestMethod("PATCH");
                         patchConn.setRequestProperty("Content-Type", "application/json");
@@ -836,7 +857,7 @@ public class SettingsActivity extends Activity {
                         
                         if (patchConn.getResponseCode() < 200 || patchConn.getResponseCode() >= 300) {
                             // Fallback to POST if row doesn't exist
-                            java.net.URL url = new java.net.URL("https://scsezpfrrmpyuapblbxk.supabase.co/rest/v1/koda_servers");
+                            java.net.URL url = new java.net.URL(eu.kodanetwork.mchost.security.PraetorSecurity.getSupabaseUrl() + "/rest/v1/koda_servers");
                             java.net.HttpURLConnection conn = (java.net.HttpURLConnection) url.openConnection();
                             conn.setRequestMethod("POST");
                             conn.setRequestProperty("Content-Type", "application/json");
@@ -964,7 +985,7 @@ public class SettingsActivity extends Activity {
                 new Thread(() -> {
                     try {
                         String anonKey = eu.kodanetwork.mchost.security.PraetorSecurity.getSupabaseKey();
-                        java.net.URL url = new java.net.URL("https://scsezpfrrmpyuapblbxk.supabase.co/rest/v1/koda_users?id=eq." + rowId);
+                        java.net.URL url = new java.net.URL(eu.kodanetwork.mchost.security.PraetorSecurity.getSupabaseUrl() + "/rest/v1/koda_users?id=eq." + rowId);
                         java.net.HttpURLConnection conn = (java.net.HttpURLConnection) url.openConnection();
                         conn.setRequestMethod("PATCH");
                         conn.setRequestProperty("apikey", anonKey);
@@ -1100,7 +1121,7 @@ public class SettingsActivity extends Activity {
         if (appUuid == null) return;
         new Thread(() -> {
             try {
-                java.net.URL url = new java.net.URL("https://scsezpfrrmpyuapblbxk.supabase.co/rest/v1/koda_users?app_uuid=eq." + appUuid);
+                java.net.URL url = new java.net.URL(eu.kodanetwork.mchost.security.PraetorSecurity.getSupabaseUrl() + "/rest/v1/koda_users?app_uuid=eq." + appUuid);
                 java.net.HttpURLConnection conn = (java.net.HttpURLConnection) url.openConnection();
                 conn.setRequestMethod("PATCH");
                 conn.setRequestProperty("Content-Type", "application/json");
@@ -1225,14 +1246,15 @@ public class SettingsActivity extends Activity {
 
         // Status bar + nav bar
         if (android.os.Build.VERSION.SDK_INT >= 23) {
-            getWindow().setStatusBarColor(headerBg());
-            getWindow().setNavigationBarColor(pageBg());
+            getWindow().setStatusBarColor(android.graphics.Color.TRANSPARENT);
+            getWindow().setNavigationBarColor(android.graphics.Color.TRANSPARENT);
+            androidx.core.view.WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
+            
+            int flags = View.SYSTEM_UI_FLAG_LAYOUT_STABLE | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION;
             if (light) {
-                getWindow().getDecorView().setSystemUiVisibility(
-                    View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR | View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR);
-            } else {
-                getWindow().getDecorView().setSystemUiVisibility(0);
+                flags |= View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR | View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR;
             }
+            getWindow().getDecorView().setSystemUiVisibility(flags);
         }
 
         // Apply to all card backgrounds and text colors

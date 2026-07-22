@@ -38,6 +38,7 @@ public class LicensesActivity extends AppCompatActivity {
         addLicense(container, "PCRE2", "pcre2.txt");
         addLicense(container, "Fast Reverse Proxy (FRP)", "frp.txt");
         addLicense(container, "Press Start 2P Font", "press_start_2p.txt");
+        addLicense(container, "TAB Plugin", "tab.txt");
     }
 
     private void addLicense(LinearLayout container, String title, String filename) {

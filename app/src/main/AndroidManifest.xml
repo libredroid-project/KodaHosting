@@ -223,6 +223,9 @@
         <activity android:name=".ui.UpdateServerActivity"
             android:screenOrientation="portrait"/>
             
+        <activity android:name=".ui.DeleteServerActivity"
+            android:screenOrientation="portrait"/>
+            
         <activity android:name=".ui.CustomDnsWizardActivity"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustResize"/>

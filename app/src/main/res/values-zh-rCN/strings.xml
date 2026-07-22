@@ -294,4 +294,7 @@
     <string name="tap_to_change">点击更改</string>
     <string name="btn_create_server">创建服务器</string>
     <string name="preparing_java">正在准备Java...</string>
+    <string name="err_server_create_cooldown">请等待 %1$d 秒后再创建新服务器。</string>
+    <string name="err_server_limit_reached">您已达到 %1$d 个活跃服务器的限制。</string>
+    <string name="err_wakeup_limit_reached">达到服务器限制。您最多可以同时运行 %1$d 个活跃服务器。请先休眠另一个服务器。</string>
 </resources>

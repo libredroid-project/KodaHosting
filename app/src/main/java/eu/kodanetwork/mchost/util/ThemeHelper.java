@@ -210,10 +210,17 @@ public class ThemeHelper {
                                 View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR | View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR);
                         }
                     } else {
-                        int darkBg = isCreateServer ? 0xFF1B1613 : DARK_STATUS;
+                        boolean isSettings = activity instanceof eu.kodanetwork.mchost.ui.SettingsActivity;
+                        boolean isServerDetail = activity instanceof eu.kodanetwork.mchost.ui.ServerDetailActivity;
+                        int darkBg = (isCreateServer || isSettings) ? 0xFF1B1613 : DARK_STATUS;
                         activity.getWindow().setStatusBarColor(darkBg);
-                        activity.getWindow().setNavigationBarColor(isCreateServer ? android.graphics.Color.TRANSPARENT : darkBg);
-                        activity.getWindow().getDecorView().setSystemUiVisibility(0);
+                        activity.getWindow().setNavigationBarColor(android.graphics.Color.TRANSPARENT);
+                        if (android.os.Build.VERSION.SDK_INT >= 29) {
+                            activity.getWindow().setNavigationBarContrastEnforced(false);
+                        }
+                        activity.getWindow().getDecorView().setSystemUiVisibility(
+                            View.SYSTEM_UI_FLAG_LAYOUT_STABLE | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                        );
                     }
                 }
             } catch (Throwable t) {

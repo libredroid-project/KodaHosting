@@ -225,7 +225,7 @@
     <string name="cdns_open_settings">%1$s Settings</string>
     <string name="praetor_delete_account_explanation">You are about to permanently delete your KodaHosting account. This action cannot be undone.\n\n• All your servers, worlds, and plugin data will be irrevocably deleted.\n• KodaHosting support cannot restore deleted accounts.\n• Any subdomains registered under your account will be released to the public pool.\n• Your personal data will be purged in compliance with GDPR guidelines.</string>
 
-    <!-- Developer Mode Strings -->
+    
     <string name="dev_options">DEVELOPER OPTIONS</string>
     <string name="dev_liquid_glass">LiquidGlass Overdrive Mode</string>
     <string name="new_database">New Database</string>
@@ -262,4 +262,25 @@
     <string name="tap_to_change">Tap to change</string>
     <string name="btn_create_server">Create Server</string>
     <string name="preparing_java">Preparing Java...</string>
+<string name="pm_heal">Heal</string><string name="pm_feed">Feed</string><string name="pm_starve">Starve</string><string name="pm_kill">Kill</string><string name="pm_wipe">Wipe</string><string name="pm_wipe_title">Wipe Player Data</string><string name="pm_wipe_desc">Are you sure? This will kick the player and delete their inventory and stats.</string><string name="pm_whitelisted">Whitelisted</string><string name="pm_inventory">Inventory</string><string name="pm_deaths">Deaths:</string><string name="pm_blocks_mined">Blocks Mined:</string><string name="pm_hours_played">Hours Played:</string><string name="pm_mobs_killed">Mobs Killed:</string><string name="pm_damage_taken">Damage Taken:</string><string name="pm_online">(Online)</string><string name="pm_offline">(Offline)</string><string name="pm_wiped_toast">Player data wiped</string><string name="pm_action_toast">Executed action on player</string>
+    <string name="err_server_create_cooldown">Please wait %1$d seconds before creating a new server.</string>
+    <string name="err_server_limit_reached">You have reached the limit of %1$d active servers.</string>
+    <string name="err_wakeup_limit_reached">Server limit reached. You can run a maximum of %1$d active servers simultaneously. Please hibernate another server first.</string>
+    <string name="delete_server_msg">Deleting Server...</string>
+    <string name="delete_server_stopping">Stopping Server...</string>
+    <string name="delete_server_stopping_sub">Waiting for server to go offline.</string>
+    <string name="delete_server_dns">Deleting DNS Record...</string>
+    <string name="delete_server_dns_sub">Contacting IONOS API</string>
+    <string name="delete_server_db">Updating Database...</string>
+    <string name="delete_server_db_sub">Marking as deleted</string>
+    <string name="delete_server_db_failed">Database Error</string>
+    <string name="delete_server_exporting">Exporting Server...</string>
+    <string name="delete_server_exporting_sub">Zipping files, this may take a while</string>
+    <string name="delete_server_cleaning">Cleaning up...</string>
+    <string name="delete_server_cleaning_sub">Deleting local files</string>
+    <string name="delete_server_permanent">Deleting Server...</string>
+    <string name="delete_server_permanent_sub">Removing local files</string>
+    <string name="delete_server_btn_retry">Retry</string>
+    <string name="delete_server_btn_export">Export &amp; Delete (ZIP)</string>
+    <string name="delete_server_btn_permanent">Delete Permanently</string>
 </resources>

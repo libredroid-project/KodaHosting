@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="@drawable/bg_rounded_card"
+    android:padding="16dp">
+
+    <TextView
+        android:id="@+id/tv_shulker_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Shulker Box"
+        android:textColor="#FFFFFF"
+        android:textSize="18sp"
+        android:fontFamily="sans-serif-medium"
+        android:layout_marginBottom="12dp"
+        android:layout_gravity="center_horizontal" />
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="#C6C6C6"
+        android:padding="8dp">
+
+        <GridLayout
+            android:id="@+id/grid_shulker_inventory"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:columnCount="9"
+            android:rowCount="3" />
+            
+    </LinearLayout>
+    
+</LinearLayout>

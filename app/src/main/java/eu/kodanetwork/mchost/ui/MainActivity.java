@@ -548,7 +548,7 @@ public class MainActivity extends AppCompatActivity {
                 for (ServerInstance srv : list) {
                     if (srv.state == ServerInstance.State.OFFLINE && srv.getSubdomain() != null && !srv.getSubdomain().isEmpty()) {
                         okhttp3.Request request = new okhttp3.Request.Builder()
-                            .url("https://scsezpfrrmpyuapblbxk.supabase.co/rest/v1/koda_servers?host=eq." + srv.getSubdomain() + "&select=server_version")
+                            .url(eu.kodanetwork.mchost.security.PraetorSecurity.getSupabaseUrl() + "/rest/v1/koda_servers?host=eq." + srv.getSubdomain() + "&select=server_version")
                             .get()
                             .addHeader("apikey", eu.kodanetwork.mchost.security.PraetorSecurity.getSupabaseKey())
                             .addHeader("Authorization", "Bearer " + eu.kodanetwork.mchost.security.PraetorSecurity.getSupabaseKey())
