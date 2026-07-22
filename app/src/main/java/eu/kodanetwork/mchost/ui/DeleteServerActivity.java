@@ -264,6 +264,8 @@ public class DeleteServerActivity extends AppCompatActivity {
         }).start();
     }
     
+    private long lastUpdate = 0;
+    
     private void deleteRecursively(File fileOrDirectory) {
         if (fileOrDirectory.isDirectory()) {
             File[] children = fileOrDirectory.listFiles();
@@ -273,6 +275,21 @@ public class DeleteServerActivity extends AppCompatActivity {
                 }
             }
         }
+        
+        long now = System.currentTimeMillis();
+        if (now - lastUpdate > 30) {
+            lastUpdate = now;
+            final String fileName = fileOrDirectory.getName();
+            handler.post(() -> {
+                if (tvSubMsg != null) {
+                    tvSubMsg.setText("..." + fileName);
+                }
+            });
+            try {
+                Thread.sleep(5);
+            } catch (InterruptedException ignored) {}
+        }
+        
         fileOrDirectory.delete();
     }
 }
