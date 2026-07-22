@@ -1833,41 +1833,64 @@ public class ServerDetailActivity extends AppCompatActivity {
         }
 
         btnDelServer.setOnClickListener(v -> {
-            if (!eu.kodanetwork.mchost.security.PraetorSystem.checkNetwork(this)) {
-                android.widget.Toast.makeText(this, getString(R.string.sd_toast_no_internet), android.widget.Toast.LENGTH_SHORT).show();
-                return;
+            android.app.Dialog dialog = new android.app.Dialog(this);
+            dialog.requestWindowFeature(android.view.Window.FEATURE_NO_TITLE);
+            dialog.setContentView(R.layout.dialog_praetor_delete);
+            dialog.setCancelable(false);
+            if (dialog.getWindow() != null) {
+                dialog.getWindow().setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT));
+                dialog.getWindow().setLayout(android.view.ViewGroup.LayoutParams.MATCH_PARENT, android.view.ViewGroup.LayoutParams.MATCH_PARENT);
             }
 
-            android.app.AlertDialog dialog = new android.app.AlertDialog.Builder(this)
-                .setTitle("\"" + server.getName() + "\" löschen?")
-                .setMessage("Achtung: Dieser Vorgang wird den Server löschen. Bitte warte...")
-                .setPositiveButton("Löschen (10)", null)
-                .setNegativeButton(getString(R.string.sd_eula_decline), null)
-                .setCancelable(false)
-                .show();
+            android.widget.TextView tvTitle = dialog.findViewById(R.id.tv_dialog_title);
+            android.widget.TextView tvBody = dialog.findViewById(R.id.tv_delete_body);
+            android.widget.Button btnPos = dialog.findViewById(R.id.btn_dialog_delete);
+            android.widget.Button btnNeg = dialog.findViewById(R.id.btn_dialog_cancel);
 
-            android.widget.Button btnPos = dialog.getButton(android.app.AlertDialog.BUTTON_POSITIVE);
+            tvTitle.setText(getString(R.string.sd_delete_dialog_title));
+            tvBody.setText(getString(R.string.sd_delete_dialog_msg));
             btnPos.setEnabled(false);
 
-            new android.os.CountDownTimer(10000, 1000) {
+            android.os.CountDownTimer timer = new android.os.CountDownTimer(10000, 1000) {
                 @Override
                 public void onTick(long millisUntilFinished) {
-                    btnPos.setText("Löschen (" + (millisUntilFinished / 1000) + "s)");
+                    btnPos.setText(String.format(getString(R.string.sd_delete_btn_waiting), (millisUntilFinished / 1000)));
                 }
 
                 @Override
                 public void onFinish() {
-                    btnPos.setText("LÖSCHEN");
+                    btnPos.setText(getString(R.string.sd_delete_btn_ready));
                     btnPos.setEnabled(true);
                 }
-            }.start();
+            };
+            timer.start();
+
+            btnNeg.setOnClickListener(v2 -> {
+                timer.cancel();
+                dialog.dismiss();
+            });
 
             btnPos.setOnClickListener(v2 -> {
-                dialog.dismiss();
-                Intent intent = new Intent(this, DeleteServerActivity.class);
-                intent.putExtra("SERVER_ID", server.getId());
-                startActivity(intent);
+                btnPos.setEnabled(false);
+                btnPos.setText("...");
+                new Thread(() -> {
+                    boolean hasNet = eu.kodanetwork.mchost.security.PraetorSystem.checkNetwork(ServerDetailActivity.this);
+                    runOnUiThread(() -> {
+                        if (hasNet) {
+                            dialog.dismiss();
+                            Intent intent = new Intent(ServerDetailActivity.this, DeleteServerActivity.class);
+                            intent.putExtra("SERVER_ID", server.getId());
+                            startActivity(intent);
+                        } else {
+                            btnPos.setEnabled(true);
+                            btnPos.setText(getString(R.string.sd_delete_btn_ready));
+                            android.widget.Toast.makeText(ServerDetailActivity.this, getString(R.string.sd_toast_no_internet), android.widget.Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                }).start();
             });
+
+            dialog.show();
         });
     }
 

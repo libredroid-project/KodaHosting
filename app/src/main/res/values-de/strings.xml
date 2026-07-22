@@ -365,4 +365,8 @@
     <string name="sd_eula_accept">AKZEPTIEREN</string>
     <string name="sd_eula_decline">ABLEHNEN</string>
     <string name="sd_eula_body">Durch das Starten dieses Minecraft-Servers akzeptierst du die Mojang/Microsoft EULA.\n\nDies beinhaltet:\n• Du darfst keinen Zugang zu Gameplay-Features verkaufen\n• Du darfst keine Minecraft-Inhalte umverteilen\n• Server müssen den EULA-Richtlinien entsprechen\n\nVollständige EULA:\nhttps://aka.ms/MinecraftEULA</string>
+    <string name="sd_delete_dialog_title">Server löschen?</string>
+    <string name="sd_delete_dialog_msg">Achtung: Dieser Vorgang wird den Server permanent löschen. Bitte warte...</string>
+    <string name="sd_delete_btn_waiting">Löschen (%ds)</string>
+    <string name="sd_delete_btn_ready">LÖSCHEN</string>
 </resources>

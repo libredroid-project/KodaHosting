@@ -380,4 +380,8 @@
     <string name="sd_eula_accept">接受</string>
     <string name="sd_eula_decline">拒绝</string>
     <string name="sd_eula_body">启动此 Minecraft 服务器即表示您接受 Mojang/Microsoft 最终用户许可协议。\n\n这包括：\n• 您不得出售游戏功能的使用权\n• 您不得重新分发 Minecraft 内容\n• 服务器必须遵守 EULA 准则\n\n完整 EULA：\nhttps://aka.ms/MinecraftEULA</string>
+    <string name="sd_delete_dialog_title">删除服务器？</string>
+    <string name="sd_delete_dialog_msg">警告：此操作将永久删除服务器。请稍候...</string>
+    <string name="sd_delete_btn_waiting">删除 (%ds)</string>
+    <string name="sd_delete_btn_ready">删除</string>
 </resources>
