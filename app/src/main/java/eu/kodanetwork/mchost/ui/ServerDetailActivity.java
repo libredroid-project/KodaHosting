@@ -178,7 +178,7 @@ public class ServerDetailActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         
         // Prevent screenshots & screen recording
-        getWindow().setFlags(android.view.WindowManager.LayoutParams.FLAG_SECURE, android.view.WindowManager.LayoutParams.FLAG_SECURE);
+        // Screen protection removed
 
         setContentView(R.layout.activity_server_detail);
         
@@ -1837,10 +1837,37 @@ public class ServerDetailActivity extends AppCompatActivity {
                 android.widget.Toast.makeText(this, getString(R.string.sd_toast_no_internet), android.widget.Toast.LENGTH_SHORT).show();
                 return;
             }
-            
-            Intent intent = new Intent(this, DeleteServerActivity.class);
-            intent.putExtra("SERVER_ID", server.getId());
-            startActivity(intent);
+
+            android.app.AlertDialog dialog = new android.app.AlertDialog.Builder(this)
+                .setTitle("\"" + server.getName() + "\" löschen?")
+                .setMessage("Achtung: Dieser Vorgang wird den Server löschen. Bitte warte...")
+                .setPositiveButton("Löschen (10)", null)
+                .setNegativeButton(getString(R.string.sd_eula_decline), null)
+                .setCancelable(false)
+                .show();
+
+            android.widget.Button btnPos = dialog.getButton(android.app.AlertDialog.BUTTON_POSITIVE);
+            btnPos.setEnabled(false);
+
+            new android.os.CountDownTimer(10000, 1000) {
+                @Override
+                public void onTick(long millisUntilFinished) {
+                    btnPos.setText("Löschen (" + (millisUntilFinished / 1000) + "s)");
+                }
+
+                @Override
+                public void onFinish() {
+                    btnPos.setText("LÖSCHEN");
+                    btnPos.setEnabled(true);
+                }
+            }.start();
+
+            btnPos.setOnClickListener(v2 -> {
+                dialog.dismiss();
+                Intent intent = new Intent(this, DeleteServerActivity.class);
+                intent.putExtra("SERVER_ID", server.getId());
+                startActivity(intent);
+            });
         });
     }
 

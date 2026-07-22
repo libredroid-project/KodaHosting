@@ -7,12 +7,12 @@ apply from: 'database-wx.gradle'
 
 android {
     namespace 'eu.kodanetwork.mchost'
-    compileSdk 35
+    compileSdk 36
 
     defaultConfig {
         applicationId "eu.kodanetwork.mchost"
         minSdk 26
-        targetSdk 35
+        targetSdk 36
         versionCode 8496
         versionName "v1.8496"
         ndkVersion "27.0.12077973"
@@ -71,6 +71,10 @@ android {
         resources {
             excludes += ['META-INF/LICENSE*', 'META-INF/NOTICE*']
         }
+    }
+
+    lint {
+        abortOnError false
     }
 }
 

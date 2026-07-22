@@ -15,7 +15,7 @@ public class DebugWarningActivity extends AppCompatActivity {
 
         // Keep it secure and fullscreen
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
-        getWindow().setFlags(WindowManager.LayoutParams.FLAG_SECURE, WindowManager.LayoutParams.FLAG_SECURE);
+        // Screen protection removed
 
         setContentView(R.layout.activity_debug_warning);
 

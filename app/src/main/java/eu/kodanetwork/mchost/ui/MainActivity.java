@@ -83,7 +83,7 @@ public class MainActivity extends AppCompatActivity {
         }
         
         // Prevent screenshots & screen recording
-        getWindow().setFlags(android.view.WindowManager.LayoutParams.FLAG_SECURE, android.view.WindowManager.LayoutParams.FLAG_SECURE);
+        // Screen protection removed
 
         // Initialize Google Play Integrity API check
         eu.kodanetwork.mchost.security.KodaIntegrityHelper.checkIntegrity(this);
