@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#A6000000"
+    android:gravity="center"
+    android:padding="16dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_margin="8dp"
+        android:background="@drawable/bg_dialog_custom"
+        android:padding="24dp"
+        android:gravity="center">
+
+        <!-- Title -->
+        <TextView
+            android:id="@+id/tv_dialog_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/sd_eula_title"
+            android:textColor="#FFFFFF"
+            android:textSize="28sp"
+            android:textStyle="bold"
+            android:letterSpacing="0.05"
+            android:gravity="center" />
+
+        <View
+            android:layout_width="40dp"
+            android:layout_height="2dp"
+            android:background="#55FF55"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="16dp" />
+
+        <!-- EULA Text (Scrollable) -->
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:layout_marginTop="20dp"
+            android:layout_marginBottom="24dp"
+            android:scrollbars="vertical">
+            
+            <TextView
+                android:id="@+id/tv_eula_body"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/sd_eula_body"
+                android:textColor="#F0F0F0"
+                android:textSize="14sp"
+                android:lineSpacingExtra="4dp" />
+        </ScrollView>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_dialog_accept"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                style="@style/KodaButton"
+                android:text="@string/sd_eula_accept"
+                android:stateListAnimator="@null"
+                android:layout_marginBottom="8dp" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_dialog_decline"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                style="@style/KodaButton.Outline"
+                android:text="@string/sd_eula_decline"
+                android:stateListAnimator="@null" />
+        </LinearLayout>
+    </LinearLayout>
+</LinearLayout>

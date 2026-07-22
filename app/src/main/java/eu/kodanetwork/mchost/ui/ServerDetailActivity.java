@@ -109,10 +109,10 @@ public class ServerDetailActivity extends AppCompatActivity {
                         }
                         android.widget.ImageView iv = findViewById(R.id.iv_server_icon);
                         if (iv != null) iv.setImageBitmap(scaled);
-                        Toast.makeText(this, "Server Icon aktualisiert", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(this, getString(R.string.sd_toast_icon_updated), Toast.LENGTH_SHORT).show();
                     }
                 } catch (Exception e) {
-                    Toast.makeText(this, "Fehler beim Laden des Bildes: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                    Toast.makeText(this, getString(R.string.sd_toast_error_loading_image) + e.getMessage(), Toast.LENGTH_LONG).show();
                 }
             }
         });
@@ -131,7 +131,7 @@ public class ServerDetailActivity extends AppCompatActivity {
                         if (s == ServerInstance.State.CRASHED || s == ServerInstance.State.ONLINE || s == ServerInstance.State.OFFLINE) {
                             layoutFullLoading.setVisibility(View.GONE);
                         } else if (s == ServerInstance.State.STARTING && layoutFullLoading.getVisibility() == View.VISIBLE) {
-                            if (tvFullLoadingMsg != null) tvFullLoadingMsg.setText("STARTING SERVER...");
+                            if (tvFullLoadingMsg != null) tvFullLoadingMsg.setText(getString(R.string.sd_starting_server));
                         }
                     }
                     updateDash();
@@ -243,7 +243,7 @@ public class ServerDetailActivity extends AppCompatActivity {
             getIntent().removeExtra("auto_setup");
             if (layoutFullLoading != null) {
                 layoutFullLoading.setVisibility(View.VISIBLE);
-                if (tvFullLoadingMsg != null) tvFullLoadingMsg.setText("AUTO-SETUP RUNNING...");
+                if (tvFullLoadingMsg != null) tvFullLoadingMsg.setText(getString(R.string.sd_auto_setup_running));
             }
             server.state = ServerInstance.State.SETTING_UP;
             repo.update(server);
@@ -322,7 +322,7 @@ public class ServerDetailActivity extends AppCompatActivity {
         if (btnImportFile != null) {
             btnImportFile.setOnClickListener(v -> {
                 new AlertDialog.Builder(this)
-                    .setTitle("Import...")
+                    .setTitle(getString(R.string.sd_dialog_import_title))
                     .setItems(new String[]{"File(s)", "Folder"}, (d, w) -> {
                         if (w == 0) {
                             Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
@@ -749,7 +749,7 @@ public class ServerDetailActivity extends AppCompatActivity {
         btnRestart.setOnClickListener(v -> sendAction(KodaServerService.ACTION_RESTART));
         btnKill   .setOnClickListener(v ->
             new AlertDialog.Builder(this)
-                .setTitle("Force Kill?")
+                .setTitle(getString(R.string.sd_dialog_force_kill_title))
                 .setMessage("Welt-Daten werden möglicherweise nicht gespeichert. Fortfahren?")
                 .setPositiveButton("Kill", (d, w) -> sendAction(KodaServerService.ACTION_KILL))
                 .setNegativeButton("Abbrechen", null)
@@ -765,77 +765,30 @@ public class ServerDetailActivity extends AppCompatActivity {
 
         if (layoutFullLoading != null) layoutFullLoading.setVisibility(View.GONE);
 
-        LinearLayout root = new LinearLayout(this);
-        root.setOrientation(LinearLayout.VERTICAL);
-        root.setBackgroundColor(0xFF0A0A0F);
-        root.setPadding(60, 60, 60, 40);
+        android.app.Dialog dialog = new android.app.Dialog(this, android.R.style.Theme_Translucent_NoTitleBar_Fullscreen);
+        dialog.setContentView(R.layout.dialog_praetor_eula);
+        dialog.setCancelable(true);
 
-        TextView tvTitle = new TextView(this);
-        tvTitle.setText(R.string.eula_title);
-        tvTitle.setTextColor(0xFFFFFFFF);
-        tvTitle.setTextSize(20);
-        tvTitle.setTypeface(android.graphics.Typeface.DEFAULT_BOLD);
-        tvTitle.setGravity(android.view.Gravity.CENTER);
-        tvTitle.setLetterSpacing(0.1f);
-        root.addView(tvTitle);
-
-        View divider = new View(this);
-        divider.setBackgroundColor(0xFF333333);
-        divider.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 2));
-        LinearLayout.LayoutParams divLp = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 2);
-        divLp.topMargin = 24; divLp.bottomMargin = 24;
-        divider.setLayoutParams(divLp);
-        root.addView(divider);
-
-        TextView tvBody = new TextView(this);
-        tvBody.setText("Durch das Starten dieses Minecraft-Servers akzeptierst du die Mojang/Microsoft EULA.\n\n" +
-            "Dies beinhaltet:\n" +
-            "• Du darfst keinen Zugang zu Gameplay-Features verkaufen\n" +
-            "• Du darfst keine Minecraft-Inhalte umverteilen\n" +
-            "• Server müssen den EULA-Richtlinien entsprechen\n\n" +
-            "Vollständige EULA:\nhttps://aka.ms/MinecraftEULA");
-        tvBody.setTextColor(0xFFCCCCDD);
-        tvBody.setTextSize(14);
-        tvBody.setLineSpacing(6, 1);
-        root.addView(tvBody);
-
-        androidx.appcompat.app.AlertDialog dialog = new androidx.appcompat.app.AlertDialog.Builder(this)
-            .setView(root)
-            .setCancelable(true)
-            .create();
-
-        LinearLayout btnRow = new LinearLayout(this);
-        btnRow.setOrientation(LinearLayout.HORIZONTAL);
-        btnRow.setGravity(android.view.Gravity.CENTER);
-        LinearLayout.LayoutParams rowLp = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-        rowLp.topMargin = 40;
-        btnRow.setLayoutParams(rowLp);
-
-        com.google.android.material.button.MaterialButton btnDecline = new com.google.android.material.button.MaterialButton(this);
-        btnDecline.setText(R.string.eula_decline);
-        btnDecline.setTextColor(0xFFFFFFFF);
-        btnDecline.setBackgroundColor(0xFFE53935);
-        btnDecline.setOnClickListener(v -> dialog.dismiss());
-        btnRow.addView(btnDecline, new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1));
-
-        com.google.android.material.button.MaterialButton btnAccept = new com.google.android.material.button.MaterialButton(this);
-        btnAccept.setText(R.string.eula_accept);
-        btnAccept.setTextColor(0xFF000000);
-        btnAccept.setBackgroundColor(0xFFFF6B00);
-        btnAccept.setOnClickListener(v -> {
-            prefs.edit().putBoolean("eula_" + server.getId(), true).apply();
-            dialog.dismiss();
-            checkQueueAndStart();
-        });
-        LinearLayout.LayoutParams accLp = new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1);
-        accLp.setMarginStart(16);
-        btnRow.addView(btnAccept, accLp);
-
-        root.addView(btnRow);
-
-        if (dialog.getWindow() != null) {
-            dialog.getWindow().setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(0xFF0A0A0F));
+        android.widget.TextView tvTitle = dialog.findViewById(R.id.tv_dialog_title);
+        if (tvTitle != null) {
+            String mcHtml = "<font color=\"#55FF55\">Minecraft</font> <font color=\"#AAAAAA\">EULA</font>";
+            tvTitle.setText(android.text.Html.fromHtml(mcHtml, android.text.Html.FROM_HTML_MODE_LEGACY));
         }
+
+        com.google.android.material.button.MaterialButton btnDecline = dialog.findViewById(R.id.btn_dialog_decline);
+        if (btnDecline != null) {
+            btnDecline.setOnClickListener(v -> dialog.dismiss());
+        }
+
+        com.google.android.material.button.MaterialButton btnAccept = dialog.findViewById(R.id.btn_dialog_accept);
+        if (btnAccept != null) {
+            btnAccept.setOnClickListener(v -> {
+                prefs.edit().putBoolean("eula_" + server.getId(), true).apply();
+                dialog.dismiss();
+                checkQueueAndStart();
+            });
+        }
+
         dialog.show();
     }
 
@@ -905,7 +858,7 @@ public class ServerDetailActivity extends AppCompatActivity {
             
             if (hasUpdates) {
                 runOnUiThread(() -> {
-                    btnUpdate.setText("Updates Available!");
+                    btnUpdate.setText(getString(R.string.sd_updates_available));
                     btnUpdate.setTextColor(android.graphics.Color.parseColor("#00E676"));
                     
                     android.view.View btnDashUpdate = findViewById(R.id.btn_dashboard_update);
@@ -920,7 +873,7 @@ public class ServerDetailActivity extends AppCompatActivity {
                 });
             } else {
                 runOnUiThread(() -> {
-                    btnUpdate.setText("Check for Updates");
+                    btnUpdate.setText(getString(R.string.sd_check_updates));
                     btnUpdate.setTextColor(eu.kodanetwork.mchost.util.ThemeHelper.isLightMode(this) ? 0xFF333333 : 0xFFDDDDDD);
                     
                     android.view.View btnDashUpdate = findViewById(R.id.btn_dashboard_update);
@@ -999,7 +952,7 @@ public class ServerDetailActivity extends AppCompatActivity {
         if (server.state == ServerInstance.State.OFFLINE || server.state == ServerInstance.State.SETTING_UP) {
             if (layoutFullLoading != null) {
                 layoutFullLoading.setVisibility(View.VISIBLE);
-                if (tvFullLoadingMsg != null) tvFullLoadingMsg.setText("AUTO-SETUP RUNNING...");
+                if (tvFullLoadingMsg != null) tvFullLoadingMsg.setText(getString(R.string.sd_auto_setup_running));
             }
             server.state = ServerInstance.State.SETTING_UP;
             repo.update(server);
@@ -1116,14 +1069,14 @@ public class ServerDetailActivity extends AppCompatActivity {
                         eu.kodanetwork.mchost.utils.HibernationManager.wakeUpServer(this, server, repo);
                         runOnUiThread(() -> {
                             updateDash();
-                            android.widget.Toast.makeText(this, "Server aufgeweckt!", android.widget.Toast.LENGTH_SHORT).show();
+                            android.widget.Toast.makeText(this, getString(R.string.sd_toast_server_woken), android.widget.Toast.LENGTH_SHORT).show();
                         });
                     } catch (Exception ex2) {
-                        runOnUiThread(() -> android.widget.Toast.makeText(this, "Fehler: " + ex2.getMessage(), android.widget.Toast.LENGTH_LONG).show());
+                        runOnUiThread(() -> android.widget.Toast.makeText(this, getString(R.string.sd_toast_error_prefix) + ex2.getMessage(), android.widget.Toast.LENGTH_LONG).show());
                     }
                 }).start();
             } else {
-                android.widget.Toast.makeText(this, "Ungültige Adresse!", android.widget.Toast.LENGTH_SHORT).show();
+                android.widget.Toast.makeText(this, getString(R.string.sd_toast_invalid_address), android.widget.Toast.LENGTH_SHORT).show();
             }
         });
         dialog.show();
@@ -1194,7 +1147,7 @@ public class ServerDetailActivity extends AppCompatActivity {
                     
                     long lastChange = eu.kodanetwork.mchost.App.getPrefs(this).getLong("last_join_change_" + server.getId(), 0);
                     if (System.currentTimeMillis() - lastChange < 24 * 60 * 60 * 1000L) {
-                        android.widget.Toast.makeText(this, "Du kannst die Join-Adresse nur einmal alle 24 Stunden ändern.", android.widget.Toast.LENGTH_LONG).show();
+                        android.widget.Toast.makeText(this, getString(R.string.sd_toast_subdomain_limit), android.widget.Toast.LENGTH_LONG).show();
                         return;
                     }
                     
@@ -1203,9 +1156,9 @@ public class ServerDetailActivity extends AppCompatActivity {
                     dialog.getWindow().setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT));
                     dialog.getWindow().setLayout(android.view.ViewGroup.LayoutParams.MATCH_PARENT, android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
                     
-                    ((android.widget.TextView) dialog.findViewById(R.id.tv_dialog_title)).setText("JOIN ADRESSE");
-                    ((android.widget.TextView) dialog.findViewById(R.id.tv_dialog_subtitle)).setText("CHANGE SUBDOMAIN");
-                    ((android.widget.TextView) dialog.findViewById(R.id.tv_dialog_message)).setText("Gib eine neue Join-Adresse ein (nur Buchstaben, Zahlen und Bindestriche).");
+                    ((android.widget.TextView) dialog.findViewById(R.id.tv_dialog_title)).setText(getString(R.string.sd_join_address));
+                    ((android.widget.TextView) dialog.findViewById(R.id.tv_dialog_subtitle)).setText(getString(R.string.sd_change_subdomain));
+                    ((android.widget.TextView) dialog.findViewById(R.id.tv_dialog_message)).setText(getString(R.string.sd_change_subdomain_hint));
                     
                     android.widget.EditText input = dialog.findViewById(R.id.et_dialog_input);
                     input.setHint("Neuer Name (z.B. meincoolerserver)");
@@ -1223,10 +1176,10 @@ public class ServerDetailActivity extends AppCompatActivity {
                             repo.update(server);
                             updateJoinAddressDisplay();
                             eu.kodanetwork.mchost.App.getPrefs(this).edit().putLong("last_join_change_" + server.getId(), System.currentTimeMillis()).apply();
-                            android.widget.Toast.makeText(this, "Join-Adresse aktualisiert! (Wird beim nächsten Aufwecken registriert)", android.widget.Toast.LENGTH_LONG).show();
+                            android.widget.Toast.makeText(this, getString(R.string.sd_toast_subdomain_updated_next_boot), android.widget.Toast.LENGTH_LONG).show();
                             dialog.dismiss();
                         } else {
-                            android.widget.Toast.makeText(this, "Ungültige Adresse!", android.widget.Toast.LENGTH_SHORT).show();
+                            android.widget.Toast.makeText(this, getString(R.string.sd_toast_invalid_address), android.widget.Toast.LENGTH_SHORT).show();
                         }
                     });
                     dialog.show();
@@ -1288,7 +1241,7 @@ public class ServerDetailActivity extends AppCompatActivity {
             android.content.ClipboardManager clipboard = (android.content.ClipboardManager) getSystemService(android.content.Context.CLIPBOARD_SERVICE);
             android.content.ClipData clip = android.content.ClipData.newPlainText("Server Log", tvLog.getText().toString());
             clipboard.setPrimaryClip(clip);
-            Toast.makeText(this, "Log kopiert!", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getString(R.string.sd_toast_log_copied), Toast.LENGTH_SHORT).show();
         });
         etCmd.setOnEditorActionListener((v, id, e) -> {
             if (id == EditorInfo.IME_ACTION_SEND ||
@@ -1400,7 +1353,7 @@ public class ServerDetailActivity extends AppCompatActivity {
 
         android.widget.Button btn = new android.widget.Button(this);
         if (!overrideFile.exists()) {
-            btn.setText("UNLOCK MANUAL EDITING (PRAETOR)");
+            btn.setText(getString(R.string.sd_unlock_manual_editing));
             btn.setTextColor(0xFFFFFFFF);
             btn.setBackgroundColor(0xFFFF4444);
             btn.setOnClickListener(v -> {
@@ -1409,12 +1362,12 @@ public class ServerDetailActivity extends AppCompatActivity {
                 startActivityForResult(i, 9001); // 9001 = Praetor Override
             });
         } else {
-            btn.setText("RESTORE AUTO-CONFIG");
+            btn.setText(getString(R.string.sd_restore_auto_config));
             btn.setTextColor(0xFF000000);
             btn.setBackgroundColor(0xFF00E676);
             btn.setOnClickListener(v -> {
                 overrideFile.delete();
-                Toast.makeText(this, "Auto-Config restored.", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, getString(R.string.sd_toast_auto_config_restored), Toast.LENGTH_SHORT).show();
                 refreshFiles();
             });
         }
@@ -1487,7 +1440,7 @@ public class ServerDetailActivity extends AppCompatActivity {
                 } else {
                     File overrideFile = getProtectedOverrideFile(file);
                     if (overrideFile != null && !overrideFile.exists()) {
-                        Toast.makeText(this, "Manual editing locked! Click 'Unlock Manual Editing' at the top of the plugin folder.", Toast.LENGTH_LONG).show();
+                        Toast.makeText(this, getString(R.string.sd_toast_manual_locked), Toast.LENGTH_LONG).show();
                     } else {
                         openFileEditor(file);
                     }
@@ -1499,7 +1452,7 @@ public class ServerDetailActivity extends AppCompatActivity {
                 if (text.startsWith("..")) {
                     if (clipFile != null) {
                         new AlertDialog.Builder(this)
-                            .setTitle("Aktion: Einfügen")
+                            .setTitle(getString(R.string.sd_dialog_paste_action))
                             .setPositiveButton("Einfügen (" + clipFile.getName() + ")", (d, w) -> {
                                 try {
                                     File dest = new File(currentDir, clipFile.getName());
@@ -1515,7 +1468,7 @@ public class ServerDetailActivity extends AppCompatActivity {
                                         }
                                     }
                                     refreshFiles();
-                                } catch (Exception e) { Toast.makeText(this, "Fehler: " + e.getMessage(), Toast.LENGTH_SHORT).show(); }
+                                } catch (Exception e) { Toast.makeText(this, getString(R.string.sd_toast_error_prefix) + e.getMessage(), Toast.LENGTH_SHORT).show(); }
                             })
                             .setNegativeButton("Abbrechen", null)
                             .show();
@@ -1523,7 +1476,7 @@ public class ServerDetailActivity extends AppCompatActivity {
                     return true;
                 }
                 
-                String[] actions = {"Umbenennen", "Kopieren", "Ausschneiden", "Löschen"};
+                String[] actions = {getString(R.string.sd_dialog_rename), "Kopieren", "Ausschneiden", "Löschen"};
                 new AlertDialog.Builder(this)
                     .setTitle(file.getName())
                     .setItems(actions, (d, which) -> {
@@ -1531,7 +1484,7 @@ public class ServerDetailActivity extends AppCompatActivity {
                             final android.widget.EditText input = new android.widget.EditText(this);
                             input.setText(file.getName());
                             new AlertDialog.Builder(this)
-                                .setTitle("Umbenennen")
+                                .setTitle(getString(R.string.sd_dialog_rename))
                                 .setView(input)
                                 .setPositiveButton("OK", (d2, w2) -> {
                                     file.renameTo(new File(file.getParent(), input.getText().toString()));
@@ -1541,11 +1494,11 @@ public class ServerDetailActivity extends AppCompatActivity {
                         } else if (which == 1) { // Kopieren
                             clipFile = file;
                             clipCut = false;
-                            Toast.makeText(this, "Kopiert. Gehe in einen Ordner und halte '..' gedrückt zum Einfügen.", Toast.LENGTH_LONG).show();
+                            Toast.makeText(this, getString(R.string.sd_toast_copied_hint), Toast.LENGTH_LONG).show();
                         } else if (which == 2) { // Ausschneiden
                             clipFile = file;
                             clipCut = true;
-                            Toast.makeText(this, "Ausgeschnitten. Gehe in einen Ordner und halte '..' gedrückt zum Einfügen.", Toast.LENGTH_LONG).show();
+                            Toast.makeText(this, getString(R.string.sd_toast_cut_hint), Toast.LENGTH_LONG).show();
                         } else if (which == 3) { // Löschen
                             if (file.isDirectory()) {
                                 deleteRecursive(file);
@@ -1632,7 +1585,7 @@ public class ServerDetailActivity extends AppCompatActivity {
                 if (currentIcon.exists()) {
                     currentIcon.delete();
                     ivServerIcon.setImageDrawable(null);
-                    Toast.makeText(this, "Server Icon entfernt", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, getString(R.string.sd_toast_icon_removed), Toast.LENGTH_SHORT).show();
                 }
             });
         }
@@ -1695,7 +1648,7 @@ public class ServerDetailActivity extends AppCompatActivity {
                         triggerAddonRestart();
                     } else {
                         // Allocate port
-                        android.widget.Toast.makeText(this, "Allocating proxy port...", android.widget.Toast.LENGTH_SHORT).show();
+                        android.widget.Toast.makeText(this, getString(R.string.sd_toast_allocating_proxy), android.widget.Toast.LENGTH_SHORT).show();
                         new Thread(() -> {
                             try {
                                 int allocatedPort = new eu.kodanetwork.mchost.network.supabase.SupabaseFunctionsClient(this).allocatePort("", server.getSubdomain(), "bedrock");
@@ -1717,7 +1670,7 @@ public class ServerDetailActivity extends AppCompatActivity {
                                     if (e.getMessage() != null && e.getMessage().contains("ports_exhausted")) {
                                         eu.kodanetwork.mchost.ui.components.PraetorDialog.showApology(ServerDetailActivity.this, "P.R.A.E.T.O.R.", "Alle Bedrock Proxy-Ports sind derzeit belegt. Bitte versuche es später erneut.");
                                     } else {
-                                        android.widget.Toast.makeText(ServerDetailActivity.this, "Error: " + e.getMessage(), android.widget.Toast.LENGTH_LONG).show();
+                                        android.widget.Toast.makeText(ServerDetailActivity.this, getString(R.string.sd_toast_error_prefix) + e.getMessage(), android.widget.Toast.LENGTH_LONG).show();
                                     }
                                 });
                             }
@@ -1752,7 +1705,7 @@ public class ServerDetailActivity extends AppCompatActivity {
                         repo.update(server);
                         triggerAddonRestart();
                     } else {
-                        android.widget.Toast.makeText(this, "Allocating voicechat port...", android.widget.Toast.LENGTH_SHORT).show();
+                        android.widget.Toast.makeText(this, getString(R.string.sd_toast_allocating_voice), android.widget.Toast.LENGTH_SHORT).show();
                         new Thread(() -> {
                             try {
                                 int allocatedPort = new eu.kodanetwork.mchost.network.supabase.SupabaseFunctionsClient(this).allocatePort("", server.getSubdomain(), "voicechat");
@@ -1768,7 +1721,7 @@ public class ServerDetailActivity extends AppCompatActivity {
                                     if (e.getMessage() != null && e.getMessage().contains("ports_exhausted")) {
                                         eu.kodanetwork.mchost.ui.components.PraetorDialog.showApology(ServerDetailActivity.this, "P.R.A.E.T.O.R.", "Alle Voicechat Proxy-Ports sind derzeit belegt. Bitte versuche es später erneut.");
                                     } else {
-                                        android.widget.Toast.makeText(ServerDetailActivity.this, "Error: " + e.getMessage(), android.widget.Toast.LENGTH_LONG).show();
+                                        android.widget.Toast.makeText(ServerDetailActivity.this, getString(R.string.sd_toast_error_prefix) + e.getMessage(), android.widget.Toast.LENGTH_LONG).show();
                                     }
                                 });
                             }
@@ -1800,7 +1753,7 @@ public class ServerDetailActivity extends AppCompatActivity {
                             
                             File zipFile = new File(cacheDir, server.getName() + "_export.zip");
                             
-                            runOnUiThread(() -> android.widget.Toast.makeText(ServerDetailActivity.this, "Zipping server, please wait...", android.widget.Toast.LENGTH_SHORT).show());
+                            runOnUiThread(() -> android.widget.Toast.makeText(ServerDetailActivity.this, getString(R.string.sd_toast_zipping), android.widget.Toast.LENGTH_SHORT).show());
                             
                             eu.kodanetwork.mchost.utils.ZipUtils.zipFolder(server.getServerDir(), zipFile.getAbsolutePath());
                             
@@ -1816,7 +1769,7 @@ public class ServerDetailActivity extends AppCompatActivity {
                             });
                         } catch (Exception e) {
                             e.printStackTrace();
-                            runOnUiThread(() -> android.widget.Toast.makeText(ServerDetailActivity.this, "Export failed: " + e.getMessage(), android.widget.Toast.LENGTH_LONG).show());
+                            runOnUiThread(() -> android.widget.Toast.makeText(ServerDetailActivity.this, getString(R.string.sd_toast_export_failed) + e.getMessage(), android.widget.Toast.LENGTH_LONG).show());
                         }
                     }).start();
                 }
@@ -1830,23 +1783,23 @@ public class ServerDetailActivity extends AppCompatActivity {
                 if (server.state == ServerInstance.State.HIBERNATED) {
                     new Thread(() -> {
                         try {
-                            runOnUiThread(() -> android.widget.Toast.makeText(ServerDetailActivity.this, "Waking up server...", android.widget.Toast.LENGTH_SHORT).show());
+                            runOnUiThread(() -> android.widget.Toast.makeText(ServerDetailActivity.this, getString(R.string.sd_toast_waking_up), android.widget.Toast.LENGTH_SHORT).show());
                             eu.kodanetwork.mchost.utils.HibernationManager.wakeUpServer(this, server, repo);
                             runOnUiThread(() -> {
                                 updateDash();
-                                android.widget.Toast.makeText(this, "Server aufgeweckt!", android.widget.Toast.LENGTH_SHORT).show();
+                                android.widget.Toast.makeText(this, getString(R.string.sd_toast_server_woken), android.widget.Toast.LENGTH_SHORT).show();
                             });
                         } catch (Exception e) {
                             if ("DNS_OCCUPIED".equals(e.getMessage())) {
                                 runOnUiThread(() -> handleDnsOccupied());
                             } else {
-                                runOnUiThread(() -> android.widget.Toast.makeText(this, "Fehler beim Aufwecken: " + e.getMessage(), android.widget.Toast.LENGTH_LONG).show());
+                                runOnUiThread(() -> android.widget.Toast.makeText(this, getString(R.string.sd_toast_wakeup_error) + e.getMessage(), android.widget.Toast.LENGTH_LONG).show());
                             }
                         }
                     }).start();
                 } else {
                     if (server.isRunning()) {
-                        android.widget.Toast.makeText(this, "Bitte Server zuerst stoppen!", android.widget.Toast.LENGTH_SHORT).show();
+                        android.widget.Toast.makeText(this, getString(R.string.sd_toast_stop_server_first), android.widget.Toast.LENGTH_SHORT).show();
                         return;
                     }
                     
@@ -1862,17 +1815,17 @@ public class ServerDetailActivity extends AppCompatActivity {
                 if (!eu.kodanetwork.mchost.security.PraetorSystem.checkNetwork(ServerDetailActivity.this)) return;
                 new Thread(() -> {
                     try {
-                        runOnUiThread(() -> android.widget.Toast.makeText(ServerDetailActivity.this, "Waking up server...", android.widget.Toast.LENGTH_SHORT).show());
+                        runOnUiThread(() -> android.widget.Toast.makeText(ServerDetailActivity.this, getString(R.string.sd_toast_waking_up), android.widget.Toast.LENGTH_SHORT).show());
                         eu.kodanetwork.mchost.utils.HibernationManager.wakeUpServer(this, server, repo);
                         runOnUiThread(() -> {
                             updateDash();
-                            android.widget.Toast.makeText(this, "Server aufgeweckt!", android.widget.Toast.LENGTH_SHORT).show();
+                            android.widget.Toast.makeText(this, getString(R.string.sd_toast_server_woken), android.widget.Toast.LENGTH_SHORT).show();
                         });
                     } catch (Exception e) {
                         if ("DNS_OCCUPIED".equals(e.getMessage())) {
                             runOnUiThread(() -> handleDnsOccupied());
                         } else {
-                            runOnUiThread(() -> android.widget.Toast.makeText(this, "Fehler beim Aufwecken: " + e.getMessage(), android.widget.Toast.LENGTH_LONG).show());
+                            runOnUiThread(() -> android.widget.Toast.makeText(this, getString(R.string.sd_toast_wakeup_error) + e.getMessage(), android.widget.Toast.LENGTH_LONG).show());
                         }
                     }
                 }).start();
@@ -1881,7 +1834,7 @@ public class ServerDetailActivity extends AppCompatActivity {
 
         btnDelServer.setOnClickListener(v -> {
             if (!eu.kodanetwork.mchost.security.PraetorSystem.checkNetwork(this)) {
-                android.widget.Toast.makeText(this, "Keine Internetverbindung", android.widget.Toast.LENGTH_SHORT).show();
+                android.widget.Toast.makeText(this, getString(R.string.sd_toast_no_internet), android.widget.Toast.LENGTH_SHORT).show();
                 return;
             }
             
@@ -1910,14 +1863,14 @@ public class ServerDetailActivity extends AppCompatActivity {
     }
 
     private void updateIntegrationStatus() {
-        tvTermuxStatus.setText("Native Mode: Active");
+        tvTermuxStatus.setText(getString(R.string.sd_native_mode_active));
         if (server.getPlayitAddress().isEmpty()) {
-            tvTunnelStatus.setText("Tunnel: not assigned");
+            tvTunnelStatus.setText(getString(R.string.sd_tunnel_not_assigned));
         } else {
             tvTunnelStatus.setText("Tunnel: " + server.getPlayitAddress());
         }
         if (server.getDomainLink().isEmpty()) {
-            tvDomainStatus.setText("Domain: not linked");
+            tvDomainStatus.setText(getString(R.string.sd_domain_not_linked));
         } else {
             tvDomainStatus.setText("Domain: " + server.getDomainLink());
         }
@@ -1982,7 +1935,7 @@ public class ServerDetailActivity extends AppCompatActivity {
                                     }
                                 }, 5000);
                             }
-                            android.widget.Toast.makeText(ServerDetailActivity.this, "✓ " + file.getName() + " installiert!", android.widget.Toast.LENGTH_SHORT).show();
+                            android.widget.Toast.makeText(ServerDetailActivity.this, "✓ " + file.getName() + getString(R.string.sd_toast_installed_suffix), android.widget.Toast.LENGTH_SHORT).show();
                         }
                         @Override public void onError(String err) {
                             pbDl.setVisibility(View.GONE);
@@ -1995,7 +1948,7 @@ public class ServerDetailActivity extends AppCompatActivity {
                 holder.itemView.setOnClickListener(v -> {
                     // Show a loading dialog instead of pbDl since pbDl is for the download button
                     android.app.ProgressDialog pd = new android.app.ProgressDialog(ServerDetailActivity.this);
-                    pd.setMessage("Lade Versionen...");
+                    pd.setMessage(getString(R.string.sd_dialog_loading_versions));
                     pd.setCancelable(false);
                     pd.show();
                     
@@ -2032,7 +1985,7 @@ public class ServerDetailActivity extends AppCompatActivity {
                             if (versions == null || versions.length() == 0) {
                                 runOnUiThread(() -> {
                                     pd.dismiss();
-                                    android.widget.Toast.makeText(ServerDetailActivity.this, "Keine kompatible Version gefunden.", android.widget.Toast.LENGTH_SHORT).show();
+                                    android.widget.Toast.makeText(ServerDetailActivity.this, getString(R.string.sd_toast_no_compatible_version), android.widget.Toast.LENGTH_SHORT).show();
                                 });
                                 return;
                             }
@@ -2167,13 +2120,13 @@ public class ServerDetailActivity extends AppCompatActivity {
                                                 } else {
                                                     runOnUiThread(() -> {
                                                         pbDl.setVisibility(View.GONE); btnDl.setVisibility(View.VISIBLE);
-                                                        android.widget.Toast.makeText(ServerDetailActivity.this, "Download-Fehler", android.widget.Toast.LENGTH_SHORT).show();
+                                                        android.widget.Toast.makeText(ServerDetailActivity.this, getString(R.string.sd_toast_download_error), android.widget.Toast.LENGTH_SHORT).show();
                                                     });
                                                 }
                                             } catch (Exception e) {
                                                 runOnUiThread(() -> {
                                                     pbDl.setVisibility(View.GONE); btnDl.setVisibility(View.VISIBLE);
-                                                    android.widget.Toast.makeText(ServerDetailActivity.this, "Fehler: " + e.getMessage(), android.widget.Toast.LENGTH_SHORT).show();
+                                                    android.widget.Toast.makeText(ServerDetailActivity.this, getString(R.string.sd_toast_error_prefix) + e.getMessage(), android.widget.Toast.LENGTH_SHORT).show();
                                                     View headerRestart = findViewById(R.id.layout_header_restart);
                                                     if (headerRestart != null) {
                                                         new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
@@ -2196,7 +2149,7 @@ public class ServerDetailActivity extends AppCompatActivity {
                         } catch (Exception e) {
                             runOnUiThread(() -> {
                                 pd.dismiss();
-                                android.widget.Toast.makeText(ServerDetailActivity.this, "Fehler beim Laden", android.widget.Toast.LENGTH_SHORT).show();
+                                android.widget.Toast.makeText(ServerDetailActivity.this, getString(R.string.sd_toast_loading_error), android.widget.Toast.LENGTH_SHORT).show();
                             });
                         }
                     }).start();
@@ -2219,7 +2172,7 @@ public class ServerDetailActivity extends AppCompatActivity {
                 }
                 @Override public void onError(String err) {
                     if (pbPlugins != null) pbPlugins.setVisibility(View.GONE);
-                    Toast.makeText(ServerDetailActivity.this, "Search error: " + err, Toast.LENGTH_LONG).show();
+                    Toast.makeText(ServerDetailActivity.this, getString(R.string.sd_toast_search_error) + err, Toast.LENGTH_LONG).show();
                 }
             });
         };
@@ -2237,10 +2190,10 @@ public class ServerDetailActivity extends AppCompatActivity {
             PlayitManager manager = new PlayitManager(this);
             Process started = manager.startTunnelNative(server.getId(), "");
             if (started == null) {
-                runOnUiThread(() -> Toast.makeText(this, "Playit could not be started", Toast.LENGTH_LONG).show());
+                runOnUiThread(() -> Toast.makeText(this, getString(R.string.sd_toast_playit_error), Toast.LENGTH_LONG).show());
                 return;
             }
-            runOnUiThread(() -> tvTunnelStatus.setText("Tunnel: starting..."));
+            runOnUiThread(() -> tvTunnelStatus.setText(getString(R.string.sd_tunnel_starting)));
             try {
                 Thread.sleep(3000);
                 String addr = manager.readAssignedAddress(server.getId());
@@ -2250,7 +2203,7 @@ public class ServerDetailActivity extends AppCompatActivity {
                         repo.update(server);
                         tvTunnelStatus.setText("Tunnel: " + addr);
                     } else {
-                        tvTunnelStatus.setText("Tunnel: running (address pending)");
+                        tvTunnelStatus.setText(getString(R.string.sd_tunnel_running_pending));
                     }
                 });
             } catch (Exception e) {
@@ -2280,7 +2233,7 @@ public class ServerDetailActivity extends AppCompatActivity {
         
         long lastChange = eu.kodanetwork.mchost.App.getPrefs(this).getLong("last_join_change_" + server.getId(), 0);
         if (System.currentTimeMillis() - lastChange < 24 * 60 * 60 * 1000L) {
-            Toast.makeText(this, "Du kannst die Join-Adresse nur einmal alle 24 Stunden ändern.", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, getString(R.string.sd_toast_subdomain_limit), Toast.LENGTH_LONG).show();
             return;
         }
         
@@ -2342,17 +2295,17 @@ public class ServerDetailActivity extends AppCompatActivity {
                                 tvDomainStatus.setText("Domain: " + domain + " (offline)");
                             }
                             updateJoinAddressDisplay();
-                            Toast.makeText(this, "Join-Adresse aktualisiert!", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(this, getString(R.string.sd_toast_subdomain_updated), Toast.LENGTH_SHORT).show();
                         });
                     } catch (Exception e) {
                         runOnUiThread(() -> {
                             tvDomainStatus.setText("Domain error: " + e.getMessage());
-                            Toast.makeText(this, "DNS request failed: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                            Toast.makeText(this, getString(R.string.sd_toast_dns_failed) + e.getMessage(), Toast.LENGTH_LONG).show();
                         });
                     }
                 });
             } else {
-                Toast.makeText(this, "Ungültige Adresse! Mindestens 3 Zeichen (a-z, 0-9, -).", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, getString(R.string.sd_toast_invalid_address_length), Toast.LENGTH_SHORT).show();
             }
         });
         dialog.show();
@@ -2421,14 +2374,14 @@ public class ServerDetailActivity extends AppCompatActivity {
             });
 
             btnUnlink.setOnClickListener(v -> {
-                android.widget.Toast.makeText(this, "Unlinked from Custom Domain. Reverting to default.", android.widget.Toast.LENGTH_SHORT).show();
+                android.widget.Toast.makeText(this, getString(R.string.sd_toast_unlinked_domain), android.widget.Toast.LENGTH_SHORT).show();
                 dialog.dismiss();
             });
         } else if (isEnabled) {
             btnChange.setVisibility(View.VISIBLE);
             btnUnlink.setVisibility(View.GONE);
             
-            btnChange.setText("LINK CUSTOM DOMAIN");
+            btnChange.setText(getString(R.string.sd_link_custom_domain));
             btnChange.setOnClickListener(v -> {
                 android.content.Intent intent = new android.content.Intent(ServerDetailActivity.this, CustomDnsWizardActivity.class);
                 intent.putExtra("SERVER_ID", server.getId());
@@ -2545,7 +2498,7 @@ public class ServerDetailActivity extends AppCompatActivity {
                 if (vcJarOld.exists()) vcJarOld.delete();
                 deleteRecursive(new File(pluginsDir, "voicechat"));
             }
-            android.widget.Toast.makeText(this, "Addon removed and files cleaned up.", android.widget.Toast.LENGTH_SHORT).show();
+            android.widget.Toast.makeText(this, getString(R.string.sd_toast_addon_removed), android.widget.Toast.LENGTH_SHORT).show();
         }, server.isRunning() ? 4000 : 500);
     }
 
@@ -2707,7 +2660,7 @@ public class ServerDetailActivity extends AppCompatActivity {
                 server.state = ServerInstance.State.OFFLINE;
                 updateDash();
                 new AlertDialog.Builder(ServerDetailActivity.this)
-                    .setTitle("Download fehlgeschlagen").setMessage(e)
+                    .setTitle(getString(R.string.sd_dialog_download_failed)).setMessage(e)
                     .setPositiveButton("OK", null).show();
             }
         });
@@ -2805,7 +2758,7 @@ public class ServerDetailActivity extends AppCompatActivity {
                     runOnUiThread(() -> {
                         try { dialog.dismiss(); } catch (Exception ignored) {}
                         if (topBar != null) topBar.setVisibility(android.view.View.VISIBLE);
-                        android.widget.Toast.makeText(this, "Fehler: " + e.getMessage(), android.widget.Toast.LENGTH_LONG).show();
+                        android.widget.Toast.makeText(this, getString(R.string.sd_toast_error_prefix) + e.getMessage(), android.widget.Toast.LENGTH_LONG).show();
                     });
                 }
             }).start();
@@ -2857,8 +2810,8 @@ public class ServerDetailActivity extends AppCompatActivity {
         }
         if (!duplicates.isEmpty()) {
             new AlertDialog.Builder(this)
-                .setTitle("File(s) already exist")
-                .setMessage("The following files already exist:\n\n• " + String.join("\n• ", duplicates) + "\n\nOverwrite them?")
+                .setTitle(getString(R.string.sd_dialog_files_exist))
+                .setMessage("The following files already exist:\n\n• " + String.join("\n• ", duplicates) + getString(R.string.sd_dialog_files_exist_msg_2))
                 .setPositiveButton("Overwrite", (d, w) -> doImport(uriNames))
                 .setNegativeButton("Cancel", null)
                 .show();
@@ -2903,7 +2856,7 @@ public class ServerDetailActivity extends AppCompatActivity {
         File destDir = new File(currentDir, rootDoc.getName() != null ? rootDoc.getName() : "ImportedFolder");
         if (!destDir.exists()) destDir.mkdirs();
 
-        Toast.makeText(this, "Importing folder...", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, getString(R.string.sd_toast_importing_folder), Toast.LENGTH_SHORT).show();
         new Thread(() -> {
             int[] counts = new int[]{0, 0};
             copyDocumentFileRecursive(rootDoc, destDir, counts);
@@ -2993,6 +2946,6 @@ public class ServerDetailActivity extends AppCompatActivity {
         android.content.ClipData clip = android.content.ClipData.newPlainText(label, text);
         clipboard.setPrimaryClip(clip);
         eu.kodanetwork.mchost.util.HapticUtil.forceVibrate(this, 30);
-        android.widget.Toast.makeText(this, label + " copied!", android.widget.Toast.LENGTH_SHORT).show();
+        android.widget.Toast.makeText(this, label + getString(R.string.sd_toast_copied_suffix), android.widget.Toast.LENGTH_SHORT).show();
     }
 }
