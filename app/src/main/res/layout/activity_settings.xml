@@ -602,7 +602,7 @@
 
                     <TextView android:id="@+id/tv_app_version_card"
                         android:layout_width="wrap_content" android:layout_height="wrap_content"
-                        android:text="v1.8495" android:textColor="#FFFFFF"
+                        android:text="v1.8497" android:textColor="#FFFFFF"
                         android:textSize="18sp" android:fontFamily="sans-serif-medium"
                         android:layout_marginBottom="4dp"/>
 
