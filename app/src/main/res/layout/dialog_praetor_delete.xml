@@ -22,19 +22,44 @@
             android:id="@+id/tv_dialog_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/sd_delete_dialog_title"
-            android:textColor="#FF5555"
-            android:textSize="28sp"
+            android:text="@string/praetor_title"
+            android:textColor="#FF3333"
+            android:textSize="36sp"
+            android:textStyle="bold"
+            android:letterSpacing="0.1"
+            android:gravity="center" />
+
+        <!-- Subtitle -->
+        <TextView
+            android:id="@+id/tv_dialog_subtitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/praetor_subtitle"
+            android:textColor="#8A8A9A"
+            android:textSize="10sp"
             android:textStyle="bold"
             android:letterSpacing="0.05"
-            android:gravity="center" />
+            android:gravity="center"
+            android:layout_marginTop="8dp" />
 
         <View
             android:layout_width="40dp"
             android:layout_height="2dp"
-            android:background="#FF5555"
-            android:layout_marginTop="16dp"
-            android:layout_marginBottom="16dp" />
+            android:background="#FF6B00"
+            android:layout_marginTop="24dp"
+            android:layout_marginBottom="24dp" />
+
+        <!-- Action Title -->
+        <TextView
+            android:id="@+id/tv_delete_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/sd_delete_dialog_title"
+            android:textColor="#F0F0F0"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:gravity="center"
+            android:layout_marginBottom="8dp" />
 
         <!-- Delete Msg Text -->
         <TextView

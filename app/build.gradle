@@ -13,8 +13,8 @@ android {
         applicationId "eu.kodanetwork.mchost"
         minSdk 26
         targetSdk 36
-        versionCode 8496
-        versionName "v1.8496"
+        versionCode 8497
+        versionName "v1.8497"
         ndkVersion "27.0.12077973"
         externalNativeBuild {
             cmake {

@@ -1843,15 +1843,15 @@ public class ServerDetailActivity extends AppCompatActivity {
             }
 
             android.widget.TextView tvTitle = dialog.findViewById(R.id.tv_dialog_title);
-            android.widget.TextView tvBody = dialog.findViewById(R.id.tv_delete_body);
             android.widget.Button btnPos = dialog.findViewById(R.id.btn_dialog_delete);
             android.widget.Button btnNeg = dialog.findViewById(R.id.btn_dialog_cancel);
 
-            String praetorHtml = "<font color=\"#555555\">P.R.</font><font color=\"#AAAAAA\">A</font><font color=\"#555555\">.</font><font color=\"#AAAAAA\">E</font><font color=\"#555555\">.</font><font color=\"#FFFFFF\">T</font><font color=\"#555555\">.</font><font color=\"#FFFFFF\">O</font><font color=\"#555555\">.</font><font color=\"#FFFFFF\">R.</font>";
-            String titleHtml = praetorHtml + "<br/><font color=\"#FF5555\">" + getString(R.string.sd_delete_dialog_title) + "</font>";
-            tvTitle.setText(android.text.Html.fromHtml(titleHtml, android.text.Html.FROM_HTML_MODE_LEGACY));
+            if (tvTitle != null) {
+                String praetorHtml = "<font color=\"#555555\">P.R.</font><font color=\"#AAAAAA\">A</font><font color=\"#555555\">.</font><font color=\"#AAAAAA\">E</font><font color=\"#555555\">.</font><font color=\"#FFFFFF\">T</font><font color=\"#555555\">.</font><font color=\"#FFFFFF\">O</font><font color=\"#555555\">.</font><font color=\"#FFFFFF\">R.</font>";
+                tvTitle.setText(android.text.Html.fromHtml(praetorHtml, android.text.Html.FROM_HTML_MODE_LEGACY));
+            }
 
-            tvBody.setText(getString(R.string.sd_delete_dialog_msg));
+            btnPos.setEnabled(false);
             btnPos.setEnabled(false);
 
             android.os.CountDownTimer timer = new android.os.CountDownTimer(10000, 1000) {
