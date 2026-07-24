@@ -182,13 +182,14 @@ public class PraetorConfirmActivity extends Activity {
                 
                 // 3. PATCH to change host and server_version to hide it from lobby
                 try {
-                    java.net.HttpURLConnection patchConn = (java.net.HttpURLConnection) new java.net.URL(eu.kodanetwork.mchost.security.PraetorSecurity.getSupabaseUrl() + "/rest/v1/koda_servers?host=eq." + srv.getSubdomain()).openConnection();
-                    patchConn.setRequestMethod("PATCH");
+                    java.net.HttpURLConnection patchConn = (java.net.HttpURLConnection) new java.net.URL(eu.kodanetwork.mchost.security.PraetorSecurity.getSupabaseUrl() + "/rest/v1/rpc/rpc_admin_patch_server").openConnection();
+                    patchConn.setRequestMethod("POST");
                     patchConn.setRequestProperty("apikey", anonKey);
                     patchConn.setRequestProperty("Authorization", authHeader);
                     patchConn.setRequestProperty("Content-Type", "application/json");
                     patchConn.setDoOutput(true);
-                    String jsonPatch = "{\"host\": \"deleted_" + srv.getSubdomain() + "\", \"server_version\": \"DELETED\"}";
+                    String adminAppUuid = eu.kodanetwork.mchost.App.getPrefs(PraetorConfirmActivity.this).getString("app_uuid", "");
+                    String jsonPatch = "{\"p_admin_app_uuid\": \"" + adminAppUuid + "\", \"p_target_host\": \"" + srv.getSubdomain() + "\", \"p_payload\": {\"host\": \"deleted_" + srv.getSubdomain() + "\", \"server_version\": \"DELETED\"}}";
                     patchConn.getOutputStream().write(jsonPatch.getBytes());
                     patchConn.getResponseCode();
                 } catch (Exception e) {

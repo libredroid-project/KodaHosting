@@ -23,10 +23,12 @@ public class HibernationManager {
                 // Update Supabase to show HIBERNATED
                 String domain = server.getSubdomain();
                 String jsonBody = "{\"server_version\": \"HIBERNATED\", \"online_players\": 0}";
-                okhttp3.RequestBody body = okhttp3.RequestBody.create(jsonBody, okhttp3.MediaType.parse("application/json"));
+                String appUuid = eu.kodanetwork.mchost.App.getPrefs(context).getString("app_uuid", "");
+                String rpcJson = "{\"p_app_uuid\":\"" + appUuid + "\", \"p_id\":\"" + server.getId() + "\", \"p_payload\": " + jsonBody + "}";
+                okhttp3.RequestBody body = okhttp3.RequestBody.create(rpcJson, okhttp3.MediaType.parse("application/json"));
                 okhttp3.Request request = new okhttp3.Request.Builder()
-                    .url("https://scsezpfrrmpyuapblbxk.supabase.co/rest/v1/koda_servers?id=eq." + server.getId())
-                    .patch(body)
+                    .url("https://scsezpfrrmpyuapblbxk.supabase.co/rest/v1/rpc/rpc_patch_server_by_id")
+                    .post(body)
                     .addHeader("apikey", eu.kodanetwork.mchost.security.PraetorSecurity.getSupabaseKey())
                     .addHeader("Authorization", "Bearer " + eu.kodanetwork.mchost.security.PraetorSecurity.getSupabaseKey())
                     .addHeader("Content-Type", "application/json")
@@ -97,10 +99,12 @@ public class HibernationManager {
                 try {
                     String domain = server.getSubdomain();
                     String jsonBody = "{\"server_version\": \"" + (server.getVersion() == null ? "1.21.11" : server.getVersion()) + "\"}";
-                    okhttp3.RequestBody body = okhttp3.RequestBody.create(jsonBody, okhttp3.MediaType.parse("application/json"));
+                    String appUuid = eu.kodanetwork.mchost.App.getPrefs(context).getString("app_uuid", "");
+                    String rpcJson = "{\"p_app_uuid\":\"" + appUuid + "\", \"p_id\":\"" + server.getId() + "\", \"p_payload\": " + jsonBody + "}";
+                    okhttp3.RequestBody body = okhttp3.RequestBody.create(rpcJson, okhttp3.MediaType.parse("application/json"));
                     okhttp3.Request request = new okhttp3.Request.Builder()
-                        .url("https://scsezpfrrmpyuapblbxk.supabase.co/rest/v1/koda_servers?id=eq." + server.getId())
-                        .patch(body)
+                        .url("https://scsezpfrrmpyuapblbxk.supabase.co/rest/v1/rpc/rpc_patch_server_by_id")
+                        .post(body)
                         .addHeader("apikey", eu.kodanetwork.mchost.security.PraetorSecurity.getSupabaseKey())
                         .addHeader("Authorization", "Bearer " + eu.kodanetwork.mchost.security.PraetorSecurity.getSupabaseKey())
                         .addHeader("Content-Type", "application/json")

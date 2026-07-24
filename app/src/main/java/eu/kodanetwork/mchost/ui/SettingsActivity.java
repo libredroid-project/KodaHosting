@@ -374,9 +374,9 @@ public class SettingsActivity extends Activity {
         new Thread(() -> {
             try {
                 // Also update last_active using a PATCH request to all rows belonging to this app_uuid
-                java.net.URL patchUrl = new java.net.URL(eu.kodanetwork.mchost.security.PraetorSecurity.getSupabaseUrl() + "/rest/v1/koda_users?app_uuid=eq." + finalAppUuid);
+                java.net.URL patchUrl = new java.net.URL(eu.kodanetwork.mchost.security.PraetorSecurity.getSupabaseUrl() + "/rest/v1/rpc/rpc_patch_user");
                 java.net.HttpURLConnection patchConn = (java.net.HttpURLConnection) patchUrl.openConnection();
-                patchConn.setRequestMethod("PATCH");
+                patchConn.setRequestMethod("POST");
                 patchConn.setRequestProperty("Content-Type", "application/json");
                 String anonKey = eu.kodanetwork.mchost.security.PraetorSecurity.getSupabaseKey();
                 patchConn.setRequestProperty("apikey", anonKey);
@@ -385,7 +385,7 @@ public class SettingsActivity extends Activity {
                 
                 patchConn.setDoOutput(true);
                 java.io.OutputStream pos = patchConn.getOutputStream();
-                pos.write("{\"last_active\":\"now()\"}".getBytes());
+                pos.write(("{\"p_app_uuid\":\"" + finalAppUuid + "\", \"p_payload\": {\"last_active\":\"now()\"}}").getBytes());
                 pos.flush(); pos.close();
                 patchConn.getResponseCode();
                 
@@ -531,13 +531,14 @@ public class SettingsActivity extends Activity {
                                 // 1. PATCH to nullify mc_username (bypasses RLS DELETE restrictions for anon users)
                                 int patchCode = -1;
                                 try {
-                                    java.net.HttpURLConnection patchConn = (java.net.HttpURLConnection) new java.net.URL(eu.kodanetwork.mchost.security.PraetorSecurity.getSupabaseUrl() + "/rest/v1/koda_users?id=eq." + rowId).openConnection();
-                                    patchConn.setRequestMethod("PATCH");
+                                    java.net.HttpURLConnection patchConn = (java.net.HttpURLConnection) new java.net.URL(eu.kodanetwork.mchost.security.PraetorSecurity.getSupabaseUrl() + "/rest/v1/rpc/rpc_patch_user_by_id").openConnection();
+                                    patchConn.setRequestMethod("POST");
                                     patchConn.setRequestProperty("apikey", anonKey);
                                     patchConn.setRequestProperty("Authorization", authHeader);
                                     patchConn.setRequestProperty("Content-Type", "application/json");
                                     patchConn.setDoOutput(true);
-                                    patchConn.getOutputStream().write("{\"app_uuid\": \"UNLINKED\", \"auth_id\": null, \"mc_username\": null}".getBytes());
+                                    String myAppUuid = eu.kodanetwork.mchost.App.getPrefs(SettingsActivity.this).getString("app_uuid", "");
+                                    patchConn.getOutputStream().write(("{\"p_app_uuid\":\"" + myAppUuid + "\", \"p_id\":\"" + rowId + "\", \"p_payload\": {\"app_uuid\": \"UNLINKED\", \"auth_id\": null, \"mc_username\": null}}").getBytes());
                                     patchCode = patchConn.getResponseCode();
                             } catch (Exception ignored) {}
                             
@@ -843,14 +844,14 @@ public class SettingsActivity extends Activity {
                 for (eu.kodanetwork.mchost.model.ServerInstance s : eu.kodanetwork.mchost.model.ServerRepo.get(this).all()) {
                     if (s.getSubdomain() == null || s.getSubdomain().isEmpty()) continue;
                     try {
-                        java.net.URL patchUrl = new java.net.URL(eu.kodanetwork.mchost.security.PraetorSecurity.getSupabaseUrl() + "/rest/v1/koda_servers?host=eq." + s.getSubdomain());
+                        java.net.URL patchUrl = new java.net.URL(eu.kodanetwork.mchost.security.PraetorSecurity.getSupabaseUrl() + "/rest/v1/rpc/rpc_patch_server");
                         java.net.HttpURLConnection patchConn = (java.net.HttpURLConnection) patchUrl.openConnection();
-                        patchConn.setRequestMethod("PATCH");
+                        patchConn.setRequestMethod("POST");
                         patchConn.setRequestProperty("Content-Type", "application/json");
                         patchConn.setRequestProperty("apikey", anonKey);
                         patchConn.setRequestProperty("Authorization", "Bearer " + anonKey);
                         patchConn.setDoOutput(true);
-                        String patchJson = "{\"owner_app_uuid\":\"" + appUuid + "\"}";
+                        String patchJson = "{\"p_app_uuid\":\"" + appUuid + "\", \"p_host\":\"" + s.getSubdomain() + "\", \"p_payload\": {\"owner_app_uuid\":\"" + appUuid + "\"}}";
                         patchConn.getOutputStream().write(patchJson.getBytes());
                         patchConn.getOutputStream().flush();
                         patchConn.getOutputStream().close();
@@ -985,14 +986,15 @@ public class SettingsActivity extends Activity {
                 new Thread(() -> {
                     try {
                         String anonKey = eu.kodanetwork.mchost.security.PraetorSecurity.getSupabaseKey();
-                        java.net.URL url = new java.net.URL(eu.kodanetwork.mchost.security.PraetorSecurity.getSupabaseUrl() + "/rest/v1/koda_users?id=eq." + rowId);
+                        java.net.URL url = new java.net.URL(eu.kodanetwork.mchost.security.PraetorSecurity.getSupabaseUrl() + "/rest/v1/rpc/rpc_patch_user_by_id");
                         java.net.HttpURLConnection conn = (java.net.HttpURLConnection) url.openConnection();
-                        conn.setRequestMethod("PATCH");
+                        conn.setRequestMethod("POST");
                         conn.setRequestProperty("apikey", anonKey);
                         conn.setRequestProperty("Authorization", "Bearer " + anonKey);
                         conn.setRequestProperty("Content-Type", "application/json");
                         conn.setDoOutput(true);
-                        conn.getOutputStream().write(("{\"permissions\": " + jsonStr + "}").getBytes());
+                        String myAppUuid = eu.kodanetwork.mchost.App.getPrefs(SettingsActivity.this).getString("app_uuid", "");
+                        conn.getOutputStream().write(("{\"p_app_uuid\":\"" + myAppUuid + "\", \"p_id\":\"" + rowId + "\", \"p_payload\": {\"permissions\": " + jsonStr + "}}").getBytes());
                         int code = conn.getResponseCode();
                         if (code >= 200 && code < 300) {
                             runOnUiThread(() -> {
@@ -1121,16 +1123,16 @@ public class SettingsActivity extends Activity {
         if (appUuid == null) return;
         new Thread(() -> {
             try {
-                java.net.URL url = new java.net.URL(eu.kodanetwork.mchost.security.PraetorSecurity.getSupabaseUrl() + "/rest/v1/koda_users?app_uuid=eq." + appUuid);
+                java.net.URL url = new java.net.URL(eu.kodanetwork.mchost.security.PraetorSecurity.getSupabaseUrl() + "/rest/v1/rpc/rpc_patch_user");
                 java.net.HttpURLConnection conn = (java.net.HttpURLConnection) url.openConnection();
-                conn.setRequestMethod("PATCH");
+                conn.setRequestMethod("POST");
                 conn.setRequestProperty("Content-Type", "application/json");
                 String anonKey = eu.kodanetwork.mchost.security.PraetorSecurity.getSupabaseKey();
                 conn.setRequestProperty("apikey", anonKey);
                 conn.setRequestProperty("Authorization", "Bearer " + anonKey);
                 conn.setDoOutput(true);
                 
-                String json = "{\"two_fa_enabled\": " + enabled + ", \"two_fa_password\": " + (password == null ? "null" : "\"" + password + "\"") + "}";
+                String json = "{\"p_app_uuid\":\"" + appUuid + "\", \"p_payload\": {\"two_fa_enabled\": " + enabled + ", \"two_fa_password\": " + (password == null ? "null" : "\"" + password + "\"") + "}}";
                 java.io.OutputStream os = conn.getOutputStream();
                 os.write(json.getBytes());
                 os.flush(); os.close();

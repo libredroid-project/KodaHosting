@@ -136,15 +136,17 @@ public class PraetorAccountsActivity extends Activity {
                 JSONObject payload = new JSONObject();
                 payload.put("permissions", permsObj);
 
-                URL url = new URL(PraetorSecurity.getSupabaseUrl() + "/rest/v1/koda_users?id=eq." + rowId);
+                URL url = new URL(PraetorSecurity.getSupabaseUrl() + "/rest/v1/rpc/rpc_admin_patch_user");
                 HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-                conn.setRequestMethod("PATCH");
+                conn.setRequestMethod("POST");
                 conn.setRequestProperty("apikey", PraetorSecurity.getSupabaseKey());
                 conn.setRequestProperty("Authorization", "Bearer " + PraetorSecurity.getSupabaseKey()); // using anon key to bypass auth RLS because user might not be the owner
                 conn.setRequestProperty("Content-Type", "application/json");
                 conn.setDoOutput(true);
 
-                conn.getOutputStream().write(payload.toString().getBytes());
+                String adminAppUuid = eu.kodanetwork.mchost.App.getPrefs(PraetorAccountsActivity.this).getString("app_uuid", "");
+                String jsonBody = "{\"p_admin_app_uuid\": \"" + adminAppUuid + "\", \"p_target_id\": \"" + rowId + "\", \"p_payload\": " + payload.toString() + "}";
+                conn.getOutputStream().write(jsonBody.getBytes());
                 
                 int code = conn.getResponseCode();
                 runOnUiThread(() -> {

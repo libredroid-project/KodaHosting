@@ -175,15 +175,15 @@ public class SupabaseAuth {
                 if (oldAppUuid != null && !oldAppUuid.equals(userId)) {
                     new Thread(() -> {
                         try {
-                            URL patchUrl = new URL(eu.kodanetwork.mchost.security.PraetorSecurity.getSupabaseUrl() + "/rest/v1/koda_servers?owner_app_uuid=eq." + oldAppUuid);
+                            URL patchUrl = new URL(eu.kodanetwork.mchost.security.PraetorSecurity.getSupabaseUrl() + "/rest/v1/rpc/rpc_migrate_servers");
                             HttpURLConnection patchConn = (HttpURLConnection) patchUrl.openConnection();
-                            patchConn.setRequestMethod("PATCH");
+                            patchConn.setRequestMethod("POST");
                             patchConn.setRequestProperty("Content-Type", "application/json");
                             patchConn.setRequestProperty("apikey", eu.kodanetwork.mchost.security.PraetorSecurity.getSupabaseKey());
                             patchConn.setRequestProperty("Authorization", "Bearer " + eu.kodanetwork.mchost.security.PraetorSecurity.getSupabaseKey());
                             patchConn.setRequestProperty("Prefer", "return=minimal");
                             patchConn.setDoOutput(true);
-                            String pJson = "{\"owner_app_uuid\":\"" + userId + "\"}";
+                            String pJson = "{\"p_old_app_uuid\":\"" + oldAppUuid + "\", \"p_new_app_uuid\":\"" + userId + "\"}";
                             java.io.OutputStream os = patchConn.getOutputStream();
                             os.write(pJson.getBytes());
                             os.flush(); os.close();

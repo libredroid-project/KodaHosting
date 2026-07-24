@@ -1,4 +1,5 @@
 import { corsHeaders } from "../_shared/cors.ts";
+import { validateHost } from "../_shared/validation.ts";
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
@@ -10,6 +11,14 @@ Deno.serve(async (req) => {
 
     if (!host) {
       return new Response(JSON.stringify({ error: "missing_parameters" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const validationError = validateHost(host);
+    if (validationError) {
+      return new Response(JSON.stringify({ error: validationError }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });

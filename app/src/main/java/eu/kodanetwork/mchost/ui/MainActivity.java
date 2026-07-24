@@ -456,15 +456,20 @@ public class MainActivity extends AppCompatActivity {
 
                 // Check Ban Status
                 if (!uuid.isEmpty()) {
+                    okhttp3.RequestBody body = okhttp3.RequestBody.create(
+                            "{\"p_app_uuid\":\"" + uuid + "\"}",
+                            okhttp3.MediaType.parse("application/json")
+                    );
                     okhttp3.Request userReq = new okhttp3.Request.Builder()
-                        .url(baseUrl + "/rest/v1/koda_users?app_uuid=eq." + uuid + "&select=is_banned")
+                        .url(baseUrl + "/rest/v1/rpc/rpc_get_is_banned")
+                        .post(body)
                         .addHeader("apikey", apiKey)
                         .addHeader("Authorization", "Bearer " + apiKey)
                         .build();
                     try (okhttp3.Response response = client.newCall(userReq).execute()) {
                         if (response.isSuccessful() && response.body() != null) {
                             String json = response.body().string();
-                            if (json.contains("\"is_banned\":true") || json.contains("\"is_banned\": true")) {
+                            if (json.contains("true")) {
                                 runOnUiThread(() -> {
                                     startActivity(new Intent(MainActivity.this, BannedActivity.class));
                                     finish();

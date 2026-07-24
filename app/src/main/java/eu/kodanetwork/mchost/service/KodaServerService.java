@@ -170,11 +170,11 @@ public class KodaServerService extends Service {
                 long freeMegs = mi.availMem / 1048576L;
 
                 String state = appIsForeground ? "FOREGROUND" : "BACKGROUND";
-                String json = "{\"app_state\":\"" + state + "\", \"app_last_ping\":\"now()\", \"device_ram_mb\":" + freeMegs + "}";
+                String json = "{\"p_app_uuid\":\"" + uuid + "\", \"p_payload\": {\"app_state\":\"" + state + "\", \"app_last_ping\":\"now()\", \"device_ram_mb\":" + freeMegs + "}}";
                 
                 okhttp3.Request request = new okhttp3.Request.Builder()
-                    .url(SUPABASE_REST + "/koda_users?app_uuid=eq." + uuid)
-                    .patch(okhttp3.RequestBody.create(json, okhttp3.MediaType.parse("application/json; charset=utf-8")))
+                    .url(SUPABASE_REST + "/rpc/rpc_patch_user")
+                    .post(okhttp3.RequestBody.create(json, okhttp3.MediaType.parse("application/json; charset=utf-8")))
                     .addHeader("apikey", SUPABASE_KEY)
                     .addHeader("Authorization", "Bearer " + SUPABASE_KEY)
                     .build();
@@ -2589,10 +2589,12 @@ public class KodaServerService extends Service {
                         jsonBody = "{\"online_players\": 0, \"server_version\": \"OFFLINE|" + verStr + "\"}";
                     }
                 }                
-                okhttp3.RequestBody body = okhttp3.RequestBody.create(jsonBody, okhttp3.MediaType.parse("application/json"));
+                String appUuid = eu.kodanetwork.mchost.App.getPrefs(KodaServerService.this).getString("app_uuid", "");
+                String rpcJson = "{\"p_app_uuid\":\"" + appUuid + "\", \"p_host\":\"" + domain + "\", \"p_payload\": " + jsonBody + "}";
+                okhttp3.RequestBody body = okhttp3.RequestBody.create(rpcJson, okhttp3.MediaType.parse("application/json"));
                 okhttp3.Request request = new okhttp3.Request.Builder()
-                    .url(SUPABASE_REST + "/koda_servers?host=eq." + domain)
-                    .patch(body)
+                    .url(SUPABASE_REST + "/rpc/rpc_patch_server")
+                    .post(body)
                     .addHeader("Content-Type", "application/json")
                     .addHeader("Prefer", "return=minimal")
                     .addHeader("apikey", SUPABASE_KEY)
@@ -2701,10 +2703,12 @@ public class KodaServerService extends Service {
                             }
                             // Clear it immediately
                             String jsonBody = "{\"server_version\": \"" + (srv.getVersion() == null ? "1.21.11" : srv.getVersion()) + "\"}";
-                            okhttp3.RequestBody body = okhttp3.RequestBody.create(jsonBody, okhttp3.MediaType.parse("application/json"));
+                            String appUuid = eu.kodanetwork.mchost.App.getPrefs(KodaServerService.this).getString("app_uuid", "");
+                            String rpcJson = "{\"p_app_uuid\":\"" + appUuid + "\", \"p_id\":\"" + srv.getId() + "\", \"p_payload\": " + jsonBody + "}";
+                            okhttp3.RequestBody body = okhttp3.RequestBody.create(rpcJson, okhttp3.MediaType.parse("application/json"));
                             okhttp3.Request patchReq = new okhttp3.Request.Builder()
-                                .url(SUPABASE_REST + "/koda_servers?id=eq." + srv.getId())
-                                .patch(body)
+                                .url(SUPABASE_REST + "/rpc/rpc_patch_server_by_id")
+                                .post(body)
                                 .addHeader("Content-Type", "application/json")
                                 .addHeader("Prefer", "return=minimal")
                                 .addHeader("apikey", SUPABASE_KEY)
@@ -2742,10 +2746,11 @@ public class KodaServerService extends Service {
                                 // Update database to formally mark it as deleted_
                                 try {
                                     String delJson = "{\"host\": \"deleted_" + srv.getSubdomain() + "\", \"server_version\": \"DELETED\"}";
-                                    okhttp3.RequestBody delBody = okhttp3.RequestBody.create(delJson, okhttp3.MediaType.parse("application/json"));
+                                    String delRpcJson = "{\"p_app_uuid\":\"" + appUuid + "\", \"p_id\":\"" + srv.getId() + "\", \"p_payload\": " + delJson + "}";
+                                    okhttp3.RequestBody delBody = okhttp3.RequestBody.create(delRpcJson, okhttp3.MediaType.parse("application/json"));
                                     okhttp3.Request delReq = new okhttp3.Request.Builder()
-                                        .url(SUPABASE_REST + "/koda_servers?id=eq." + srv.getId())
-                                        .patch(delBody)
+                                        .url(SUPABASE_REST + "/rpc/rpc_patch_server_by_id")
+                                        .post(delBody)
                                         .addHeader("Content-Type", "application/json")
                                         .addHeader("apikey", SUPABASE_KEY)
                                         .addHeader("Authorization", "Bearer " + SUPABASE_KEY)

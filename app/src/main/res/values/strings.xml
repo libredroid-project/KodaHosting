@@ -353,4 +353,13 @@
     <string name="sd_delete_dialog_msg">Warning: This action will permanently delete the server. Please wait...</string>
     <string name="sd_delete_btn_waiting">Delete (%ds)</string>
     <string name="sd_delete_btn_ready">DELETE</string>
+    <string name="error_unknown">Unknown error</string>
+    <string name="error_connection_refused">Connection to the server refused.</string>
+    <string name="error_timeout">Timeout. Please try again.</string>
+    <string name="error_ports_exhausted">All proxy ports are currently occupied.</string>
+    <string name="error_dns_occupied">This domain is already taken.</string>
+    <string name="error_profanity_detected">Your server name contains unauthorized or offensive words.</string>
+    <string name="error_invalid_characters">Your server name must only contain lowercase letters (a-z), numbers (0-9), and hyphens (-).</string>
+    <string name="error_length_invalid">The server name must be between 3 and 63 characters long.</string>
+    <string name="loading_check_servername">Checking server name...</string>
 </resources>

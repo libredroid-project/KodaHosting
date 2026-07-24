@@ -1,4 +1,5 @@
 import { corsHeaders } from "../_shared/cors.ts";
+import { validateHost } from "../_shared/validation.ts";
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
@@ -12,6 +13,14 @@ Deno.serve(async (req) => {
 
     if (!host || !target || !port) {
       return new Response(JSON.stringify({ error: "missing_parameters" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const validationError = validateHost(host);
+    if (validationError) {
+      return new Response(JSON.stringify({ error: validationError }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -58,22 +67,46 @@ Deno.serve(async (req) => {
     }
 
     // 4. Create SRV record (Points to the A-Record with the Minecraft Port)
-    const createSrvRes = await fetch(`https://api.hosting.ionos.com/dns/v1/zones/${zoneId}/records`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json", "X-API-Key": fullApiKey },
-      body: JSON.stringify([{
-        name: srvFqdn,
-        type: "SRV",
-        content: `0 ${port} ${fqdn}.`,
-        ttl: 3600,
-        prio: 0,
-        disabled: false
-      }])
-    });
+    try {
+      const createSrvRes = await fetch(`https://api.hosting.ionos.com/dns/v1/zones/${zoneId}/records`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "X-API-Key": fullApiKey },
+        body: JSON.stringify([{
+          name: srvFqdn,
+          type: "SRV",
+          content: `0 ${port} ${fqdn}.`,
+          ttl: 3600,
+          prio: 0,
+          disabled: false
+        }])
+      });
 
-    if (!createSrvRes.ok) {
-        const errText = await createSrvRes.text();
-        throw new Error("SRV-Record creation failed: " + errText);
+      if (!createSrvRes.ok) {
+          const errText = await createSrvRes.text();
+          throw new Error("SRV-Record creation failed: " + errText);
+      }
+    } catch (srvError: any) {
+      // ROLLBACK: Delete the A-Record since SRV failed
+      console.error("SRV failed, rolling back A record...", srvError.message);
+      try {
+        // We must fetch the A-record ID to delete it
+        const aRecordRes = await fetch(`https://api.hosting.ionos.com/dns/v1/zones/${zoneId}?recordName=${fqdn}&recordType=A`, {
+          headers: { "X-API-Key": fullApiKey }
+        });
+        if (aRecordRes.ok) {
+           const aData = await aRecordRes.json();
+           if (aData && Array.isArray(aData.records) && aData.records.length > 0) {
+              const aRecordId = aData.records[0].id;
+              await fetch(`https://api.hosting.ionos.com/dns/v1/zones/${zoneId}/records/${aRecordId}`, {
+                method: "DELETE",
+                headers: { "X-API-Key": fullApiKey }
+              });
+           }
+        }
+      } catch (rollbackErr) {
+         console.error("Rollback failed:", rollbackErr);
+      }
+      throw srvError; // Rethrow original error
     }
 
     return new Response(JSON.stringify({ ok: true, host, vps: target, port }), {

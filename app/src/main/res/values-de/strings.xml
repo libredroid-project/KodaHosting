@@ -369,4 +369,13 @@
     <string name="sd_delete_dialog_msg">Achtung: Dieser Vorgang wird den Server permanent löschen. Bitte warte...</string>
     <string name="sd_delete_btn_waiting">Löschen (%ds)</string>
     <string name="sd_delete_btn_ready">LÖSCHEN</string>
+    <string name="error_unknown">Unbekannter Fehler</string>
+    <string name="error_connection_refused">Verbindung zum Server abgelehnt.</string>
+    <string name="error_timeout">Zeitüberschreitung. Bitte erneut versuchen.</string>
+    <string name="error_ports_exhausted">Alle Proxy-Ports belegt.</string>
+    <string name="error_dns_occupied">Diese Domain ist bereits belegt.</string>
+    <string name="error_profanity_detected">Dein Servername enthält unerlaubte oder beleidigende Wörter.</string>
+    <string name="error_invalid_characters">Dein Servername darf nur aus kleinen Buchstaben (a-z), Zahlen (0-9) und Bindestrichen (-) bestehen.</string>
+    <string name="error_length_invalid">Der Servername muss zwischen 3 und 63 Zeichen lang sein.</string>
+    <string name="loading_check_servername">Überprüfe Servernamen...</string>
 </resources>

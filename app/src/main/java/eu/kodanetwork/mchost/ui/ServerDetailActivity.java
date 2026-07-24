@@ -515,7 +515,7 @@ public class ServerDetailActivity extends AppCompatActivity {
                     w.putExtra(PraetorWarningActivity.EXTRA_ACTION, getString(R.string.praetor_action_back));
                     startActivity(w);
                     
-                    // Switch back to Dashboard (index 0)
+                    // android.widget.Switch back to Dashboard (index 0)
                     tabs.selectTab(tabs.getTabAt(0));
                     return;
                 }
@@ -531,183 +531,301 @@ public class ServerDetailActivity extends AppCompatActivity {
         showTab(0);
     }
 
-    private void showPlayerActions() {
+        private void showPlayerActions() {
+        com.google.android.material.bottomsheet.BottomSheetDialog sheet = 
+            new com.google.android.material.bottomsheet.BottomSheetDialog(this);
+        sheet.setContentView(R.layout.bottom_sheet_player_list);
+
+        android.widget.LinearLayout containerOnline = sheet.findViewById(R.id.container_pm_online);
+        android.widget.LinearLayout containerOffline = sheet.findViewById(R.id.container_pm_offline);
+        android.widget.TextView headerOnline = sheet.findViewById(R.id.tv_pm_online_header);
+        android.widget.TextView headerOffline = sheet.findViewById(R.id.tv_pm_offline_header);
+
+        if (containerOnline != null && containerOffline != null && headerOnline != null && headerOffline != null) {
+            containerOnline.removeAllViews();
+            containerOffline.removeAllViews();
+            
+                        
+            if (server != null && server.onlinePlayerNames != null && !server.onlinePlayerNames.isEmpty()) {
+                for (String playerName : server.onlinePlayerNames) {
+                    android.view.View playerRow = getLayoutInflater().inflate(R.layout.item_player_row, containerOnline, false);
+                    android.widget.TextView tvName = playerRow.findViewById(R.id.tv_row_player_name);
+                    tvName.setText(playerName);
+                    
+                    android.widget.ImageView ivHead = playerRow.findViewById(R.id.iv_row_player_head);
+                    new Thread(() -> {
+                        try {
+                            java.net.URL url = new java.net.URL("https://mc-heads.net/avatar/" + playerName + "/64");
+                            java.io.InputStream in = url.openStream();
+                            final android.graphics.Bitmap bmp = android.graphics.BitmapFactory.decodeStream(in);
+                            runOnUiThread(() -> {
+                                if (ivHead != null && bmp != null) ivHead.setImageBitmap(bmp);
+                            });
+                        } catch (Exception e) {}
+                    }).start();
+                    
+                    playerRow.setOnClickListener(v -> {
+                        sheet.dismiss();
+                        showPlayerActionSheet(playerName, true);
+                    });
+                    
+                    containerOnline.addView(playerRow);
+                }
+                headerOnline.setVisibility(android.view.View.VISIBLE);
+                containerOnline.setVisibility(android.view.View.VISIBLE);
+            } else {
+                // Show empty state or hide
+                headerOnline.setVisibility(android.view.View.GONE);
+                containerOnline.setVisibility(android.view.View.GONE);
+            }
+            
+            // For offline players, we could read usercache.json or whitelist.json
+            // Let's implement reading whitelist.json to show known offline players!
+            new Thread(() -> {
+                try {
+                    java.io.File whitelistFile = new java.io.File(server.getServerDir(), "whitelist.json");
+                    if (whitelistFile.exists()) {
+                        StringBuilder sb = new StringBuilder();
+                        try (java.io.BufferedReader br = new java.io.BufferedReader(new java.io.FileReader(whitelistFile))) {
+                            String line;
+                            while ((line = br.readLine()) != null) sb.append(line);
+                        }
+                        org.json.JSONArray arr = new org.json.JSONArray(sb.toString());
+                        java.util.List<String> offlineNames = new java.util.ArrayList<>();
+                        for (int i = 0; i < arr.length(); i++) {
+                            org.json.JSONObject obj = arr.getJSONObject(i);
+                            String name = obj.optString("name");
+                            if (name != null && !name.isEmpty() && (server.onlinePlayerNames == null || !server.onlinePlayerNames.contains(name))) {
+                                offlineNames.add(name);
+                            }
+                        }
+                        
+                        if (!offlineNames.isEmpty()) {
+                            runOnUiThread(() -> {
+                                for (String offlineName : offlineNames) {
+                                    android.view.View playerRow = getLayoutInflater().inflate(R.layout.item_player_row, containerOffline, false);
+                                    android.widget.TextView tvName = playerRow.findViewById(R.id.tv_row_player_name);
+                                    tvName.setText(offlineName);
+                                    tvName.setTextColor(0xFF888899); // darker text for offline
+                                    
+                                    android.widget.ImageView ivHead = playerRow.findViewById(R.id.iv_row_player_head);
+                                    // optional grayscale matrix
+                                    android.graphics.ColorMatrix matrix = new android.graphics.ColorMatrix();
+                                    matrix.setSaturation(0);
+                                    android.graphics.ColorMatrixColorFilter filter = new android.graphics.ColorMatrixColorFilter(matrix);
+                                    ivHead.setColorFilter(filter);
+                                    
+                                    new Thread(() -> {
+                                        try {
+                                            java.net.URL url = new java.net.URL("https://mc-heads.net/avatar/" + offlineName + "/64");
+                                            java.io.InputStream in = url.openStream();
+                                            final android.graphics.Bitmap bmp = android.graphics.BitmapFactory.decodeStream(in);
+                                            runOnUiThread(() -> {
+                                                if (ivHead != null && bmp != null) ivHead.setImageBitmap(bmp);
+                                            });
+                                        } catch (Exception e) {}
+                                    }).start();
+                                    
+                                    playerRow.setOnClickListener(v -> {
+                                        sheet.dismiss();
+                                        showPlayerActionSheet(offlineName, false); // offline player
+                                    });
+                                    
+                                    containerOffline.addView(playerRow);
+                                }
+                                headerOffline.setVisibility(android.view.View.VISIBLE);
+                                containerOffline.setVisibility(android.view.View.VISIBLE);
+                            });
+                        }
+                    }
+                } catch (Exception e) {}
+            }).start();
+        }
+
+        sheet.show();
+    }
+
+private void showPlayerActionSheet(String player, boolean isOnline) {
         com.google.android.material.bottomsheet.BottomSheetDialog sheet = 
             new com.google.android.material.bottomsheet.BottomSheetDialog(this);
         
-        android.widget.LinearLayout container = new android.widget.LinearLayout(this);
-        container.setOrientation(android.widget.LinearLayout.VERTICAL);
-        container.setBackgroundColor(0xFF0E0E14);
-        container.setPadding(0, 0, 0, 48);
-
-        TextView tvTitle = new TextView(this);
-        tvTitle.setText(R.string.players_manage_title);
-        tvTitle.setTextColor(0xFFFF6B00);
-        tvTitle.setTextSize(13);
-        tvTitle.setTypeface(android.graphics.Typeface.DEFAULT_BOLD);
-        tvTitle.setLetterSpacing(0.12f);
-        tvTitle.setPadding(48, 40, 48, 24);
-        container.addView(tvTitle);
-
-        View div = new View(this);
-        div.setBackgroundColor(0xFF222230);
-        div.setLayoutParams(new android.widget.LinearLayout.LayoutParams(android.widget.LinearLayout.LayoutParams.MATCH_PARENT, 1));
-        container.addView(div);
-
-        java.util.Set<String> shown = new java.util.HashSet<>();
-        int pad = (int)(16 * getResources().getDisplayMetrics().density);
-
-        java.util.List<String> onlineList = new java.util.ArrayList<>();
-        if (server.onlinePlayerNames != null) {
-            try { onlineList.addAll(server.onlinePlayerNames); } catch (Exception ignored) {}
+        View view = getLayoutInflater().inflate(R.layout.bottom_sheet_player_manage, null);
+        sheet.setContentView(view);
+        
+        android.view.Window w = sheet.getWindow();
+        if (w != null) {
+            w.setNavigationBarColor(0xFF1B1613);
+            w.setStatusBarColor(0xFF1B1613);
         }
         
-        if (!onlineList.isEmpty()) {
-            TextView header = new TextView(this);
-            header.setText(R.string.players_online);
-            header.setTextColor(Color.parseColor("#00E676"));
-            header.setTextSize(12);
-            header.setPadding(48, pad, 48, pad/2);
-            container.addView(header);
-
-            for (String p : onlineList) {
-                container.addView(createPlayerRow(p, true, pad, sheet));
-                shown.add(p);
+        // Setup Header
+        TextView tvName = view.findViewById(R.id.tv_pm_player_name);
+        tvName.setText(player + (isOnline ? " (Online)" : " (Offline)"));
+        
+        // Buttons
+        android.widget.Button btnHeal = view.findViewById(R.id.btn_pm_heal);
+        android.widget.Button btnStarve = view.findViewById(R.id.btn_pm_starve);
+        android.widget.Button btnKill = view.findViewById(R.id.btn_pm_kill);
+        android.widget.Button btnDelete = view.findViewById(R.id.btn_pm_delete);
+        android.widget.Switch switchWhitelist = view.findViewById(R.id.switch_pm_whitelist);
+        
+        btnHeal.setOnClickListener(v -> {
+            sendCmd("effect give " + player + " instant_health 1 255");
+            android.widget.Toast.makeText(this, "Healed " + player, android.widget.Toast.LENGTH_SHORT).show();
+        });
+        
+        btnStarve.setOnClickListener(v -> {
+            sendCmd("effect give " + player + " hunger 100 255");
+            android.widget.Toast.makeText(this, "Starving " + player, android.widget.Toast.LENGTH_SHORT).show();
+        });
+        
+        btnKill.setOnClickListener(v -> {
+            sendCmd("kill " + player);
+            android.widget.Toast.makeText(this, "Killed " + player, android.widget.Toast.LENGTH_SHORT).show();
+        });
+        
+        btnDelete.setOnClickListener(v -> {
+            new android.app.AlertDialog.Builder(this)
+                .setTitle("Wipe Player Data")
+                .setMessage("Are you sure? This will kick the player and delete their inventory and stats.")
+                .setPositiveButton("Wipe", (d, w2) -> {
+                    sendCmd("kick " + player + " Your data is being wiped.");
+                    new Thread(() -> {
+                        try { Thread.sleep(1000); } catch(Exception ignored){}
+                        String uuid = eu.kodanetwork.mchost.util.PlayerStatsParser.getUuidFromName(new java.io.File(server.getServerDir()), player);
+                        if (uuid != null) {
+                            new java.io.File(server.getServerDir(), "world/playerdata/" + uuid + ".dat").delete();
+                            new java.io.File(server.getServerDir(), "world/stats/" + uuid + ".json").delete();
+                            runOnUiThread(() -> {
+                                android.widget.Toast.makeText(this, "Wiped " + player, android.widget.Toast.LENGTH_SHORT).show();
+                                sheet.dismiss();
+                            });
+                        }
+                    }).start();
+                })
+                .setNegativeButton("Cancel", null)
+                .show();
+        });
+        
+        // Stats
+        new Thread(() -> {
+            String uuid = eu.kodanetwork.mchost.util.PlayerStatsParser.getUuidFromName(new java.io.File(server.getServerDir()), player);
+            if (uuid != null) {
+                eu.kodanetwork.mchost.util.PlayerStatsParser.PlayerStats stats = eu.kodanetwork.mchost.util.PlayerStatsParser.getStats(new java.io.File(server.getServerDir()), uuid);
+                
+                // Read Whitelist
+                boolean isWhitelisted = false;
+                try {
+                    java.io.File wl = new java.io.File(server.getServerDir(), "whitelist.json");
+                    if (wl.exists()) {
+                        byte[] bytes = new byte[(int) wl.length()];
+                        try (java.io.FileInputStream fis = new java.io.FileInputStream(wl)) { fis.read(bytes); }
+                        org.json.JSONArray arr = new org.json.JSONArray(new String(bytes, java.nio.charset.StandardCharsets.UTF_8));
+                        for (int i = 0; i < arr.length(); i++) {
+                            if (arr.getJSONObject(i).getString("uuid").equalsIgnoreCase(uuid)) {
+                                isWhitelisted = true; break;
+                            }
+                        }
+                    }
+                } catch(Exception ignored){}
+                
+                boolean finalIsWhitelisted = isWhitelisted;
+                
+                // Read Inventory
+                java.util.Map<String, Object> dat = eu.kodanetwork.mchost.util.NbtParser.parsePlayerDat(new java.io.File(server.getServerDir(), "world/playerdata/" + uuid + ".dat"));
+                
+                runOnUiThread(() -> {
+                    TextView tvDeaths = view.findViewById(R.id.tv_pm_stat_deaths);
+                    TextView tvMined = view.findViewById(R.id.tv_pm_stat_mined);
+                    TextView tvHours = view.findViewById(R.id.tv_pm_stat_hours);
+                    TextView tvMobs = view.findViewById(R.id.tv_pm_stat_mobs);
+                    TextView tvDmg = view.findViewById(R.id.tv_pm_stat_dmg);
+                    
+                    tvDeaths.setText(String.valueOf(stats.deaths));
+                    tvMined.setText(String.valueOf(stats.blocksMined));
+                    tvHours.setText(String.valueOf(stats.hoursPlayed));
+                    tvMobs.setText(String.valueOf(stats.mobsKilled));
+                    tvDmg.setText(String.valueOf(stats.damageTaken));
+                    
+                    switchWhitelist.setChecked(finalIsWhitelisted);
+                    switchWhitelist.setOnCheckedChangeListener((btn, isChecked) -> {
+                        sendCmd((isChecked ? "whitelist add " : "whitelist remove ") + player);
+                    });
+                    
+                    if (dat != null && dat.containsKey("Inventory")) {
+                        populateInventoryUI(view, (java.util.List<Object>) dat.get("Inventory"));
+                    }
+                });
             }
+        }).start();
+        
+        sheet.show();
+    }
+    
+    private void populateInventoryUI(View view, java.util.List<Object> inventory) {
+        android.widget.LinearLayout containerArmor = view.findViewById(R.id.container_armor);
+        android.widget.FrameLayout containerOffhand = view.findViewById(R.id.container_offhand);
+        android.widget.GridLayout gridMain = view.findViewById(R.id.grid_inventory_main);
+        android.widget.GridLayout gridHotbar = view.findViewById(R.id.grid_inventory_hotbar);
+        
+        // Initialize empty slots
+        View[] armorSlots = new View[4];
+        for (int i=0; i<4; i++) {
+            armorSlots[i] = getLayoutInflater().inflate(R.layout.item_inventory_slot, containerArmor, false);
+            containerArmor.addView(armorSlots[i]);
         }
-
-        java.util.List<String> offlineList = new java.util.ArrayList<>();
-        if (server.knownPlayers != null) {
-            try { offlineList.addAll(server.knownPlayers); } catch (Exception ignored) {}
+        View offhandSlot = getLayoutInflater().inflate(R.layout.item_inventory_slot, containerOffhand, false);
+        containerOffhand.addView(offhandSlot);
+        
+        View[] mainSlots = new View[27];
+        for (int i=0; i<27; i++) {
+            mainSlots[i] = getLayoutInflater().inflate(R.layout.item_inventory_slot, gridMain, false);
+            gridMain.addView(mainSlots[i]);
         }
         
-        boolean hasOffline = false;
-        for (String p : offlineList) {
-            if (!shown.contains(p)) hasOffline = true;
+        View[] hotbarSlots = new View[9];
+        for (int i=0; i<9; i++) {
+            hotbarSlots[i] = getLayoutInflater().inflate(R.layout.item_inventory_slot, gridHotbar, false);
+            gridHotbar.addView(hotbarSlots[i]);
         }
-
-        if (hasOffline) {
-            TextView header2 = new TextView(this);
-            header2.setText(R.string.players_offline_known);
-            header2.setTextColor(eu.kodanetwork.mchost.util.ThemeHelper.isLightMode(this) ? 0xFF555566 : Color.GRAY);
-            header2.setTextSize(12);
-            header2.setPadding(48, shown.isEmpty() ? pad : pad*2, 48, pad/2);
-            container.addView(header2);
-
-            for (String p : offlineList) {
-                if (!shown.contains(p)) {
-                    container.addView(createPlayerRow(p, false, pad, sheet));
+        
+        // Populate items
+        for (Object itemObj : inventory) {
+            if (itemObj instanceof java.util.Map) {
+                java.util.Map<String, Object> item = (java.util.Map<String, Object>) itemObj;
+                int slotId = -1;
+                if (item.containsKey("Slot")) {
+                    Object slotVal = item.get("Slot");
+                    if (slotVal instanceof Byte) slotId = (Byte) slotVal;
+                    else if (slotVal instanceof Number) slotId = ((Number)slotVal).intValue();
+                }
+                
+                String id = (String) item.get("id"); // e.g. minecraft:stone
+                int count = 1;
+                if (item.containsKey("Count")) count = ((Number)item.get("Count")).intValue();
+                
+                View targetView = null;
+                if (slotId >= 0 && slotId <= 8) targetView = hotbarSlots[slotId];
+                else if (slotId >= 9 && slotId <= 35) targetView = mainSlots[slotId - 9];
+                else if (slotId >= 100 && slotId <= 103) targetView = armorSlots[103 - slotId]; // 103=helmet, 102=chest, 101=legs, 100=boots
+                else if (slotId == 106) targetView = offhandSlot;
+                
+                if (targetView != null && id != null) {
+                    android.widget.ImageView iv = targetView.findViewById(R.id.iv_item_icon);
+                    TextView tvCount = targetView.findViewById(R.id.tv_item_count);
+                    
+                    String itemName = id.replace("minecraft:", "");
+                    String url = "https://raw.githubusercontent.com/InventivetalentDev/minecraft-assets/master/assets/minecraft/textures/item/" + itemName + ".png";
+                    
+                    com.bumptech.glide.Glide.with(this).load(url).into(iv);
+                    
+                    if (count > 1) {
+                        tvCount.setVisibility(View.VISIBLE);
+                        tvCount.setText(String.valueOf(count));
+                    }
                 }
             }
         }
-
-        if (container.getChildCount() == 2) { // Only Title and Divider
-            TextView empty = new TextView(this);
-            empty.setText(R.string.players_none_known);
-            boolean light = eu.kodanetwork.mchost.util.ThemeHelper.isLightMode(this);
-            empty.setTextColor(light ? 0xFF555566 : 0xFF888899);
-            empty.setPadding(48, pad, 48, pad);
-            container.addView(empty);
-        }
-
-        android.widget.ScrollView sv = new android.widget.ScrollView(this);
-        sv.addView(container);
-        sheet.setContentView(sv);
-        
-        android.view.Window w = sheet.getWindow();
-        if (w != null) {
-            w.setNavigationBarColor(0xFF0D0D14);
-            w.setStatusBarColor(0xFF0D0D14);
-        }
-        sheet.show();
-    }
-
-    private android.widget.LinearLayout createPlayerRow(String p, boolean isOnline, int pad, com.google.android.material.bottomsheet.BottomSheetDialog parentSheet) {
-        android.widget.LinearLayout row = new android.widget.LinearLayout(this);
-        row.setOrientation(android.widget.LinearLayout.HORIZONTAL);
-        row.setGravity(android.view.Gravity.CENTER_VERTICAL);
-        row.setPadding(48, pad/2, 48, pad/2);
-
-        TextView tv = new TextView(this);
-        tv.setText(p);
-        tv.setTextSize(16);
-        tv.setTextColor(isOnline ? Color.WHITE : Color.GRAY);
-        android.widget.LinearLayout.LayoutParams lpTv = new android.widget.LinearLayout.LayoutParams(0, android.view.ViewGroup.LayoutParams.WRAP_CONTENT, 1f);
-        row.addView(tv, lpTv);
-
-        TextView btn = new TextView(this);
-        btn.setText(R.string.players_manage);
-        btn.setTextColor(0xFFFF6B00);
-        btn.setPadding(pad, pad/4, 0, pad/4);
-        android.util.TypedValue outValue = new android.util.TypedValue();
-        getTheme().resolveAttribute(android.R.attr.selectableItemBackgroundBorderless, outValue, true);
-        btn.setBackgroundResource(outValue.resourceId);
-        btn.setClickable(true);
-        btn.setFocusable(true);
-        
-        btn.setOnClickListener(v -> {
-            showPlayerActionSheet(p, isOnline);
-            parentSheet.dismiss();
-        });
-        row.addView(btn);
-        return row;
-    }
-
-    private void showPlayerActionSheet(String player, boolean isOnline) {
-        com.google.android.material.bottomsheet.BottomSheetDialog sheet = 
-            new com.google.android.material.bottomsheet.BottomSheetDialog(this);
-        
-        android.widget.LinearLayout container = new android.widget.LinearLayout(this);
-        container.setOrientation(android.widget.LinearLayout.VERTICAL);
-        container.setBackgroundColor(0xFF0E0E14);
-        container.setPadding(0, 0, 0, 48);
-
-        TextView tvTitle = new TextView(this);
-        tvTitle.setText("AKTION FÜR: " + player);
-        tvTitle.setTextColor(0xFFFF6B00);
-        tvTitle.setTextSize(13);
-        tvTitle.setTypeface(android.graphics.Typeface.DEFAULT_BOLD);
-        tvTitle.setLetterSpacing(0.12f);
-        tvTitle.setPadding(48, 40, 48, 24);
-        container.addView(tvTitle);
-
-        View div = new View(this);
-        div.setBackgroundColor(0xFF222230);
-        div.setLayoutParams(new android.widget.LinearLayout.LayoutParams(android.widget.LinearLayout.LayoutParams.MATCH_PARENT, 1));
-        container.addView(div);
-
-        if (isOnline) addPlayerActionBtn(container, sheet, "Kick", "kick " + player, 0xFFF0F0F0);
-        addPlayerActionBtn(container, sheet, "Ban", "ban " + player, 0xFFFF4444);
-        addPlayerActionBtn(container, sheet, "Pardon (Entbannen)", "pardon " + player, 0xFF00E676);
-        addPlayerActionBtn(container, sheet, "OP geben", "op " + player, 0xFF44AAFF);
-        addPlayerActionBtn(container, sheet, "OP entfernen", "deop " + player, 0xFFFFCC00);
-
-        sheet.setContentView(container);
-        android.view.Window w = sheet.getWindow();
-        if (w != null) {
-            w.setNavigationBarColor(0xFF0D0D14);
-            w.setStatusBarColor(0xFF0D0D14);
-        }
-        sheet.show();
-    }
-
-    private void addPlayerActionBtn(android.widget.LinearLayout container, com.google.android.material.bottomsheet.BottomSheetDialog sheet, String text, String cmd, int color) {
-        TextView btn = new TextView(ServerDetailActivity.this);
-        btn.setText(text);
-        btn.setTextColor(color);
-        btn.setTextSize(15);
-        btn.setPadding(48, 40, 48, 40);
-        btn.setClickable(true);
-        
-        android.util.TypedValue tv2 = new android.util.TypedValue();
-        getTheme().resolveAttribute(android.R.attr.selectableItemBackground, tv2, true);
-        btn.setForeground(ContextCompat.getDrawable(ServerDetailActivity.this, tv2.resourceId));
-        
-        btn.setOnClickListener(v -> {
-            if (svc != null) svc.sendCmd(server.getId(), cmd);
-            sheet.dismiss();
-        });
-        container.addView(btn);
     }
 
     private void showTab(int i) {
@@ -724,7 +842,7 @@ public class ServerDetailActivity extends AppCompatActivity {
 
     private void setupDashButtons() {
         btnStart.setOnClickListener(v -> {
-            eu.kodanetwork.mchost.util.AppLogger.log("UI", "START button clicked for server: " + server.getName());
+            eu.kodanetwork.mchost.util.AppLogger.log("UI", "START android.widget.Button clicked for server: " + server.getName());
             File serverDir = new File(server.getServerDir());
             if (!serverDir.exists()) {
                 eu.kodanetwork.mchost.util.AppLogger.log("UI", "Server directory does not exist: " + serverDir.getAbsolutePath());
@@ -1396,7 +1514,7 @@ public class ServerDetailActivity extends AppCompatActivity {
 
         addProtectedHeader(currentDir);
 
-        // Back button if not in root
+        // Back android.widget.Button if not in root
         if (!currentDir.getAbsolutePath().equals(rootPath)) {
             addFRow(".. (Ordner hoch)", currentDir.getParentFile());
         }
@@ -1468,7 +1586,11 @@ public class ServerDetailActivity extends AppCompatActivity {
                                         }
                                     }
                                     refreshFiles();
-                                } catch (Exception e) { Toast.makeText(this, getString(R.string.sd_toast_error_prefix) + e.getMessage(), Toast.LENGTH_SHORT).show(); }
+                                } catch (Exception e) { 
+                                    runOnUiThread(() -> {
+                                        Toast.makeText(this, getString(R.string.sd_toast_error_prefix) + getFriendlyErrorMsg(e.getMessage()), Toast.LENGTH_LONG).show();
+                                    });
+                                }
                             })
                             .setNegativeButton("Abbrechen", null)
                             .show();
@@ -1670,7 +1792,7 @@ public class ServerDetailActivity extends AppCompatActivity {
                                     if (e.getMessage() != null && e.getMessage().contains("ports_exhausted")) {
                                         eu.kodanetwork.mchost.ui.components.PraetorDialog.showApology(ServerDetailActivity.this, "P.R.A.E.T.O.R.", "Alle Bedrock Proxy-Ports sind derzeit belegt. Bitte versuche es später erneut.");
                                     } else {
-                                        android.widget.Toast.makeText(ServerDetailActivity.this, getString(R.string.sd_toast_error_prefix) + e.getMessage(), android.widget.Toast.LENGTH_LONG).show();
+                                        android.widget.Toast.makeText(ServerDetailActivity.this, getString(R.string.sd_toast_error_prefix) + getFriendlyErrorMsg(e.getMessage()), android.widget.Toast.LENGTH_LONG).show();
                                     }
                                 });
                             }
@@ -1721,7 +1843,7 @@ public class ServerDetailActivity extends AppCompatActivity {
                                     if (e.getMessage() != null && e.getMessage().contains("ports_exhausted")) {
                                         eu.kodanetwork.mchost.ui.components.PraetorDialog.showApology(ServerDetailActivity.this, "P.R.A.E.T.O.R.", "Alle Voicechat Proxy-Ports sind derzeit belegt. Bitte versuche es später erneut.");
                                     } else {
-                                        android.widget.Toast.makeText(ServerDetailActivity.this, getString(R.string.sd_toast_error_prefix) + e.getMessage(), android.widget.Toast.LENGTH_LONG).show();
+                                        android.widget.Toast.makeText(ServerDetailActivity.this, getString(R.string.sd_toast_error_prefix) + getFriendlyErrorMsg(e.getMessage()), android.widget.Toast.LENGTH_LONG).show();
                                     }
                                 });
                             }
@@ -1793,7 +1915,7 @@ public class ServerDetailActivity extends AppCompatActivity {
                             if ("DNS_OCCUPIED".equals(e.getMessage())) {
                                 runOnUiThread(() -> handleDnsOccupied());
                             } else {
-                                runOnUiThread(() -> android.widget.Toast.makeText(this, getString(R.string.sd_toast_wakeup_error) + e.getMessage(), android.widget.Toast.LENGTH_LONG).show());
+                                runOnUiThread(() -> android.widget.Toast.makeText(this, getString(R.string.sd_toast_wakeup_error) + e.getMessage(), android.widget.Toast.LENGTH_SHORT).show());
                             }
                         }
                     }).start();
@@ -1825,7 +1947,7 @@ public class ServerDetailActivity extends AppCompatActivity {
                         if ("DNS_OCCUPIED".equals(e.getMessage())) {
                             runOnUiThread(() -> handleDnsOccupied());
                         } else {
-                            runOnUiThread(() -> android.widget.Toast.makeText(this, getString(R.string.sd_toast_wakeup_error) + e.getMessage(), android.widget.Toast.LENGTH_LONG).show());
+                            runOnUiThread(() -> android.widget.Toast.makeText(ServerDetailActivity.this, getString(R.string.sd_toast_wakeup_error) + e.getMessage(), android.widget.Toast.LENGTH_SHORT).show());
                         }
                     }
                 }).start();
@@ -1999,7 +2121,7 @@ public class ServerDetailActivity extends AppCompatActivity {
                 });
                 
                 holder.itemView.setOnClickListener(v -> {
-                    // Show a loading dialog instead of pbDl since pbDl is for the download button
+                    // Show a loading dialog instead of pbDl since pbDl is for the download android.widget.Button
                     android.app.ProgressDialog pd = new android.app.ProgressDialog(ServerDetailActivity.this);
                     pd.setMessage(getString(R.string.sd_dialog_loading_versions));
                     pd.setCancelable(false);
@@ -2179,7 +2301,7 @@ public class ServerDetailActivity extends AppCompatActivity {
                                             } catch (Exception e) {
                                                 runOnUiThread(() -> {
                                                     pbDl.setVisibility(View.GONE); btnDl.setVisibility(View.VISIBLE);
-                                                    android.widget.Toast.makeText(ServerDetailActivity.this, getString(R.string.sd_toast_error_prefix) + e.getMessage(), android.widget.Toast.LENGTH_SHORT).show();
+                                                    android.widget.Toast.makeText(ServerDetailActivity.this, getString(R.string.sd_toast_error_prefix) + getFriendlyErrorMsg(e.getMessage()), android.widget.Toast.LENGTH_SHORT).show();
                                                     View headerRestart = findViewById(R.id.layout_header_restart);
                                                     if (headerRestart != null) {
                                                         new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
@@ -2238,6 +2360,19 @@ public class ServerDetailActivity extends AppCompatActivity {
         // Trigger initial search to load popular plugins
         doSearch.run();
     }
+    
+    private String getFriendlyErrorMsg(String msg) {
+        if (msg == null) return getString(R.string.error_unknown);
+        if (msg.contains("Connection refused")) return getString(R.string.error_connection_refused);
+        if (msg.contains("timeout")) return getString(R.string.error_timeout);
+        if (msg.contains("ports_exhausted")) return getString(R.string.error_ports_exhausted);
+        if (msg.contains("DNS_OCCUPIED")) return getString(R.string.error_dns_occupied);
+        if (msg.contains("profanity_detected")) return getString(R.string.error_profanity_detected);
+        if (msg.contains("invalid_characters")) return getString(R.string.error_invalid_characters);
+        if (msg.contains("length_invalid")) return getString(R.string.error_length_invalid);
+        return msg;
+    }
+
     private void startTunnel() {
         io.execute(() -> {
             PlayitManager manager = new PlayitManager(this);
@@ -2667,6 +2802,170 @@ public class ServerDetailActivity extends AppCompatActivity {
         switchFlight.setOnCheckedChangeListener(checkListener);
     }
 
+    
+    private void showModrinthSearch() {
+        com.google.android.material.bottomsheet.BottomSheetDialog dialog = new com.google.android.material.bottomsheet.BottomSheetDialog(this);
+        dialog.setContentView(R.layout.dialog_modrinth_search);
+        
+        android.view.Window window = dialog.getWindow();
+        if (window != null) {
+            window.addFlags(android.view.WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+            window.setNavigationBarColor(android.graphics.Color.TRANSPARENT);
+            window.setStatusBarColor(0xFF0A0807);
+            window.getDecorView().setSystemUiVisibility(
+                android.view.View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION | android.view.View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
+            if (android.os.Build.VERSION.SDK_INT >= 29) {
+                window.setNavigationBarContrastEnforced(false);
+            }
+        }
+        
+        dialog.setOnShowListener(d -> {
+            com.google.android.material.bottomsheet.BottomSheetDialog bsd = (com.google.android.material.bottomsheet.BottomSheetDialog) d;
+            android.widget.FrameLayout bottomSheet = bsd.findViewById(com.google.android.material.R.id.design_bottom_sheet);
+            if (bottomSheet != null) {
+                com.google.android.material.bottomsheet.BottomSheetBehavior<android.view.View> behavior = com.google.android.material.bottomsheet.BottomSheetBehavior.from(bottomSheet);
+                bottomSheet.getLayoutParams().height = android.view.ViewGroup.LayoutParams.MATCH_PARENT;
+                bottomSheet.requestLayout();
+                behavior.setPeekHeight(android.content.res.Resources.getSystem().getDisplayMetrics().heightPixels);
+                behavior.setState(com.google.android.material.bottomsheet.BottomSheetBehavior.STATE_EXPANDED);
+            }
+        });
+        
+        android.widget.EditText etSearch = dialog.findViewById(R.id.et_modrinth_search);
+        android.widget.ImageButton btnSubmit = dialog.findViewById(R.id.btn_modrinth_search_submit);
+        androidx.recyclerview.widget.RecyclerView rvResults = dialog.findViewById(R.id.rv_modrinth_results);
+        android.widget.ProgressBar pb = dialog.findViewById(R.id.pb_modrinth_search);
+        
+        rvResults.setLayoutManager(new androidx.recyclerview.widget.LinearLayoutManager(this));
+        
+        eu.kodanetwork.mchost.ui.adapters.ModrinthSearchAdapter adapter = new eu.kodanetwork.mchost.ui.adapters.ModrinthSearchAdapter(this, (project, pbDownload, btn) -> {
+            pbDownload.setVisibility(android.view.View.VISIBLE);
+            btn.setVisibility(android.view.View.GONE);
+            new Thread(() -> {
+                try {
+                    String projectId = project.optString("project_id", project.optString("id"));
+                    String projectTitle = project.optString("title");
+                    String versionUrl = "https://api.modrinth.com/v2/project/" + projectId + "/version";
+                    java.net.HttpURLConnection conn = (java.net.HttpURLConnection) new java.net.URL(versionUrl).openConnection();
+                    conn.setRequestProperty("User-Agent", "KodaNetwork/1.0");
+                    java.io.InputStream in = conn.getInputStream();
+                    java.io.BufferedReader reader = new java.io.BufferedReader(new java.io.InputStreamReader(in));
+                    StringBuilder sb = new StringBuilder();
+                    String line;
+                    while ((line = reader.readLine()) != null) sb.append(line);
+                    in.close();
+                    
+                    org.json.JSONArray versions = new org.json.JSONArray(sb.toString());
+                    if (versions.length() > 0) {
+                        org.json.JSONObject latest = versions.getJSONObject(0);
+                        org.json.JSONArray files = latest.getJSONArray("files");
+                        if (files.length() > 0) {
+                            org.json.JSONObject file = files.getJSONObject(0);
+                            String dlUrl = file.getString("url");
+                            String sha1 = file.getJSONObject("hashes").getString("sha1");
+                            
+                            runOnUiThread(() -> {
+                                pbDownload.setVisibility(android.view.View.GONE);
+                                btn.setVisibility(android.view.View.VISIBLE);
+                                dialog.dismiss();
+                                
+                                java.io.File propsFile = new java.io.File(server.getServerDir(), "server.properties");
+                                try {
+                                    java.util.List<String> linesProps = new java.util.ArrayList<>();
+                                    if (propsFile.exists()) {
+                                        try (java.io.BufferedReader br = new java.io.BufferedReader(new java.io.FileReader(propsFile))) {
+                                            String l; while ((l = br.readLine()) != null) linesProps.add(l);
+                                        }
+                                    }
+                                    boolean foundUrl = false, foundSha1 = false;
+                                    for (int i = 0; i < linesProps.size(); i++) {
+                                        if (linesProps.get(i).trim().startsWith("resource-pack=")) {
+                                            linesProps.set(i, "resource-pack=" + dlUrl);
+                                            foundUrl = true;
+                                        } else if (linesProps.get(i).trim().startsWith("resource-pack-sha1=")) {
+                                            linesProps.set(i, "resource-pack-sha1=" + sha1);
+                                            foundSha1 = true;
+                                        }
+                                    }
+                                    if (!foundUrl) linesProps.add("resource-pack=" + dlUrl);
+                                    if (!foundSha1) linesProps.add("resource-pack-sha1=" + sha1);
+                                    try (java.io.PrintWriter pw = new java.io.PrintWriter(new java.io.FileWriter(propsFile))) {
+                                        for (String l : linesProps) pw.println(l);
+                                    }
+                                } catch (Exception ignored) {}
+                                
+                                android.widget.TextView tvUrl = findViewById(R.id.tv_resource_pack_url);
+                                if (tvUrl != null) tvUrl.setText(dlUrl);
+                                
+                                android.widget.Toast.makeText(ServerDetailActivity.this, "Resource Pack applied: " + projectTitle, android.widget.Toast.LENGTH_SHORT).show();
+                            });
+                            return;
+                        }
+                    }
+                    runOnUiThread(() -> {
+                        pbDownload.setVisibility(android.view.View.GONE);
+                        btn.setVisibility(android.view.View.VISIBLE);
+                        android.widget.Toast.makeText(ServerDetailActivity.this, "No valid files found for " + projectTitle, android.widget.Toast.LENGTH_SHORT).show();
+                    });
+                } catch (Exception e) {
+                    runOnUiThread(() -> {
+                        pbDownload.setVisibility(android.view.View.GONE);
+                        btn.setVisibility(android.view.View.VISIBLE);
+                        android.widget.Toast.makeText(ServerDetailActivity.this, "Error fetching versions: " + e.getMessage(), android.widget.Toast.LENGTH_SHORT).show();
+                    });
+                }
+            }).start();
+        });
+        rvResults.setAdapter(adapter);
+        
+        android.view.View.OnClickListener doSearch = v -> {
+            String query = etSearch.getText().toString().trim();
+            if (query.isEmpty()) return;
+            
+            eu.kodanetwork.mchost.util.HapticUtil.forceVibrate(this, 30);
+            pb.setVisibility(android.view.View.VISIBLE);
+            
+            new Thread(() -> {
+                try {
+                    String urlStr = "https://api.modrinth.com/v2/search?query=" + java.net.URLEncoder.encode(query, "UTF-8") + "&facets=[[%22project_type:resourcepack%22]]";
+                    java.net.HttpURLConnection conn = (java.net.HttpURLConnection) new java.net.URL(urlStr).openConnection();
+                    conn.setRequestProperty("User-Agent", "KodaNetwork/1.0");
+                    
+                    java.io.InputStream in = conn.getInputStream();
+                    java.io.BufferedReader reader = new java.io.BufferedReader(new java.io.InputStreamReader(in));
+                    StringBuilder sb = new StringBuilder();
+                    String line;
+                    while ((line = reader.readLine()) != null) sb.append(line);
+                    in.close();
+                    
+                    org.json.JSONObject result = new org.json.JSONObject(sb.toString());
+                    org.json.JSONArray hits = result.getJSONArray("hits");
+                    
+                    runOnUiThread(() -> {
+                        pb.setVisibility(android.view.View.GONE);
+                        adapter.setResults(hits);
+                    });
+                } catch (Exception e) {
+                    runOnUiThread(() -> {
+                        pb.setVisibility(android.view.View.GONE);
+                        android.widget.Toast.makeText(ServerDetailActivity.this, "Search error: " + e.getMessage(), android.widget.Toast.LENGTH_SHORT).show();
+                    });
+                }
+            }).start();
+        };
+        
+        btnSubmit.setOnClickListener(doSearch);
+        etSearch.setOnEditorActionListener((v, actionId, event) -> {
+            if (actionId == android.view.inputmethod.EditorInfo.IME_ACTION_SEARCH) {
+                doSearch.onClick(v);
+                return true;
+            }
+            return false;
+        });
+        
+        dialog.show();
+    }
+
     private void downloadJar() {
         server.state = ServerInstance.State.INSTALLING;
         updateDash();
@@ -3001,4 +3300,5 @@ public class ServerDetailActivity extends AppCompatActivity {
         eu.kodanetwork.mchost.util.HapticUtil.forceVibrate(this, 30);
         android.widget.Toast.makeText(this, label + getString(R.string.sd_toast_copied_suffix), android.widget.Toast.LENGTH_SHORT).show();
     }
+
 }

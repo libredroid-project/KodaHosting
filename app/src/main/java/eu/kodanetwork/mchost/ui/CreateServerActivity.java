@@ -1220,12 +1220,13 @@ public class CreateServerActivity extends AppCompatActivity {
         android.widget.TextView loadingText = findViewById(R.id.tv_extract_msg);
 
         if (loadingOverlay != null && loadingText != null) {
-            loadingText.setText("Überprüfe Servernamen...");
+            loadingText.setText(getString(R.string.loading_check_servername));
             loadingOverlay.setVisibility(android.view.View.VISIBLE);
             animateLightBlob(findViewById(R.id.java_extract_light_blob));
         }
 
         executor.submit(() -> {
+            boolean portAllocated = false;
             try {
                 boolean isTaken = false;
                 try {
@@ -1233,7 +1234,7 @@ public class CreateServerActivity extends AppCompatActivity {
                 } catch (Exception e) {
                     mainHandler.post(() -> {
                         if (loadingOverlay != null) loadingOverlay.setVisibility(android.view.View.GONE);
-                        android.widget.Toast.makeText(CreateServerActivity.this, "Fehler bei der Namensprüfung: " + e.getMessage(), android.widget.Toast.LENGTH_LONG).show();
+                        android.widget.Toast.makeText(CreateServerActivity.this, "Fehler bei der Namensprüfung: " + getFriendlyErrorMsg(e.getMessage()), android.widget.Toast.LENGTH_LONG).show();
                     });
                     return;
                 }
@@ -1249,13 +1250,14 @@ public class CreateServerActivity extends AppCompatActivity {
                 try {
                     int allocatedPort = new eu.kodanetwork.mchost.network.supabase.SupabaseFunctionsClient(CreateServerActivity.this).allocatePort("", s.getSubdomain(), "main");
                     s.setPort(allocatedPort);
+                    portAllocated = true;
                 } catch (Exception e) {
                     mainHandler.post(() -> {
                         if (loadingOverlay != null) loadingOverlay.setVisibility(android.view.View.GONE);
                         if (e.getMessage() != null && e.getMessage().contains("ports_exhausted")) {
                             eu.kodanetwork.mchost.ui.components.PraetorDialog.showApology(CreateServerActivity.this, "P.R.A.E.T.O.R.", "Alle KodaNetwork Proxy-Ports sind derzeit belegt. Bitte versuche es später erneut.");
                         } else {
-                            android.widget.Toast.makeText(CreateServerActivity.this, "Fehler bei der Port-Zuweisung: " + e.getMessage(), android.widget.Toast.LENGTH_LONG).show();
+                            android.widget.Toast.makeText(CreateServerActivity.this, "Fehler bei der Port-Zuweisung: " + getFriendlyErrorMsg(e.getMessage()), android.widget.Toast.LENGTH_LONG).show();
                         }
                     });
                     return;
@@ -1322,12 +1324,35 @@ public class CreateServerActivity extends AppCompatActivity {
                     finish();
                 });
             } catch (Exception e) {
+                if (portAllocated) {
+                    // Rollback: release the port if local setup failed
+                    try {
+                        new eu.kodanetwork.mchost.network.supabase.SupabaseFunctionsClient(this).deleteDnsLink("", s.getSubdomain(), s.getBaseDomain());
+                    } catch (Exception ignored) {}
+                }
                 mainHandler.post(() -> {
                     if (loadingOverlay != null) loadingOverlay.setVisibility(android.view.View.GONE);
-                    android.widget.Toast.makeText(CreateServerActivity.this, "Fehler: " + e.getMessage(), android.widget.Toast.LENGTH_LONG).show();
+                    android.widget.Toast.makeText(CreateServerActivity.this, "Fehler: " + getFriendlyErrorMsg(e.getMessage()), android.widget.Toast.LENGTH_LONG).show();
                 });
             }
         });
+    }
+
+    private String getFriendlyErrorMsg(String rawMsg) {
+        if (rawMsg == null) return getString(R.string.error_unknown);
+        if (rawMsg.contains("profanity_detected")) {
+            return getString(R.string.error_profanity_detected);
+        }
+        if (rawMsg.contains("invalid_characters")) {
+            return getString(R.string.error_invalid_characters);
+        }
+        if (rawMsg.contains("length_invalid")) {
+            return getString(R.string.error_length_invalid);
+        }
+        if (rawMsg.contains("ports_exhausted")) {
+            return getString(R.string.error_ports_exhausted);
+        }
+        return rawMsg;
     }
 
     private void extractZip(android.net.Uri zipUri, File destDir) throws IOException {

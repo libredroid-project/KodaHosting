@@ -92,9 +92,7 @@ public class SupabaseFunctionsClient {
             body
         ).execute();
         if (!response.isSuccessful()) {
-            String errorBody = "";
-            try { errorBody = response.errorBody().string(); } catch (Exception ignored) {}
-            throw new IOException("create-dns-link failed: HTTP " + response.code() + " " + errorBody);
+            throw new IOException(extractErrorMsg(response, "create-dns-link failed: HTTP " + response.code()));
         }
     }
 
@@ -115,9 +113,7 @@ public class SupabaseFunctionsClient {
         }
         
         if (!response.isSuccessful()) {
-            String errorBody = "";
-            try { errorBody = response.errorBody().string(); } catch (Exception ignored) {}
-            throw new IOException("delete-dns-link failed: HTTP " + response.code() + " " + errorBody);
+            throw new IOException(extractErrorMsg(response, "delete-dns-link failed: HTTP " + response.code()));
         }
         return result;
     }
@@ -133,8 +129,11 @@ public class SupabaseFunctionsClient {
             body
         ).execute();
         
-        if (!response.isSuccessful() || response.body() == null) {
-            throw new IOException("check-server-name failed: HTTP " + response.code());
+        if (!response.isSuccessful()) {
+            throw new IOException(extractErrorMsg(response, "check-server-name failed: HTTP " + response.code()));
+        }
+        if (response.body() == null) {
+            throw new IOException("check-server-name failed: Empty body");
         }
         Map<String, Object> map = response.body();
         return "taken".equals(map.get("status"));
@@ -152,11 +151,14 @@ public class SupabaseFunctionsClient {
             body
         ).execute();
         
-        if (!response.isSuccessful() || response.body() == null) {
+        if (!response.isSuccessful()) {
             if (response.code() == 409) {
                 throw new IOException("ports_exhausted");
             }
-            throw new IOException("allocate-port failed: HTTP " + response.code());
+            throw new IOException(extractErrorMsg(response, "allocate-port failed: HTTP " + response.code()));
+        }
+        if (response.body() == null) {
+            throw new IOException("allocate-port failed: Empty body");
         }
         
         Number portNum = (Number) response.body().get("port");
@@ -171,6 +173,22 @@ public class SupabaseFunctionsClient {
 
     private static String str(Object value) {
         return value == null ? "" : String.valueOf(value);
+    }
+
+    private String extractErrorMsg(Response<?> response, String defaultMsg) {
+        try {
+            if (response.errorBody() != null) {
+                String errorBodyStr = response.errorBody().string();
+                org.json.JSONObject errJson = new org.json.JSONObject(errorBodyStr);
+                if (errJson.has("error")) {
+                    return errJson.getString("error");
+                }
+                return errorBodyStr;
+            }
+        } catch (Exception e) {
+            // ignore
+        }
+        return defaultMsg;
     }
 
     public static class ProvisionResponse {

@@ -166,14 +166,15 @@ public class DeleteServerActivity extends AppCompatActivity {
                 // 3. Mark as deleted in Supabase (Do NOT delete row)
                 setMsg(getString(R.string.delete_server_db), getString(R.string.delete_server_db_sub));
                 try {
-                    java.net.HttpURLConnection patchConn = (java.net.HttpURLConnection) new java.net.URL(eu.kodanetwork.mchost.security.PraetorSecurity.getSupabaseUrl() + "/rest/v1/koda_servers?host=eq." + server.getSubdomain()).openConnection();
-                    patchConn.setRequestMethod("PATCH");
+                    java.net.HttpURLConnection patchConn = (java.net.HttpURLConnection) new java.net.URL(eu.kodanetwork.mchost.security.PraetorSecurity.getSupabaseUrl() + "/rest/v1/rpc/rpc_patch_server").openConnection();
+                    patchConn.setRequestMethod("POST");
                     patchConn.setRequestProperty("apikey", anonKey);
                     patchConn.setRequestProperty("Authorization", authHeader);
                     patchConn.setRequestProperty("Content-Type", "application/json");
                     patchConn.setDoOutput(true);
                     
-                    String jsonPatch = "{\"host\": \"deleted_" + server.getSubdomain() + "\", \"server_version\": \"DELETED\"}";
+                    String appUuid = prefs.getString("app_uuid", "unknown");
+                    String jsonPatch = "{\"p_app_uuid\":\"" + appUuid + "\", \"p_host\":\"" + server.getSubdomain() + "\", \"p_payload\": {\"host\": \"deleted_" + server.getSubdomain() + "\", \"server_version\": \"DELETED\"}}";
                     patchConn.getOutputStream().write(jsonPatch.getBytes());
                     int responseCode = patchConn.getResponseCode();
                     
@@ -184,8 +185,8 @@ public class DeleteServerActivity extends AppCompatActivity {
                             token = prefs.getString("koda_session_token", null);
                             authHeader = token != null ? "Bearer " + token : "Bearer " + anonKey;
                             
-                            patchConn = (java.net.HttpURLConnection) new java.net.URL(eu.kodanetwork.mchost.security.PraetorSecurity.getSupabaseUrl() + "/rest/v1/koda_servers?host=eq." + server.getSubdomain()).openConnection();
-                            patchConn.setRequestMethod("PATCH");
+                            patchConn = (java.net.HttpURLConnection) new java.net.URL(eu.kodanetwork.mchost.security.PraetorSecurity.getSupabaseUrl() + "/rest/v1/rpc/rpc_patch_server").openConnection();
+                            patchConn.setRequestMethod("POST");
                             patchConn.setRequestProperty("apikey", anonKey);
                             patchConn.setRequestProperty("Authorization", authHeader);
                             patchConn.setRequestProperty("Content-Type", "application/json");

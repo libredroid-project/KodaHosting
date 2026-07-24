@@ -31,10 +31,11 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="SECURITY CHECK"
-            android:textColor="#8A8A9A"
-            android:textSize="10sp"
-            android:textStyle="bold"
+            android:text="@string/praetor_subtitle"
+            android:textColor="#555555"
+            android:textSize="14sp"
+            android:fontFamily="monospace"
+            android:textStyle="normal"
             android:letterSpacing="0.05"
             android:gravity="center"
             android:layout_marginTop="8dp" />

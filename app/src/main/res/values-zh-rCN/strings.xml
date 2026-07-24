@@ -384,4 +384,13 @@
     <string name="sd_delete_dialog_msg">警告：此操作将永久删除服务器。请稍候...</string>
     <string name="sd_delete_btn_waiting">删除 (%ds)</string>
     <string name="sd_delete_btn_ready">删除</string>
+    <string name="error_unknown">未知错误</string>
+    <string name="error_connection_refused">服务器连接被拒绝。</string>
+    <string name="error_timeout">超时，请重试。</string>
+    <string name="error_ports_exhausted">所有代理端口已被占用。</string>
+    <string name="error_dns_occupied">此域名已被占用。</string>
+    <string name="error_profanity_detected">您的服务器名称包含未经授权或冒犯性的词语。</string>
+    <string name="error_invalid_characters">您的服务器名称只能包含小写字母 (a-z)、数字 (0-9) 和连字符 (-)。</string>
+    <string name="error_length_invalid">服务器名称长度必须在 3 到 63 个字符之间。</string>
+    <string name="loading_check_servername">正在检查服务器名称...</string>
 </resources>
