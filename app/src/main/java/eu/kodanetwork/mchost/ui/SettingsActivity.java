@@ -39,6 +39,12 @@ public class SettingsActivity extends Activity {
             findViewById(android.R.id.content).getRootView().setBackgroundResource(R.drawable.bg_cyber_grid);
         }
 
+        TextView tvUuid = findViewById(R.id.tv_settings_app_uuid);
+        if (tvUuid != null) {
+            String appUuid = prefs.getString("app_uuid", "Unknown");
+            tvUuid.setText("UUID: " + appUuid);
+        }
+
         // Apply light mode to settings page itself
         applyThemeModeToActivity();
 
