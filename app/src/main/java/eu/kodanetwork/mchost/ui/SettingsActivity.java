@@ -42,8 +42,13 @@ public class SettingsActivity extends Activity {
         TextView tvUuid = findViewById(R.id.tv_settings_app_uuid);
         if (tvUuid != null) {
             String appUuid = prefs.getString("app_uuid", "Unknown");
-            tvUuid.setText("UUID: " + appUuid);
-            tvUuid.setOnClickListener(v -> {
+            tvUuid.setText(appUuid);
+        }
+        
+        View cardUuid = findViewById(R.id.card_app_uuid);
+        if (cardUuid != null) {
+            String appUuid = prefs.getString("app_uuid", "Unknown");
+            cardUuid.setOnClickListener(v -> {
                 eu.kodanetwork.mchost.util.HapticUtil.forceVibrate(this, 80);
                 android.content.ClipboardManager clipboard = (android.content.ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
                 android.content.ClipData clip = android.content.ClipData.newPlainText("Koda App UUID", appUuid);

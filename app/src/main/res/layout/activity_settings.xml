@@ -678,16 +678,36 @@
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 
-            <!-- DISCLAIMER & UUID -->
-            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
-                android:orientation="vertical" android:gravity="center" android:layout_marginTop="16dp" android:layout_marginBottom="48dp">
-                
-                <TextView android:id="@+id/tv_settings_app_uuid" android:layout_width="wrap_content" android:layout_height="wrap_content"
-                    android:text="UUID: Loading..."
-                    android:textColor="#888899" android:textSize="14sp" android:layout_marginBottom="12dp" 
-                    android:textAlignment="center" android:fontFamily="monospace"
-                    android:gravity="center_horizontal" android:textIsSelectable="true"/>
+            <!-- APP UUID CARD -->
+            <androidx.cardview.widget.CardView
+                android:id="@+id/card_app_uuid"
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                android:clickable="true" android:focusable="true"
+                android:foreground="?attr/selectableItemBackground"
+                app:cardBackgroundColor="#241C18"
+                app:cardCornerRadius="12dp" app:cardElevation="0dp">
 
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:orientation="vertical" android:padding="16dp" android:gravity="center">
+
+                    <TextView android:id="@+id/tv_settings_app_uuid"
+                        android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:text="Loading..." android:textColor="#FFFFFF"
+                        android:textSize="18sp" android:fontFamily="sans-serif-medium"
+                        android:layout_marginBottom="4dp"/>
+
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:text="Tap to copy UUID" android:textColor="#888899"
+                        android:textSize="12sp" android:fontFamily="sans-serif"/>
+
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- DISCLAIMER -->
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:orientation="vertical" android:gravity="center" android:layout_marginBottom="48dp">
+                
                 <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
                     android:text="Not an official Minecraft product. Not approved by or associated with Mojang or Microsoft."
                     android:textColor="#555566" android:textSize="10sp" android:textAlignment="center" android:fontFamily="sans-serif"
