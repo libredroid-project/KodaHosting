@@ -43,6 +43,13 @@ public class SettingsActivity extends Activity {
         if (tvUuid != null) {
             String appUuid = prefs.getString("app_uuid", "Unknown");
             tvUuid.setText("UUID: " + appUuid);
+            tvUuid.setOnClickListener(v -> {
+                eu.kodanetwork.mchost.util.HapticUtil.forceVibrate(this, 80);
+                android.content.ClipboardManager clipboard = (android.content.ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+                android.content.ClipData clip = android.content.ClipData.newPlainText("Koda App UUID", appUuid);
+                clipboard.setPrimaryClip(clip);
+                Toast.makeText(this, "UUID copied to clipboard", Toast.LENGTH_SHORT).show();
+            });
         }
 
         // Apply light mode to settings page itself
