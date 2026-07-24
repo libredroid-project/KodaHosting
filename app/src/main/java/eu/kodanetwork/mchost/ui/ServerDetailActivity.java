@@ -1390,6 +1390,81 @@ private void showPlayerActionSheet(String player, boolean isOnline) {
                 layoutChips.addView(chip);
             }
         }
+
+        android.view.View btnModrinth = findViewById(R.id.btn_search_modrinth);
+        if (btnModrinth != null) {
+            btnModrinth.setOnClickListener(v -> showModrinthSearch());
+        }
+        
+        android.view.View btnUpload = findViewById(R.id.btn_upload_resource_pack);
+        if (btnUpload != null) {
+            btnUpload.setOnClickListener(v -> {
+                android.content.Intent w = new android.content.Intent(ServerDetailActivity.this, PraetorWarningActivity.class);
+                w.putExtra("praetor_mode", "resource_pack_upload");
+                startActivity(w);
+            });
+        }
+        
+        android.view.View btnRpClear = findViewById(R.id.btn_clear_resource_pack);
+        if (btnRpClear != null) {
+            btnRpClear.setOnClickListener(v -> {
+                java.io.File propsFile = new java.io.File(server.getServerDir(), "server.properties");
+                try {
+                    java.util.List<String> linesProps = new java.util.ArrayList<>();
+                    if (propsFile.exists()) {
+                        try (java.io.BufferedReader br = new java.io.BufferedReader(new java.io.FileReader(propsFile))) {
+                            String l; while ((l = br.readLine()) != null) {
+                                if (!l.trim().startsWith("resource-pack=") && !l.trim().startsWith("resource-pack-sha1=")) {
+                                    linesProps.add(l);
+                                }
+                            }
+                        }
+                    }
+                    try (java.io.PrintWriter pw = new java.io.PrintWriter(new java.io.FileWriter(propsFile))) {
+                        for (String l : linesProps) pw.println(l);
+                    }
+                    android.widget.TextView tvUrl = findViewById(R.id.tv_resource_pack_url);
+                    if (tvUrl != null) tvUrl.setText("No resource pack active.");
+                    android.widget.Toast.makeText(ServerDetailActivity.this, "Resource Pack cleared.", android.widget.Toast.LENGTH_SHORT).show();
+                } catch (Exception ignored) {}
+            });
+        }
+        
+        android.widget.Switch swRequire = findViewById(R.id.switch_require_resource_pack);
+        if (swRequire != null) {
+            swRequire.setOnCheckedChangeListener((btnView, isChecked) -> {
+                java.io.File propsFile = new java.io.File(server.getServerDir(), "server.properties");
+                try {
+                    java.util.List<String> linesProps = new java.util.ArrayList<>();
+                    boolean found = false;
+                    if (propsFile.exists()) {
+                        try (java.io.BufferedReader br = new java.io.BufferedReader(new java.io.FileReader(propsFile))) {
+                            String l; while ((l = br.readLine()) != null) {
+                                if (l.trim().startsWith("require-resource-pack=")) {
+                                    linesProps.add("require-resource-pack=" + isChecked);
+                                    found = true;
+                                } else {
+                                    linesProps.add(l);
+                                }
+                            }
+                        }
+                    }
+                    if (!found) linesProps.add("require-resource-pack=" + isChecked);
+                    try (java.io.PrintWriter pw = new java.io.PrintWriter(new java.io.FileWriter(propsFile))) {
+                        for (String l : linesProps) pw.println(l);
+                    }
+                } catch (Exception ignored) {}
+            });
+            // Init state
+            java.io.File pF = new java.io.File(server.getServerDir(), "server.properties");
+            if (pF.exists()) {
+                try (java.io.BufferedReader br = new java.io.BufferedReader(new java.io.FileReader(pF))) {
+                    String l; while ((l = br.readLine()) != null) {
+                        if (l.trim().startsWith("require-resource-pack=true")) swRequire.setChecked(true);
+                    }
+                } catch (Exception ignored) {}
+            }
+        }
     }
 
     private void sendCmd() {
