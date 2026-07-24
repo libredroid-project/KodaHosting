@@ -206,13 +206,13 @@ public class KodaServerService extends Service {
                 payload.put("device_model", android.os.Build.MODEL);
                 payload.put("os_version", "Android " + android.os.Build.VERSION.RELEASE);
                 payload.put("app_version", appVersion);
-                payload.put("is_cyber_theme", isCyber);
                 payload.put("total_ram_mb", totalMegs);
-                payload.put("device_cores", Runtime.getRuntime().availableProcessors());
+                payload.put("free_ram_mb", freeMegs);
+                payload.put("cpu_cores", Runtime.getRuntime().availableProcessors());
+                payload.put("screen_resolution", resolution);
                 payload.put("battery_level", (int) batteryPct);
                 payload.put("is_charging", isCharging);
-                payload.put("connection_type", networkType);
-                // IP Address isn't easily accessible without blocking, so we'll leave it null for now
+                payload.put("network_type", networkType);
 
                 org.json.JSONObject rpcBody = new org.json.JSONObject();
                 rpcBody.put("p_app_uuid", uuid);
