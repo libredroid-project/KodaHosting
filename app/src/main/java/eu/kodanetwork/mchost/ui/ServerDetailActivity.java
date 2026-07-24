@@ -3020,14 +3020,16 @@ public class ServerDetailActivity extends AppCompatActivity {
         
         android.view.View.OnClickListener doSearch = v -> {
             String query = etSearch.getText().toString().trim();
-            if (query.isEmpty()) return;
             
             eu.kodanetwork.mchost.util.HapticUtil.forceVibrate(this, 30);
             pb.setVisibility(android.view.View.VISIBLE);
             
             new Thread(() -> {
                 try {
-                    String urlStr = "https://api.modrinth.com/v2/search?query=" + java.net.URLEncoder.encode(query, "UTF-8") + "&facets=[[%22project_type:resourcepack%22]]";
+                    String urlStr = "https://api.modrinth.com/v2/search?limit=100&facets=[[%22project_type:resourcepack%22]]";
+                    if (!query.isEmpty()) {
+                        urlStr += "&query=" + java.net.URLEncoder.encode(query, "UTF-8");
+                    }
                     java.net.HttpURLConnection conn = (java.net.HttpURLConnection) new java.net.URL(urlStr).openConnection();
                     conn.setRequestProperty("User-Agent", "KodaNetwork/1.0");
                     
@@ -3062,6 +3064,9 @@ public class ServerDetailActivity extends AppCompatActivity {
             }
             return false;
         });
+        
+        // Trigger initial search for popular resource packs
+        doSearch.onClick(null);
         
         dialog.show();
     }

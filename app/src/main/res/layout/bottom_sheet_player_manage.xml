@@ -164,7 +164,7 @@
                     android:textColor="#FFFFFF"
                     android:textSize="16sp"/>
                     
-                <Switch
+                <com.google.android.material.switchmaterial.SwitchMaterial
                     android:id="@+id/switch_pm_whitelist"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"/>
