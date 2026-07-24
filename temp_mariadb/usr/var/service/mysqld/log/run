@@ -1,3 +1,0 @@
-#!/data/data/com.termux/files/usr/bin/sh
-svlogger="/data/data/com.termux/files/usr/share/termux-services/svlogger"
-exec "${svlogger}" "$@"

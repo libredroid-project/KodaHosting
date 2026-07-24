@@ -1,3 +1,0 @@
-C:/Users/Home/KodaHosting/KodaNetwork/app/.cxx/Debug/6h2y4e6h/arm64-v8a/CMakeFiles/embeddedjvm.dir
-C:/Users/Home/KodaHosting/KodaNetwork/app/.cxx/Debug/6h2y4e6h/arm64-v8a/CMakeFiles/edit_cache.dir
-C:/Users/Home/KodaHosting/KodaNetwork/app/.cxx/Debug/6h2y4e6h/arm64-v8a/CMakeFiles/rebuild_cache.dir
