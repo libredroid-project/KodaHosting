@@ -654,12 +654,8 @@ private void showPlayerActionSheet(String player, boolean isOnline) {
         
         android.view.Window w = sheet.getWindow();
         if (w != null) {
-            boolean isLight = eu.kodanetwork.mchost.util.ThemeHelper.isLightMode(this);
-            w.setNavigationBarColor(isLight ? 0xFFF5F5F5 : 0xFF1B1613);
-            w.setStatusBarColor(isLight ? 0xFFF5F5F5 : 0xFF1B1613);
-            if (isLight && android.os.Build.VERSION.SDK_INT >= 23) {
-                w.getDecorView().setSystemUiVisibility(android.view.View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR | android.view.View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR);
-            }
+            w.setNavigationBarColor(0xFF1B1613);
+            w.setStatusBarColor(0xFF1B1613);
         }
         
         // Setup Header
