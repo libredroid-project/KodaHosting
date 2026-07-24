@@ -515,7 +515,7 @@ public class ServerDetailActivity extends AppCompatActivity {
                     w.putExtra(PraetorWarningActivity.EXTRA_ACTION, getString(R.string.praetor_action_back));
                     startActivity(w);
                     
-                    // android.widget.Switch back to Dashboard (index 0)
+                    // com.google.android.material.switchmaterial.SwitchMaterial back to Dashboard (index 0)
                     tabs.selectTab(tabs.getTabAt(0));
                     return;
                 }
@@ -555,7 +555,7 @@ public class ServerDetailActivity extends AppCompatActivity {
                     android.widget.ImageView ivHead = playerRow.findViewById(R.id.iv_row_player_head);
                     new Thread(() -> {
                         try {
-                            java.net.URL url = new java.net.URL("https://mc-heads.net/avatar/" + playerName + "/64");
+                            java.net.URL url = new java.net.URL("https://minotar.net/helm/" + playerName + "/64.png");
                             java.io.InputStream in = url.openStream();
                             final android.graphics.Bitmap bmp = android.graphics.BitmapFactory.decodeStream(in);
                             runOnUiThread(() -> {
@@ -579,14 +579,14 @@ public class ServerDetailActivity extends AppCompatActivity {
                 containerOnline.setVisibility(android.view.View.GONE);
             }
             
-            // For offline players, we could read usercache.json or whitelist.json
-            // Let's implement reading whitelist.json to show known offline players!
             new Thread(() -> {
                 try {
-                    java.io.File whitelistFile = new java.io.File(server.getServerDir(), "whitelist.json");
-                    if (whitelistFile.exists()) {
+                    java.io.File cacheFile = new java.io.File(server.getServerDir(), "usercache.json");
+                    if (!cacheFile.exists()) cacheFile = new java.io.File(server.getServerDir(), "whitelist.json");
+                    
+                    if (cacheFile.exists()) {
                         StringBuilder sb = new StringBuilder();
-                        try (java.io.BufferedReader br = new java.io.BufferedReader(new java.io.FileReader(whitelistFile))) {
+                        try (java.io.BufferedReader br = new java.io.BufferedReader(new java.io.FileReader(cacheFile))) {
                             String line;
                             while ((line = br.readLine()) != null) sb.append(line);
                         }
@@ -596,7 +596,7 @@ public class ServerDetailActivity extends AppCompatActivity {
                             org.json.JSONObject obj = arr.getJSONObject(i);
                             String name = obj.optString("name");
                             if (name != null && !name.isEmpty() && (server.onlinePlayerNames == null || !server.onlinePlayerNames.contains(name))) {
-                                offlineNames.add(name);
+                                if (!offlineNames.contains(name)) offlineNames.add(name);
                             }
                         }
                         
@@ -617,7 +617,7 @@ public class ServerDetailActivity extends AppCompatActivity {
                                     
                                     new Thread(() -> {
                                         try {
-                                            java.net.URL url = new java.net.URL("https://mc-heads.net/avatar/" + offlineName + "/64");
+                                            java.net.URL url = new java.net.URL("https://minotar.net/helm/" + offlineName + "/64.png");
                                             java.io.InputStream in = url.openStream();
                                             final android.graphics.Bitmap bmp = android.graphics.BitmapFactory.decodeStream(in);
                                             runOnUiThread(() -> {
@@ -654,8 +654,12 @@ private void showPlayerActionSheet(String player, boolean isOnline) {
         
         android.view.Window w = sheet.getWindow();
         if (w != null) {
-            w.setNavigationBarColor(0xFF1B1613);
-            w.setStatusBarColor(0xFF1B1613);
+            boolean isLight = eu.kodanetwork.mchost.util.ThemeHelper.isLightMode(this);
+            w.setNavigationBarColor(isLight ? 0xFFF5F5F5 : 0xFF1B1613);
+            w.setStatusBarColor(isLight ? 0xFFF5F5F5 : 0xFF1B1613);
+            if (isLight && android.os.Build.VERSION.SDK_INT >= 23) {
+                w.getDecorView().setSystemUiVisibility(android.view.View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR | android.view.View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR);
+            }
         }
         
         // Setup Header
@@ -667,7 +671,7 @@ private void showPlayerActionSheet(String player, boolean isOnline) {
         android.widget.Button btnStarve = view.findViewById(R.id.btn_pm_starve);
         android.widget.Button btnKill = view.findViewById(R.id.btn_pm_kill);
         android.widget.Button btnDelete = view.findViewById(R.id.btn_pm_delete);
-        android.widget.Switch switchWhitelist = view.findViewById(R.id.switch_pm_whitelist);
+        com.google.android.material.switchmaterial.SwitchMaterial switchWhitelist = view.findViewById(R.id.switch_pm_whitelist);
         
         btnHeal.setOnClickListener(v -> {
             sendCmd("effect give " + player + " instant_health 1 255");
@@ -707,86 +711,106 @@ private void showPlayerActionSheet(String player, boolean isOnline) {
                 .show();
         });
         
-        // Stats
+        // Stats & Live Updates
         new Thread(() -> {
             String uuid = eu.kodanetwork.mchost.util.PlayerStatsParser.getUuidFromName(new java.io.File(server.getServerDir()), player);
             if (uuid != null) {
-                eu.kodanetwork.mchost.util.PlayerStatsParser.PlayerStats stats = eu.kodanetwork.mchost.util.PlayerStatsParser.getStats(new java.io.File(server.getServerDir()), uuid);
-                
-                // Read Whitelist
-                boolean isWhitelisted = false;
-                try {
-                    java.io.File wl = new java.io.File(server.getServerDir(), "whitelist.json");
-                    if (wl.exists()) {
-                        byte[] bytes = new byte[(int) wl.length()];
-                        try (java.io.FileInputStream fis = new java.io.FileInputStream(wl)) { fis.read(bytes); }
-                        org.json.JSONArray arr = new org.json.JSONArray(new String(bytes, java.nio.charset.StandardCharsets.UTF_8));
-                        for (int i = 0; i < arr.length(); i++) {
-                            if (arr.getJSONObject(i).getString("uuid").equalsIgnoreCase(uuid)) {
-                                isWhitelisted = true; break;
+                while (sheet.isShowing()) {
+                    try {
+                        eu.kodanetwork.mchost.util.PlayerStatsParser.PlayerStats stats = eu.kodanetwork.mchost.util.PlayerStatsParser.getStats(new java.io.File(server.getServerDir()), uuid);
+                        
+                        // Read Whitelist
+                        boolean isWhitelisted = false;
+                        try {
+                            java.io.File wl = new java.io.File(server.getServerDir(), "whitelist.json");
+                            if (wl.exists()) {
+                                byte[] bytes = new byte[(int) wl.length()];
+                                try (java.io.FileInputStream fis = new java.io.FileInputStream(wl)) { fis.read(bytes); }
+                                org.json.JSONArray arr = new org.json.JSONArray(new String(bytes, java.nio.charset.StandardCharsets.UTF_8));
+                                for (int i = 0; i < arr.length(); i++) {
+                                    if (arr.getJSONObject(i).getString("uuid").equalsIgnoreCase(uuid)) {
+                                        isWhitelisted = true; break;
+                                    }
+                                }
                             }
-                        }
+                        } catch(Exception ignored){}
+                        
+                        boolean finalIsWhitelisted = isWhitelisted;
+                        
+                        // Read Inventory
+                        java.util.Map<String, Object> dat = eu.kodanetwork.mchost.util.NbtParser.parsePlayerDat(new java.io.File(server.getServerDir(), "world/playerdata/" + uuid + ".dat"));
+                        
+                        runOnUiThread(() -> {
+                            if (!sheet.isShowing()) return;
+                            TextView tvDeaths = view.findViewById(R.id.tv_pm_stat_deaths);
+                            TextView tvMined = view.findViewById(R.id.tv_pm_stat_mined);
+                            TextView tvHours = view.findViewById(R.id.tv_pm_stat_hours);
+                            TextView tvMobs = view.findViewById(R.id.tv_pm_stat_mobs);
+                            TextView tvDmg = view.findViewById(R.id.tv_pm_stat_dmg);
+                            
+                            tvDeaths.setText(String.valueOf(stats.deaths));
+                            tvMined.setText(String.valueOf(stats.blocksMined));
+                            tvHours.setText(String.valueOf(stats.hoursPlayed));
+                            tvMobs.setText(String.valueOf(stats.mobsKilled));
+                            tvDmg.setText(String.valueOf(stats.damageTaken));
+                            
+                            switchWhitelist.setOnCheckedChangeListener(null);
+                            switchWhitelist.setChecked(finalIsWhitelisted);
+                            switchWhitelist.setOnCheckedChangeListener((btn, isChecked) -> {
+                                sendCmd((isChecked ? "whitelist add " : "whitelist remove ") + player);
+                            });
+                            
+                            // Only update inventory if we haven't already added slots to avoid duplication
+                            android.widget.GridLayout gridMain = view.findViewById(R.id.grid_inventory_main);
+                            if (gridMain != null && gridMain.getChildCount() == 0) {
+                                if (dat != null && dat.containsKey("Inventory")) {
+                                    populateInventoryUI(view, (java.util.List<Object>) dat.get("Inventory"));
+                                }
+                            }
+                        });
+                        
+                        Thread.sleep(2000);
+                    } catch (Exception e) {
+                        try { Thread.sleep(2000); } catch (Exception ignored) {}
                     }
-                } catch(Exception ignored){}
-                
-                boolean finalIsWhitelisted = isWhitelisted;
-                
-                // Read Inventory
-                java.util.Map<String, Object> dat = eu.kodanetwork.mchost.util.NbtParser.parsePlayerDat(new java.io.File(server.getServerDir(), "world/playerdata/" + uuid + ".dat"));
-                
-                runOnUiThread(() -> {
-                    TextView tvDeaths = view.findViewById(R.id.tv_pm_stat_deaths);
-                    TextView tvMined = view.findViewById(R.id.tv_pm_stat_mined);
-                    TextView tvHours = view.findViewById(R.id.tv_pm_stat_hours);
-                    TextView tvMobs = view.findViewById(R.id.tv_pm_stat_mobs);
-                    TextView tvDmg = view.findViewById(R.id.tv_pm_stat_dmg);
-                    
-                    tvDeaths.setText(String.valueOf(stats.deaths));
-                    tvMined.setText(String.valueOf(stats.blocksMined));
-                    tvHours.setText(String.valueOf(stats.hoursPlayed));
-                    tvMobs.setText(String.valueOf(stats.mobsKilled));
-                    tvDmg.setText(String.valueOf(stats.damageTaken));
-                    
-                    switchWhitelist.setChecked(finalIsWhitelisted);
-                    switchWhitelist.setOnCheckedChangeListener((btn, isChecked) -> {
-                        sendCmd((isChecked ? "whitelist add " : "whitelist remove ") + player);
-                    });
-                    
-                    if (dat != null && dat.containsKey("Inventory")) {
-                        populateInventoryUI(view, (java.util.List<Object>) dat.get("Inventory"));
-                    }
-                });
+                }
             }
         }).start();
         
         sheet.show();
     }
     
-    private void populateInventoryUI(View view, java.util.List<Object> inventory) {
+    private void populateInventoryUI(android.view.View view, java.util.List<Object> inventory) {
         android.widget.LinearLayout containerArmor = view.findViewById(R.id.container_armor);
         android.widget.FrameLayout containerOffhand = view.findViewById(R.id.container_offhand);
         android.widget.GridLayout gridMain = view.findViewById(R.id.grid_inventory_main);
         android.widget.GridLayout gridHotbar = view.findViewById(R.id.grid_inventory_hotbar);
         
         // Initialize empty slots
-        View[] armorSlots = new View[4];
+        android.view.View[] armorSlots = new android.view.View[4];
         for (int i=0; i<4; i++) {
             armorSlots[i] = getLayoutInflater().inflate(R.layout.item_inventory_slot, containerArmor, false);
             containerArmor.addView(armorSlots[i]);
         }
-        View offhandSlot = getLayoutInflater().inflate(R.layout.item_inventory_slot, containerOffhand, false);
+        android.view.View offhandSlot = getLayoutInflater().inflate(R.layout.item_inventory_slot, containerOffhand, false);
         containerOffhand.addView(offhandSlot);
         
-        View[] mainSlots = new View[27];
+        android.view.View[] mainSlots = new android.view.View[27];
         for (int i=0; i<27; i++) {
             mainSlots[i] = getLayoutInflater().inflate(R.layout.item_inventory_slot, gridMain, false);
-            gridMain.addView(mainSlots[i]);
+            android.widget.GridLayout.LayoutParams params = new android.widget.GridLayout.LayoutParams(
+                android.widget.GridLayout.spec(i / 9), android.widget.GridLayout.spec(i % 9)
+            );
+            gridMain.addView(mainSlots[i], params);
         }
         
-        View[] hotbarSlots = new View[9];
+        android.view.View[] hotbarSlots = new android.view.View[9];
         for (int i=0; i<9; i++) {
             hotbarSlots[i] = getLayoutInflater().inflate(R.layout.item_inventory_slot, gridHotbar, false);
-            gridHotbar.addView(hotbarSlots[i]);
+            android.widget.GridLayout.LayoutParams params = new android.widget.GridLayout.LayoutParams(
+                android.widget.GridLayout.spec(0), android.widget.GridLayout.spec(i)
+            );
+            gridHotbar.addView(hotbarSlots[i], params);
         }
         
         // Populate items
@@ -804,7 +828,7 @@ private void showPlayerActionSheet(String player, boolean isOnline) {
                 int count = 1;
                 if (item.containsKey("Count")) count = ((Number)item.get("Count")).intValue();
                 
-                View targetView = null;
+                android.view.View targetView = null;
                 if (slotId >= 0 && slotId <= 8) targetView = hotbarSlots[slotId];
                 else if (slotId >= 9 && slotId <= 35) targetView = mainSlots[slotId - 9];
                 else if (slotId >= 100 && slotId <= 103) targetView = armorSlots[103 - slotId]; // 103=helmet, 102=chest, 101=legs, 100=boots
@@ -812,15 +836,15 @@ private void showPlayerActionSheet(String player, boolean isOnline) {
                 
                 if (targetView != null && id != null) {
                     android.widget.ImageView iv = targetView.findViewById(R.id.iv_item_icon);
-                    TextView tvCount = targetView.findViewById(R.id.tv_item_count);
+                    android.widget.TextView tvCount = targetView.findViewById(R.id.tv_item_count);
                     
                     String itemName = id.replace("minecraft:", "");
-                    String url = "https://raw.githubusercontent.com/InventivetalentDev/minecraft-assets/master/assets/minecraft/textures/item/" + itemName + ".png";
+                    String url = "https://raw.githubusercontent.com/InventivetalentDev/minecraft-assets/1.20.4/assets/minecraft/textures/item/" + itemName + ".png";
                     
                     com.bumptech.glide.Glide.with(this).load(url).into(iv);
                     
                     if (count > 1) {
-                        tvCount.setVisibility(View.VISIBLE);
+                        tvCount.setVisibility(android.view.View.VISIBLE);
                         tvCount.setText(String.valueOf(count));
                     }
                 }
@@ -1430,7 +1454,7 @@ private void showPlayerActionSheet(String player, boolean isOnline) {
             });
         }
         
-        android.widget.Switch swRequire = findViewById(R.id.switch_require_resource_pack);
+        com.google.android.material.switchmaterial.SwitchMaterial swRequire = findViewById(R.id.switch_require_resource_pack);
         if (swRequire != null) {
             swRequire.setOnCheckedChangeListener((btnView, isChecked) -> {
                 java.io.File propsFile = new java.io.File(server.getServerDir(), "server.properties");
