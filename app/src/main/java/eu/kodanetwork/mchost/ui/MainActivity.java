@@ -78,8 +78,48 @@ public class MainActivity extends AppCompatActivity {
         String lastThemeMode = prefs.getString("theme_mode", "dark");
         boolean isCyber = "cyber".equals(lastTheme);
 
-        if (prefs.getString("app_uuid", null) == null) {
-            prefs.edit().putString("app_uuid", java.util.UUID.randomUUID().toString()).apply();
+        String currentAppUuid = prefs.getString("app_uuid", null);
+        String androidId = android.provider.Settings.Secure.getString(getContentResolver(), android.provider.Settings.Secure.ANDROID_ID);
+        String hwidUuid = null;
+        try {
+            java.security.MessageDigest md = java.security.MessageDigest.getInstance("SHA-256");
+            byte[] hash = md.digest(androidId.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+            StringBuilder hexString = new StringBuilder();
+            for (int i = 0; i < 4; i++) { // 8 characters
+                String hex = Integer.toHexString(0xff & hash[i]);
+                if (hex.length() == 1) hexString.append('0');
+                hexString.append(hex);
+            }
+            hwidUuid = "KODA-" + hexString.toString().toUpperCase();
+        } catch (Exception e) {
+            hwidUuid = "KODA-" + androidId.substring(0, 8).toUpperCase();
+        }
+
+        if (currentAppUuid == null || (!currentAppUuid.startsWith("KODA-") && !currentAppUuid.equals(hwidUuid))) {
+            prefs.edit().putString("app_uuid", hwidUuid).apply();
+            
+            // Automatic migration of servers for existing users
+            if (currentAppUuid != null && !currentAppUuid.isEmpty()) {
+                String finalOld = currentAppUuid;
+                String finalNew = hwidUuid;
+                new Thread(() -> {
+                    try {
+                        java.net.URL patchUrl = new java.net.URL(eu.kodanetwork.mchost.security.PraetorSecurity.getSupabaseUrl() + "/rest/v1/rpc/rpc_migrate_servers");
+                        java.net.HttpURLConnection patchConn = (java.net.HttpURLConnection) patchUrl.openConnection();
+                        patchConn.setRequestMethod("POST");
+                        patchConn.setRequestProperty("Content-Type", "application/json");
+                        patchConn.setRequestProperty("apikey", eu.kodanetwork.mchost.security.PraetorSecurity.getSupabaseKey());
+                        patchConn.setRequestProperty("Authorization", "Bearer " + eu.kodanetwork.mchost.security.PraetorSecurity.getSupabaseKey());
+                        patchConn.setRequestProperty("Prefer", "return=minimal");
+                        patchConn.setDoOutput(true);
+                        String pJson = "{\"p_old_app_uuid\":\"" + finalOld + "\", \"p_new_app_uuid\":\"" + finalNew + "\"}";
+                        java.io.OutputStream os = patchConn.getOutputStream();
+                        os.write(pJson.getBytes());
+                        os.flush(); os.close();
+                        patchConn.getResponseCode();
+                    } catch (Exception ignored) {}
+                }).start();
+            }
         }
         
         // Prevent screenshots & screen recording
