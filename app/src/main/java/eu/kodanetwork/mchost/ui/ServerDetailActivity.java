@@ -187,13 +187,9 @@ public class ServerDetailActivity extends AppCompatActivity {
         // Apply light mode background early
         if (eu.kodanetwork.mchost.util.ThemeHelper.isLightMode(this)) {
             findViewById(android.R.id.content).setBackgroundColor(0xFFF5F5F5);
-            if (android.os.Build.VERSION.SDK_INT >= 23) {
-                getWindow().setStatusBarColor(0xFFF5F5F5);
-                getWindow().getDecorView().setSystemUiVisibility(
-                    View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR | View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR);
-                getWindow().setNavigationBarColor(0xFFF5F5F5);
-            }
         }
+        
+        setupWindowDecor(getWindow());
         
         android.content.SharedPreferences prefs = eu.kodanetwork.mchost.App.getPrefs(this);
         lastTheme = prefs.getString("app_theme", "modern");
@@ -535,6 +531,7 @@ public class ServerDetailActivity extends AppCompatActivity {
         com.google.android.material.bottomsheet.BottomSheetDialog sheet = 
             new com.google.android.material.bottomsheet.BottomSheetDialog(this);
         sheet.setContentView(R.layout.bottom_sheet_player_list);
+        setupWindowDecor(sheet.getWindow());
 
         android.widget.LinearLayout containerOnline = sheet.findViewById(R.id.container_pm_online);
         android.widget.LinearLayout containerOffline = sheet.findViewById(R.id.container_pm_offline);
@@ -644,8 +641,8 @@ public class ServerDetailActivity extends AppCompatActivity {
 
         sheet.show();
     }
-
-private void showPlayerActionSheet(String player, boolean isOnline) {
+    
+    private void showPlayerActionSheet(String player, boolean isOnline) {
         com.google.android.material.bottomsheet.BottomSheetDialog sheet = 
             new com.google.android.material.bottomsheet.BottomSheetDialog(this);
         
@@ -653,10 +650,7 @@ private void showPlayerActionSheet(String player, boolean isOnline) {
         sheet.setContentView(view);
         
         android.view.Window w = sheet.getWindow();
-        if (w != null) {
-            w.setNavigationBarColor(0xFF1B1613);
-            w.setStatusBarColor(0xFF1B1613);
-        }
+        setupWindowDecor(w);
         
         // Setup Header
         TextView tvName = view.findViewById(R.id.tv_pm_player_name);
@@ -2272,10 +2266,7 @@ private void showPlayerActionSheet(String player, boolean isOnline) {
                                 pd.dismiss();
                                 
                                 com.google.android.material.bottomsheet.BottomSheetDialog sheet = new com.google.android.material.bottomsheet.BottomSheetDialog(ServerDetailActivity.this);
-                                sheet.setOnShowListener(dialog -> {
-                                    android.view.Window window = ((com.google.android.material.bottomsheet.BottomSheetDialog) dialog).getWindow();
-                                    if (window != null) window.setNavigationBarColor(0xFF0E0E14);
-                                });
+                                setupWindowDecor(sheet.getWindow());
                                 android.widget.LinearLayout container = new android.widget.LinearLayout(ServerDetailActivity.this);
                                 container.setOrientation(android.widget.LinearLayout.VERTICAL);
                                 container.setBackgroundColor(0xFF0E0E14);
@@ -2903,16 +2894,7 @@ private void showPlayerActionSheet(String player, boolean isOnline) {
         dialog.setContentView(R.layout.dialog_modrinth_search);
         
         android.view.Window window = dialog.getWindow();
-        if (window != null) {
-            window.addFlags(android.view.WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
-            window.setNavigationBarColor(android.graphics.Color.TRANSPARENT);
-            window.setStatusBarColor(0xFF0A0807);
-            window.getDecorView().setSystemUiVisibility(
-                android.view.View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION | android.view.View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
-            if (android.os.Build.VERSION.SDK_INT >= 29) {
-                window.setNavigationBarContrastEnforced(false);
-            }
-        }
+        setupWindowDecor(window);
         
         dialog.setOnShowListener(d -> {
             com.google.android.material.bottomsheet.BottomSheetDialog bsd = (com.google.android.material.bottomsheet.BottomSheetDialog) d;
@@ -3394,6 +3376,27 @@ private void showPlayerActionSheet(String player, boolean isOnline) {
         clipboard.setPrimaryClip(clip);
         eu.kodanetwork.mchost.util.HapticUtil.forceVibrate(this, 30);
         android.widget.Toast.makeText(this, label + getString(R.string.sd_toast_copied_suffix), android.widget.Toast.LENGTH_SHORT).show();
+    }
+
+    private void setupWindowDecor(android.view.Window w) {
+        if (w == null) return;
+        w.addFlags(android.view.WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+        if (android.os.Build.VERSION.SDK_INT >= 23) {
+            w.setStatusBarColor(android.graphics.Color.TRANSPARENT);
+            w.setNavigationBarColor(android.graphics.Color.TRANSPARENT);
+            androidx.core.view.WindowCompat.setDecorFitsSystemWindows(w, false);
+            
+            boolean isLight = eu.kodanetwork.mchost.util.ThemeHelper.isLightMode(this);
+            int flags = android.view.View.SYSTEM_UI_FLAG_LAYOUT_STABLE | android.view.View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION;
+            if (isLight) {
+                flags |= android.view.View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR | android.view.View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR;
+            }
+            w.getDecorView().setSystemUiVisibility(flags);
+            
+            if (android.os.Build.VERSION.SDK_INT >= 29) {
+                w.setNavigationBarContrastEnforced(false);
+            }
+        }
     }
 
 }

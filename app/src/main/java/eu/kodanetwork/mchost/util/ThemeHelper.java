@@ -204,10 +204,13 @@ public class ThemeHelper {
                         activity.getWindow().getDecorView().setBackgroundResource(R.drawable.bg_liquid_glass);
                     } else if (lightMode) {
                         activity.getWindow().setStatusBarColor(LIGHT_STATUS);
-                        activity.getWindow().setNavigationBarColor(LIGHT_STATUS);
+                        activity.getWindow().setNavigationBarColor(android.graphics.Color.TRANSPARENT);
+                        if (android.os.Build.VERSION.SDK_INT >= 29) {
+                            activity.getWindow().setNavigationBarContrastEnforced(false);
+                        }
                         if (android.os.Build.VERSION.SDK_INT >= 23) {
                             activity.getWindow().getDecorView().setSystemUiVisibility(
-                                View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR | View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR);
+                                View.SYSTEM_UI_FLAG_LAYOUT_STABLE | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR | View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR);
                         }
                     } else {
                         boolean isSettings = activity instanceof eu.kodanetwork.mchost.ui.SettingsActivity;
