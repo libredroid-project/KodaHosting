@@ -147,7 +147,37 @@ public class CreateSupportTicketActivity extends AppCompatActivity {
         sb.append("Animations: ").append(prefs.getBoolean("animations_enabled", true)).append("\n");
 
         long maxMem = Runtime.getRuntime().maxMemory() / (1024 * 1024);
-        sb.append("Max Memory: ").append(maxMem).append(" MB\n");
+        long totalMegs = 0;
+        try {
+            android.app.ActivityManager actManager = (android.app.ActivityManager) getSystemService(android.content.Context.ACTIVITY_SERVICE);
+            android.app.ActivityManager.MemoryInfo memInfo = new android.app.ActivityManager.MemoryInfo();
+            actManager.getMemoryInfo(memInfo);
+            totalMegs = memInfo.totalMem / 1048576L;
+        } catch (Exception ignored) {}
+        
+        sb.append("Total System RAM: ").append(totalMegs).append(" MB\n");
+        sb.append("App Max Memory: ").append(maxMem).append(" MB\n");
+        sb.append("CPU Cores: ").append(Runtime.getRuntime().availableProcessors()).append("\n");
+        
+        android.content.Intent batteryStatus = registerReceiver(null, new android.content.IntentFilter(android.content.Intent.ACTION_BATTERY_CHANGED));
+        if (batteryStatus != null) {
+            int level = batteryStatus.getIntExtra(android.os.BatteryManager.EXTRA_LEVEL, -1);
+            int scale = batteryStatus.getIntExtra(android.os.BatteryManager.EXTRA_SCALE, -1);
+            int status = batteryStatus.getIntExtra(android.os.BatteryManager.EXTRA_STATUS, -1);
+            boolean isCharging = status == android.os.BatteryManager.BATTERY_STATUS_CHARGING || status == android.os.BatteryManager.BATTERY_STATUS_FULL;
+            sb.append("Battery: ").append((int)(level * 100 / (float)scale)).append("% (").append(isCharging ? "Charging" : "Discharging").append(")\n");
+        }
+        
+        android.net.ConnectivityManager cm = (android.net.ConnectivityManager) getSystemService(android.content.Context.CONNECTIVITY_SERVICE);
+        String networkType = "Unknown";
+        if (cm != null) {
+            android.net.NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+            if (activeNetwork != null) {
+                if (activeNetwork.getType() == android.net.ConnectivityManager.TYPE_WIFI) networkType = "WIFI";
+                else if (activeNetwork.getType() == android.net.ConnectivityManager.TYPE_MOBILE) networkType = "MOBILE";
+            }
+        }
+        sb.append("Network Type: ").append(networkType).append("\n");
         sb.append("Storage Free: ").append(getFilesDir().getFreeSpace() / (1024 * 1024)).append(" MB\n");
 
         try {
