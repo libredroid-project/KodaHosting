@@ -36,11 +36,7 @@
     <option name="autoReloadType" value="NONE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="1c7b5403-826e-4eb8-9d43-ed80980da5f9" name="Changes" comment="ToS added, Settings UI fixes. Wesbite redesign">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/eu/kodanetwork/mchost/service/KodaServerService.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/eu/kodanetwork/mchost/service/KodaServerService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/eu/kodanetwork/mchost/ui/MainActivity.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/eu/kodanetwork/mchost/ui/MainActivity.java" afterDir="false" />
-    </list>
+    <list default="true" id="1c7b5403-826e-4eb8-9d43-ed80980da5f9" name="Changes" comment="ToS added, Settings UI fixes. Wesbite redesign" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />

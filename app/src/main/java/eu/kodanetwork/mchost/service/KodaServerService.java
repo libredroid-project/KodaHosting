@@ -197,33 +197,30 @@ public class KodaServerService extends Service {
                 } catch (Exception ignored) {}
 
                 String state = appIsForeground ? "FOREGROUND" : "BACKGROUND";
+                boolean isCyber = "cyber".equals(prefs.getString("app_theme", "modern"));
+                
                 org.json.JSONObject payload = new org.json.JSONObject();
                 payload.put("app_state", state);
+                payload.put("app_last_ping", "now()");
+                payload.put("device_ram_mb", freeMegs);
                 payload.put("device_model", android.os.Build.MODEL);
                 payload.put("os_version", "Android " + android.os.Build.VERSION.RELEASE);
                 payload.put("app_version", appVersion);
+                payload.put("is_cyber_theme", isCyber);
                 payload.put("total_ram_mb", totalMegs);
-                payload.put("free_ram_mb", freeMegs);
-                payload.put("cpu_cores", Runtime.getRuntime().availableProcessors());
-                payload.put("screen_resolution", resolution);
+                payload.put("device_cores", Runtime.getRuntime().availableProcessors());
                 payload.put("battery_level", (int) batteryPct);
                 payload.put("is_charging", isCharging);
-                payload.put("network_type", networkType);
+                payload.put("connection_type", networkType);
+                // IP Address isn't easily accessible without blocking, so we'll leave it null for now
 
-                okhttp3.Request request = new okhttp3.Request.Builder()
-                    .url(SUPABASE_REST + "/koda_users?app_uuid=eq." + uuid)
-                    .patch(okhttp3.RequestBody.create(payload.toString(), okhttp3.MediaType.parse("application/json; charset=utf-8")))
-                    .addHeader("apikey", SUPABASE_KEY)
-                    .addHeader("Authorization", "Bearer " + SUPABASE_KEY)
-                    .addHeader("Prefer", "return=minimal")
-                    .build();
-                httpClient.newCall(request).execute().close();
-                
-                // Keep calling old RPC to update app_last_ping and device_ram_mb as well so existing features don't break
-                String json = "{\"p_app_uuid\":\"" + uuid + "\", \"p_payload\": {\"app_state\":\"" + state + "\", \"app_last_ping\":\"now()\", \"device_ram_mb\":" + freeMegs + "}}";
+                org.json.JSONObject rpcBody = new org.json.JSONObject();
+                rpcBody.put("p_app_uuid", uuid);
+                rpcBody.put("p_payload", payload);
+
                 okhttp3.Request requestRpc = new okhttp3.Request.Builder()
                     .url(SUPABASE_REST + "/rpc/rpc_patch_user")
-                    .post(okhttp3.RequestBody.create(json, okhttp3.MediaType.parse("application/json; charset=utf-8")))
+                    .post(okhttp3.RequestBody.create(rpcBody.toString(), okhttp3.MediaType.parse("application/json; charset=utf-8")))
                     .addHeader("apikey", SUPABASE_KEY)
                     .addHeader("Authorization", "Bearer " + SUPABASE_KEY)
                     .build();
