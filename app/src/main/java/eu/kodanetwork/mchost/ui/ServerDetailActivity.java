@@ -190,6 +190,29 @@ public class ServerDetailActivity extends AppCompatActivity {
         }
         
         setupWindowDecor(getWindow());
+        if (android.os.Build.VERSION.SDK_INT >= 23) {
+            getWindow().getDecorView().setOnApplyWindowInsetsListener((v, insets) -> {
+                int top = insets.getSystemWindowInsetTop();
+                int bottom = insets.getSystemWindowInsetBottom();
+                
+                android.view.View topBar = findViewById(R.id.app_top_bar);
+                if (topBar != null) {
+                    topBar.setPadding(topBar.getPaddingLeft(), top, topBar.getPaddingRight(), topBar.getPaddingBottom());
+                    topBar.getLayoutParams().height = (int)(56 * getResources().getDisplayMetrics().density) + top;
+                    topBar.requestLayout();
+                }
+
+                int[] panels = {R.id.panel_dash, R.id.panel_console, R.id.panel_plugins, R.id.panel_settings, R.id.panel_files};
+                for (int id : panels) {
+                    android.view.View panel = findViewById(id);
+                    if (panel != null) {
+                        panel.setPadding(panel.getPaddingLeft(), panel.getPaddingTop(), panel.getPaddingRight(), bottom);
+                    }
+                }
+                
+                return insets.replaceSystemWindowInsets(insets.getSystemWindowInsetLeft(), 0, insets.getSystemWindowInsetRight(), 0);
+            });
+        }
         
         android.content.SharedPreferences prefs = eu.kodanetwork.mchost.App.getPrefs(this);
         lastTheme = prefs.getString("app_theme", "modern");
@@ -529,7 +552,7 @@ public class ServerDetailActivity extends AppCompatActivity {
 
         private void showPlayerActions() {
         com.google.android.material.bottomsheet.BottomSheetDialog sheet = 
-            new com.google.android.material.bottomsheet.BottomSheetDialog(this);
+            new com.google.android.material.bottomsheet.BottomSheetDialog(this, R.style.KodaBottomSheetDialog);
         sheet.setContentView(R.layout.bottom_sheet_player_list);
         setupWindowDecor(sheet.getWindow());
 
@@ -644,7 +667,7 @@ public class ServerDetailActivity extends AppCompatActivity {
     
     private void showPlayerActionSheet(String player, boolean isOnline) {
         com.google.android.material.bottomsheet.BottomSheetDialog sheet = 
-            new com.google.android.material.bottomsheet.BottomSheetDialog(this);
+            new com.google.android.material.bottomsheet.BottomSheetDialog(this, R.style.KodaBottomSheetDialog);
         
         View view = getLayoutInflater().inflate(R.layout.bottom_sheet_player_manage, null);
         sheet.setContentView(view);
@@ -2265,7 +2288,7 @@ public class ServerDetailActivity extends AppCompatActivity {
                             runOnUiThread(() -> {
                                 pd.dismiss();
                                 
-                                com.google.android.material.bottomsheet.BottomSheetDialog sheet = new com.google.android.material.bottomsheet.BottomSheetDialog(ServerDetailActivity.this);
+                                com.google.android.material.bottomsheet.BottomSheetDialog sheet = new com.google.android.material.bottomsheet.BottomSheetDialog(ServerDetailActivity.this, R.style.KodaBottomSheetDialog);
                                 setupWindowDecor(sheet.getWindow());
                                 android.widget.LinearLayout container = new android.widget.LinearLayout(ServerDetailActivity.this);
                                 container.setOrientation(android.widget.LinearLayout.VERTICAL);
@@ -2890,7 +2913,7 @@ public class ServerDetailActivity extends AppCompatActivity {
 
     
     private void showModrinthSearch() {
-        com.google.android.material.bottomsheet.BottomSheetDialog dialog = new com.google.android.material.bottomsheet.BottomSheetDialog(this);
+        com.google.android.material.bottomsheet.BottomSheetDialog dialog = new com.google.android.material.bottomsheet.BottomSheetDialog(this, R.style.KodaBottomSheetDialog);
         dialog.setContentView(R.layout.dialog_modrinth_search);
         
         android.view.Window window = dialog.getWindow();
