@@ -29,7 +29,10 @@ public class SupabaseAuth {
                 conn.setRequestProperty("apikey", eu.kodanetwork.mchost.security.PraetorSecurity.getSupabaseKey());
                 conn.setDoOutput(true);
 
-                String json = "{\"email\":\"" + email + "\", \"password\":\"" + password + "\"}";
+                JSONObject jsonObj = new JSONObject();
+                jsonObj.put("email", email);
+                jsonObj.put("password", password);
+                String json = jsonObj.toString();
                 OutputStream os = conn.getOutputStream();
                 os.write(json.getBytes());
                 os.flush(); os.close();
@@ -70,7 +73,10 @@ public class SupabaseAuth {
                 conn.setRequestProperty("apikey", eu.kodanetwork.mchost.security.PraetorSecurity.getSupabaseKey());
                 conn.setDoOutput(true);
 
-                String json = "{\"email\":\"" + email + "\", \"password\":\"" + password + "\"}";
+                JSONObject jsonObj = new JSONObject();
+                jsonObj.put("email", email);
+                jsonObj.put("password", password);
+                String json = jsonObj.toString();
                 OutputStream os = conn.getOutputStream();
                 os.write(json.getBytes());
                 os.flush(); os.close();
@@ -111,7 +117,10 @@ public class SupabaseAuth {
                 conn.setRequestProperty("apikey", eu.kodanetwork.mchost.security.PraetorSecurity.getSupabaseKey());
                 conn.setDoOutput(true);
 
-                String json = "{\"id_token\":\"" + idToken + "\", \"provider\":\"google\"}";
+                JSONObject jsonObj = new JSONObject();
+                jsonObj.put("id_token", idToken);
+                jsonObj.put("provider", "google");
+                String json = jsonObj.toString();
                 OutputStream os = conn.getOutputStream();
                 os.write(json.getBytes());
                 os.flush(); os.close();
@@ -163,43 +172,15 @@ public class SupabaseAuth {
 
             if (accessToken != null && userId != null) {
                 SharedPreferences prefs = eu.kodanetwork.mchost.App.getPrefs(ctx);
-                String oldAppUuid = prefs.getString("app_uuid", null);
                 
                 prefs.edit()
                     .putString("koda_session_token", accessToken)
                     .putString("koda_refresh_token", refreshToken)
-                    .putString("app_uuid", userId) // Replaces old local app_uuid
                     .putString("account_email", email)
+                    .putString("auth_uuid", userId)
                     .apply();
                     
-                if (oldAppUuid != null && !oldAppUuid.equals(userId)) {
-                    new Thread(() -> {
-                        try {
-                            URL patchUrl = new URL(eu.kodanetwork.mchost.security.PraetorSecurity.getSupabaseUrl() + "/rest/v1/rpc/rpc_migrate_servers");
-                            HttpURLConnection patchConn = (HttpURLConnection) patchUrl.openConnection();
-                            patchConn.setRequestMethod("POST");
-                            patchConn.setRequestProperty("Content-Type", "application/json");
-                            patchConn.setRequestProperty("apikey", eu.kodanetwork.mchost.security.PraetorSecurity.getSupabaseKey());
-                            patchConn.setRequestProperty("Authorization", "Bearer " + eu.kodanetwork.mchost.security.PraetorSecurity.getSupabaseKey());
-                            patchConn.setRequestProperty("Prefer", "return=minimal");
-                            patchConn.setDoOutput(true);
-                            String pJson = "{\"p_old_app_uuid\":\"" + oldAppUuid + "\", \"p_new_app_uuid\":\"" + userId + "\"}";
-                            java.io.OutputStream os = patchConn.getOutputStream();
-                            os.write(pJson.getBytes());
-                            os.flush(); os.close();
-                            
-                            int code = patchConn.getResponseCode();
-                            try {
-                                java.io.InputStream is = code < 400 ? patchConn.getInputStream() : patchConn.getErrorStream();
-                                if (is != null) {
-                                    while (is.read() != -1) {}
-                                    is.close();
-                                }
-                            } catch (Exception e) {}
-                        } catch (Exception ignored) {}
-                    }).start();
-                }
-                
+                syncAuthId(ctx, userId);
                 cb.onSuccess();
             } else if (userId != null) {
                 // Signed up but needs email confirmation
@@ -213,14 +194,39 @@ public class SupabaseAuth {
     }
 
     public static void logout(Context ctx) {
+        syncAuthId(ctx, null);
         eu.kodanetwork.mchost.App.getPrefs(ctx).edit()
             .remove("koda_session_token")
             .remove("koda_refresh_token")
-            .remove("app_uuid")
+            .remove("auth_uuid")
             .remove("account_email")
             .remove("mc_username")
             .remove("link_code")
             .apply();
+    }
+
+    private static void syncAuthId(Context ctx, String authId) {
+        new Thread(() -> {
+            try {
+                String appUuid = eu.kodanetwork.mchost.App.getPrefs(ctx).getString("app_uuid", null);
+                if (appUuid == null) return;
+
+                org.json.JSONObject rpcBody = new org.json.JSONObject();
+                rpcBody.put("p_app_uuid", appUuid);
+                rpcBody.put("p_auth_id", authId == null ? org.json.JSONObject.NULL : authId);
+
+                java.net.URL url = new java.net.URL(eu.kodanetwork.mchost.security.PraetorSecurity.getSupabaseUrl() + "/rest/v1/rpc/rpc_sync_auth_id");
+                java.net.HttpURLConnection conn = (java.net.HttpURLConnection) url.openConnection();
+                conn.setRequestMethod("POST");
+                conn.setRequestProperty("Content-Type", "application/json");
+                conn.setRequestProperty("apikey", eu.kodanetwork.mchost.security.PraetorSecurity.getSupabaseKey());
+                conn.setRequestProperty("Authorization", "Bearer " + eu.kodanetwork.mchost.security.PraetorSecurity.getSupabaseKey());
+                conn.setDoOutput(true);
+                conn.getOutputStream().write(rpcBody.toString().getBytes());
+                conn.getResponseCode();
+            } catch (Exception ignored) {
+            }
+        }).start();
     }
 
     public static void updatePassword(Context ctx, String newPassword, AuthCallback cb) {
@@ -240,7 +246,9 @@ public class SupabaseAuth {
                 conn.setRequestProperty("Authorization", "Bearer " + token);
                 conn.setDoOutput(true);
 
-                String json = "{\"password\":\"" + newPassword + "\"}";
+                JSONObject jsonObj = new JSONObject();
+                jsonObj.put("password", newPassword);
+                String json = jsonObj.toString();
                 OutputStream os = conn.getOutputStream();
                 os.write(json.getBytes());
                 os.flush(); os.close();
@@ -297,7 +305,9 @@ public class SupabaseAuth {
             conn.setRequestProperty("apikey", eu.kodanetwork.mchost.security.PraetorSecurity.getSupabaseKey());
             conn.setDoOutput(true);
 
-            String json = "{\"refresh_token\":\"" + refreshToken + "\"}";
+            JSONObject jsonObj = new JSONObject();
+            jsonObj.put("refresh_token", refreshToken);
+            String json = jsonObj.toString();
             OutputStream os = conn.getOutputStream();
             os.write(json.getBytes());
             os.flush(); os.close();
