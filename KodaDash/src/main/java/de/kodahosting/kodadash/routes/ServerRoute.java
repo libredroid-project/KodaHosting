@@ -35,6 +35,11 @@ public class ServerRoute extends RouteHandler {
             }
             response.addProperty("motd", motd);
             
+            response.addProperty("onlinePlayers", Bukkit.getServer().getOnlinePlayers().size());
+            response.addProperty("maxPlayers", Bukkit.getServer().getMaxPlayers());
+            response.addProperty("usedRam", this.plugin.getStatsManager().getUsedRam());
+            response.addProperty("maxRam", this.plugin.getStatsManager().getMaxRam());
+            
             JsonArray tpsArray = new JsonArray();
             tpsArray.add(new com.google.gson.JsonPrimitive(this.plugin.getStatsManager().getTps()));
             response.add("tps", tpsArray);
