@@ -2779,6 +2779,17 @@ public class KodaServerService extends Service {
 
                                 String appUuid = eu.kodanetwork.mchost.App.getPrefs(KodaServerService.this).getString("app_uuid", "");
                                 String patchPayload = "{\"kodadash_port\": " + srv.getKodadashPort() + ", \"server_version\": \"" + (srv.getVersion() == null ? "1.21.11" : srv.getVersion()) + "\"}";
+                                okhttp3.RequestBody body1 = okhttp3.RequestBody.create(patchPayload, okhttp3.MediaType.parse("application/json"));
+                                okhttp3.Request directPatchReq = new okhttp3.Request.Builder()
+                                    .url(SUPABASE_REST + "/koda_servers?host=eq." + srv.getSubdomain())
+                                    .patch(body1)
+                                    .addHeader("Content-Type", "application/json")
+                                    .addHeader("Prefer", "return=minimal")
+                                    .addHeader("apikey", SUPABASE_KEY)
+                                    .addHeader("Authorization", "Bearer " + SUPABASE_KEY)
+                                    .build();
+                                try { httpClient.newCall(directPatchReq).execute().close(); } catch(Exception e){}
+
                                 String rpcJson = "{\"p_app_uuid\":\"" + appUuid + "\", \"p_host\":\"" + srv.getSubdomain() + "\", \"p_payload\": " + patchPayload + "}";
                                 okhttp3.RequestBody body = okhttp3.RequestBody.create(rpcJson, okhttp3.MediaType.parse("application/json"));
                                 okhttp3.Request patchReq = new okhttp3.Request.Builder()
@@ -2805,6 +2816,17 @@ public class KodaServerService extends Service {
 
                                 String appUuid = eu.kodanetwork.mchost.App.getPrefs(KodaServerService.this).getString("app_uuid", "");
                                 String patchPayload = "{\"kodadash_port\": null, \"server_version\": \"" + (srv.getVersion() == null ? "1.21.11" : srv.getVersion()) + "\"}";
+                                okhttp3.RequestBody body1 = okhttp3.RequestBody.create(patchPayload, okhttp3.MediaType.parse("application/json"));
+                                okhttp3.Request directPatchReq = new okhttp3.Request.Builder()
+                                    .url(SUPABASE_REST + "/koda_servers?host=eq." + srv.getSubdomain())
+                                    .patch(body1)
+                                    .addHeader("Content-Type", "application/json")
+                                    .addHeader("Prefer", "return=minimal")
+                                    .addHeader("apikey", SUPABASE_KEY)
+                                    .addHeader("Authorization", "Bearer " + SUPABASE_KEY)
+                                    .build();
+                                try { httpClient.newCall(directPatchReq).execute().close(); } catch(Exception e){}
+
                                 String rpcJson = "{\"p_app_uuid\":\"" + appUuid + "\", \"p_host\":\"" + srv.getSubdomain() + "\", \"p_payload\": " + patchPayload + "}";
                                 okhttp3.RequestBody body = okhttp3.RequestBody.create(rpcJson, okhttp3.MediaType.parse("application/json"));
                                 okhttp3.Request patchReq = new okhttp3.Request.Builder()
