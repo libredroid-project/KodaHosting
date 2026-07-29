@@ -21,7 +21,7 @@ public class ServerInstance {
     private String    serverDir;
     private long      lastActive;
     private String    dbUsername = "admin";
-    private String    dbPassword = "password";
+    private String    dbPassword = java.util.UUID.randomUUID().toString().substring(0, 12);
 
     private int       maxPlayers = 20;
     private Gamemode   gamemode   = Gamemode.survival;
@@ -49,6 +49,8 @@ public class ServerInstance {
     private int       bedrockPort    = 0;
     private boolean   voicechat      = false;
     private int       voicechatPort  = 0;
+    private boolean   kodadashSupport = false;
+    private int       kodadashPort   = 0;
     
     public java.util.Map<String, String> pluginVersions = new java.util.HashMap<>();
     private String lastBackupTime;
@@ -116,9 +118,10 @@ public class ServerInstance {
         j.put("aiPrompt", aiPrompt);
         j.put("bedrockSupport", bedrockSupport);
         j.put("bedrockPort", bedrockPort);
-        j.put("bedrockPort", bedrockPort);
         j.put("voicechat", voicechat);
         j.put("voicechatPort", voicechatPort);
+        j.put("kodadashSupport", kodadashSupport);
+        j.put("kodadashPort", kodadashPort);
         j.put("lastActive", lastActive);
         j.put("customDomain", customDomain);
         j.put("baseDomain", baseDomain);
@@ -166,6 +169,8 @@ public class ServerInstance {
         s.bedrockPort    = j.optInt("bedrockPort", 0);
         s.voicechat      = j.optBoolean("voicechat", false);
         s.voicechatPort  = j.optInt("voicechatPort", 0);
+        s.kodadashSupport = j.optBoolean("kodadashSupport", false);
+        s.kodadashPort   = j.optInt("kodadashPort", 0);
         s.lastActive     = j.optLong("lastActive", System.currentTimeMillis());
         s.customDomain   = j.optString("customDomain", "");
         s.baseDomain     = j.optString("baseDomain", "kodanetwork.eu");
@@ -240,6 +245,11 @@ public class ServerInstance {
     public void   setVoicechat(boolean v)      { voicechat = v; }
     public int    getVoicechatPort()           { return voicechatPort; }
     public void   setVoicechatPort(int v)      { voicechatPort = v; }
+    
+    public boolean isKodadashSupport()         { return kodadashSupport; }
+    public void   setKodadashSupport(boolean v){ kodadashSupport = v; }
+    public int    getKodadashPort()            { return kodadashPort; }
+    public void   setKodadashPort(int v)       { kodadashPort = v; }
     
     public String getLastBackupTime()          { return lastBackupTime; }
     public void   setLastBackupTime(String v)  { lastBackupTime = v; }

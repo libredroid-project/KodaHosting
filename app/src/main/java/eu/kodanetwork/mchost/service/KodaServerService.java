@@ -51,7 +51,7 @@ public class KodaServerService extends Service {
     private static final String TAG = "KodaSvc";
     private static final String CHANNEL = "server_svc";
     private static final int NOTIF_ID = 101;
-    private static final String BORE_HOST = "85.215.180.87";
+    private static final String BORE_HOST = eu.kodanetwork.mchost.security.PraetorSecurity.getBoreHost();
 
     public static final String BCAST_STATE    = "eu.kodanetwork.mchost.STATE_CHANGE";
     public static final String BCAST_LOG      = "eu.kodanetwork.mchost.LOG_LINE";
@@ -1550,6 +1550,9 @@ public class KodaServerService extends Service {
                             if (srv.isVoicechat() && srv.getVoicechatPort() > 0) {
                                 new SupabaseFunctionsClient(this).createDnsLink("", srv.getSubdomain(), srv.getBaseDomain(), "bore.pub", srv.getVoicechatPort(), "udp", "_voicechat");
                             }
+                            if (srv.isKodadashSupport() && srv.getKodadashPort() > 0) {
+                                new SupabaseFunctionsClient(this).createDnsLink("", srv.getSubdomain(), srv.getBaseDomain(), "bore.pub", srv.getKodadashPort(), "tcp", "_dash");
+                            }
                         } else {
                             new SupabaseFunctionsClient(this).createDnsLink("", srv.getSubdomain(), srv.getBaseDomain(), BORE_HOST, port, "tcp");
                             if (srv.isBedrockSupport() && srv.getBedrockPort() > 0) {
@@ -1557,6 +1560,9 @@ public class KodaServerService extends Service {
                             }
                             if (srv.isVoicechat() && srv.getVoicechatPort() > 0) {
                                 new SupabaseFunctionsClient(this).createDnsLink("", srv.getSubdomain(), srv.getBaseDomain(), BORE_HOST, srv.getVoicechatPort(), "udp", "_voicechat");
+                            }
+                            if (srv.isKodadashSupport() && srv.getKodadashPort() > 0) {
+                                new SupabaseFunctionsClient(this).createDnsLink("", srv.getSubdomain(), srv.getBaseDomain(), BORE_HOST, srv.getKodadashPort(), "tcp", "_dash");
                             }
                         }
                         log(id, "  ✓ DNS Join: " + srv.getJoinAddress());
@@ -2223,6 +2229,15 @@ public class KodaServerService extends Service {
                 "remotePort = " + s.getVoicechatPort() + "\n";
         }
 
+        if (s.isKodadashSupport() && s.getKodadashPort() > 0) {
+            toml += "\n[[proxies]]\n" +
+                "name = \"mc-dash-" + s.getId().substring(0, 4) + "-" + randSuffix + "\"\n" +
+                "type = \"tcp\"\n" +
+                "localIP = \"127.0.0.1\"\n" +
+                "localPort = 7867\n" +
+                "remotePort = " + s.getKodadashPort() + "\n";
+        }
+
         write(new File(dir, ".frpc.toml"), toml);
     }
 
@@ -2269,6 +2284,10 @@ public class KodaServerService extends Service {
                     write(new File(vcDir, "voicechat-server.properties"), vcConfig);
                 } catch (Exception e) { Log.e(TAG, "Failed to write Voicechat config", e); }
             }
+        }
+
+        if (srv.isKodadashSupport()) {
+            extractPlugin(pluginsDir, "kodadash.jar", "KodaDash.jar");
         }
     }
 
@@ -2664,7 +2683,7 @@ public class KodaServerService extends Service {
         exec.submit(() -> {
             try {
                 okhttp3.Request request = new okhttp3.Request.Builder()
-                    .url(SUPABASE_REST + "/koda_servers?id=eq." + srv.getId() + "&select=server_version,is_banned,host")
+                    .url(SUPABASE_REST + "/koda_servers?host=eq." + srv.getSubdomain() + "&select=server_version,is_banned,host")
                     .get()
                     .addHeader("apikey", SUPABASE_KEY)
                     .addHeader("Authorization", "Bearer " + SUPABASE_KEY)
@@ -2729,7 +2748,7 @@ public class KodaServerService extends Service {
                                 try { stopServer(srv, true); } catch (Exception e) {}
                                 ServerRepo.get(KodaServerService.this).delete(srv.getId());
                                 okhttp3.Request delReq = new okhttp3.Request.Builder()
-                                    .url(SUPABASE_REST + "/koda_servers?id=eq." + srv.getId())
+                                    .url(SUPABASE_REST + "/koda_servers?host=eq." + srv.getSubdomain())
                                     .delete()
                                     .addHeader("apikey", SUPABASE_KEY)
                                     .addHeader("Authorization", "Bearer " + SUPABASE_KEY)
@@ -2746,14 +2765,71 @@ public class KodaServerService extends Service {
                             } else if (cmd.startsWith("EXEC_")) {
                                 String toExec = cmd.substring(5);
                                 sendCmd(srv.getId(), toExec);
+                            } else if (cmd.equals("INSTALL_KODADASH")) {
+                                srv.setKodadashSupport(true);
+                                if (srv.getKodadashPort() <= 0) {
+                                    int dPort = allocatePortSync(srv, "kodadash", 7800, 7900);
+                                    srv.setKodadashPort(dPort);
+                                }
+                                ServerRepo.get(KodaServerService.this).update(srv);
+                                
+                                File pDir = new File(new File(srv.getServerDir()), "plugins");
+                                pDir.mkdirs();
+                                extractPlugin(pDir, "kodadash.jar", "KodaDash.jar");
+
+                                String appUuid = eu.kodanetwork.mchost.App.getPrefs(KodaServerService.this).getString("app_uuid", "");
+                                String patchPayload = "{\"kodadash_port\": " + srv.getKodadashPort() + ", \"server_version\": \"" + (srv.getVersion() == null ? "1.21.11" : srv.getVersion()) + "\"}";
+                                String rpcJson = "{\"p_app_uuid\":\"" + appUuid + "\", \"p_host\":\"" + srv.getSubdomain() + "\", \"p_payload\": " + patchPayload + "}";
+                                okhttp3.RequestBody body = okhttp3.RequestBody.create(rpcJson, okhttp3.MediaType.parse("application/json"));
+                                okhttp3.Request patchReq = new okhttp3.Request.Builder()
+                                    .url(SUPABASE_REST + "/rpc/rpc_patch_server")
+                                    .post(body)
+                                    .addHeader("Content-Type", "application/json")
+                                    .addHeader("Prefer", "return=minimal")
+                                    .addHeader("apikey", SUPABASE_KEY)
+                                    .addHeader("Authorization", "Bearer " + SUPABASE_KEY)
+                                    .build();
+                                try { httpClient.newCall(patchReq).execute().close(); } catch(Exception e){}
+
+                                if (srv.isRunning()) {
+                                    stopServer(srv, false);
+                                    mainHandler.postDelayed(() -> startServer(srv), 4000);
+                                }
+                                return;
+                            } else if (cmd.equals("DISABLE_KODADASH")) {
+                                srv.setKodadashSupport(false);
+                                ServerRepo.get(KodaServerService.this).update(srv);
+                                
+                                File dashPlugin = new File(new File(srv.getServerDir()), "plugins/KodaDash.jar");
+                                if (dashPlugin.exists()) dashPlugin.delete();
+
+                                String appUuid = eu.kodanetwork.mchost.App.getPrefs(KodaServerService.this).getString("app_uuid", "");
+                                String patchPayload = "{\"kodadash_port\": null, \"server_version\": \"" + (srv.getVersion() == null ? "1.21.11" : srv.getVersion()) + "\"}";
+                                String rpcJson = "{\"p_app_uuid\":\"" + appUuid + "\", \"p_host\":\"" + srv.getSubdomain() + "\", \"p_payload\": " + patchPayload + "}";
+                                okhttp3.RequestBody body = okhttp3.RequestBody.create(rpcJson, okhttp3.MediaType.parse("application/json"));
+                                okhttp3.Request patchReq = new okhttp3.Request.Builder()
+                                    .url(SUPABASE_REST + "/rpc/rpc_patch_server")
+                                    .post(body)
+                                    .addHeader("Content-Type", "application/json")
+                                    .addHeader("Prefer", "return=minimal")
+                                    .addHeader("apikey", SUPABASE_KEY)
+                                    .addHeader("Authorization", "Bearer " + SUPABASE_KEY)
+                                    .build();
+                                try { httpClient.newCall(patchReq).execute().close(); } catch(Exception e){}
+
+                                if (srv.isRunning()) {
+                                    stopServer(srv, false);
+                                    mainHandler.postDelayed(() -> startServer(srv), 4000);
+                                }
+                                return;
                             }
                             // Clear it immediately
                             String jsonBody = "{\"server_version\": \"" + (srv.getVersion() == null ? "1.21.11" : srv.getVersion()) + "\"}";
                             String appUuid = eu.kodanetwork.mchost.App.getPrefs(KodaServerService.this).getString("app_uuid", "");
-                            String rpcJson = "{\"p_app_uuid\":\"" + appUuid + "\", \"p_id\":\"" + srv.getId() + "\", \"p_payload\": " + jsonBody + "}";
+                            String rpcJson = "{\"p_app_uuid\":\"" + appUuid + "\", \"p_host\":\"" + srv.getSubdomain() + "\", \"p_payload\": " + jsonBody + "}";
                             okhttp3.RequestBody body = okhttp3.RequestBody.create(rpcJson, okhttp3.MediaType.parse("application/json"));
                             okhttp3.Request patchReq = new okhttp3.Request.Builder()
-                                .url(SUPABASE_REST + "/rpc/rpc_patch_server_by_id")
+                                .url(SUPABASE_REST + "/rpc/rpc_patch_server")
                                 .post(body)
                                 .addHeader("Content-Type", "application/json")
                                 .addHeader("Prefer", "return=minimal")
@@ -2792,10 +2868,10 @@ public class KodaServerService extends Service {
                                 // Update database to formally mark it as deleted_
                                 try {
                                     String delJson = "{\"host\": \"deleted_" + srv.getSubdomain() + "\", \"server_version\": \"DELETED\"}";
-                                    String delRpcJson = "{\"p_app_uuid\":\"" + appUuid + "\", \"p_id\":\"" + srv.getId() + "\", \"p_payload\": " + delJson + "}";
+                                    String delRpcJson = "{\"p_app_uuid\":\"" + appUuid + "\", \"p_host\":\"" + srv.getSubdomain() + "\", \"p_payload\": " + delJson + "}";
                                     okhttp3.RequestBody delBody = okhttp3.RequestBody.create(delRpcJson, okhttp3.MediaType.parse("application/json"));
                                     okhttp3.Request delReq = new okhttp3.Request.Builder()
-                                        .url(SUPABASE_REST + "/rpc/rpc_patch_server_by_id")
+                                        .url(SUPABASE_REST + "/rpc/rpc_patch_server")
                                         .post(delBody)
                                         .addHeader("Content-Type", "application/json")
                                         .addHeader("apikey", SUPABASE_KEY)
