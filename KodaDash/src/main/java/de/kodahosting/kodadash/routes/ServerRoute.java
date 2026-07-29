@@ -1,5 +1,6 @@
 package de.kodahosting.kodadash.routes;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.sun.net.httpserver.HttpExchange;
 import de.kodahosting.kodadash.KodaDash;
@@ -34,13 +35,23 @@ public class ServerRoute extends RouteHandler {
             }
             response.addProperty("motd", motd);
             
-            response.addProperty("onlinePlayers", Bukkit.getServer().getOnlinePlayers().size());
-            response.addProperty("maxPlayers", Bukkit.getServer().getMaxPlayers());
+            JsonArray tpsArray = new JsonArray();
+            tpsArray.add(new com.google.gson.JsonPrimitive(this.plugin.getStatsManager().getTps()));
+            response.add("tps", tpsArray);
             
-            // Assuming StatsManager provides these methods
-            response.addProperty("tps", this.plugin.getStatsManager().getTps());
-            response.addProperty("usedRam", this.plugin.getStatsManager().getUsedRam());
-            response.addProperty("maxRam", this.plugin.getStatsManager().getMaxRam());
+            JsonObject ramObj = new JsonObject();
+            ramObj.addProperty("max", this.plugin.getStatsManager().getMaxRam());
+            long usedRam = this.plugin.getStatsManager().getUsedRam();
+            long maxRam = this.plugin.getStatsManager().getMaxRam();
+            ramObj.addProperty("allocated", usedRam);
+            ramObj.addProperty("free", 0); // simplification for the UI calculation
+            response.add("ram", ramObj);
+            
+            JsonObject playersObj = new JsonObject();
+            playersObj.addProperty("online", Bukkit.getServer().getOnlinePlayers().size());
+            playersObj.addProperty("max", Bukkit.getServer().getMaxPlayers());
+            response.add("players", playersObj);
+            
             response.addProperty("uptime", this.plugin.getStatsManager().getUptime());
             
             response.addProperty("port", Bukkit.getServer().getPort());

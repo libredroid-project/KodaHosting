@@ -200,7 +200,10 @@ async function doLogin() {
   state.password = password || null;
   
   try {
-    const data = await api('/api/auth', { method: 'POST' });
+    const data = await api('/api/auth', { 
+      method: 'POST',
+      body: JSON.stringify({ token: token, password: password || undefined })
+    });
     
     // Auth success
     sessionStorage.setItem('kodaDashToken', token);
@@ -449,7 +452,8 @@ async function loadPlayers() {
   const header = document.getElementById('players-count-header');
   
   try {
-    const players = await api('/api/players');
+    const res = await api('/api/players');
+    const players = res.players || [];
     
     header.textContent = `Players (${players.length})`;
     
@@ -534,7 +538,8 @@ async function loadFiles(path = '') {
   
   try {
     const encodedPath = encodeURIComponent(path);
-    const files = await api(`/api/files${path ? '?path=' + encodedPath : ''}`);
+    const res = await api(`/api/files${path ? '?path=' + encodedPath : ''}`);
+    const files = res.entries || [];
     state.currentPath = path;
     
     // Update breadcrumb
@@ -704,7 +709,8 @@ async function loadSettings() {
   container.innerHTML = 'Loading...';
   
   try {
-    const props = await api('/api/settings');
+    const res = await api('/api/settings');
+    const props = res.properties || {};
     container.innerHTML = '';
     
     // Group properties
