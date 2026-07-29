@@ -352,11 +352,12 @@ public class SettingsActivity extends Activity {
                     conn.setRequestProperty("apikey", anonKey);
                     
                     String token = prefs.getString("koda_session_token", null);
-                    conn.setRequestProperty("Authorization", token != null ? "Bearer " + token : "Bearer " + anonKey);
+                    // ALWAYS use anonKey for Authorization to match Supabase RLS policies which only allow 'anon'
+                    conn.setRequestProperty("Authorization", "Bearer " + anonKey);
                     
                     conn.setDoOutput(true);
                     
-                    String userId = prefs.getString("koda_session_token", null) != null ? finalAppUuid : null;
+                    String userId = prefs.getString("koda_session_token", null) != null ? prefs.getString("auth_uuid", null) : null;
                     String authIdStr = userId != null ? "\"" + userId + "\"" : "null";
                     
                     String json = "{\"app_uuid\":\"" + finalAppUuid + "\", \"code\":\"" + newCode + "\", \"auth_id\": " + authIdStr + ", \"is_main\": " + isMain + "}";
@@ -407,7 +408,7 @@ public class SettingsActivity extends Activity {
                 pos.flush(); pos.close();
                 patchConn.getResponseCode();
                 
-                String userId = prefs.getString("koda_session_token", null) != null ? finalAppUuid : null;
+                String userId = prefs.getString("koda_session_token", null) != null ? prefs.getString("auth_uuid", null) : null;
                 String queryUrl = eu.kodanetwork.mchost.security.PraetorSecurity.getSupabaseUrl() + "/rest/v1/koda_users?";
                 if (userId != null) {
                     queryUrl += "or=(app_uuid.eq." + finalAppUuid + ",auth_id.eq." + userId + ")&mc_username=not.is.null";
