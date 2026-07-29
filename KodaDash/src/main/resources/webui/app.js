@@ -537,8 +537,8 @@ async function loadFiles(path = '') {
   const breadcrumb = document.getElementById('files-breadcrumb');
   
   try {
-    const encodedPath = encodeURIComponent(path);
-    const res = await api(`/api/files${path ? '?path=' + encodedPath : ''}`);
+    const encodedPath = path ? '/' + path.split('/').map(encodeURIComponent).join('/') : '';
+    const res = await api(`/api/files${encodedPath}`);
     const files = res.entries || [];
     state.currentPath = path;
     
@@ -619,8 +619,8 @@ async function loadFiles(path = '') {
 
 async function openFile(path) {
   try {
-    const encodedPath = encodeURIComponent(path);
-    const data = await api(`/api/files/content?path=${encodedPath}`);
+    const encodedPath = '/' + path.split('/').map(encodeURIComponent).join('/');
+    const data = await api(`/api/files${encodedPath}`);
     
     state.editingFile = path;
     document.getElementById('editor-filename').textContent = path.split('/').pop();
@@ -637,8 +637,8 @@ async function saveFile() {
   
   const content = document.getElementById('editor-textarea').value;
   try {
-    const encodedPath = encodeURIComponent(state.editingFile);
-    await api(`/api/files/content?path=${encodedPath}`, {
+    const encodedPath = '/' + state.editingFile.split('/').map(encodeURIComponent).join('/');
+    await api(`/api/files${encodedPath}`, {
       method: 'POST',
       body: JSON.stringify({ content })
     });
@@ -658,8 +658,8 @@ window.deleteFile = async function(path) {
   if (!confirm(`Delete ${path}? This cannot be undone.`)) return;
   
   try {
-    const encodedPath = encodeURIComponent(path);
-    await api(`/api/files?path=${encodedPath}`, { method: 'DELETE' });
+    const encodedPath = '/' + path.split('/').map(encodeURIComponent).join('/');
+    await api(`/api/files${encodedPath}`, { method: 'DELETE' });
     showToast('Deleted', 'success');
     loadFiles(state.currentPath);
   } catch (error) {
@@ -673,11 +673,12 @@ document.getElementById('new-file-btn').addEventListener('click', async () => {
   
   const fullPath = state.currentPath ? `${state.currentPath}/${name}` : name;
   try {
-    const encodedPath = encodeURIComponent(fullPath);
-    await api(`/api/files/content?path=${encodedPath}`, {
+    const encodedPath = '/' + fullPath.split('/').map(encodeURIComponent).join('/');
+    await api(`/api/files${encodedPath}`, {
       method: 'POST',
       body: JSON.stringify({ content: '' })
     });
+    showToast('File created', 'success');
     loadFiles(state.currentPath);
     openFile(fullPath);
   } catch (error) {
