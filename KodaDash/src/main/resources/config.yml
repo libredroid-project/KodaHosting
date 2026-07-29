@@ -1,0 +1,51 @@
+# ============================================
+# KodaDash Configuration
+# Secure Remote Control Panel for KodaHosting
+# ============================================
+
+# Port for the web dashboard (HTTP + SSE)
+port: 7867
+
+# Allowed origins for CORS (comma-separated)
+# Set to * for development, restrict to your domain in production
+cors-origins: "https://kodahosting.com,http://localhost:3000"
+
+# Auto-generated API token (DO NOT SHARE)
+# This token is used by the KodaHosting website to authenticate.
+# It is generated automatically on first startup.
+# Use /kodadash regenerate to create a new one.
+api-token: ""
+
+# Optional secondary password (BCrypt hash)
+# Set via /kodadash setpassword <password>
+# Leave empty to disable secondary password
+password-hash: ""
+
+# Rate limiting
+rate-limit:
+  # Maximum requests per minute per IP
+  max-requests: 120
+  # Auth endpoint: max attempts per minute per IP
+  max-auth-attempts: 10
+
+# Maximum file size for uploads (in bytes, default 10MB)
+max-upload-size: 10485760
+
+# Maximum number of console lines to keep in memory
+console-buffer-size: 500
+
+# Paths that are blocked from the file browser (relative to server dir)
+blocked-paths:
+  - "plugins/KodaDash/config.yml"
+  - "whitelist.json"
+  - "banned-players.json"
+  - "banned-ips.json"
+  - "ops.json"
+
+# Commands that are blocked from being executed via the console
+blocked-commands:
+  - "stop"
+  - "kodadash"
+  - "op"
+  - "deop"
+  - "ban-ip"

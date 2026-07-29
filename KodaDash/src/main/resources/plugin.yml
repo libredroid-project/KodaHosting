@@ -1,0 +1,19 @@
+name: KodaDash
+version: ${project.version}
+main: de.kodahosting.kodadash.KodaDash
+api-version: 1.13
+description: Secure remote server control panel for KodaHosting
+author: KodaHosting
+website: https://kodahosting.com
+
+commands:
+  kodadash:
+    description: KodaDash panel management
+    usage: /kodadash <setpassword|removepassword|token|regenerate|status>
+    permission: kodadash.admin
+    aliases: [kd, dash]
+
+permissions:
+  kodadash.admin:
+    description: Full access to KodaDash commands
+    default: op

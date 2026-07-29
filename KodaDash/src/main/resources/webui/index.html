@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KodaDash</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono&family=Outfit:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <script type="module" src="app.js" defer></script>
+</head>
+<body>
+  <div id="toast-container"></div>
+  
+  <div id="app">
+    <!-- Login Screen -->
+    <div id="login-screen">
+      <div id="login-particles"></div>
+      <div class="login-card">
+        <h1 class="logo">Koda<span class="accent">Dash</span></h1>
+        <p class="subtitle">Enter your token to manage your server</p>
+        <form id="login-form">
+          <div class="input-group">
+            <input type="text" id="token-input" placeholder="Connection Token" autocomplete="off" required>
+          </div>
+          <div class="input-group" id="password-group" style="display: none;">
+            <input type="password" id="password-input" placeholder="Server Password (Optional)">
+          </div>
+          <button type="submit" class="btn-primary login-btn">Connect</button>
+        </form>
+        <div id="login-error" class="error-msg"></div>
+      </div>
+    </div>
+
+    <!-- Dashboard -->
+    <div id="dashboard" style="display: none;">
+      <!-- Sidebar -->
+      <nav id="sidebar">
+        <div class="sidebar-header">
+          <span class="logo">Koda<span class="accent">Dash</span></span>
+          <span class="server-name" id="server-name">Loading...</span>
+          <button id="mobile-menu-close" class="mobile-only">&times;</button>
+        </div>
+        <ul class="nav-links">
+          <li class="nav-item active" data-tab="overview"><span class="nav-icon">📊</span> Overview</li>
+          <li class="nav-item" data-tab="console"><span class="nav-icon">💻</span> Console</li>
+          <li class="nav-item" data-tab="players"><span class="nav-icon">👥</span> Players</li>
+          <li class="nav-item" data-tab="files"><span class="nav-icon">📁</span> Files</li>
+          <li class="nav-item" data-tab="settings"><span class="nav-icon">⚙️</span> Settings</li>
+        </ul>
+        <div class="sidebar-footer">
+          <div class="connection-status" id="connection-status">
+            <span class="status-dot connected"></span>
+            <span>Connected</span>
+          </div>
+          <button id="logout-btn" class="btn-ghost">Disconnect</button>
+        </div>
+      </nav>
+
+      <!-- Main Content -->
+      <main id="main-content">
+        <header class="mobile-header mobile-only">
+          <button id="mobile-menu-btn">☰</button>
+          <span class="logo">Koda<span class="accent">Dash</span></span>
+        </header>
+
+        <!-- Overview Tab -->
+        <section id="tab-overview" class="tab-content active">
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-icon">📈</div>
+              <div class="stat-info">
+                <span class="stat-label">TPS</span>
+                <span class="stat-value" id="stat-tps">--</span>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon">🧠</div>
+              <div class="stat-info">
+                <span class="stat-label">RAM Usage</span>
+                <span class="stat-value" id="stat-ram">-- / --</span>
+                <div class="progress-bar-bg"><div class="progress-bar" id="stat-ram-bar"></div></div>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon">👥</div>
+              <div class="stat-info">
+                <span class="stat-label">Players</span>
+                <span class="stat-value" id="stat-players">-- / --</span>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon">⏱️</div>
+              <div class="stat-info">
+                <span class="stat-label">Uptime</span>
+                <span class="stat-value" id="stat-uptime">--</span>
+              </div>
+            </div>
+          </div>
+          
+          <div class="server-info-card">
+            <h3>Server Information</h3>
+            <div class="info-grid">
+              <div class="info-item">
+                <span class="info-label">Version</span>
+                <span class="info-value" id="info-version">--</span>
+              </div>
+              <div class="info-item">
+                <span class="info-label">MOTD</span>
+                <span class="info-value" id="info-motd">--</span>
+              </div>
+              <div class="info-item">
+                <span class="info-label">World</span>
+                <span class="info-value" id="info-world">--</span>
+              </div>
+              <div class="info-item">
+                <span class="info-label">Gamemode</span>
+                <span class="info-value" id="info-gamemode">--</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Console Tab -->
+        <section id="tab-console" class="tab-content">
+          <div class="console-container">
+            <div id="console-output" class="console-output"></div>
+            <form id="console-form" class="console-input-area">
+              <span class="console-prompt">&gt;</span>
+              <input type="text" id="console-input" placeholder="Enter command..." autocomplete="off">
+              <button type="submit" class="btn-primary">Send</button>
+            </form>
+          </div>
+        </section>
+
+        <!-- Players Tab -->
+        <section id="tab-players" class="tab-content">
+          <div class="tab-header">
+            <h2 id="players-count-header">Players (0/0)</h2>
+            <button class="btn-ghost" id="refresh-players-btn">Refresh</button>
+          </div>
+          <div id="players-grid" class="players-grid">
+            <!-- Populated by JS -->
+          </div>
+          <div id="players-empty" class="empty-state" style="display: none;">
+            <div class="empty-icon">🛌</div>
+            <h3>No players online</h3>
+            <p>It's quiet in here.</p>
+          </div>
+        </section>
+
+        <!-- Files Tab -->
+        <section id="tab-files" class="tab-content">
+          <div class="files-header">
+            <div class="breadcrumb" id="files-breadcrumb">
+              <!-- Populated by JS -->
+            </div>
+            <div class="files-actions">
+              <button class="btn-ghost" id="new-file-btn">New File</button>
+              <button class="btn-ghost" id="new-folder-btn">New Folder</button>
+              <button class="btn-ghost" id="refresh-files-btn">Refresh</button>
+            </div>
+          </div>
+          <div class="files-list" id="files-list">
+            <!-- Populated by JS -->
+          </div>
+        </section>
+
+        <!-- Settings Tab -->
+        <section id="tab-settings" class="tab-content">
+          <div class="tab-header">
+            <h2>Server Settings</h2>
+            <button class="btn-primary" id="save-settings-btn">Save Changes</button>
+          </div>
+          <div class="settings-warning">
+            ⚠️ Changes require a server restart to take effect completely.
+          </div>
+          <div class="settings-form" id="settings-form">
+            <!-- Populated by JS -->
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <!-- File Editor Overlay -->
+    <div id="file-editor-overlay" class="overlay" style="display: none;">
+      <div class="editor-modal">
+        <div class="editor-header">
+          <h3 id="editor-filename">filename.txt</h3>
+          <div class="editor-actions">
+            <button class="btn-primary" id="editor-save-btn">Save</button>
+            <button class="btn-ghost" id="editor-close-btn">Close</button>
+          </div>
+        </div>
+        <textarea id="editor-textarea" spellcheck="false"></textarea>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
