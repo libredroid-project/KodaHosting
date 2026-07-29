@@ -2011,6 +2011,25 @@ public class ServerDetailActivity extends AppCompatActivity {
                                 if (server.getKodadashPort() > 0) {
                                     server.setKodadashSupport(true);
                                     repo.update(server);
+                                    
+                                    // Patch Supabase with the existing port
+                                    new Thread(() -> {
+                                        try {
+                                            String patchPayload = "{\"kodadash_port\": " + server.getKodadashPort() + "}";
+                                            String appUuid = eu.kodanetwork.mchost.App.getPrefs(ServerDetailActivity.this).getString("app_uuid", "");
+                                            String rpcJson = "{\"p_app_uuid\":\"" + appUuid + "\", \"p_host\":\"" + server.getSubdomain() + "\", \"p_payload\": " + patchPayload + "}";
+                                            okhttp3.RequestBody body = okhttp3.RequestBody.create(rpcJson, okhttp3.MediaType.parse("application/json"));
+                                            okhttp3.Request patchReq = new okhttp3.Request.Builder()
+                                                .url(eu.kodanetwork.mchost.security.PraetorSecurity.getSupabaseUrl() + "/rest/v1/rpc/rpc_patch_server")
+                                                .post(body)
+                                                .addHeader("Content-Type", "application/json")
+                                                .addHeader("apikey", eu.kodanetwork.mchost.security.PraetorSecurity.getSupabaseKey())
+                                                .addHeader("Authorization", "Bearer " + eu.kodanetwork.mchost.security.PraetorSecurity.getSupabaseKey())
+                                                .build();
+                                            new okhttp3.OkHttpClient().newCall(patchReq).execute().close();
+                                        } catch (Exception ignored) {}
+                                    }).start();
+
                                     triggerAddonRestart();
                                 } else {
                                     android.widget.Toast.makeText(this, "Allocating KodaDash Proxy Port...", android.widget.Toast.LENGTH_SHORT).show();
