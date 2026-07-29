@@ -257,6 +257,8 @@ public class ServerDetailActivity extends AppCompatActivity {
         else startService(si);
         bindService(si, conn, Context.BIND_AUTO_CREATE);
         startTicker();
+        
+        checkServerBanStatus();
 
         if (getIntent().getBooleanExtra("auto_setup", false)) {
             getIntent().removeExtra("auto_setup");
@@ -392,6 +394,13 @@ public class ServerDetailActivity extends AppCompatActivity {
                 intent.putExtra("SERVER_ID", server.getId());
                 startActivity(intent);
             });
+        }
+        
+        View layoutBanned = findViewById(R.id.layout_server_banned);
+        TextView tvBannedReason = findViewById(R.id.tv_banned_reason);
+        View btnBannedDownload = findViewById(R.id.btn_banned_download);
+        if (btnBannedDownload != null) {
+            btnBannedDownload.setOnClickListener(v -> exportZip());
         }
 
         // tv_custom_domain_target and btn_copy_domain no longer exist.
@@ -1974,40 +1983,74 @@ public class ServerDetailActivity extends AppCompatActivity {
             });
         }
 
+        // KodaDash Web Control Addon (Restricted to darkpocky3@gmail.com and PaperMC/Purpur)
+        String accountEmail = eu.kodanetwork.mchost.App.getPrefs(this).getString("account_email", "");
+        boolean isPaperOrPurpur = server.getType() == ServerInstance.Type.PAPER || server.getType() == ServerInstance.Type.PURPUR;
+        
+        android.widget.CompoundButton swKodadash = findViewById(R.id.switch_kodadash);
+        View rowKodadash = findViewById(R.id.row_kodadash);
+        View dividerKodadash = findViewById(R.id.divider_kodadash);
+
+        if ("darkpocky3@gmail.com".equalsIgnoreCase(accountEmail) && isPaperOrPurpur) {
+            if (rowKodadash != null) rowKodadash.setVisibility(View.VISIBLE);
+            if (dividerKodadash != null) dividerKodadash.setVisibility(View.VISIBLE);
+
+            if (swKodadash != null) {
+                swKodadash.setChecked(server.isKodadashSupport());
+                swKodadash.setOnClickListener(v -> {
+                    if (!eu.kodanetwork.mchost.security.PraetorSystem.checkNetwork(this)) {
+                        swKodadash.setChecked(false);
+                        return;
+                    }
+                    boolean isChecked = swKodadash.isChecked();
+                    if (isChecked) {
+                        new androidx.appcompat.app.AlertDialog.Builder(this)
+                            .setTitle("KodaDash Beta Warning")
+                            .setMessage("KodaDash Web Control Panel is a Beta feature. It uses ~50MB extra RAM and might be unstable. Are you sure you want to enable it?")
+                            .setPositiveButton("Enable", (dialog, which) -> {
+                                if (server.getKodadashPort() > 0) {
+                                    server.setKodadashSupport(true);
+                                    repo.update(server);
+                                    triggerAddonRestart();
+                                } else {
+                                    android.widget.Toast.makeText(this, "Allocating KodaDash Proxy Port...", android.widget.Toast.LENGTH_SHORT).show();
+                                    new Thread(() -> {
+                                        try {
+                                            int allocatedPort = new eu.kodanetwork.mchost.network.supabase.SupabaseFunctionsClient(this).allocatePort("", server.getSubdomain(), "kodadash");
+                                            runOnUiThread(() -> {
+                                                server.setKodadashPort(allocatedPort);
+                                                server.setKodadashSupport(true);
+                                                repo.update(server);
+                                                triggerAddonRestart();
+                                            });
+                                        } catch (Exception e) {
+                                            runOnUiThread(() -> {
+                                                swKodadash.setChecked(false);
+                                                android.widget.Toast.makeText(ServerDetailActivity.this, "Port Allocation Error: " + e.getMessage(), android.widget.Toast.LENGTH_LONG).show();
+                                            });
+                                        }
+                                    }).start();
+                                }
+                            })
+                            .setNegativeButton("Cancel", (dialog, which) -> {
+                                swKodadash.setChecked(false);
+                            })
+                            .setOnCancelListener(dialog -> swKodadash.setChecked(false))
+                            .show();
+                    } else {
+                        server.setKodadashSupport(false);
+                        repo.update(server);
+                        triggerAddonRestart();
+                    }
+                });
+            }
+        }
+
         setupGameplaySettings();
 
         android.view.View btnExportZip = findViewById(R.id.btn_export_zip);
         if (btnExportZip != null) {
-            btnExportZip.setOnClickListener(v -> {
-                if (server != null) {
-                    new Thread(() -> {
-                        try {
-                            File cacheDir = new File(getCacheDir(), "exports");
-                            if (!cacheDir.exists()) cacheDir.mkdirs();
-                            
-                            File zipFile = new File(cacheDir, server.getName() + "_export.zip");
-                            
-                            runOnUiThread(() -> android.widget.Toast.makeText(ServerDetailActivity.this, getString(R.string.sd_toast_zipping), android.widget.Toast.LENGTH_SHORT).show());
-                            
-                            eu.kodanetwork.mchost.utils.ZipUtils.zipFolder(server.getServerDir(), zipFile.getAbsolutePath());
-                            
-                            android.net.Uri uri = androidx.core.content.FileProvider.getUriForFile(ServerDetailActivity.this, "eu.kodanetwork.mchost.fileprovider", zipFile);
-                            
-                            android.content.Intent shareIntent = new android.content.Intent(android.content.Intent.ACTION_SEND);
-                            shareIntent.setType("application/zip");
-                            shareIntent.putExtra(android.content.Intent.EXTRA_STREAM, uri);
-                            shareIntent.addFlags(android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                            
-                            runOnUiThread(() -> {
-                                startActivity(android.content.Intent.createChooser(shareIntent, "Save Server ZIP"));
-                            });
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                            runOnUiThread(() -> android.widget.Toast.makeText(ServerDetailActivity.this, getString(R.string.sd_toast_export_failed) + e.getMessage(), android.widget.Toast.LENGTH_LONG).show());
-                        }
-                    }).start();
-                }
-            });
+            btnExportZip.setOnClickListener(v -> exportZip());
         }
         
         android.widget.TextView btnHibernate = findViewById(R.id.btn_hibernate);
@@ -3175,6 +3218,95 @@ public class ServerDetailActivity extends AppCompatActivity {
             String displayDomain = (customDomain != null && !customDomain.trim().isEmpty()) ? customDomain : defaultDomain;
             tvJoinAddr.setText(displayDomain);
             tvJoinAddr.setOnClickListener(v -> copyToClipboard("Join Address", displayDomain));
+        }
+    }
+
+    private void checkServerBanStatus() {
+        android.content.SharedPreferences prefs = eu.kodanetwork.mchost.App.getPrefs(this);
+        String sessionToken = prefs.getString("koda_session_token", null);
+        String cacheKey = "banned_server_" + server.getId();
+        String reasonKey = "banned_reason_" + server.getId();
+        
+        // Check offline cache first
+        if (prefs.getBoolean(cacheKey, false)) {
+            showBannedOverlay(prefs.getString(reasonKey, "Unknown"));
+        }
+        
+        // Fetch from Supabase
+        new Thread(() -> {
+            try {
+                String responseStr = eu.kodanetwork.mchost.network.supabase.SupportApi.makeSupabaseRequest(
+                        "rest/v1/koda_servers?select=is_banned,ban_reason&host=eq." + server.getSubdomain(), "GET", null, sessionToken);
+                org.json.JSONArray arr = new org.json.JSONArray(responseStr);
+                if (arr.length() > 0) {
+                    org.json.JSONObject obj = arr.getJSONObject(0);
+                    boolean isBanned = obj.optBoolean("is_banned", false);
+                    String banReason = obj.optString("ban_reason", "Verstoß gegen die Nutzungsbedingungen");
+                    
+                    if (isBanned) {
+                        prefs.edit().putBoolean(cacheKey, true).putString(reasonKey, banReason).apply();
+                        runOnUiThread(() -> showBannedOverlay(banReason));
+                    } else {
+                        prefs.edit().remove(cacheKey).remove(reasonKey).apply();
+                    }
+                }
+            } catch (Exception ignored) {}
+        }).start();
+    }
+    
+    private void showBannedOverlay(String reason) {
+        View layoutBanned = findViewById(R.id.layout_server_banned);
+        TextView tvBannedReason = findViewById(R.id.tv_banned_reason);
+        if (layoutBanned != null && tvBannedReason != null) {
+            tvBannedReason.setText(reason);
+            layoutBanned.setVisibility(View.VISIBLE);
+            
+            // Hide everything except the top bar
+            View tabs = findViewById(R.id.tabs);
+            if (tabs != null) tabs.setVisibility(View.GONE);
+            View panelDash = findViewById(R.id.panel_dash);
+            if (panelDash != null) panelDash.setVisibility(View.GONE);
+            View panelConsole = findViewById(R.id.panel_console);
+            if (panelConsole != null) panelConsole.setVisibility(View.GONE);
+            View panelFiles = findViewById(R.id.panel_files);
+            if (panelFiles != null) panelFiles.setVisibility(View.GONE);
+            View panelPlugins = findViewById(R.id.panel_plugins);
+            if (panelPlugins != null) panelPlugins.setVisibility(View.GONE);
+            View panelSettings = findViewById(R.id.panel_settings);
+            if (panelSettings != null) panelSettings.setVisibility(View.GONE);
+            View restartHeader = findViewById(R.id.layout_header_restart);
+            if (restartHeader != null) restartHeader.setVisibility(View.GONE);
+        }
+    }
+    
+    private void exportZip() {
+        if (server != null) {
+            new Thread(() -> {
+                try {
+                    File cacheDir = new File(getCacheDir(), "exports");
+                    if (!cacheDir.exists()) cacheDir.mkdirs();
+                    
+                    File zipFile = new File(cacheDir, server.getName() + "_export.zip");
+                    
+                    runOnUiThread(() -> android.widget.Toast.makeText(ServerDetailActivity.this, getString(R.string.sd_toast_zipping), android.widget.Toast.LENGTH_SHORT).show());
+                    
+                    eu.kodanetwork.mchost.utils.ZipUtils.zipFolder(server.getServerDir(), zipFile.getAbsolutePath());
+                    
+                    android.net.Uri uri = androidx.core.content.FileProvider.getUriForFile(ServerDetailActivity.this, "eu.kodanetwork.mchost.fileprovider", zipFile);
+                    
+                    android.content.Intent shareIntent = new android.content.Intent(android.content.Intent.ACTION_SEND);
+                    shareIntent.setType("application/zip");
+                    shareIntent.putExtra(android.content.Intent.EXTRA_STREAM, uri);
+                    shareIntent.addFlags(android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                    
+                    runOnUiThread(() -> {
+                        startActivity(android.content.Intent.createChooser(shareIntent, "Save Server ZIP"));
+                    });
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    runOnUiThread(() -> android.widget.Toast.makeText(ServerDetailActivity.this, getString(R.string.sd_toast_export_failed) + e.getMessage(), android.widget.Toast.LENGTH_LONG).show());
+                }
+            }).start();
         }
     }
 

@@ -814,6 +814,29 @@
                             android:layout_width="wrap_content" android:layout_height="wrap_content"
                             app:useMaterialThemeColors="false" app:thumbTint="@color/switch_thumb" app:trackTint="@color/switch_track"/>
                     </LinearLayout>
+
+                    <View android:id="@+id/divider_kodadash" android:layout_width="match_parent" android:layout_height="1dp"
+                        android:background="#332A24" android:layout_marginTop="12dp" android:layout_marginBottom="12dp"
+                        android:visibility="gone"/>
+
+                    <LinearLayout android:id="@+id/row_kodadash" android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:orientation="horizontal" android:gravity="center_vertical"
+                        android:visibility="gone">
+                        <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+                            android:layout_weight="1" android:orientation="vertical">
+                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                                android:text="KodaDash Web Control"
+                                android:textColor="#FF6B00" android:textSize="13sp" android:fontFamily="sans-serif-medium"/>
+                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                                android:text="⚠️ Beta: High RAM (~50MB), PaperMC/Purpur"
+                                android:textColor="#FF5252" android:textSize="11sp" android:fontFamily="sans-serif"
+                                android:layout_marginTop="2dp"/>
+                        </LinearLayout>
+                        <com.google.android.material.switchmaterial.SwitchMaterial
+                            android:id="@+id/switch_kodadash"
+                            android:layout_width="wrap_content" android:layout_height="wrap_content"
+                            app:useMaterialThemeColors="false" app:thumbTint="@color/switch_thumb" app:trackTint="@color/switch_track"/>
+                    </LinearLayout>
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 
@@ -1126,6 +1149,64 @@
                 android:fontFamily="sans-serif-medium"
                 app:strokeColor="#FF6B00"
                 app:cornerRadius="12dp"/>
+        </LinearLayout>
+    </FrameLayout>
+
+    <!-- BANNED SERVER OVERLAY -->
+    <FrameLayout android:id="@+id/layout_server_banned"
+        android:layout_width="match_parent" android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:background="#2E1508" android:visibility="gone"
+        android:elevation="200dp" android:clickable="true" android:focusable="true">
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:orientation="vertical" android:gravity="center" android:layout_gravity="center"
+            android:padding="32dp">
+            
+            <ImageView android:layout_width="80dp" android:layout_height="80dp"
+                android:src="@android:drawable/ic_dialog_alert"
+                app:tint="#FF3344"
+                android:layout_marginBottom="16dp"/>
+                
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="@string/server_banned_title" android:textColor="#FF3344"
+                android:textSize="20sp" android:textStyle="bold" android:fontFamily="sans-serif-medium"
+                android:letterSpacing="0.04" android:layout_marginBottom="16dp"/>
+                
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="@string/server_banned_message"
+                android:textColor="#F0F0F0" android:textSize="14sp"
+                android:textAlignment="center" android:fontFamily="sans-serif"
+                android:layout_marginBottom="24dp"/>
+                
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:layout_marginBottom="32dp"
+                app:cardBackgroundColor="#2A1010"
+                app:cardCornerRadius="8dp" app:cardElevation="0dp">
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:orientation="vertical" android:padding="16dp">
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:text="@string/server_banned_reason_label" android:textColor="#8A8A9A"
+                        android:textSize="12sp" android:fontFamily="sans-serif-medium"
+                        android:layout_marginBottom="4dp"/>
+                    <TextView android:id="@+id/tv_banned_reason"
+                        android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:text="@string/server_banned_reason_unknown" android:textColor="#FF3344"
+                        android:textSize="14sp" android:fontFamily="sans-serif-medium"/>
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+                
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_banned_download"
+                style="@style/KodaButton"
+                android:layout_width="match_parent" android:layout_height="56dp"
+                android:text="@string/server_banned_download"
+                android:textSize="14sp"
+                android:fontFamily="sans-serif-medium"
+                app:cornerRadius="12dp"
+                app:icon="@android:drawable/stat_sys_download"
+                app:iconGravity="textStart"/>
+                
         </LinearLayout>
     </FrameLayout>
 
