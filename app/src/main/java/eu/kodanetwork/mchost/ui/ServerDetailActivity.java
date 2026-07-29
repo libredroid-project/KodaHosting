@@ -2021,6 +2021,24 @@ public class ServerDetailActivity extends AppCompatActivity {
                                                 server.setKodadashPort(allocatedPort);
                                                 server.setKodadashSupport(true);
                                                 repo.update(server);
+                                                
+                                                // Patch Supabase with the new port
+                                                new Thread(() -> {
+                                                    try {
+                                                        String patchPayload = "{\"kodadash_port\": " + allocatedPort + "}";
+                                                        String appUuid = eu.kodanetwork.mchost.App.getPrefs(ServerDetailActivity.this).getString("app_uuid", "");
+                                                        String rpcJson = "{\"p_app_uuid\":\"" + appUuid + "\", \"p_host\":\"" + server.getSubdomain() + "\", \"p_payload\": " + patchPayload + "}";
+                                                        okhttp3.RequestBody body = okhttp3.RequestBody.create(rpcJson, okhttp3.MediaType.parse("application/json"));
+                                                        okhttp3.Request patchReq = new okhttp3.Request.Builder()
+                                                            .url(eu.kodanetwork.mchost.security.PraetorSecurity.getSupabaseUrl() + "/rest/v1/rpc/rpc_patch_server")
+                                                            .post(body)
+                                                            .addHeader("Content-Type", "application/json")
+                                                            .addHeader("apikey", eu.kodanetwork.mchost.security.PraetorSecurity.getSupabaseKey())
+                                                            .addHeader("Authorization", "Bearer " + eu.kodanetwork.mchost.security.PraetorSecurity.getSupabaseKey())
+                                                            .build();
+                                                        new okhttp3.OkHttpClient().newCall(patchReq).execute().close();
+                                                    } catch (Exception ignored) {}
+                                                }).start();
                                                 triggerAddonRestart();
                                             });
                                         } catch (Exception e) {
@@ -2040,6 +2058,25 @@ public class ServerDetailActivity extends AppCompatActivity {
                     } else {
                         server.setKodadashSupport(false);
                         repo.update(server);
+
+                        // Patch Supabase to remove the port
+                        new Thread(() -> {
+                            try {
+                                String patchPayload = "{\"kodadash_port\": null}";
+                                String appUuid = eu.kodanetwork.mchost.App.getPrefs(ServerDetailActivity.this).getString("app_uuid", "");
+                                String rpcJson = "{\"p_app_uuid\":\"" + appUuid + "\", \"p_host\":\"" + server.getSubdomain() + "\", \"p_payload\": " + patchPayload + "}";
+                                okhttp3.RequestBody body = okhttp3.RequestBody.create(rpcJson, okhttp3.MediaType.parse("application/json"));
+                                okhttp3.Request patchReq = new okhttp3.Request.Builder()
+                                    .url(eu.kodanetwork.mchost.security.PraetorSecurity.getSupabaseUrl() + "/rest/v1/rpc/rpc_patch_server")
+                                    .post(body)
+                                    .addHeader("Content-Type", "application/json")
+                                    .addHeader("apikey", eu.kodanetwork.mchost.security.PraetorSecurity.getSupabaseKey())
+                                    .addHeader("Authorization", "Bearer " + eu.kodanetwork.mchost.security.PraetorSecurity.getSupabaseKey())
+                                    .build();
+                                new okhttp3.OkHttpClient().newCall(patchReq).execute().close();
+                            } catch (Exception ignored) {}
+                        }).start();
+
                         triggerAddonRestart();
                     }
                 });
