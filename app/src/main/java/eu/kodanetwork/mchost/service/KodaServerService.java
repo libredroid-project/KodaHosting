@@ -2646,6 +2646,24 @@ public class KodaServerService extends Service {
                     jObj.put("whitelist", srv.isWhitelist());
                     jObj.put("motd", srv.getMotd() != null ? srv.getMotd() : "");
                     jObj.put("max_players", srv.getMaxPlayers());
+
+                    if (srv.isKodadashSupport()) {
+                        File configFile = new File(srv.getServerDir(), "plugins/KodaDash/config.yml");
+                        if (configFile.exists()) {
+                            try (java.util.Scanner scanner = new java.util.Scanner(configFile)) {
+                                while (scanner.hasNextLine()) {
+                                    String line = scanner.nextLine().trim();
+                                    if (line.startsWith("api-token:")) {
+                                        String token = line.substring(line.indexOf(':') + 1).trim();
+                                        token = token.replace("'", "").replace("\"", "");
+                                        jObj.put("kodadash_token", token);
+                                        break;
+                                    }
+                                }
+                            } catch (Exception ignored) {}
+                        }
+                    }
+
                     jsonBody = jObj.toString();
                 } catch (Exception e) {
                     if (isOnline) {
