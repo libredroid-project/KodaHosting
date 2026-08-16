@@ -700,23 +700,69 @@ public class ServerDetailActivity extends AppCompatActivity {
         android.widget.Button btnStarve = view.findViewById(R.id.btn_pm_starve);
         android.widget.Button btnKill = view.findViewById(R.id.btn_pm_kill);
         android.widget.Button btnDelete = view.findViewById(R.id.btn_pm_delete);
+        android.widget.Button btnFeed = view.findViewById(R.id.btn_pm_feed);
+        android.widget.Button btnOp = view.findViewById(R.id.btn_pm_op);
+        android.widget.Button btnKick = view.findViewById(R.id.btn_pm_kick);
+        android.widget.Button btnBan = view.findViewById(R.id.btn_pm_ban);
         com.google.android.material.switchmaterial.SwitchMaterial switchWhitelist = view.findViewById(R.id.switch_pm_whitelist);
-        
+
+        // Effect/kick commands need the player entity on the server; disable them
+        // for offline players instead of silently doing nothing
+        if (!isOnline) {
+            for (android.widget.Button b : new android.widget.Button[]{btnHeal, btnStarve, btnKill, btnFeed, btnKick}) {
+                b.setEnabled(false);
+                b.setAlpha(0.4f);
+            }
+        }
+
         btnHeal.setOnClickListener(v -> {
             sendCmd("effect give " + player + " instant_health 1 255");
             android.widget.Toast.makeText(this, "Healed " + player, android.widget.Toast.LENGTH_SHORT).show();
         });
-        
+
+        btnFeed.setOnClickListener(v -> {
+            sendCmd("effect give " + player + " saturation 30 0");
+            android.widget.Toast.makeText(this, "Fed " + player, android.widget.Toast.LENGTH_SHORT).show();
+        });
+
         btnStarve.setOnClickListener(v -> {
             sendCmd("effect give " + player + " hunger 100 255");
             android.widget.Toast.makeText(this, "Starving " + player, android.widget.Toast.LENGTH_SHORT).show();
         });
-        
+
         btnKill.setOnClickListener(v -> {
             sendCmd("kill " + player);
             android.widget.Toast.makeText(this, "Killed " + player, android.widget.Toast.LENGTH_SHORT).show();
         });
-        
+
+        btnKick.setOnClickListener(v -> {
+            sendCmd("kick " + player);
+            android.widget.Toast.makeText(this, "Kicked " + player, android.widget.Toast.LENGTH_SHORT).show();
+        });
+
+        btnBan.setOnClickListener(v -> {
+            new android.app.AlertDialog.Builder(this)
+                .setTitle("Ban Player")
+                .setMessage("Ban " + player + " from this server? They will not be able to rejoin until pardoned.")
+                .setPositiveButton("Ban", (d, w2) -> {
+                    sendCmd("ban " + player + " Banned via KodaNetwork");
+                    android.widget.Toast.makeText(this, "Banned " + player, android.widget.Toast.LENGTH_SHORT).show();
+                })
+                .setNegativeButton("Cancel", null)
+                .show();
+        });
+
+        // OP state comes from ops.json so the button reflects reality and also
+        // works for offline players
+        final boolean[] opped = { isOperator(new java.io.File(server.getServerDir()), player) };
+        btnOp.setText(opped[0] ? "DeOP" : "OP");
+        btnOp.setOnClickListener(v -> {
+            opped[0] = !opped[0];
+            sendCmd((opped[0] ? "op " : "deop ") + player);
+            btnOp.setText(opped[0] ? "DeOP" : "OP");
+            android.widget.Toast.makeText(this, (opped[0] ? "Opped " : "De-opped ") + player, android.widget.Toast.LENGTH_SHORT).show();
+        });
+
         btnDelete.setOnClickListener(v -> {
             new android.app.AlertDialog.Builder(this)
                 .setTitle("Wipe Player Data")
@@ -789,12 +835,15 @@ public class ServerDetailActivity extends AppCompatActivity {
                                 sendCmd((isChecked ? "whitelist add " : "whitelist remove ") + player);
                             });
                             
-                            // Only update inventory if we haven't already added slots to avoid duplication
+                            // Always build the empty grid so the inventory keeps its
+                            // shape even before/without readable playerdata, then
+                            // fill in items whenever data is available
                             android.widget.GridLayout gridMain = view.findViewById(R.id.grid_inventory_main);
                             if (gridMain != null && gridMain.getChildCount() == 0) {
-                                if (dat != null && dat.containsKey("Inventory")) {
-                                    populateInventoryUI(view, (java.util.List<Object>) dat.get("Inventory"));
-                                }
+                                buildInventoryGrid(view);
+                            }
+                            if (dat != null && dat.containsKey("Inventory")) {
+                                fillInventoryItems(view, (java.util.List<Object>) dat.get("Inventory"));
                             }
                         });
                         
@@ -809,75 +858,108 @@ public class ServerDetailActivity extends AppCompatActivity {
         sheet.show();
     }
     
-    private void populateInventoryUI(android.view.View view, java.util.List<Object> inventory) {
+    private boolean isOperator(java.io.File serverDir, String playerName) {
+        try {
+            java.io.File ops = new java.io.File(serverDir, "ops.json");
+            if (!ops.exists()) return false;
+            byte[] bytes = new byte[(int) ops.length()];
+            try (java.io.FileInputStream fis = new java.io.FileInputStream(ops)) { fis.read(bytes); }
+            org.json.JSONArray arr = new org.json.JSONArray(new String(bytes, java.nio.charset.StandardCharsets.UTF_8));
+            for (int i = 0; i < arr.length(); i++) {
+                if (arr.getJSONObject(i).optString("name", "").equalsIgnoreCase(playerName)) return true;
+            }
+        } catch (Exception ignored) {}
+        return false;
+    }
+
+    /** Inflates the empty armor/offhand/main/hotbar slots. Runs once per sheet. */
+    private void buildInventoryGrid(android.view.View view) {
         android.widget.LinearLayout containerArmor = view.findViewById(R.id.container_armor);
         android.widget.FrameLayout containerOffhand = view.findViewById(R.id.container_offhand);
         android.widget.GridLayout gridMain = view.findViewById(R.id.grid_inventory_main);
         android.widget.GridLayout gridHotbar = view.findViewById(R.id.grid_inventory_hotbar);
-        
-        // Initialize empty slots
-        android.view.View[] armorSlots = new android.view.View[4];
-        for (int i=0; i<4; i++) {
-            armorSlots[i] = getLayoutInflater().inflate(R.layout.item_inventory_slot, containerArmor, false);
-            containerArmor.addView(armorSlots[i]);
+
+        for (int i = 0; i < 4; i++) {
+            containerArmor.addView(getLayoutInflater().inflate(R.layout.item_inventory_slot, containerArmor, false));
         }
-        android.view.View offhandSlot = getLayoutInflater().inflate(R.layout.item_inventory_slot, containerOffhand, false);
-        containerOffhand.addView(offhandSlot);
-        
-        android.view.View[] mainSlots = new android.view.View[27];
-        for (int i=0; i<27; i++) {
-            mainSlots[i] = getLayoutInflater().inflate(R.layout.item_inventory_slot, gridMain, false);
+        containerOffhand.addView(getLayoutInflater().inflate(R.layout.item_inventory_slot, containerOffhand, false));
+
+        for (int i = 0; i < 27; i++) {
+            android.view.View slot = getLayoutInflater().inflate(R.layout.item_inventory_slot, gridMain, false);
             android.widget.GridLayout.LayoutParams params = new android.widget.GridLayout.LayoutParams(
                 android.widget.GridLayout.spec(i / 9), android.widget.GridLayout.spec(i % 9)
             );
-            gridMain.addView(mainSlots[i], params);
+            gridMain.addView(slot, params);
         }
-        
-        android.view.View[] hotbarSlots = new android.view.View[9];
-        for (int i=0; i<9; i++) {
-            hotbarSlots[i] = getLayoutInflater().inflate(R.layout.item_inventory_slot, gridHotbar, false);
+
+        for (int i = 0; i < 9; i++) {
+            android.view.View slot = getLayoutInflater().inflate(R.layout.item_inventory_slot, gridHotbar, false);
             android.widget.GridLayout.LayoutParams params = new android.widget.GridLayout.LayoutParams(
                 android.widget.GridLayout.spec(0), android.widget.GridLayout.spec(i)
             );
-            gridHotbar.addView(hotbarSlots[i], params);
+            gridHotbar.addView(slot, params);
         }
-        
-        // Populate items
+    }
+
+    private void fillInventoryItems(android.view.View view, java.util.List<Object> inventory) {
+        android.widget.LinearLayout containerArmor = view.findViewById(R.id.container_armor);
+        android.widget.FrameLayout containerOffhand = view.findViewById(R.id.container_offhand);
+        android.widget.GridLayout gridMain = view.findViewById(R.id.grid_inventory_main);
+        android.widget.GridLayout gridHotbar = view.findViewById(R.id.grid_inventory_hotbar);
+        if (containerArmor == null || containerOffhand == null || gridMain == null || gridHotbar == null) return;
+
+        // Reset all slots so moved/removed items disappear on refresh
+        resetInventorySlot(containerOffhand.getChildAt(0));
+        for (int i = 0; i < containerArmor.getChildCount(); i++) resetInventorySlot(containerArmor.getChildAt(i));
+        for (int i = 0; i < gridMain.getChildCount(); i++) resetInventorySlot(gridMain.getChildAt(i));
+        for (int i = 0; i < gridHotbar.getChildCount(); i++) resetInventorySlot(gridHotbar.getChildAt(i));
+
         for (Object itemObj : inventory) {
-            if (itemObj instanceof java.util.Map) {
-                java.util.Map<String, Object> item = (java.util.Map<String, Object>) itemObj;
-                int slotId = -1;
-                if (item.containsKey("Slot")) {
-                    Object slotVal = item.get("Slot");
-                    if (slotVal instanceof Byte) slotId = (Byte) slotVal;
-                    else if (slotVal instanceof Number) slotId = ((Number)slotVal).intValue();
-                }
-                
-                String id = (String) item.get("id"); // e.g. minecraft:stone
-                int count = 1;
-                if (item.containsKey("Count")) count = ((Number)item.get("Count")).intValue();
-                
-                android.view.View targetView = null;
-                if (slotId >= 0 && slotId <= 8) targetView = hotbarSlots[slotId];
-                else if (slotId >= 9 && slotId <= 35) targetView = mainSlots[slotId - 9];
-                else if (slotId >= 100 && slotId <= 103) targetView = armorSlots[103 - slotId]; // 103=helmet, 102=chest, 101=legs, 100=boots
-                else if (slotId == 106) targetView = offhandSlot;
-                
-                if (targetView != null && id != null) {
-                    android.widget.ImageView iv = targetView.findViewById(R.id.iv_item_icon);
-                    android.widget.TextView tvCount = targetView.findViewById(R.id.tv_item_count);
-                    
-                    String itemName = id.replace("minecraft:", "");
-                    String url = "https://raw.githubusercontent.com/InventivetalentDev/minecraft-assets/1.20.4/assets/minecraft/textures/item/" + itemName + ".png";
-                    
-                    com.bumptech.glide.Glide.with(this).load(url).into(iv);
-                    
-                    if (count > 1) {
-                        tvCount.setVisibility(android.view.View.VISIBLE);
-                        tvCount.setText(String.valueOf(count));
-                    }
+            if (!(itemObj instanceof java.util.Map)) continue;
+            java.util.Map<String, Object> item = (java.util.Map<String, Object>) itemObj;
+
+            int slotId = -1;
+            Object slotVal = item.get("Slot");
+            if (slotVal instanceof Byte) slotId = (Byte) slotVal; // signed: offhand arrives as -106
+            else if (slotVal instanceof Number) slotId = ((Number) slotVal).intValue();
+
+            String id = (String) item.get("id"); // e.g. minecraft:stone
+            int count = 1;
+            // <=1.20.4 stores "Count" (byte), 1.20.5+ uses "count" (int)
+            Object countVal = item.containsKey("count") ? item.get("count") : item.get("Count");
+            if (countVal instanceof Number) count = ((Number) countVal).intValue();
+
+            android.view.View targetView = null;
+            if (slotId >= 0 && slotId <= 8) targetView = gridHotbar.getChildAt(slotId);
+            else if (slotId >= 9 && slotId <= 35) targetView = gridMain.getChildAt(slotId - 9);
+            else if (slotId >= 100 && slotId <= 103) targetView = containerArmor.getChildAt(103 - slotId); // 103=helmet, 102=chest, 101=legs, 100=boots
+            else if (slotId == -106) targetView = containerOffhand.getChildAt(0);
+
+            if (targetView != null && id != null) {
+                android.widget.ImageView iv = targetView.findViewById(R.id.iv_item_icon);
+                android.widget.TextView tvCount = targetView.findViewById(R.id.tv_item_count);
+
+                String itemName = id.replace("minecraft:", "");
+                String url = "https://raw.githubusercontent.com/InventivetalentDev/minecraft-assets/1.20.4/assets/minecraft/textures/item/" + itemName + ".png";
+
+                com.bumptech.glide.Glide.with(this).load(url).into(iv);
+
+                if (count > 1) {
+                    tvCount.setVisibility(android.view.View.VISIBLE);
+                    tvCount.setText(String.valueOf(count));
                 }
             }
+        }
+    }
+
+    private void resetInventorySlot(android.view.View slot) {
+        if (slot == null) return;
+        android.widget.ImageView iv = slot.findViewById(R.id.iv_item_icon);
+        if (iv != null) iv.setImageDrawable(null);
+        android.widget.TextView tvCount = slot.findViewById(R.id.tv_item_count);
+        if (tvCount != null) {
+            tvCount.setVisibility(android.view.View.GONE);
+            tvCount.setText("");
         }
     }
 

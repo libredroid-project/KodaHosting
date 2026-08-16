@@ -39,7 +39,7 @@ public class PlayerStatsParser {
         java.io.File f1 = new java.io.File(serverDir, world + "/players/stats/" + uuid + ".json");
         if (f1.exists()) return f1;
         java.io.File f2 = new java.io.File(serverDir, world + "/stats/" + uuid + ".json");
-        return f2.exists() ? f2 : f2;
+        return f2.exists() ? f2 : f1;
     }
 
     public static class PlayerStats {
