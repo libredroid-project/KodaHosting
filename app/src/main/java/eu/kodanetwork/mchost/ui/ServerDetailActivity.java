@@ -3006,20 +3006,41 @@ public class ServerDetailActivity extends AppCompatActivity {
         android.widget.CompoundButton switchHardcore = findViewById(R.id.switch_hardcore);
         android.widget.CompoundButton switchPvp = findViewById(R.id.switch_pvp);
         android.widget.CompoundButton switchFlight = findViewById(R.id.switch_flight);
+        EditText etMotd = findViewById(R.id.et_motd);
+        android.widget.Spinner spinnerGamemode = findViewById(R.id.spinner_gamemode);
+        android.widget.CompoundButton switchForceGamemode = findViewById(R.id.switch_force_gamemode);
 
         if (etMaxPlayers == null) return;
 
         // Initialize values
         etMaxPlayers.setText(props.getProperty("max-players", "20"));
-        
+
         String[] difficulties = {"peaceful", "easy", "normal", "hard"};
         android.widget.ArrayAdapter<String> adapter = new android.widget.ArrayAdapter<>(this, android.R.layout.simple_spinner_item, difficulties);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerDifficulty.setAdapter(adapter);
-        
+
         String diff = props.getProperty("difficulty", "easy");
         for (int i=0; i<difficulties.length; i++) {
             if (difficulties[i].equalsIgnoreCase(diff)) spinnerDifficulty.setSelection(i);
+        }
+
+        final String[] gamemodes = {"survival", "creative", "adventure", "spectator"};
+        if (spinnerGamemode != null) {
+            android.widget.ArrayAdapter<String> gmAdapter = new android.widget.ArrayAdapter<>(this, android.R.layout.simple_spinner_item, gamemodes);
+            gmAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+            spinnerGamemode.setAdapter(gmAdapter);
+            String gm = props.getProperty("gamemode", "survival");
+            for (int i = 0; i < gamemodes.length; i++) {
+                if (gamemodes[i].equalsIgnoreCase(gm)) spinnerGamemode.setSelection(i);
+            }
+        }
+        if (switchForceGamemode != null) {
+            switchForceGamemode.setChecked("true".equalsIgnoreCase(props.getProperty("force-gamemode", "false")));
+        }
+        if (etMotd != null) {
+            String motd = props.getProperty("motd", server.getMotd() != null ? server.getMotd() : "");
+            etMotd.setText(motd);
         }
 
         int viewDist = 10;
@@ -3041,13 +3062,29 @@ public class ServerDetailActivity extends AppCompatActivity {
             java.util.Map<String, String> updates = new java.util.HashMap<>();
             updates.put("max-players", etMaxPlayers.getText().toString());
             updates.put("difficulty", difficulties[spinnerDifficulty.getSelectedItemPosition()]);
+            if (etMotd != null) updates.put("motd", etMotd.getText().toString());
+            if (spinnerGamemode != null && spinnerGamemode.getSelectedItemPosition() >= 0) {
+                updates.put("gamemode", gamemodes[spinnerGamemode.getSelectedItemPosition()]);
+            }
+            if (switchForceGamemode != null) updates.put("force-gamemode", String.valueOf(switchForceGamemode.isChecked()));
             updates.put("view-distance", String.valueOf(sbViewDistance.getProgress() + 5));
             updates.put("simulation-distance", String.valueOf(sbSimDistance.getProgress() + 5));
             updates.put("online-mode", String.valueOf(switchOnlineMode.isChecked()));
             updates.put("hardcore", String.valueOf(switchHardcore.isChecked()));
             updates.put("pvp", String.valueOf(switchPvp.isChecked()));
             updates.put("allow-flight", String.valueOf(switchFlight.isChecked()));
-            
+
+            // Keep the model in sync so KodaServerService.writeProps() rewrites
+            // the same values on the next server start instead of stale ones
+            try { server.setMaxPlayers(Integer.parseInt(etMaxPlayers.getText().toString())); } catch (Exception ignored) {}
+            if (etMotd != null) server.setMotd(etMotd.getText().toString());
+            try { server.setDifficulty(ServerInstance.Difficulty.valueOf(difficulties[spinnerDifficulty.getSelectedItemPosition()])); } catch (Exception ignored) {}
+            if (spinnerGamemode != null && spinnerGamemode.getSelectedItemPosition() >= 0) {
+                try { server.setGamemode(ServerInstance.Gamemode.valueOf(gamemodes[spinnerGamemode.getSelectedItemPosition()])); } catch (Exception ignored) {}
+            }
+            server.setPvp(switchPvp.isChecked());
+            repo.update(server);
+
             java.util.List<String> lines = new java.util.ArrayList<>();
             if (propsFile.exists()) {
                 try (java.io.BufferedReader br = new java.io.BufferedReader(new java.io.FileReader(propsFile))) {
@@ -3075,11 +3112,26 @@ public class ServerDetailActivity extends AppCompatActivity {
             public void onTextChanged(CharSequence s, int start, int before, int count) {}
             public void afterTextChanged(android.text.Editable s) { saveProps.run(); }
         });
-        
+
+        if (etMotd != null) {
+            etMotd.addTextChangedListener(new android.text.TextWatcher() {
+                public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+                public void onTextChanged(CharSequence s, int start, int before, int count) {}
+                public void afterTextChanged(android.text.Editable s) { saveProps.run(); }
+            });
+        }
+
         spinnerDifficulty.setOnItemSelectedListener(new android.widget.AdapterView.OnItemSelectedListener() {
             public void onItemSelected(android.widget.AdapterView<?> p, View v, int pos, long id) { saveProps.run(); }
             public void onNothingSelected(android.widget.AdapterView<?> p) {}
         });
+
+        if (spinnerGamemode != null) {
+            spinnerGamemode.setOnItemSelectedListener(new android.widget.AdapterView.OnItemSelectedListener() {
+                public void onItemSelected(android.widget.AdapterView<?> p, View v, int pos, long id) { saveProps.run(); }
+                public void onNothingSelected(android.widget.AdapterView<?> p) {}
+            });
+        }
 
         android.widget.SeekBar.OnSeekBarChangeListener seekListener = new android.widget.SeekBar.OnSeekBarChangeListener() {
             public void onProgressChanged(android.widget.SeekBar seekBar, int progress, boolean fromUser) {
@@ -3097,6 +3149,7 @@ public class ServerDetailActivity extends AppCompatActivity {
         switchHardcore.setOnCheckedChangeListener(checkListener);
         switchPvp.setOnCheckedChangeListener(checkListener);
         switchFlight.setOnCheckedChangeListener(checkListener);
+        if (switchForceGamemode != null) switchForceGamemode.setOnCheckedChangeListener(checkListener);
     }
 
     
