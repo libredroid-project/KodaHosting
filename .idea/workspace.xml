@@ -5,6 +5,16 @@
       <config />
     </shared>
     <layouts>
+      <layout url="file://$PROJECT_DIR$/app/src/main/res/drawable/ic_back_custom.xml">
+        <config>
+          <theme>@style/Theme.KodaNetwork</theme>
+        </config>
+      </layout>
+      <layout url="file://$PROJECT_DIR$/app/src/main/res/drawable/ic_launcher_background.xml">
+        <config>
+          <theme>@style/Theme.KodaNetwork</theme>
+        </config>
+      </layout>
       <layout url="file://$PROJECT_DIR$/app/src/main/res/drawable/ic_launcher_foreground.xml">
         <config>
           <theme>@style/Theme.KodaNetwork</theme>
@@ -16,6 +26,11 @@
         </config>
       </layout>
       <layout url="file://$PROJECT_DIR$/app/src/main/res/layout/activity_server_detail.xml">
+        <config>
+          <theme>@style/Theme.KodaNetwork</theme>
+        </config>
+      </layout>
+      <layout url="file://$PROJECT_DIR$/app/src/main/res/layout/activity_server_detail_m3.xml">
         <config>
           <theme>@style/Theme.KodaNetwork</theme>
         </config>
@@ -36,7 +51,55 @@
     <option name="autoReloadType" value="NONE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="1c7b5403-826e-4eb8-9d43-ed80980da5f9" name="Changes" comment="ToS added, Settings UI fixes. Wesbite redesign" />
+    <list default="true" id="1c7b5403-826e-4eb8-9d43-ed80980da5f9" name="Changes" comment="ToS added, Settings UI fixes. Wesbite redesign">
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/caches/deviceStreaming.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/caches/deviceStreaming.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/deploymentTargetSelector.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/deploymentTargetSelector.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/KodaDash/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/KodaDash/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/KodaDash/src/main/java/de/kodahosting/kodadash/managers/ConsoleManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/KodaDash/src/main/java/de/kodahosting/kodadash/managers/ConsoleManager.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/KodaDash/src/main/java/de/kodahosting/kodadash/managers/FileManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/KodaDash/src/main/java/de/kodahosting/kodadash/managers/FileManager.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/KodaDash/src/main/java/de/kodahosting/kodadash/routes/FilesRoute.java" beforeDir="false" afterPath="$PROJECT_DIR$/KodaDash/src/main/java/de/kodahosting/kodadash/routes/FilesRoute.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/KodaDash/src/main/java/de/kodahosting/kodadash/routes/PlayersRoute.java" beforeDir="false" afterPath="$PROJECT_DIR$/KodaDash/src/main/java/de/kodahosting/kodadash/routes/PlayersRoute.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/KodaDash/src/main/java/de/kodahosting/kodadash/server/DashServer.java" beforeDir="false" afterPath="$PROJECT_DIR$/KodaDash/src/main/java/de/kodahosting/kodadash/server/DashServer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/KodaDash/src/main/resources/webui/app.js" beforeDir="false" afterPath="$PROJECT_DIR$/KodaDash/src/main/resources/webui/app.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/KodaDash/src/main/resources/webui/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/KodaDash/src/main/resources/webui/index.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/KodaDash/src/main/resources/webui/style.css" beforeDir="false" afterPath="$PROJECT_DIR$/KodaDash/src/main/resources/webui/style.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/app/build.gradle" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/AndroidManifest.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/AndroidManifest.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/assets/BIT3B8C.tmp" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/assets/kodadash.jar" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/assets/kodadash.jar" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/cpp/PraetorSecurity.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/cpp/PraetorSecurity.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/eu/kodanetwork/mchost/App.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/eu/kodanetwork/mchost/App.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/eu/kodanetwork/mchost/network/supabase/SupportApi.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/eu/kodanetwork/mchost/network/supabase/SupportApi.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/eu/kodanetwork/mchost/security/AntiTamperSystem.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/eu/kodanetwork/mchost/security/AntiTamperSystem.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/eu/kodanetwork/mchost/security/PraetorSecurity.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/eu/kodanetwork/mchost/security/PraetorSecurity.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/eu/kodanetwork/mchost/ui/CreateDatabaseActivity.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/eu/kodanetwork/mchost/ui/CreateDatabaseActivity.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/eu/kodanetwork/mchost/ui/CreateServerActivity.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/eu/kodanetwork/mchost/ui/CreateServerActivity.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/eu/kodanetwork/mchost/ui/CreateSupportTicketActivity.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/eu/kodanetwork/mchost/ui/CreateSupportTicketActivity.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/eu/kodanetwork/mchost/ui/MainActivity.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/eu/kodanetwork/mchost/ui/MainActivity.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/eu/kodanetwork/mchost/ui/ServerCardAdapter.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/eu/kodanetwork/mchost/ui/ServerCardAdapter.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/eu/kodanetwork/mchost/ui/ServerDetailActivity.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/eu/kodanetwork/mchost/ui/ServerDetailActivity.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/eu/kodanetwork/mchost/ui/SettingsActivity.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/eu/kodanetwork/mchost/ui/SettingsActivity.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/eu/kodanetwork/mchost/ui/SupportChatActivity.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/eu/kodanetwork/mchost/ui/SupportChatActivity.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/eu/kodanetwork/mchost/ui/SupportTicketListActivity.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/eu/kodanetwork/mchost/ui/SupportTicketListActivity.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/eu/kodanetwork/mchost/util/ThemeHelper.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/eu/kodanetwork/mchost/util/ThemeHelper.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/layout/activity_main.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/layout/activity_main.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/layout/activity_settings.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/layout/activity_settings.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/layout/activity_support_chat.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/layout/activity_support_chat.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/values-de/strings.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/values-de/strings.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/values-zh-rCN/strings.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/values-zh-rCN/strings.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/values/strings.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/values/strings.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/xml/network_security_config.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/xml/network_security_config.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/local.properties" beforeDir="false" afterPath="$PROJECT_DIR$/local.properties" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/supabase/functions/_shared/cors.ts" beforeDir="false" afterPath="$PROJECT_DIR$/supabase/functions/_shared/cors.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/supabase/functions/allocate-port/index.ts" beforeDir="false" afterPath="$PROJECT_DIR$/supabase/functions/allocate-port/index.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/supabase/functions/bootstrap-playit/index.ts" beforeDir="false" afterPath="$PROJECT_DIR$/supabase/functions/bootstrap-playit/index.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/supabase/functions/check-server-name/index.ts" beforeDir="false" afterPath="$PROJECT_DIR$/supabase/functions/check-server-name/index.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/supabase/functions/create-dns-link/index.ts" beforeDir="false" afterPath="$PROJECT_DIR$/supabase/functions/create-dns-link/index.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/supabase/functions/delete-dns-link/index.ts" beforeDir="false" afterPath="$PROJECT_DIR$/supabase/functions/delete-dns-link/index.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/supabase/functions/list-servers/index.ts" beforeDir="false" afterPath="$PROJECT_DIR$/supabase/functions/list-servers/index.ts" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -95,27 +158,27 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "Android App.app.executor": "Run",
-    "ApkExportedModule": "KodaNetwork.app",
-    "BundleExportedModule": "KodaNetwork.app",
-    "ModuleVcsDetector.initialDetectionPerformed": "true",
-    "ResourceManagerPrefKey.ResourceType": "MIPMAP",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
-    "RunOnceActivity.cidr.known.project.marker": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "RunOnceActivity.readMode.enableVisualFormatting": "true",
-    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
-    "cf.first.check.clang-format": "false",
-    "cidr.known.project.marker": "true",
-    "com.google.services.firebase.aqiPopupShown": "true",
-    "git-widget-placeholder": "internal-testing",
-    "kotlin-language-version-configured": "true",
-    "last_opened_file_path": "C:/Users/Home/KodaHosting/KodaNetwork"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Android App.app.executor&quot;: &quot;Run&quot;,
+    &quot;ApkExportedModule&quot;: &quot;KodaNetwork.app&quot;,
+    &quot;BundleExportedModule&quot;: &quot;KodaNetwork.app&quot;,
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;ResourceManagerPrefKey.ResourceType&quot;: &quot;MIPMAP&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.cidr.known.project.marker&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.readMode.enableVisualFormatting&quot;: &quot;true&quot;,
+    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
+    &quot;cf.first.check.clang-format&quot;: &quot;false&quot;,
+    &quot;cidr.known.project.marker&quot;: &quot;true&quot;,
+    &quot;com.google.services.firebase.aqiPopupShown&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;internal-testing&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/Home/KodaHosting/KodaNetwork&quot;
   }
-}]]></component>
+}</component>
   <component name="RunManager">
     <configuration name="app" type="AndroidRunConfigurationType" factoryName="Android App" activateToolWindowBeforeRun="false">
       <module name="KodaNetwork.app" />
@@ -295,12 +358,12 @@
       <map>
         <entry key="eu.kodanetwork.mchost">
           <value>
-            <CheckInfo lastCheckTimestamp="1784760572629" />
+            <CheckInfo lastCheckTimestamp="1785975445683" />
           </value>
         </entry>
         <entry key="eu.kodanetwork.mchost.test">
           <value>
-            <CheckInfo lastCheckTimestamp="1784760572629" />
+            <CheckInfo lastCheckTimestamp="1785975445683" />
           </value>
         </entry>
       </map>

@@ -10,12 +10,16 @@ import eu.kodanetwork.mchost.security.PraetorSecurity;
 
 public class SupportApi {
 
-    public static String makeSupabaseRequest(String endpoint, String method, String jsonBody) throws Exception {
+    public static String makeSupabaseRequest(String endpoint, String method, String jsonBody, String sessionToken) throws Exception {
         URL url = new URL(PraetorSecurity.getSupabaseUrl() + "/" + endpoint);
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
         conn.setRequestMethod(method);
         conn.setRequestProperty("apikey", PraetorSecurity.getSupabaseKey());
-        conn.setRequestProperty("Authorization", "Bearer " + PraetorSecurity.getSupabaseKey());
+        if (sessionToken != null && !sessionToken.isEmpty()) {
+            conn.setRequestProperty("Authorization", "Bearer " + sessionToken);
+        } else {
+            conn.setRequestProperty("Authorization", "Bearer " + PraetorSecurity.getSupabaseKey());
+        }
         conn.setRequestProperty("Content-Type", "application/json");
 
         if (jsonBody != null && (method.equals("POST") || method.equals("PATCH"))) {

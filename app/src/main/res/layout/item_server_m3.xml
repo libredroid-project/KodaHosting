@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent" android:layout_height="wrap_content">
+
+    <LinearLayout
+        android:id="@+id/container_main"
+        android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="?android:attr/colorBackground"
+        android:padding="16dp">
+
+    <!-- Top Row: Dot, Status, Address -->
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:orientation="horizontal" android:gravity="center_vertical"
+        android:layout_marginBottom="16dp">
+        <View android:id="@+id/dot"
+            android:layout_width="10dp" android:layout_height="10dp"
+            android:background="@drawable/dot_offline"
+            android:layout_marginEnd="8dp"/>
+        <TextView android:id="@+id/tv_badge"
+            android:layout_width="0dp" android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="ONLINE" android:textColor="#F0F0F0"
+            android:textSize="12sp" android:fontFamily="sans-serif-medium"
+            android:textStyle="bold" android:letterSpacing="0.05"/>
+        <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:background="@drawable/pill_address_bg"
+            android:paddingStart="12dp" android:paddingEnd="12dp"
+            android:paddingTop="8dp" android:paddingBottom="8dp"
+            android:orientation="horizontal" android:gravity="center_vertical">
+            <ImageView android:layout_width="14dp" android:layout_height="14dp"
+                android:src="@android:drawable/ic_menu_sort_by_size" app:tint="#8A8A9A"
+                android:layout_marginEnd="6dp"/> <!-- Link icon placeholder -->
+            <TextView android:id="@+id/tv_addr"
+                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="elite-bee-17.arm-mc.com" android:textColor="?attr/colorOnSurfaceVariant"
+                android:textSize="12sp" android:fontFamily="sans-serif-medium"/>
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- Middle Row: Icon, Title, Subtitle -->
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:orientation="horizontal" android:gravity="center_vertical"
+        android:layout_marginBottom="20dp">
+        <!-- Icon -->
+        <ImageView android:id="@+id/iv_server_icon"
+            android:layout_width="48dp" android:layout_height="48dp"
+            android:background="@drawable/server_icon_bg"
+            android:scaleType="centerCrop"
+            android:layout_marginEnd="12dp" />
+        
+        <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+            android:layout_weight="1" android:orientation="vertical">
+            <TextView android:id="@+id/tv_name"
+                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="Survival with friends" android:textColor="#F0F0F0"
+                android:textSize="20sp" android:fontFamily="sans-serif-medium"
+                android:textStyle="bold"/>
+            <TextView android:id="@+id/tv_ver"
+                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="Pumpkin 1.21.11 • 5 players" android:textColor="?attr/colorOnSurfaceVariant"
+                android:textSize="13sp" android:fontFamily="sans-serif"
+                android:layout_marginTop="2dp"/>
+            <!-- Hidden views to prevent crash -->
+            <TextView android:id="@+id/tv_type" android:layout_width="0dp" android:layout_height="0dp"/>
+            <TextView android:id="@+id/tv_players" android:layout_width="0dp" android:layout_height="0dp"/>
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- Stats Row -->
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:orientation="horizontal" android:gravity="center_vertical"
+        android:background="@drawable/stats_card_bg"
+        android:padding="12dp" android:layout_marginBottom="12dp">
+        <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+            android:layout_weight="1" android:orientation="vertical"
+            android:layout_marginEnd="16dp">
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="SERVER RAM USAGE" android:textColor="?attr/colorOnSurfaceVariant"
+                android:textSize="10sp" android:fontFamily="sans-serif-medium"
+                android:letterSpacing="0.05" android:layout_marginBottom="6dp"/>
+            <TextView android:id="@+id/tv_ram"
+                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="1.3GB / 1.9GB" android:textColor="#F0F0F0"
+                android:textSize="14sp" android:fontFamily="sans-serif-medium"
+                android:textStyle="bold" android:layout_marginBottom="10dp"/>
+            <ProgressBar android:id="@+id/pb_ram"
+                style="?android:attr/progressBarStyleHorizontal"
+                android:layout_width="match_parent" android:layout_height="4dp"
+                android:progressDrawable="@drawable/custom_progress_bar"
+                android:progress="68" android:max="100"/>
+        </LinearLayout>
+        <!-- TPS Indicator -->
+        <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:orientation="vertical" android:gravity="center"
+            android:layout_marginEnd="20dp">
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="TPS" android:textColor="?attr/colorOnSurfaceVariant"
+                android:textSize="10sp" android:fontFamily="sans-serif-medium"
+                android:letterSpacing="0.05" android:layout_marginBottom="4dp"/>
+            <TextView android:id="@+id/tv_tps"
+                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="20.0" android:textColor="#00E676"
+                android:textSize="16sp" android:fontFamily="sans-serif-medium"
+                android:textStyle="bold"/>
+        </LinearLayout>
+
+        <!-- Circular indicator -->
+        <FrameLayout android:layout_width="52dp" android:layout_height="52dp">
+            <ProgressBar
+                android:id="@+id/pb_battery"
+                style="?android:attr/progressBarStyleHorizontal"
+                android:layout_width="match_parent" android:layout_height="match_parent"
+                android:progressDrawable="@drawable/circular_progress"
+                android:progress="50" android:max="100"/>
+            <LinearLayout android:layout_width="match_parent" android:layout_height="match_parent"
+                android:orientation="vertical" android:gravity="center">
+                <ImageView android:layout_width="12dp" android:layout_height="12dp"
+                    android:src="@android:drawable/ic_lock_idle_charging" app:tint="#FF6B00"
+                    android:layout_marginBottom="2dp"/>
+                <TextView android:id="@+id/tv_battery"
+                    android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:text="50%" android:textColor="#F0F0F0"
+                    android:textSize="10sp" android:fontFamily="sans-serif-medium"
+                    android:textStyle="bold"/>
+            </LinearLayout>
+        </FrameLayout>
+    </LinearLayout>
+
+    <!-- Bottom Row -->
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:orientation="horizontal" android:gravity="center_vertical">
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_action"
+            android:layout_width="0dp" android:layout_height="48dp"
+            android:layout_weight="1" android:text="STOP"
+            android:textColor="?attr/colorOnPrimary" android:textSize="15sp"
+            android:fontFamily="sans-serif-medium" android:textStyle="bold"
+            app:backgroundTint="#FF5252" app:cornerRadius="28dp"
+            android:insetTop="0dp" android:insetBottom="0dp"/>
+    </LinearLayout>
+
+    <!-- Divider for next server -->
+    <View android:id="@+id/divider" android:layout_width="match_parent" android:layout_height="1dp"
+        android:background="#222222"
+        android:layout_marginTop="16dp" />
+    </LinearLayout>
+</FrameLayout>

@@ -11,6 +11,10 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
+import org.bukkit.Statistic;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.PlayerInventory;
+
 import java.io.IOException;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
@@ -58,6 +62,24 @@ public class PlayersRoute extends RouteHandler {
                     handleUnban(exchange);
                 } else if (path.endsWith("/message")) {
                     handleMessage(exchange);
+                } else if (path.endsWith("/heal")) {
+                    handleSimpleAction(exchange, "heal");
+                } else if (path.endsWith("/feed")) {
+                    handleSimpleAction(exchange, "feed");
+                } else if (path.endsWith("/starve")) {
+                    handleSimpleAction(exchange, "starve");
+                } else if (path.endsWith("/kill")) {
+                    handleSimpleAction(exchange, "kill");
+                } else if (path.endsWith("/op")) {
+                    handleSimpleAction(exchange, "op");
+                } else if (path.endsWith("/deop")) {
+                    handleSimpleAction(exchange, "deop");
+                } else if (path.endsWith("/wipe")) {
+                    handleSimpleAction(exchange, "wipe");
+                } else if (path.endsWith("/whitelist")) {
+                    handleSimpleAction(exchange, "whitelist");
+                } else if (path.endsWith("/unwhitelist")) {
+                    handleSimpleAction(exchange, "unwhitelist");
                 } else {
                     sendError(exchange, 404, "Unknown player action");
                 }
@@ -87,6 +109,50 @@ public class PlayersRoute extends RouteHandler {
                         pJson.addProperty("gamemode", player.getGameMode().name());
                         pJson.addProperty("world", player.getWorld().getName());
                         pJson.addProperty("isOp", player.isOp());
+                        
+                        // Stats
+                        JsonObject stats = new JsonObject();
+                        try {
+                            stats.addProperty("deaths", player.getStatistic(Statistic.DEATHS));
+                            stats.addProperty("mobsKilled", player.getStatistic(Statistic.MOB_KILLS));
+                            stats.addProperty("damageTaken", player.getStatistic(Statistic.DAMAGE_TAKEN));
+                            
+                            int playTime = 0;
+                            try {
+                                playTime = player.getStatistic(Statistic.valueOf("PLAY_ONE_MINUTE"));
+                            } catch (IllegalArgumentException e) {
+                                try {
+                                    playTime = player.getStatistic(Statistic.valueOf("PLAY_ONE_TICK"));
+                                } catch (IllegalArgumentException e2) {}
+                            }
+                            stats.addProperty("playTimeHours", playTime / (20 * 60 * 60)); // Ticks to hours
+                        } catch (Exception e) {
+                            // Fallback if statistics are disabled or error
+                        }
+                        pJson.add("stats", stats);
+                        
+                        // Inventory
+                        JsonObject inv = new JsonObject();
+                        PlayerInventory playerInv = player.getInventory();
+                        inv.add("armor", serializeItems(playerInv.getArmorContents()));
+                        inv.add("main", serializeItems(playerInv.getContents())); 
+                        
+                        String offhandStr = null;
+                        try {
+                            java.lang.reflect.Method m = playerInv.getClass().getMethod("getItemInOffHand");
+                            ItemStack offhand = (ItemStack) m.invoke(playerInv);
+                            if (offhand != null) offhandStr = offhand.getType().name();
+                        } catch (Exception e) {}
+                        
+                        if (offhandStr != null) {
+                            pJson.addProperty("offhand", offhandStr);
+                        } else {
+                            pJson.add("offhand", com.google.gson.JsonNull.INSTANCE);
+                        }
+                        pJson.add("inventory", inv);
+                        
+                        pJson.addProperty("isWhitelisted", player.isWhitelisted());
+                        
                         playersArray.add(pJson);
                     }
                     return playersArray;
@@ -222,6 +288,89 @@ public class PlayersRoute extends RouteHandler {
                 Player p = Bukkit.getPlayer(targetPlayer);
                 if (p != null) {
                     p.sendMessage(ChatColor.translateAlternateColorCodes('&', message));
+                }
+            });
+
+            JsonObject response = new JsonObject();
+            response.addProperty("success", true);
+            sendJson(exchange, 200, response);
+
+        } catch (Exception e) {
+            sendError(exchange, 400, "Invalid JSON format");
+        }
+    }
+
+    private JsonArray serializeItems(ItemStack[] items) {
+        JsonArray array = new JsonArray();
+        if (items != null) {
+            for (ItemStack item : items) {
+                if (item == null || item.getType().name().equals("AIR")) {
+                    array.add(com.google.gson.JsonNull.INSTANCE);
+                } else {
+                    JsonObject iObj = new JsonObject();
+                    iObj.addProperty("type", item.getType().name());
+                    iObj.addProperty("amount", item.getAmount());
+                    array.add(iObj);
+                }
+            }
+        }
+        return array;
+    }
+
+    private void handleSimpleAction(HttpExchange exchange, String action) throws IOException {
+        String body = readBody(exchange);
+        if (body == null || body.trim().isEmpty()) {
+            sendError(exchange, 400, "Missing request body");
+            return;
+        }
+
+        try {
+            JsonObject json = new JsonParser().parse(body).getAsJsonObject();
+            if (!json.has("player")) {
+                sendError(exchange, 400, "Missing player name");
+                return;
+            }
+
+            String targetPlayer = json.get("player").getAsString();
+
+            Bukkit.getScheduler().runTask(plugin, () -> {
+                Player p = Bukkit.getPlayer(targetPlayer);
+                if (p != null) {
+                    switch (action) {
+                        case "heal":
+                            p.setHealth(p.getMaxHealth());
+                            p.setFoodLevel(20);
+                            break;
+                        case "feed":
+                            p.setFoodLevel(20);
+                            break;
+                        case "starve":
+                            p.setFoodLevel(0);
+                            break;
+                        case "kill":
+                            p.setHealth(0);
+                            break;
+                        case "op":
+                            p.setOp(true);
+                            break;
+                        case "deop":
+                            p.setOp(false);
+                            break;
+                        case "wipe":
+                            p.getInventory().clear();
+                            p.getEnderChest().clear();
+                            p.setExp(0);
+                            p.setLevel(0);
+                            p.getActivePotionEffects().forEach(effect -> p.removePotionEffect(effect.getType()));
+                            p.kickPlayer("Your data has been wiped.");
+                            break;
+                        case "whitelist":
+                            p.setWhitelisted(true);
+                            break;
+                        case "unwhitelist":
+                            p.setWhitelisted(false);
+                            break;
+                    }
                 }
             });
 

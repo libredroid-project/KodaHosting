@@ -20,8 +20,15 @@ public class SettingsActivity extends Activity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        if (eu.kodanetwork.mchost.util.Material3ThemeHelper.isM3Enabled(this)) {
+            setTheme(R.style.Theme_KodaNetwork_Material3);
+        }
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_settings);
+        if (eu.kodanetwork.mchost.util.Material3ThemeHelper.isM3Enabled(this)) {
+            setContentView(R.layout.activity_settings_m3);
+        } else {
+            setContentView(R.layout.activity_settings);
+        }
 
         TextView tvVersion = findViewById(R.id.tv_settings_version);
         if (tvVersion != null) {
@@ -155,6 +162,121 @@ public class SettingsActivity extends Activity {
                 eu.kodanetwork.mchost.util.HapticUtil.forceVibrate(this, 100);
             }
         });
+
+        setupMaterial3Developer();
+    }
+
+    private void setupMaterial3Developer() {
+        com.google.android.material.switchmaterial.SwitchMaterial switchM3 = findViewById(R.id.switch_dev_material3);
+        android.widget.LinearLayout m3Options = findViewById(R.id.ll_m3_options);
+        
+        if (switchM3 == null || m3Options == null) return;
+        
+        boolean m3Enabled = prefs.getBoolean("dev_material3_enabled", false);
+        switchM3.setChecked(m3Enabled);
+        m3Options.setVisibility(m3Enabled ? View.VISIBLE : View.GONE);
+        
+        switchM3.setOnCheckedChangeListener((btn, checked) -> {
+            prefs.edit().putBoolean("dev_material3_enabled", checked).apply();
+            m3Options.setVisibility(checked ? View.VISIBLE : View.GONE);
+            eu.kodanetwork.mchost.util.HapticUtil.forceVibrate(this, 80);
+            Toast.makeText(this, checked ? "Material 3 aktiviert" : "Material 3 deaktiviert", Toast.LENGTH_SHORT).show();
+            btn.postDelayed(this::recreate, 300);
+        });
+        
+        setupM3ColorModeSegmented();
+        setupM3ColorPresets();
+    }
+
+    private void setupM3ColorModeSegmented() {
+        TextView btnDynamic = findViewById(R.id.btn_m3_dynamic);
+        TextView btnCustom = findViewById(R.id.btn_m3_custom);
+        View pill = findViewById(R.id.pill_m3_color_mode);
+        View customColorSection = findViewById(R.id.ll_m3_custom_color);
+        android.widget.FrameLayout container = findViewById(R.id.container_m3_color_mode);
+        
+        if (btnDynamic == null || btnCustom == null || pill == null || customColorSection == null) return;
+        
+        String mode = prefs.getString("m3_color_mode", "dynamic");
+        boolean isDynamic = "dynamic".equals(mode);
+        
+        customColorSection.setVisibility(isDynamic ? View.GONE : View.VISIBLE);
+        
+        btnDynamic.setTextColor(isDynamic ? 0xFFFFFFFF : 0xFF888899);
+        btnCustom.setTextColor(isDynamic ? 0xFF888899 : 0xFFFFFFFF);
+        
+        container.post(() -> {
+            int width = container.getWidth() / 2;
+            pill.getLayoutParams().width = width;
+            pill.requestLayout();
+            pill.setTranslationX(isDynamic ? 0 : width);
+        });
+        
+        View.OnClickListener clickListener = v -> {
+            boolean newIsDynamic = v.getId() == R.id.btn_m3_dynamic;
+            if (newIsDynamic == "dynamic".equals(prefs.getString("m3_color_mode", "dynamic"))) return;
+            
+            prefs.edit().putString("m3_color_mode", newIsDynamic ? "dynamic" : "custom").apply();
+            customColorSection.setVisibility(newIsDynamic ? View.GONE : View.VISIBLE);
+            
+            btnDynamic.setTextColor(newIsDynamic ? 0xFFFFFFFF : 0xFF888899);
+            btnCustom.setTextColor(newIsDynamic ? 0xFF888899 : 0xFFFFFFFF);
+            
+            int width = container.getWidth() / 2;
+            pill.animate().translationX(newIsDynamic ? 0 : width).setDuration(250)
+                .setInterpolator(new android.view.animation.OvershootInterpolator(1.2f)).start();
+                
+            eu.kodanetwork.mchost.util.HapticUtil.forceVibrate(this, 50);
+            v.postDelayed(this::recreate, 300);
+        };
+        
+        btnDynamic.setOnClickListener(clickListener);
+        btnCustom.setOnClickListener(clickListener);
+    }
+    
+    private void setupM3ColorPresets() {
+        android.widget.LinearLayout llPresets = findViewById(R.id.ll_m3_color_presets);
+        View preview = findViewById(R.id.view_m3_color_preview);
+        
+        if (llPresets == null || preview == null) return;
+        
+        int currentColor = eu.kodanetwork.mchost.util.Material3ThemeHelper.getCustomColor(this);
+        
+        if (preview.getBackground() instanceof android.graphics.drawable.GradientDrawable) {
+            ((android.graphics.drawable.GradientDrawable)preview.getBackground()).setColor(currentColor);
+        } else {
+            preview.setBackgroundColor(currentColor);
+        }
+        
+        llPresets.removeAllViews();
+        
+        int margin = (int)(4 * getResources().getDisplayMetrics().density);
+        int size = (int)(36 * getResources().getDisplayMetrics().density);
+        
+        for (int i = 0; i < eu.kodanetwork.mchost.util.Material3ThemeHelper.COLOR_PRESETS.length; i++) {
+            final int color = eu.kodanetwork.mchost.util.Material3ThemeHelper.COLOR_PRESETS[i];
+            
+            View circle = new View(this);
+            android.widget.LinearLayout.LayoutParams lp = new android.widget.LinearLayout.LayoutParams(size, size);
+            lp.setMargins(margin, 0, margin, 0);
+            circle.setLayoutParams(lp);
+            
+            android.graphics.drawable.GradientDrawable gd = new android.graphics.drawable.GradientDrawable();
+            gd.setShape(android.graphics.drawable.GradientDrawable.OVAL);
+            gd.setColor(color);
+            if (color == currentColor) {
+                gd.setStroke((int)(3 * getResources().getDisplayMetrics().density), 0xFFFFFFFF);
+            }
+            circle.setBackground(gd);
+            
+            circle.setOnClickListener(v -> {
+                eu.kodanetwork.mchost.util.HapticUtil.forceVibrate(this, 50);
+                prefs.edit().putInt("m3_custom_color", color).apply();
+                v.postDelayed(this::recreate, 300);
+            });
+            
+            llPresets.addView(circle);
+        }
     }
 
     // Colors for light/dark
@@ -352,8 +474,7 @@ public class SettingsActivity extends Activity {
                     conn.setRequestProperty("apikey", anonKey);
                     
                     String token = prefs.getString("koda_session_token", null);
-                    // ALWAYS use anonKey for Authorization to match Supabase RLS policies which only allow 'anon'
-                    conn.setRequestProperty("Authorization", "Bearer " + anonKey);
+                    conn.setRequestProperty("Authorization", token != null ? "Bearer " + token : "Bearer " + anonKey);
                     
                     conn.setDoOutput(true);
                     

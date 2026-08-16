@@ -147,12 +147,19 @@ public class CreateServerActivity extends AppCompatActivity {
     }
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        if (eu.kodanetwork.mchost.util.Material3ThemeHelper.isM3Enabled(this)) {
+            setTheme(R.style.Theme_KodaNetwork_Material3);
+        }
         super.onCreate(savedInstanceState);
         android.content.SharedPreferences prefs = eu.kodanetwork.mchost.App.getPrefs(this);
         lastTheme = prefs.getString("app_theme", "modern");
         boolean isCyber = "cyber".equals(lastTheme);
 
-        setContentView(R.layout.activity_create_server);
+        if (eu.kodanetwork.mchost.util.Material3ThemeHelper.isM3Enabled(this)) {
+            setContentView(R.layout.activity_create_server_m3);
+        } else {
+            setContentView(R.layout.activity_create_server);
+        }
         if (isCyber) {
             findViewById(android.R.id.content).getRootView().setBackgroundResource(R.drawable.bg_cyber_grid);
         }

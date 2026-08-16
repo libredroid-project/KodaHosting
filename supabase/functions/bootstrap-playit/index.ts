@@ -4,6 +4,15 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
   if (req.method !== "POST") return new Response("Method not allowed", { status: 405, headers: corsHeaders });
 
+  const authHeader = req.headers.get("Authorization")?.replace("Bearer ", "");
+  const apikey = req.headers.get("apikey");
+  if (!authHeader || !apikey) {
+    return new Response(JSON.stringify({ error: "unauthorized" }), {
+      status: 401,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+
   try {
     const playitToken = Deno.env.get("PLAYIT_AGENT_TOKEN") ?? "";
     const body = await req.json();

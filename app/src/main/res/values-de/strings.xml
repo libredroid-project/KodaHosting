@@ -143,6 +143,11 @@
     <string name="eula_accept">AKZEPTIEREN</string>
 
 
+    <string name="praetor_update_title">App-Update verfügbar</string>
+    <string name="praetor_update_message">Deine KodaHosting App ist veraltet. Ein Sicherheits- und Stabilitätsupdate wird dringend empfohlen, um fortzufahren.</string>
+    <string name="praetor_update_button">Über Play Store updaten</string>
+    <string name="praetor_update_skip">Überspringen</string>
+    <string name="praetor_update_skip_timer">Überspringen (%ds)</string>
     <string name="praetor_title">P.R.A.E.T.O.R.</string>
     <string name="praetor_subtitle">PROTOCOL FOR RISK ASSESSMENT,\nENFORCEMENT &amp; TOTAL OVERSIGHT RESPONSE</string>
     <string name="praetor_action_fix">PROBLEM BEHEBEN</string>
@@ -378,4 +383,9 @@
     <string name="error_invalid_characters">Dein Servername darf nur aus kleinen Buchstaben (a-z), Zahlen (0-9) und Bindestrichen (-) bestehen.</string>
     <string name="error_length_invalid">Der Servername muss zwischen 3 und 63 Zeichen lang sein.</string>
     <string name="loading_check_servername">Überprüfe Servernamen...</string>
+    <string name="server_banned_title">SERVER GESPERRT</string>
+    <string name="server_banned_message">Dieser Server wurde vom KodaNetwork gesperrt.</string>
+    <string name="server_banned_reason_label">Grund: </string>
+    <string name="server_banned_reason_unknown">Unbekannt</string>
+    <string name="server_banned_download">Backup herunterladen</string>
 </resources>

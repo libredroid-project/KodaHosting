@@ -14,8 +14,11 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.logging.Handler;
-import java.util.logging.LogRecord;
 import java.util.logging.Logger;
+import java.util.logging.LogRecord;
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 
 /**
  * Captures server console output and manages SSE streaming to dashboard clients.
@@ -25,9 +28,13 @@ public class ConsoleManager {
     private final LinkedList<JsonObject> buffer = new LinkedList<>();
     private final int maxLines;
     private final List<SseClient> sseClients = new CopyOnWriteArrayList<>();
-    private final Handler logHandler;
     private final Gson gson = new Gson();
-    private int totalLines = 0;
+    private static int totalLines = 0;
+    private static ConsoleManager instance;
+    private static boolean appenderAttached = false;
+    private static Object log4jAppenderProxy;
+    private static Object log4jRootLogger;
+    private static Handler logHandler;
 
     private static class SseClient {
         final OutputStream stream;
@@ -39,47 +46,103 @@ public class ConsoleManager {
         }
     }
 
+
+
     public ConsoleManager(KodaDash plugin) {
         this.plugin = plugin;
+        instance = this;
         this.maxLines = plugin.getConfig().getInt("console-buffer-size", 500);
 
+        if (appenderAttached) return;
+        appenderAttached = true;
+        
         logHandler = new Handler() {
             @Override
             public void publish(LogRecord record) {
                 if (record == null || record.getMessage() == null) return;
-                
-                JsonObject json = new JsonObject();
-                json.addProperty("index", totalLines);
-                json.addProperty("timestamp", record.getMillis());
-                json.addProperty("level", record.getLevel().getName());
-                json.addProperty("message", formatMessage(record));
-
-                synchronized (buffer) {
-                    buffer.add(json);
-                    totalLines++;
-                    if (buffer.size() > maxLines) {
-                        buffer.removeFirst();
-                    }
-                }
-
-                broadcastSse(json);
+                if (instance != null) instance.appendLine(record.getMillis(), record.getLevel().getName(), formatMessage(record));
             }
-
-            @Override
-            public void flush() {}
-
-            @Override
-            public void close() throws SecurityException {}
+            @Override public void flush() {}
+            @Override public void close() throws SecurityException {}
         };
 
-        Logger.getLogger("").addHandler(logHandler);
+        try {
+            Class<?> logManagerClass = Class.forName("org.apache.logging.log4j.LogManager");
+            log4jRootLogger = logManagerClass.getMethod("getRootLogger").invoke(null);
+            Class<?> appenderInterface = Class.forName("org.apache.logging.log4j.core.Appender");
+            
+            log4jAppenderProxy = Proxy.newProxyInstance(
+                appenderInterface.getClassLoader(),
+                new Class<?>[]{appenderInterface},
+                new InvocationHandler() {
+                    @Override
+                    public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+                        String name = method.getName();
+                        if (name.equals("append") && args.length == 1) {
+                            Object event = args[0];
+                            try {
+                                Object messageObj = event.getClass().getMethod("getMessage").invoke(event);
+                                String formatted = (String) messageObj.getClass().getMethod("getFormattedMessage").invoke(messageObj);
+                                String level = event.getClass().getMethod("getLevel").invoke(event).toString();
+                                long time = (long) event.getClass().getMethod("getTimeMillis").invoke(event);
+                                if (instance != null) instance.appendLine(time, level, formatted);
+                            } catch (Exception e) {}
+                            return null;
+                        } else if (name.equals("getName")) {
+                            return "KodaDashAppender";
+                        } else if (name.equals("isStarted")) {
+                            return true;
+                        } else if (name.equals("isStopped")) {
+                            return false;
+                        } else if (name.equals("getState")) {
+                            try {
+                                Class<?> stateClass = Class.forName("org.apache.logging.log4j.core.LifeCycle$State");
+                                return Enum.valueOf((Class<Enum>) stateClass, "STARTED");
+                            } catch (Exception e) {
+                                return null;
+                            }
+                        } else if (name.equals("hashCode")) {
+                            return System.identityHashCode(proxy);
+                        } else if (name.equals("equals")) {
+                            return proxy == args[0];
+                        }
+                        return null;
+                    }
+                }
+            );
+            
+            log4jRootLogger.getClass().getMethod("addAppender", appenderInterface).invoke(log4jRootLogger, log4jAppenderProxy);
+        } catch (Throwable t) {
+            // Fallback to java.util.logging if Log4j2 is not available
+            Logger.getLogger("").addHandler(logHandler);
+        }
+    }
+
+    private void appendLine(long time, String level, String message) {
+        JsonObject json = new JsonObject();
+        json.addProperty("index", totalLines);
+        json.addProperty("timestamp", time);
+        json.addProperty("level", level);
+        json.addProperty("message", message);
+
+        synchronized (buffer) {
+            buffer.add(json);
+            totalLines++;
+            if (buffer.size() > maxLines) {
+                buffer.removeFirst();
+            }
+        }
+        broadcastSse(json);
     }
 
     /**
      * Clean up resources on plugin disable.
      */
     public void cleanup() {
-        Logger.getLogger("").removeHandler(logHandler);
+        instance = null;
+        // Don't try to remove the appender, let the static appender continue running
+        // but it will safely do nothing because instance is null.
+        
         for (SseClient client : sseClients) {
             try {
                 client.stream.close();

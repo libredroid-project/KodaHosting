@@ -4,7 +4,12 @@
         <domain includeSubdomains="true">supabase.co</domain>
         <domain includeSubdomains="true">api.kodanetwork.eu</domain>
         <domain includeSubdomains="true">resend.com</domain>
-        <!-- In the future, add <pin-set> here for strict SSL pinning -->
+        <pin-set expiration="2027-01-01">
+            <!-- Pin for scsezpfrrmpyuapblbxk.supabase.co -->
+            <pin digest="SHA-256">ZcJbApTb7wyllleAjHw2vYAskqdT+DhMY9aPDFwAtf4=</pin>
+            <!-- Pin for resend.com -->
+            <pin digest="SHA-256">TEkn6qDvfkQohSynIX2+ktH9lYUhByOu5hw15/ISVmI=</pin>
+        </pin-set>
     </domain-config>
     <base-config cleartextTrafficPermitted="false">
         <trust-anchors>

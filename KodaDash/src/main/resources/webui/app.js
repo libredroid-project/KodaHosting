@@ -289,9 +289,7 @@ function switchTab(tabName) {
   
   // Load data based on tab
   if (tabName === 'overview') loadOverview();
-  else if (tabName === 'players') loadPlayers();
   else if (tabName === 'files') loadFiles(state.currentPath);
-  else if (tabName === 'settings') loadSettings();
 }
 
 // --- Overview ---
@@ -335,8 +333,10 @@ function updateOverviewStats(data) {
   // Info
   document.getElementById('info-version').textContent = data.version;
   document.getElementById('info-motd').innerHTML = parseMinecraftColors(data.motd || 'A Minecraft Server');
-  document.getElementById('info-world').textContent = 'world'; // static for now
-  document.getElementById('info-gamemode').textContent = 'Survival'; // static for now
+  document.getElementById('info-world').textContent = data.worldName || 'world';
+  document.getElementById('info-gamemode').textContent = data.gamemode || 'Survival';
+  document.getElementById('info-onlinemode').textContent = data.onlineMode ? 'Premium (true)' : 'Cracked (false)';
+  document.getElementById('info-difficulty').textContent = data.difficulty || 'NORMAL';
 }
 
 function startStatsPolling() {
@@ -395,6 +395,12 @@ async function initConsole() {
 }
 
 function appendConsoleLine(line) {
+  // Hide TPS check spam and TPS commands
+  if (line.message && (line.message.includes('TPS:') || line.message.includes('TPS check') || line.message.includes('TPS from last'))) return;
+  
+  // Hide the server's own echo of the command being issued
+  if (line.message && line.message.includes('issued server command:')) return;
+  
   const container = document.getElementById('console-output');
   const el = document.createElement('div');
   el.className = 'console-line';
@@ -445,91 +451,7 @@ async function sendCommand() {
   }
 }
 
-// --- Players ---
-async function loadPlayers() {
-  const grid = document.getElementById('players-grid');
-  const empty = document.getElementById('players-empty');
-  const header = document.getElementById('players-count-header');
-  
-  try {
-    const res = await api('/api/players');
-    const players = res.players || [];
-    
-    header.textContent = `Players (${players.length})`;
-    
-    if (players.length === 0) {
-      grid.style.display = 'none';
-      empty.style.display = 'block';
-      return;
-    }
-    
-    grid.style.display = 'grid';
-    empty.style.display = 'none';
-    grid.innerHTML = '';
-    
-    players.forEach(p => {
-      const healthPercent = Math.min(100, (p.health / 20) * 100);
-      
-      const card = document.createElement('div');
-      card.className = 'player-card';
-      card.innerHTML = `
-        <div class="player-header">
-          <img class="player-avatar" src="https://mc-heads.net/avatar/${p.name}/48" alt="${p.name}">
-          <div class="player-info">
-            <div class="player-name">${escapeHtml(p.name)}</div>
-            <div class="player-health">
-              <span>HP</span>
-              <div class="health-bar-bg">
-                <div class="health-bar" style="width: ${healthPercent}%"></div>
-              </div>
-              <span>${Math.round(p.health)}</span>
-            </div>
-          </div>
-        </div>
-        <div class="player-actions">
-          <button class="btn-ghost" onclick="kickPlayer('${escapeHtml(p.name)}')">Kick</button>
-          <button class="btn-danger" onclick="banPlayer('${escapeHtml(p.name)}')">Ban</button>
-        </div>
-      `;
-      grid.appendChild(card);
-    });
-    
-  } catch (error) {
-    console.error('Failed to load players:', error);
-    showToast('Failed to load players', 'error');
-  }
-}
 
-window.kickPlayer = async function(name) {
-  if (!confirm(`Are you sure you want to kick ${name}?`)) return;
-  try {
-    await api('/api/players/kick', {
-      method: 'POST',
-      body: JSON.stringify({ player: name, reason: 'Kicked by admin' })
-    });
-    showToast(`Kicked ${name}`, 'success');
-    loadPlayers();
-  } catch (error) {
-    showToast('Failed to kick player', 'error');
-  }
-};
-
-window.banPlayer = async function(name) {
-  const reason = prompt(`Reason for banning ${name}:`, 'Banned by admin');
-  if (reason === null) return;
-  try {
-    await api('/api/players/ban', {
-      method: 'POST',
-      body: JSON.stringify({ player: name, reason })
-    });
-    showToast(`Banned ${name}`, 'success');
-    loadPlayers();
-  } catch (error) {
-    showToast('Failed to ban player', 'error');
-  }
-};
-
-document.getElementById('refresh-players-btn').addEventListener('click', loadPlayers);
 
 // --- Files ---
 async function loadFiles(path = '') {
@@ -608,7 +530,6 @@ async function loadFiles(path = '') {
           openFile(fullPath);
         }
       };
-      
       list.appendChild(item);
     });
     
@@ -617,15 +538,57 @@ async function loadFiles(path = '') {
   }
 }
 
+let monacoEditor = null;
+let isFullscreen = false;
+
+function initMonaco() {
+  if (monacoEditor) return;
+  require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.38.0/min/vs' }});
+  require(['vs/editor/editor.main'], function() {
+    monacoEditor = monaco.editor.create(document.getElementById('monaco-container'), {
+      value: "",
+      language: "yaml",
+      theme: "vs-dark",
+      automaticLayout: true,
+      minimap: { enabled: true }
+    });
+    
+    // Ctrl+S / Cmd+S Shortcut
+    monacoEditor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS, function() {
+      saveFile();
+    });
+  });
+}
+
 async function openFile(path) {
   try {
     const encodedPath = '/' + path.split('/').map(encodeURIComponent).join('/');
     const data = await api(`/api/files${encodedPath}`);
     
     state.editingFile = path;
-    document.getElementById('editor-filename').textContent = path.split('/').pop();
-    document.getElementById('editor-textarea').value = data.content;
+    const filename = path.split('/').pop();
+    document.getElementById('editor-filename').textContent = filename;
     document.getElementById('file-editor-overlay').style.display = 'flex';
+    
+    if (!monacoEditor) initMonaco();
+    
+    // Wait for monaco to load if it's not ready yet
+    const checkMonaco = setInterval(() => {
+      if (monacoEditor) {
+        clearInterval(checkMonaco);
+        monacoEditor.setValue(data.content || '');
+        
+        // detect language
+        let lang = 'plaintext';
+        if (filename.endsWith('.yml') || filename.endsWith('.yaml')) lang = 'yaml';
+        else if (filename.endsWith('.properties')) lang = 'properties';
+        else if (filename.endsWith('.java')) lang = 'java';
+        else if (filename.endsWith('.log')) lang = 'properties';
+        else if (filename.endsWith('.json')) lang = 'plaintext'; // Workaround for CDN worker crash
+        
+        monaco.editor.setModelLanguage(monacoEditor.getModel(), lang);
+      }
+    }, 100);
     
   } catch (error) {
     showToast('Cannot read this file. It may be too large or binary.', 'warning');
@@ -633,9 +596,9 @@ async function openFile(path) {
 }
 
 async function saveFile() {
-  if (!state.editingFile) return;
+  if (!state.editingFile || !monacoEditor) return;
   
-  const content = document.getElementById('editor-textarea').value;
+  const content = monacoEditor.getValue();
   try {
     const encodedPath = '/' + state.editingFile.split('/').map(encodeURIComponent).join('/');
     await api(`/api/files${encodedPath}`, {
@@ -648,6 +611,12 @@ async function saveFile() {
     showToast('Failed to save file', 'error');
   }
 }
+
+document.getElementById('editor-save-btn').addEventListener('click', saveFile);
+
+
+
+
 
 function closeEditor() {
   document.getElementById('file-editor-overlay').style.display = 'none';
@@ -704,112 +673,6 @@ document.getElementById('refresh-files-btn').addEventListener('click', () => loa
 document.getElementById('editor-save-btn').addEventListener('click', saveFile);
 document.getElementById('editor-close-btn').addEventListener('click', closeEditor);
 
-// --- Settings ---
-async function loadSettings() {
-  const container = document.getElementById('settings-form');
-  container.innerHTML = 'Loading...';
-  
-  try {
-    const res = await api('/api/settings');
-    const props = res.properties || {};
-    container.innerHTML = '';
-    
-    // Group properties
-    const groups = {
-      'General': ['server-name', 'motd', 'max-players', 'server-port', 'online-mode'],
-      'Gameplay': ['gamemode', 'difficulty', 'pvp', 'allow-flight', 'spawn-monsters', 'spawn-animals'],
-      'World': ['level-name', 'level-type', 'level-seed', 'view-distance', 'generate-structures'],
-      'Advanced': [] // catch-all
-    };
-    
-    const renderedProps = new Set();
-    
-    const renderGroup = (title, keys) => {
-      const section = document.createElement('div');
-      section.className = 'settings-section';
-      section.innerHTML = `<h3>${title}</h3>`;
-      
-      let hasItems = false;
-      
-      keys.forEach(key => {
-        if (props[key] !== undefined) {
-          hasItems = true;
-          renderedProps.add(key);
-          const val = props[key];
-          section.appendChild(createSettingRow(key, val));
-        }
-      });
-      
-      if (hasItems) container.appendChild(section);
-    };
-    
-    renderGroup('General', groups['General']);
-    renderGroup('Gameplay', groups['Gameplay']);
-    renderGroup('World', groups['World']);
-    
-    // Advanced (remaining)
-    const advKeys = Object.keys(props).filter(k => !renderedProps.has(k)).sort();
-    if (advKeys.length > 0) {
-      renderGroup('Advanced', advKeys);
-    }
-    
-  } catch (error) {
-    container.innerHTML = 'Failed to load settings.';
-  }
-}
-
-function createSettingRow(key, value) {
-  const row = document.createElement('div');
-  row.className = 'setting-row';
-  
-  let controlHtml = '';
-  
-  if (value === 'true' || value === 'false' || typeof value === 'boolean') {
-    const isChecked = value === 'true' || value === true;
-    controlHtml = `
-      <label class="toggle-switch">
-        <input type="checkbox" data-key="${key}" ${isChecked ? 'checked' : ''}>
-        <span class="toggle-slider"></span>
-      </label>
-    `;
-  } else if (!isNaN(value) && value !== '') {
-    controlHtml = `<input type="number" data-key="${key}" value="${value}">`;
-  } else {
-    controlHtml = `<input type="text" data-key="${key}" value="${escapeHtml(value.toString())}">`;
-  }
-  
-  row.innerHTML = `
-    <div class="setting-info">
-      <div class="setting-name">${key}</div>
-    </div>
-    <div class="setting-control">${controlHtml}</div>
-  `;
-  
-  return row;
-}
-
-document.getElementById('save-settings-btn').addEventListener('click', async () => {
-  const data = {};
-  
-  document.querySelectorAll('#settings-form input').forEach(input => {
-    const key = input.dataset.key;
-    if (input.type === 'checkbox') {
-      data[key] = input.checked ? 'true' : 'false';
-    } else {
-      data[key] = input.value;
-    }
-  });
-  
-  try {
-    await api('/api/settings', {
-      method: 'POST',
-      body: JSON.stringify(data)
-    });
-    showToast('Settings saved! Restart server to apply.', 'success');
-  } catch (error) {
-    showToast('Failed to save settings', 'error');
-  }
-});
 
 // --- Init ---
 document.addEventListener('DOMContentLoaded', () => {
@@ -831,3 +694,5 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('sidebar').classList.remove('open');
   });
 });
+
+

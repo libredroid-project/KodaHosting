@@ -4,6 +4,15 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
   if (req.method !== "GET" && req.method !== "POST") return new Response("Method not allowed", { status: 405, headers: corsHeaders });
 
+  const authHeader = req.headers.get("Authorization")?.replace("Bearer ", "");
+  const apikey = req.headers.get("apikey");
+  if (!authHeader || !apikey) {
+    return new Response(JSON.stringify({ error: "unauthorized" }), {
+      status: 401,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+
   try {
     const apiKeyPrefix = Deno.env.get("IONOS_API_PREFIX") ?? "";
     const apiSecret = Deno.env.get("IONOS_API_SECRET") ?? "";
@@ -67,14 +76,7 @@ Deno.serve(async (req) => {
         }
       });
     } else if (supabaseUrl && supabaseKey && activeHosts.length === 0) {
-      // If there are no servers at all, delete everything
-      await fetch(`${supabaseUrl}/rest/v1/koda_servers`, {
-        method: "DELETE",
-        headers: {
-          "apikey": supabaseKey,
-          "Authorization": `Bearer ${supabaseKey}`
-        }
-      });
+      console.warn("IONOS returned 0 active servers. Skipping deletion to prevent data loss.");
     }
 
     return new Response(JSON.stringify({ ok: true, servers }), {

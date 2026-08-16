@@ -21,3 +21,10 @@ java_export/
 *.apk
 *.zip
 *.aab
+
+# Security & Secrets
+*.keystore
+*.jks
+.env
+*.env
+supabase/.env

@@ -37,9 +37,11 @@ public class DashServer {
             server.createContext("/api/players", new PlayersRoute(plugin));
             server.createContext("/api/files", new FilesRoute(plugin));
             server.createContext("/api/settings", new SettingsRoute(plugin));
+            server.createContext("/api/plugins", new PluginsRoute(plugin));
 
             // Static web UI files (SPA fallback)
             server.createContext("/", new StaticHandler(plugin));
+            server.createContext("/resourcepack.zip", new ResourcepackRoute(plugin));
 
             executor = Executors.newFixedThreadPool(10);
             server.setExecutor(executor);

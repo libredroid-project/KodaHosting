@@ -3,6 +3,7 @@
     android:fitsSystemWindows="true"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/main_root_layout"
+    android:saveEnabled="false"
     android:layout_width="match_parent" android:layout_height="match_parent"
     android:background="#0A0807"
     android:orientation="vertical">

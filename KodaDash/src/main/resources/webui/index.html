@@ -8,6 +8,8 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono&family=Outfit:wght@500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.38.0/min/vs/editor/editor.main.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.38.0/min/vs/loader.min.js"></script>
   <script type="module" src="app.js" defer></script>
 </head>
 <body>
@@ -45,9 +47,7 @@
         <ul class="nav-links">
           <li class="nav-item active" data-tab="overview"><span class="nav-icon">📊</span> Overview</li>
           <li class="nav-item" data-tab="console"><span class="nav-icon">💻</span> Console</li>
-          <li class="nav-item" data-tab="players"><span class="nav-icon">👥</span> Players</li>
           <li class="nav-item" data-tab="files"><span class="nav-icon">📁</span> Files</li>
-          <li class="nav-item" data-tab="settings"><span class="nav-icon">⚙️</span> Settings</li>
         </ul>
         <div class="sidebar-footer">
           <div class="connection-status" id="connection-status">
@@ -111,12 +111,20 @@
                 <span class="info-value" id="info-motd">--</span>
               </div>
               <div class="info-item">
-                <span class="info-label">World</span>
-                <span class="info-value" id="info-world">--</span>
+                <span class="info-label">Online Mode</span>
+                <span class="info-value" id="info-onlinemode">--</span>
+              </div>
+              <div class="info-item">
+                <span class="info-label">Difficulty</span>
+                <span class="info-value" id="info-difficulty">--</span>
               </div>
               <div class="info-item">
                 <span class="info-label">Gamemode</span>
                 <span class="info-value" id="info-gamemode">--</span>
+              </div>
+              <div class="info-item">
+                <span class="info-label">World</span>
+                <span class="info-value" id="info-world">--</span>
               </div>
             </div>
           </div>
@@ -134,21 +142,7 @@
           </div>
         </section>
 
-        <!-- Players Tab -->
-        <section id="tab-players" class="tab-content">
-          <div class="tab-header">
-            <h2 id="players-count-header">Players (0/0)</h2>
-            <button class="btn-ghost" id="refresh-players-btn">Refresh</button>
-          </div>
-          <div id="players-grid" class="players-grid">
-            <!-- Populated by JS -->
-          </div>
-          <div id="players-empty" class="empty-state" style="display: none;">
-            <div class="empty-icon">🛌</div>
-            <h3>No players online</h3>
-            <p>It's quiet in here.</p>
-          </div>
-        </section>
+
 
         <!-- Files Tab -->
         <section id="tab-files" class="tab-content">
@@ -167,35 +161,31 @@
           </div>
         </section>
 
-        <!-- Settings Tab -->
-        <section id="tab-settings" class="tab-content">
-          <div class="tab-header">
-            <h2>Server Settings</h2>
-            <button class="btn-primary" id="save-settings-btn">Save Changes</button>
-          </div>
-          <div class="settings-warning">
-            ⚠️ Changes require a server restart to take effect completely.
-          </div>
-          <div class="settings-form" id="settings-form">
-            <!-- Populated by JS -->
-          </div>
-        </section>
+
       </main>
     </div>
 
+
+
     <!-- File Editor Overlay -->
-    <div id="file-editor-overlay" class="overlay" style="display: none;">
-      <div class="editor-modal">
-        <div class="editor-header">
-          <h3 id="editor-filename">filename.txt</h3>
+    <div id="file-editor-overlay" class="overlay" style="display: none; padding: 0;">
+      <div class="modal editor-modal" style="width: 100vw; height: 100vh; max-width: 100%; max-height: 100%; margin: 0; border-radius: 0; border: none;">
+        <div class="modal-header">
+          <h2 id="editor-filename">filename.yml</h2>
           <div class="editor-actions">
-            <button class="btn-primary" id="editor-save-btn">Save</button>
-            <button class="btn-ghost" id="editor-close-btn">Close</button>
+            <button class="btn-success" id="editor-save-btn">Save</button>
+            <button class="btn-ghost" id="editor-close-btn">Exit</button>
           </div>
         </div>
-        <textarea id="editor-textarea" spellcheck="false"></textarea>
+        <div class="modal-content editor-modal-content" style="height: calc(100vh - 60px); padding: 0;">
+          <div id="monaco-container" style="width: 100%; height: 100%;"></div>
+        </div>
       </div>
     </div>
-  </div>
-</body>
+
+
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js"></script>
+    <script src="app.js?v=2"></script>
+  </body>
 </html>

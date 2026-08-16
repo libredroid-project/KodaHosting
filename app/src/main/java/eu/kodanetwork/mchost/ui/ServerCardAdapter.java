@@ -33,7 +33,9 @@ public class ServerCardAdapter extends RecyclerView.Adapter<ServerCardAdapter.VH
 
     @NonNull @Override
     public VH onCreateViewHolder(@NonNull ViewGroup p, int t) {
-        return new VH(LayoutInflater.from(ctx).inflate(R.layout.item_server, p, false));
+        boolean m3Enabled = eu.kodanetwork.mchost.util.Material3ThemeHelper.isM3Enabled(ctx);
+        int layoutId = m3Enabled ? R.layout.item_server_m3 : R.layout.item_server;
+        return new VH(LayoutInflater.from(ctx).inflate(layoutId, p, false));
     }
 
     @Override public void onBindViewHolder(@NonNull VH h, int i) { h.bind(data.get(i)); }
@@ -194,6 +196,12 @@ public class ServerCardAdapter extends RecyclerView.Adapter<ServerCardAdapter.VH
                     click.on(s);
                 };
                 itemView.setOnClickListener(cardClick);
+                if (eu.kodanetwork.mchost.util.Material3ThemeHelper.isM3Enabled(ctx)) {
+                    eu.kodanetwork.mchost.util.M3AnimationHelper.applySpringTouch(itemView);
+                    if (btnAction != null) {
+                        eu.kodanetwork.mchost.util.M3AnimationHelper.applySpringTouch(btnAction);
+                    }
+                }
                 eu.kodanetwork.mchost.util.ThemeHelper.applyToView(itemView, isLight, themeColor, isCyber);
                 return; // Done for databases
             }
@@ -350,6 +358,12 @@ public class ServerCardAdapter extends RecyclerView.Adapter<ServerCardAdapter.VH
             };
             
             itemView.setOnClickListener(cardClick);
+            if (eu.kodanetwork.mchost.util.Material3ThemeHelper.isM3Enabled(ctx)) {
+                eu.kodanetwork.mchost.util.M3AnimationHelper.applySpringTouch(itemView);
+                if (btnAction != null) {
+                    eu.kodanetwork.mchost.util.M3AnimationHelper.applySpringTouch(btnAction);
+                }
+            }
 
             // Apply theme LAST so that dynamic colors on btnAction are properly styled for light mode
             eu.kodanetwork.mchost.util.ThemeHelper.applyToView(itemView, isLight, themeColor, isCyber);

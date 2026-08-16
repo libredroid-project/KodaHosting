@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Material 3 Tonal Palette (Seed: #FF6B00 Koda Orange) -->
+    <!-- Light Theme Colors -->
+    <color name="m3_light_primary">#A04100</color>
+    <color name="m3_light_onPrimary">#FFFFFF</color>
+    <color name="m3_light_primaryContainer">#FFDBCC</color>
+    <color name="m3_light_onPrimaryContainer">#351000</color>
+    <color name="m3_light_secondary">#765749</color>
+    <color name="m3_light_onSecondary">#FFFFFF</color>
+    <color name="m3_light_secondaryContainer">#FFDBCC</color>
+    <color name="m3_light_onSecondaryContainer">#2C160B</color>
+    <color name="m3_light_tertiary">#665F31</color>
+    <color name="m3_light_onTertiary">#FFFFFF</color>
+    <color name="m3_light_tertiaryContainer">#EFE4A9</color>
+    <color name="m3_light_onTertiaryContainer">#201C00</color>
+    <color name="m3_light_error">#BA1A1A</color>
+    <color name="m3_light_onError">#FFFFFF</color>
+    <color name="m3_light_errorContainer">#FFDAD6</color>
+    <color name="m3_light_onErrorContainer">#410002</color>
+    <color name="m3_light_background">#FFF8F6</color>
+    <color name="m3_light_onBackground">#221A16</color>
+    <color name="m3_light_surface">#FFF8F6</color>
+    <color name="m3_light_onSurface">#221A16</color>
+    <color name="m3_light_surfaceVariant">#F5DED6</color>
+    <color name="m3_light_onSurfaceVariant">#53433D</color>
+    <color name="m3_light_outline">#85736C</color>
+    <color name="m3_light_outlineVariant">#D8C2BA</color>
+    <color name="m3_light_inverseSurface">#382E2A</color>
+    <color name="m3_light_inverseOnSurface">#FFEDE7</color>
+    <color name="m3_light_inversePrimary">#FFB599</color>
+    <color name="m3_light_surfaceTint">#A04100</color>
+
+    <!-- Dark Theme Colors -->
+    <color name="m3_dark_primary">#FFB599</color>
+    <color name="m3_dark_onPrimary">#561F00</color>
+    <color name="m3_dark_primaryContainer">#7A3000</color>
+    <color name="m3_dark_onPrimaryContainer">#FFDBCC</color>
+    <color name="m3_dark_secondary">#E6BEAC</color>
+    <color name="m3_dark_onSecondary">#432A1E</color>
+    <color name="m3_dark_secondaryContainer">#5C4033</color>
+    <color name="m3_dark_onSecondaryContainer">#FFDBCC</color>
+    <color name="m3_dark_tertiary">#D2C88F</color>
+    <color name="m3_dark_onTertiary">#373106</color>
+    <color name="m3_dark_tertiaryContainer">#4E471C</color>
+    <color name="m3_dark_onTertiaryContainer">#EFE4A9</color>
+    <color name="m3_dark_error">#FFB4AB</color>
+    <color name="m3_dark_onError">#690005</color>
+    <color name="m3_dark_errorContainer">#93000A</color>
+    <color name="m3_dark_onErrorContainer">#FFDAD6</color>
+    <color name="m3_dark_background">#1A120E</color>
+    <color name="m3_dark_onBackground">#F1DFD8</color>
+    <color name="m3_dark_surface">#1A120E</color>
+    <color name="m3_dark_onSurface">#F1DFD8</color>
+    <color name="m3_dark_surfaceVariant">#53433D</color>
+    <color name="m3_dark_onSurfaceVariant">#D8C2BA</color>
+    <color name="m3_dark_outline">#A08C85</color>
+    <color name="m3_dark_outlineVariant">#53433D</color>
+    <color name="m3_dark_inverseSurface">#F1DFD8</color>
+    <color name="m3_dark_inverseOnSurface">#382E2A</color>
+    <color name="m3_dark_inversePrimary">#A04100</color>
+    <color name="m3_dark_surfaceTint">#FFB599</color>
+
+    <!-- Surface Containers -->
+    <color name="m3_light_surfaceContainerLowest">#FFFFFF</color>
+    <color name="m3_light_surfaceContainerLow">#F7F2FA</color>
+    <color name="m3_light_surfaceContainer">#F3EDF7</color>
+    <color name="m3_light_surfaceContainerHigh">#ECE6F0</color>
+    <color name="m3_light_surfaceContainerHighest">#E6E0E9</color>
+
+    <color name="m3_dark_surfaceContainerLowest">#0A0807</color>
+    <color name="m3_dark_surfaceContainerLow">#100C0A</color>
+    <color name="m3_dark_surfaceContainer">#16110D</color>
+    <color name="m3_dark_surfaceContainerHigh">#1C1611</color>
+    <color name="m3_dark_surfaceContainerHighest">#241C18</color>
+</resources>

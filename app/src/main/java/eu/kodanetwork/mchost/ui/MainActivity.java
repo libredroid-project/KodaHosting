@@ -41,6 +41,7 @@ import eu.kodanetwork.mchost.util.ThemeHelper;
 public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = "KodaNetwork";
+    private static boolean updateDialogShown = false;
 
     private RecyclerView rv;
     private View tvEmpty;
@@ -71,31 +72,31 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        android.content.SharedPreferences prefsForTheme = eu.kodanetwork.mchost.App.getPrefs(this);
+        if (prefsForTheme.getBoolean("dev_material3_enabled", false)) {
+            setTheme(R.style.Theme_KodaNetwork_Material3);
+        }
         super.onCreate(savedInstanceState);
         
         android.content.SharedPreferences prefs = eu.kodanetwork.mchost.App.getPrefs(this);
-        String lastTheme = prefs.getString("app_theme", "modern");
-        String lastThemeMode = prefs.getString("theme_mode", "dark");
-        boolean isCyber = "cyber".equals(lastTheme);
+        this.lastTheme = prefs.getString("app_theme", "modern");
+        this.lastThemeMode = prefs.getString("theme_mode", "dark");
+        this.lastM3Enabled = prefs.getBoolean("dev_material3_enabled", false);
+        this.lastM3ColorMode = prefs.getString("m3_color_mode", "dynamic");
+        this.lastM3CustomColor = prefs.getInt("m3_custom_color", 0xFF6750A4);
+        boolean isCyber = "cyber".equals(this.lastTheme);
 
         String currentAppUuid = prefs.getString("app_uuid", null);
-        String androidId = android.provider.Settings.Secure.getString(getContentResolver(), android.provider.Settings.Secure.ANDROID_ID);
         String hwidUuid = null;
         try {
-            java.security.MessageDigest md = java.security.MessageDigest.getInstance("SHA-256");
-            byte[] hash = md.digest(androidId.getBytes(java.nio.charset.StandardCharsets.UTF_8));
-            StringBuilder hexString = new StringBuilder();
-            for (int i = 0; i < 4; i++) { // 8 characters
-                String hex = Integer.toHexString(0xff & hash[i]);
-                if (hex.length() == 1) hexString.append('0');
-                hexString.append(hex);
-            }
-            hwidUuid = "KODA-" + hexString.toString().toUpperCase();
+            String fullHwid = eu.kodanetwork.mchost.security.HWIDManager.getDeviceHWID(this);
+            hwidUuid = "KODA-" + fullHwid.substring(0, 16).toUpperCase();
         } catch (Exception e) {
+            String androidId = android.provider.Settings.Secure.getString(getContentResolver(), android.provider.Settings.Secure.ANDROID_ID);
             hwidUuid = "KODA-" + androidId.substring(0, 8).toUpperCase();
         }
 
-        if (currentAppUuid == null || (!currentAppUuid.startsWith("KODA-") && !currentAppUuid.equals(hwidUuid))) {
+        if (currentAppUuid == null || !currentAppUuid.equals(hwidUuid)) {
             prefs.edit().putString("app_uuid", hwidUuid).apply();
             
             // Automatic migration of servers for existing users
@@ -172,7 +173,11 @@ public class MainActivity extends AppCompatActivity {
         eu.kodanetwork.mchost.security.AntiTamperSystem.check(this);
         eu.kodanetwork.mchost.security.TripwireObserver.startWatching(this);
 
-        setContentView(R.layout.activity_main);
+        if (this.lastM3Enabled) {
+            setContentView(R.layout.activity_main_m3);
+        } else {
+            setContentView(R.layout.activity_main);
+        }
         
         eu.kodanetwork.mchost.orchestration.DatabaseOrchestrator.ensureDatabasesExtracted(this);
 
@@ -186,23 +191,10 @@ public class MainActivity extends AppCompatActivity {
             if (rootLayout != null) rootLayout.setBackgroundResource(R.drawable.bg_liquid_glass);
             if (topBar != null) topBar.setBackgroundColor(0x33000000);
             if (bottomBar != null) bottomBar.setBackgroundColor(0x33000000);
-            getWindow().getDecorView().setBackgroundResource(R.drawable.bg_liquid_glass);
-            
-            // Make system bars transparent
-            if (android.os.Build.VERSION.SDK_INT >= 21) {
-                getWindow().setStatusBarColor(0x00000000);
-                getWindow().setNavigationBarColor(0x00000000);
-            }
         } else if (ThemeHelper.isLightMode(this)) {
             if (rootLayout != null) rootLayout.setBackgroundColor(0xFFF5F5F5);
             if (topBar != null) topBar.setBackgroundColor(0xFFF5F5F5);
             if (bottomBar != null) bottomBar.setBackgroundColor(0xFFF5F5F5);
-            if (android.os.Build.VERSION.SDK_INT >= 23) {
-                getWindow().setStatusBarColor(0xFFF5F5F5);
-                getWindow().getDecorView().setSystemUiVisibility(
-                    android.view.View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR | android.view.View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR);
-                getWindow().setNavigationBarColor(0xFFF5F5F5);
-            }
         }
         
         permLauncher = registerForActivityResult(new ActivityResultContracts.RequestMultiplePermissions(), r -> {});
@@ -219,6 +211,7 @@ public class MainActivity extends AppCompatActivity {
 
             ExtendedFloatingActionButton fab = findViewById(R.id.fab_add);
             if (fab != null) {
+                if (this.lastM3Enabled) eu.kodanetwork.mchost.util.M3AnimationHelper.applySpringTouch(fab);
                 fab.setText(R.string.new_server_btn);
                 fab.setOnClickListener(v -> {
                     eu.kodanetwork.mchost.util.HapticUtil.forceVibrate(this, 80);
@@ -228,6 +221,7 @@ public class MainActivity extends AppCompatActivity {
 
             View fabDb = findViewById(R.id.fab_add_db);
             if (fabDb != null) {
+                if (this.lastM3Enabled) eu.kodanetwork.mchost.util.M3AnimationHelper.applySpringTouch(fabDb);
                 fabDb.setOnClickListener(v -> {
                     eu.kodanetwork.mchost.util.HapticUtil.forceVibrate(this, 80);
                     startActivity(new Intent(this, CreateDatabaseActivity.class));
@@ -466,8 +460,11 @@ public class MainActivity extends AppCompatActivity {
         } catch (Exception ignored) {}
     }
 
-    private String lastTheme = "modern";
-    private String lastThemeMode = "dark";
+    private String lastTheme;
+    private String lastThemeMode;
+    private boolean lastM3Enabled;
+    private String lastM3ColorMode;
+    private int lastM3CustomColor;
 
     @Override
     protected void onResume() {
@@ -475,9 +472,19 @@ public class MainActivity extends AppCompatActivity {
         android.content.SharedPreferences prefs = eu.kodanetwork.mchost.App.getPrefs(this);
         String currentTheme = prefs.getString("app_theme", "modern");
         String currentMode = prefs.getString("theme_mode", "dark");
-        if (!currentTheme.equals(lastTheme) || !currentMode.equals(lastThemeMode)) {
+        boolean currentM3Enabled = prefs.getBoolean("dev_material3_enabled", false);
+        String currentM3ColorMode = prefs.getString("m3_color_mode", "dynamic");
+        int currentM3CustomColor = prefs.getInt("m3_custom_color", 0xFF6750A4);
+        
+        if (!currentTheme.equals(lastTheme) || !currentMode.equals(lastThemeMode) ||
+            currentM3Enabled != lastM3Enabled || !currentM3ColorMode.equals(lastM3ColorMode) ||
+            currentM3CustomColor != lastM3CustomColor) {
+            
             lastTheme = currentTheme;
             lastThemeMode = currentMode;
+            lastM3Enabled = currentM3Enabled;
+            lastM3ColorMode = currentM3ColorMode;
+            lastM3CustomColor = currentM3CustomColor;
             recreate();
             return;
         }
@@ -489,6 +496,13 @@ public class MainActivity extends AppCompatActivity {
     private void checkAppStatus() {
         new Thread(() -> {
             try {
+                if (eu.kodanetwork.mchost.App.getPrefs(this).getBoolean("is_banned_user", false)) {
+                    runOnUiThread(() -> {
+                        startActivity(new Intent(MainActivity.this, BannedActivity.class));
+                        finish();
+                    });
+                    return;
+                }
                 String uuid = eu.kodanetwork.mchost.App.getPrefs(this).getString("app_uuid", "");
                 String apiKey = eu.kodanetwork.mchost.security.PraetorSecurity.getSupabaseKey();
                 String baseUrl = eu.kodanetwork.mchost.security.PraetorSecurity.getSupabaseUrl();
@@ -510,11 +524,14 @@ public class MainActivity extends AppCompatActivity {
                         if (response.isSuccessful() && response.body() != null) {
                             String json = response.body().string();
                             if (json.contains("true")) {
+                                eu.kodanetwork.mchost.App.getPrefs(MainActivity.this).edit().putBoolean("is_banned_user", true).apply();
                                 runOnUiThread(() -> {
                                     startActivity(new Intent(MainActivity.this, BannedActivity.class));
                                     finish();
                                 });
                                 return;
+                            } else {
+                                eu.kodanetwork.mchost.App.getPrefs(MainActivity.this).edit().putBoolean("is_banned_user", false).apply();
                             }
                         }
                     } catch (Exception ignored) {}
@@ -582,8 +599,122 @@ public class MainActivity extends AppCompatActivity {
                         }
                     }
                 } catch (Exception ignored) {}
+
+                // Check latest app version
+                okhttp3.Request versionReq = new okhttp3.Request.Builder()
+                    .url(baseUrl + "/rest/v1/app_settings?key=eq.latest_app_version&select=value")
+                    .addHeader("apikey", apiKey)
+                    .addHeader("Authorization", "Bearer " + apiKey)
+                    .build();
+                try (okhttp3.Response response = client.newCall(versionReq).execute()) {
+                    if (response.isSuccessful() && response.body() != null) {
+                        String json = response.body().string();
+                        int latestVer = 0;
+                        try {
+                            org.json.JSONArray arr = new org.json.JSONArray(json);
+                            if (arr.length() > 0) {
+                                String valStr = arr.getJSONObject(0).optString("value", "0");
+                                latestVer = Integer.parseInt(valStr);
+                            }
+                        } catch (Exception ignored) {}
+                        
+                        if (latestVer > eu.kodanetwork.mchost.BuildConfig.VERSION_CODE) {
+                            if (!updateDialogShown) {
+                                updateDialogShown = true;
+                                runOnUiThread(() -> showUpdateRequiredDialog());
+                            }
+                        }
+                    }
+                } catch (Exception ignored) {}
             } catch (Exception ignored) {}
         }).start();
+    }
+
+    private void showUpdateRequiredDialog() {
+        if (isFinishing() || isDestroyed()) return;
+        com.google.android.material.bottomsheet.BottomSheetDialog dialog = new com.google.android.material.bottomsheet.BottomSheetDialog(this, R.style.KodaBottomSheetDialog);
+        dialog.setCancelable(false);
+        dialog.setCanceledOnTouchOutside(false);
+
+        android.view.View view = getLayoutInflater().inflate(R.layout.dialog_praetor_update, null);
+        dialog.setContentView(view);
+
+        android.widget.TextView tvTitle = view.findViewById(R.id.tvUpdateTitle);
+        String praetorHtml = "<font color='#555555'>P.R.</font><font color='#AAAAAA'>A.E.T.</font><font color='#FFFFFF'>O.R.</font>";
+        if (tvTitle != null) tvTitle.setText(android.text.Html.fromHtml(praetorHtml, android.text.Html.FROM_HTML_MODE_LEGACY));
+
+        com.google.android.material.button.MaterialButton btnUpdate = view.findViewById(R.id.btnUpdateNow);
+        com.google.android.material.button.MaterialButton btnSkip = view.findViewById(R.id.btnUpdateSkip);
+
+        btnUpdate.setOnClickListener(v -> {
+            try {
+                com.google.android.play.core.appupdate.AppUpdateManager appUpdateManager = com.google.android.play.core.appupdate.AppUpdateManagerFactory.create(this);
+                com.google.android.gms.tasks.Task<com.google.android.play.core.appupdate.AppUpdateInfo> appUpdateInfoTask = appUpdateManager.getAppUpdateInfo();
+                appUpdateInfoTask.addOnSuccessListener(appUpdateInfo -> {
+                    if (appUpdateInfo.updateAvailability() == com.google.android.play.core.install.model.UpdateAvailability.UPDATE_AVAILABLE
+                          && appUpdateInfo.isUpdateTypeAllowed(com.google.android.play.core.install.model.AppUpdateType.FLEXIBLE)) {
+                          try {
+                              appUpdateManager.startUpdateFlowForResult(appUpdateInfo, com.google.android.play.core.install.model.AppUpdateType.FLEXIBLE, this, 123);
+                          } catch (Exception e) {
+                              fallbackUpdate();
+                          }
+                    } else {
+                          fallbackUpdate();
+                    }
+                }).addOnFailureListener(e -> {
+                    fallbackUpdate();
+                });
+            } catch (Exception e) {
+                fallbackUpdate();
+            }
+        });
+
+        new android.os.CountDownTimer(10000, 1000) {
+            @Override
+            public void onTick(long millisUntilFinished) {
+                btnSkip.setText(String.format(getString(R.string.praetor_update_skip_timer), millisUntilFinished / 1000));
+            }
+            @Override
+            public void onFinish() {
+                btnSkip.setEnabled(true);
+                btnSkip.setText(getString(R.string.praetor_update_skip));
+            }
+        }.start();
+
+        btnSkip.setOnClickListener(v -> dialog.dismiss());
+        
+        dialog.setOnShowListener(d -> {
+            // Expand the bottom sheet
+            com.google.android.material.bottomsheet.BottomSheetDialog d1 = (com.google.android.material.bottomsheet.BottomSheetDialog) d;
+            android.widget.FrameLayout bottomSheet = d1.findViewById(com.google.android.material.R.id.design_bottom_sheet);
+            if (bottomSheet != null) {
+                com.google.android.material.bottomsheet.BottomSheetBehavior.from(bottomSheet).setState(com.google.android.material.bottomsheet.BottomSheetBehavior.STATE_EXPANDED);
+            }
+        });
+
+        android.view.Window w = dialog.getWindow();
+        if (w != null && android.os.Build.VERSION.SDK_INT >= 23) {
+            w.setNavigationBarColor(android.graphics.Color.TRANSPARENT);
+            androidx.core.view.WindowCompat.setDecorFitsSystemWindows(w, false);
+            if (android.os.Build.VERSION.SDK_INT >= 29) {
+                w.setNavigationBarContrastEnforced(false);
+            }
+            int flags = w.getDecorView().getSystemUiVisibility();
+            flags &= ~android.view.View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR; // Enforce white icons for dark Praetor background
+            w.getDecorView().setSystemUiVisibility(flags);
+        }
+
+        dialog.show();
+    }
+
+    private void fallbackUpdate() {
+        try {
+            Intent intent = new Intent(Intent.ACTION_VIEW, android.net.Uri.parse("market://details?id=" + getPackageName()));
+            intent.setPackage("com.android.vending");
+            startActivity(intent);
+        } catch (Exception e) {
+            startActivity(new Intent(Intent.ACTION_VIEW, android.net.Uri.parse("https://play.google.com/store/apps/details?id=" + getPackageName())));
+        }
     }
 
     private void checkOfflineHibernations() {

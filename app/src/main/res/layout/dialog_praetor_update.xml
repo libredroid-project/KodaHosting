@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="32dp"
+    android:background="@drawable/bg_dialog_custom"
+    android:gravity="center">
+
+    <TextView
+        android:id="@+id/tvUpdateTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:text="@string/praetor_title"
+        android:textColor="#FF3333"
+        android:textSize="36sp"
+        android:textStyle="bold"
+        android:letterSpacing="0.1" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/praetor_subtitle"
+        android:textColor="#8A8A9A"
+        android:textSize="10sp"
+        android:textStyle="bold"
+        android:letterSpacing="0.05"
+        android:gravity="center"
+        android:layout_marginTop="8dp" />
+
+    <View
+        android:layout_width="40dp"
+        android:layout_height="2dp"
+        android:background="#FF6B00"
+        android:layout_marginTop="24dp"
+        android:layout_marginBottom="24dp" />
+
+    <TextView
+        android:id="@+id/tvUpdateSubtitle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:text="@string/praetor_update_title"
+        android:textColor="#FFFFFF"
+        android:textSize="18sp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/tvUpdateMessage"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="32dp"
+        android:gravity="center"
+        android:text="@string/praetor_update_message"
+        android:textColor="#F0F0F0"
+        android:textSize="16sp"
+        android:lineSpacingExtra="4dp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnUpdateNow"
+            style="@style/KodaButton"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            app:backgroundTint="#FF6B00"
+            android:stateListAnimator="@null"
+            android:text="@string/praetor_update_button"
+            android:layout_marginBottom="8dp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnUpdateSkip"
+            style="@style/KodaButton.Outline"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:stateListAnimator="@null"
+            android:enabled="false"
+            android:text="@string/praetor_update_skip" />
+
+    </LinearLayout>
+
+</LinearLayout>

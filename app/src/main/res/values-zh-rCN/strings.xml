@@ -184,6 +184,11 @@
     <string name="message_hint">详细描述问题...</string>
     <string name="create_and_open_chat">创建并打开聊天</string>
 
+    <string name="praetor_update_title">应用更新可用</string>
+    <string name="praetor_update_message">您的 KodaHosting 应用已过期。强烈建议进行安全和稳定性更新以继续使用。</string>
+    <string name="praetor_update_button">通过 Play 商店更新</string>
+    <string name="praetor_update_skip">跳过</string>
+    <string name="praetor_update_skip_timer">跳过 (%ds)</string>
     <string name="praetor_title">P.R.A.E.T.O.R.</string>
     <string name="praetor_subtitle">风险评估、执行与全面监管响应协议</string>
     <string name="praetor_action_fix">修复问题</string>
@@ -393,4 +398,9 @@
     <string name="error_invalid_characters">您的服务器名称只能包含小写字母 (a-z)、数字 (0-9) 和连字符 (-)。</string>
     <string name="error_length_invalid">服务器名称长度必须在 3 到 63 个字符之间。</string>
     <string name="loading_check_servername">正在检查服务器名称...</string>
+    <string name="server_banned_title">服务器被封禁</string>
+    <string name="server_banned_message">此服务器已被 KodaNetwork 封禁。</string>
+    <string name="server_banned_reason_label">原因：</string>
+    <string name="server_banned_reason_unknown">未知</string>
+    <string name="server_banned_download">下载备份</string>
 </resources>

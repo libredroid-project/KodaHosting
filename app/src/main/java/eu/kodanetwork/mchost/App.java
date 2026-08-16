@@ -48,9 +48,17 @@ public class App extends Application implements Application.ActivityLifecycleCal
                 // Tamper detected! The file was modified by root/ADB, invalidating the MAC.
                 eu.kodanetwork.mchost.security.AntiTamperSystem.executePermanentBan(context, "FILE_TAMPER_DETECTED");
             }
+            android.util.Log.e("KodaNetwork", "Security Warning: Falling back to unencrypted SharedPreferences (KeyStore error)", se);
+            if (Looper.myLooper() == Looper.getMainLooper()) {
+                android.widget.Toast.makeText(context, "Security Warning: Device does not support encrypted storage.", android.widget.Toast.LENGTH_LONG).show();
+            }
             cachedPrefs = context.getSharedPreferences("koda_settings_enc_fallback", Context.MODE_PRIVATE);
             return cachedPrefs;
         } catch (Exception e) {
+            android.util.Log.e("KodaNetwork", "Security Warning: Falling back to unencrypted SharedPreferences", e);
+            if (Looper.myLooper() == Looper.getMainLooper()) {
+                android.widget.Toast.makeText(context, "Security Warning: Device does not support encrypted storage.", android.widget.Toast.LENGTH_LONG).show();
+            }
             cachedPrefs = context.getSharedPreferences("koda_settings_enc_fallback", Context.MODE_PRIVATE);
             return cachedPrefs;
         }
@@ -131,6 +139,12 @@ public class App extends Application implements Application.ActivityLifecycleCal
         activeActivities++;
         eu.kodanetwork.mchost.service.KodaServerService.appIsForeground = true;
         if (activeActivities == 1) doResetAfkTimer();
+
+        // Apply Material 3 theme if enabled (before any view manipulation)
+        SharedPreferences m3Prefs = getPrefs(activity);
+        if (m3Prefs.getBoolean("dev_material3_enabled", false)) {
+            eu.kodanetwork.mchost.util.Material3ThemeHelper.applyM3Theme(activity);
+        }
 
         try {
             android.view.View root = ((android.view.ViewGroup) activity.findViewById(android.R.id.content)).getChildAt(0);

@@ -52,12 +52,15 @@ public class SupportTicketListActivity extends AppCompatActivity {
 
     private void loadTickets() {
         String uuid = eu.kodanetwork.mchost.App.getPrefs(this).getString("app_uuid", null);
+        String sessionToken = eu.kodanetwork.mchost.App.getPrefs(this).getString("koda_session_token", null);
         if (uuid == null) return;
 
         new Thread(() -> {
             try {
+                JSONObject rpcObj = new JSONObject();
+                rpcObj.put("p_reporter_uuid", uuid);
                 String response = SupportApi.makeSupabaseRequest(
-                        "rest/v1/support_tickets?reporter_uuid=eq." + uuid + "&order=created_at.desc", "GET", null);
+                        "rest/v1/rpc/rpc_get_tickets", "POST", rpcObj.toString(), sessionToken);
                 JSONArray arr = new JSONArray(response);
                 
                 List<JSONObject> newTickets = new ArrayList<>();

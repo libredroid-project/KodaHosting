@@ -1,0 +1,364 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/root_layout"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent" android:layout_height="match_parent"
+    android:orientation="vertical" android:background="?attr/colorSurface">
+
+    <!-- Header Container -->
+    <com.google.android.material.appbar.AppBarLayout 
+        android:id="@+id/top_bar_container"
+        android:layout_width="match_parent" 
+        android:layout_height="wrap_content"
+        app:elevation="0dp"
+        android:background="?attr/colorSurface">
+        
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/top_bar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            app:title="@string/new_server">
+            
+            <ImageButton 
+                android:id="@+id/btn_back"
+                android:layout_width="48dp" 
+                android:layout_height="48dp"
+                android:src="@android:drawable/ic_menu_revert"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                app:tint="?attr/colorOnSurface"
+                android:layout_gravity="start|center_vertical"/>
+                
+        </com.google.android.material.appbar.MaterialToolbar>
+    </com.google.android.material.appbar.AppBarLayout>
+    
+    <ScrollView android:id="@+id/main_scroll" android:layout_width="match_parent" android:layout_height="0dp"
+        android:layout_weight="1" android:scrollbars="none" android:clipToPadding="false" android:paddingBottom="24dp">
+        
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:orientation="vertical" android:padding="16dp">
+
+            <!-- IMPORT SECTION -->
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:orientation="horizontal" android:layout_marginBottom="16dp">
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_import"
+                    style="@style/Widget.Material3.Button.TonalButton"
+                    android:layout_width="0dp" android:layout_height="56dp"
+                    android:layout_weight="1"
+                    android:text="@string/import_folder"
+                    app:cornerRadius="12dp"
+                    android:layout_marginEnd="8dp"/>
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_import_zip"
+                    style="@style/Widget.Material3.Button.TonalButton"
+                    android:layout_width="0dp" android:layout_height="56dp"
+                    android:layout_weight="1"
+                    android:text="@string/import_zip"
+                    app:cornerRadius="12dp"/>
+            </LinearLayout>
+
+            <!-- GENERAL INFO CARD -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                app:cardBackgroundColor="?attr/colorSurfaceContainer"
+                app:cardElevation="0dp" app:cardCornerRadius="16dp" app:strokeWidth="0dp"
+                android:layout_marginBottom="16dp">
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:orientation="vertical" android:padding="16dp">
+                    
+                    <LinearLayout android:id="@+id/layout_name_section"
+                        android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:orientation="vertical">
+                        <com.google.android.material.textfield.TextInputLayout
+                            android:layout_width="match_parent" android:layout_height="wrap_content"
+                            android:hint="@string/server_name_label"
+                            style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                            android:layout_marginBottom="16dp">
+                            <com.google.android.material.textfield.TextInputEditText
+                                android:id="@+id/et_name"
+                                android:layout_width="match_parent" android:layout_height="wrap_content"
+                                android:inputType="text" android:singleLine="true"/>
+                        </com.google.android.material.textfield.TextInputLayout>
+                    </LinearLayout>
+
+                    <!-- ADDRESS PREVIEW -->
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:background="?attr/colorSurfaceContainerHighest"
+                        android:orientation="vertical" android:padding="12dp">
+                        <TextView android:id="@+id/tv_address_preview_label"
+                            android:layout_width="wrap_content" android:layout_height="wrap_content"
+                            android:text="@string/connect_address_label" android:textColor="?attr/colorOnSurfaceVariant"
+                            android:textAppearance="?attr/textAppearanceLabelSmall"/>
+                        <TextView android:id="@+id/tv_address_preview"
+                            android:layout_width="wrap_content" android:layout_height="wrap_content"
+                            android:text="yourserver.kodanetwork.eu"
+                            android:textColor="?attr/colorOnSurface" android:textAppearance="?attr/textAppearanceTitleMedium"
+                            android:layout_marginTop="4dp"/>
+                        <TextView android:id="@+id/tv_velocity_label"
+                            android:layout_width="wrap_content" android:layout_height="wrap_content"
+                            android:text="Velocity: kodanetwork.eu"
+                            android:textColor="?attr/colorOnSurfaceVariant" android:textAppearance="?attr/textAppearanceLabelSmall"
+                            android:layout_marginTop="2dp" android:layout_marginBottom="12dp"/>
+                            
+                        <!-- DOMAIN TOGGLE (preserving structure exactly for Java compat) -->
+                        <FrameLayout android:id="@+id/container_domain"
+                            android:layout_width="match_parent" android:layout_height="40dp"
+                            android:background="?attr/colorSurfaceContainerHigh" android:padding="4dp">
+                            <View android:id="@+id/pill_domain"
+                                android:layout_width="0dp" android:layout_height="match_parent"
+                                android:background="?attr/colorPrimary" />
+                            <LinearLayout android:layout_width="match_parent" android:layout_height="match_parent"
+                                android:orientation="horizontal">
+                                <FrameLayout android:id="@+id/wrapper_domain_kodanetwork"
+                                    android:layout_width="0dp" android:layout_height="match_parent"
+                                    android:layout_weight="1">
+                                    <TextView android:id="@+id/btn_domain_kodanetwork"
+                                        android:layout_width="match_parent" android:layout_height="match_parent"
+                                        android:text="kodanetwork.eu" android:gravity="center"
+                                        android:textColor="?attr/colorOnPrimary" />
+                                </FrameLayout>
+                                <FrameLayout android:id="@+id/wrapper_domain_kodaserv"
+                                    android:layout_width="0dp" android:layout_height="match_parent"
+                                    android:layout_weight="1">
+                                    <TextView android:id="@+id/btn_domain_kodaserv"
+                                        android:layout_width="match_parent" android:layout_height="match_parent"
+                                        android:text="kodaserv.eu" android:gravity="center"
+                                        android:textColor="?attr/colorOnSurfaceVariant" />
+                                </FrameLayout>
+                            </LinearLayout>
+                        </FrameLayout>
+                    </LinearLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- ENGINE CARD -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                app:cardBackgroundColor="?attr/colorSurfaceContainer"
+                app:cardElevation="0dp" app:cardCornerRadius="16dp" app:strokeWidth="0dp"
+                android:layout_marginBottom="16dp">
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:orientation="vertical" android:padding="16dp">
+                    
+                    <LinearLayout android:id="@+id/layout_type_section"
+                        android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:orientation="vertical">
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                            android:text="@string/server_type_label" android:textColor="?attr/colorOnSurfaceVariant"
+                            android:textAppearance="?attr/textAppearanceLabelMedium" android:layout_marginBottom="8dp"/>
+                        <NumberPicker android:id="@+id/np_server_type"
+                            android:layout_width="match_parent" android:layout_height="120dp"
+                            android:layout_marginBottom="16dp"/>
+                    </LinearLayout>
+
+                    <LinearLayout android:id="@+id/layout_version_section"
+                        android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:orientation="vertical">
+                        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                            android:orientation="horizontal" android:gravity="center_vertical" android:layout_marginBottom="8dp">
+                            <TextView android:layout_width="0dp" android:layout_height="wrap_content"
+                                android:layout_weight="1" android:text="@string/version_label"
+                                android:textColor="?attr/colorOnSurfaceVariant" android:textAppearance="?attr/textAppearanceLabelMedium"/>
+                            <TextView android:id="@+id/tv_version_loading"
+                                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                                android:text="..." android:textColor="?attr/colorOnSurfaceVariant"/>
+                        </LinearLayout>
+                        <LinearLayout android:id="@+id/layout_version_picker"
+                            android:layout_width="match_parent" android:layout_height="52dp"
+                            android:background="?attr/colorSurfaceContainerHighest"
+                            android:orientation="horizontal" android:gravity="center_vertical"
+                            android:paddingStart="16dp" android:paddingEnd="16dp"
+                            android:clickable="true" android:focusable="true">
+                            <TextView android:id="@+id/tv_version_selected"
+                                android:layout_width="0dp" android:layout_height="wrap_content"
+                                android:layout_weight="1" android:text="1.21.4"
+                                android:textColor="?attr/colorOnSurface" android:textAppearance="?attr/textAppearanceBodyLarge"/>
+                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                                android:text="▼" android:textColor="?attr/colorPrimary"/>
+                        </LinearLayout>
+                    </LinearLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- RAM CARD -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                app:cardBackgroundColor="?attr/colorSurfaceContainer"
+                app:cardElevation="0dp" app:cardCornerRadius="16dp" app:strokeWidth="0dp"
+                android:layout_marginBottom="16dp">
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:orientation="vertical" android:padding="16dp">
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:orientation="horizontal" android:gravity="center_vertical" android:layout_marginBottom="12dp">
+                        <TextView android:layout_width="0dp" android:layout_height="wrap_content"
+                            android:layout_weight="1" android:text="@string/ram_label"
+                            android:textColor="?attr/colorOnSurfaceVariant" android:textAppearance="?attr/textAppearanceLabelMedium"/>
+                        <TextView android:id="@+id/tv_ram_value"
+                            android:layout_width="wrap_content" android:layout_height="wrap_content"
+                            android:textColor="?attr/colorPrimary" android:textAppearance="?attr/textAppearanceTitleMedium"/>
+                    </LinearLayout>
+                    <SeekBar android:id="@+id/seek_ram"
+                        android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:layout_marginBottom="8dp"/>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- SETUP & AI CARD -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                app:cardBackgroundColor="?attr/colorSurfaceContainer"
+                app:cardElevation="0dp" app:cardCornerRadius="16dp" app:strokeWidth="0dp"
+                android:layout_marginBottom="24dp">
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:orientation="vertical" android:padding="16dp">
+                    
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:orientation="horizontal" android:gravity="center_vertical" android:layout_marginBottom="16dp">
+                        <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+                            android:layout_weight="1" android:orientation="vertical">
+                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                                android:text="@string/execution_mode_native" android:textColor="?attr/colorOnSurface"
+                                android:textAppearance="?attr/textAppearanceBodyLarge"/>
+                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                                android:text="@string/execution_mode_desc" android:textColor="?attr/colorOnSurfaceVariant"
+                                android:textAppearance="?attr/textAppearanceBodySmall"/>
+                        </LinearLayout>
+                        <com.google.android.material.switchmaterial.SwitchMaterial
+                            android:id="@+id/sw_use_native"
+                            android:layout_width="wrap_content" android:layout_height="wrap_content"
+                            android:checked="true"/>
+                    </LinearLayout>
+
+                    <LinearLayout android:id="@+id/layout_setup_section"
+                        android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:orientation="vertical" android:layout_marginBottom="16dp">
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                            android:text="@string/setup_design_label" android:textColor="?attr/colorOnSurfaceVariant"
+                            android:textAppearance="?attr/textAppearanceLabelMedium" android:layout_marginBottom="8dp"/>
+                        <RadioGroup android:id="@+id/rg_setup_type"
+                            android:layout_width="match_parent" android:layout_height="wrap_content"
+                            android:orientation="vertical">
+                            <RadioButton android:id="@+id/rb_setup_koda"
+                                android:layout_width="match_parent" android:layout_height="wrap_content"
+                                android:text="@string/setup_koda" android:checked="true"/>
+                            <RadioButton android:id="@+id/rb_setup_manual"
+                                android:layout_width="match_parent" android:layout_height="wrap_content"
+                                android:text="@string/setup_manual"/>
+                            <RadioButton android:id="@+id/rb_setup_ai"
+                                android:layout_width="match_parent" android:layout_height="wrap_content"
+                                android:text="@string/setup_ai" android:visibility="gone"/>
+                        </RadioGroup>
+                    </LinearLayout>
+                    
+                    <LinearLayout android:id="@+id/layout_theme_color"
+                        android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:orientation="vertical" android:layout_marginBottom="16dp">
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                            android:text="@string/theme_color_label" android:textColor="?attr/colorOnSurfaceVariant"
+                            android:textAppearance="?attr/textAppearanceLabelMedium" android:layout_marginBottom="8dp"/>
+                        <LinearLayout android:id="@+id/btn_color_picker"
+                            android:layout_width="match_parent" android:layout_height="56dp"
+                            android:orientation="horizontal" android:gravity="center_vertical"
+                            android:background="?attr/colorSurfaceContainerHighest" android:padding="16dp">
+                            <View android:id="@+id/color_preview"
+                                android:layout_width="24dp" android:layout_height="24dp"
+                                android:background="@drawable/color_preview_circle" android:layout_marginEnd="16dp"/>
+                            <TextView android:id="@+id/tv_color_hex"
+                                android:layout_width="0dp" android:layout_height="wrap_content"
+                                android:layout_weight="1" android:text="#FF6B00"
+                                android:textColor="?attr/colorOnSurface" android:textAppearance="?attr/textAppearanceBodyLarge"/>
+                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                                android:text="@string/tap_to_change" android:textColor="?attr/colorOnSurfaceVariant"
+                                android:textAppearance="?attr/textAppearanceBodySmall"/>
+                        </LinearLayout>
+                    </LinearLayout>
+
+                    <!-- AI CHAT SECTION -->
+                    <LinearLayout android:id="@+id/layout_ai_prompt"
+                        android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:orientation="vertical" android:visibility="gone">
+                        <RelativeLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginBottom="8dp">
+                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                                android:text="@string/ai_chat_label" android:textColor="?attr/colorOnSurfaceVariant"
+                                android:textAppearance="?attr/textAppearanceLabelMedium" android:layout_centerVertical="true"/>
+                            <ImageButton android:id="@+id/btn_ai_fullscreen"
+                                android:layout_width="32dp" android:layout_height="32dp"
+                                android:layout_alignParentEnd="true" android:layout_centerVertical="true"
+                                android:background="?attr/selectableItemBackgroundBorderless"
+                                android:src="@android:drawable/ic_menu_crop" app:tint="?attr/colorOnSurfaceVariant" />
+                        </RelativeLayout>
+                        <ScrollView android:id="@+id/sv_ai_chat"
+                            android:layout_width="match_parent" android:layout_height="200dp"
+                            android:background="?attr/colorSurfaceContainerHighest"
+                            android:padding="8dp" android:layout_marginBottom="12dp">
+                            <LinearLayout android:id="@+id/ll_ai_chat"
+                                android:layout_width="match_parent" android:layout_height="wrap_content"
+                                android:orientation="vertical" />
+                        </ScrollView>
+                        <LinearLayout android:layout_width="match_parent" android:layout_height="56dp"
+                            android:orientation="horizontal" android:gravity="center_vertical">
+                            <com.google.android.material.textfield.TextInputLayout
+                                android:layout_width="0dp" android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:hint="@string/ai_chat_hint"
+                                style="@style/Widget.Material3.TextInputLayout.OutlinedBox">
+                                <com.google.android.material.textfield.TextInputEditText
+                                    android:id="@+id/et_ai_prompt"
+                                    android:layout_width="match_parent" android:layout_height="wrap_content"
+                                    android:inputType="text" android:singleLine="true"/>
+                            </com.google.android.material.textfield.TextInputLayout>
+                            <com.google.android.material.button.MaterialButton
+                                android:id="@+id/btn_ai_send"
+                                android:layout_width="56dp" android:layout_height="56dp"
+                                android:layout_marginStart="8dp"
+                                app:icon="@android:drawable/ic_menu_send"
+                                app:cornerRadius="12dp"
+                                android:padding="0dp" android:insetTop="0dp" android:insetBottom="0dp"/>
+                        </LinearLayout>
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btn_ai_approve"
+                            android:layout_width="match_parent" android:layout_height="56dp"
+                            android:layout_marginTop="12dp"
+                            android:text="@string/ai_approve_btn"
+                            app:backgroundTint="#00E676"
+                            app:cornerRadius="12dp"
+                            android:visibility="gone"/>
+                        <TextView android:id="@+id/tv_ai_chat_hint" android:layout_width="match_parent" android:layout_height="wrap_content"
+                            android:text="@string/ai_chat_desc"
+                            android:textColor="?attr/colorOnSurfaceVariant" android:textAppearance="?attr/textAppearanceBodySmall"
+                            android:layout_marginTop="8dp" android:gravity="center_horizontal"/>
+                    </LinearLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_create"
+                android:layout_width="match_parent" android:layout_height="56dp"
+                android:text="@string/btn_create_server"
+                android:textAppearance="?attr/textAppearanceLabelLarge"
+                app:cornerRadius="28dp"
+                android:layout_marginBottom="16dp"/>
+        </LinearLayout>
+    </ScrollView>
+
+    <!-- LOADING OVERLAY -->
+    <FrameLayout android:id="@+id/layout_java_extract"
+        android:layout_width="match_parent" android:layout_height="match_parent"
+        android:background="#DD000000" android:elevation="10dp" android:visibility="gone">
+        <View android:id="@+id/java_extract_light_blob"
+            android:layout_width="300dp" android:layout_height="300dp"
+            android:layout_gravity="center" android:background="@drawable/bg_light_blob"/>
+        <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:orientation="vertical" android:layout_gravity="center" android:gravity="center">
+            <ProgressBar android:layout_width="56dp" android:layout_height="56dp" android:indeterminateTint="?attr/colorPrimary"/>
+            <TextView android:id="@+id/tv_extract_msg"
+                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="Extracting Java..." android:textColor="@android:color/white"
+                android:textSize="16sp" android:textStyle="bold" android:layout_marginTop="16dp"/>
+            <TextView android:id="@+id/java_extract_progress"
+                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="0%" android:textColor="#B0B0B0" android:textSize="12sp"
+                android:layout_marginTop="8dp"/>
+        </LinearLayout>
+    </FrameLayout>
+</LinearLayout>

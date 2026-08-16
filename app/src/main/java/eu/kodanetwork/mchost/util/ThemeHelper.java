@@ -69,11 +69,19 @@ public class ThemeHelper {
     }
 
     public static void apply(Activity activity) {
+        // M3 Theme delegation
+        if (Material3ThemeHelper.isM3Enabled(activity)) {
+            return;
+        }
         apply(activity, null);
     }
 
     public static void apply(android.app.Dialog dialog) {
         if (dialog == null || !dialog.isShowing()) return;
+        // M3 Theme delegation
+        if (Material3ThemeHelper.isM3Enabled(dialog.getContext())) {
+            return;
+        }
         main.postDelayed(() -> {
             try {
                 android.content.Context ctx = dialog.getContext();
@@ -100,6 +108,11 @@ public class ThemeHelper {
 
     public static void apply(Activity activity, String colorHex) {
         if (activity == null || activity.isFinishing()) return;
+
+        // M3 Theme delegation
+        if (Material3ThemeHelper.isM3Enabled(activity)) {
+            return;
+        }
 
         android.content.SharedPreferences prefs = eu.kodanetwork.mchost.App.getPrefs(activity);
         if (!prefs.getBoolean("animations_enabled", true)) {
@@ -182,48 +195,50 @@ public class ThemeHelper {
                 // 3. System UI
                 if (android.os.Build.VERSION.SDK_INT >= 21) {
                     boolean isCreateServer = activity instanceof eu.kodanetwork.mchost.ui.CreateServerActivity;
+                    boolean isSupportChat = activity instanceof eu.kodanetwork.mchost.ui.SupportChatActivity;
+
+                    androidx.core.view.WindowInsetsControllerCompat windowInsetsController =
+                            androidx.core.view.WindowCompat.getInsetsController(activity.getWindow(), activity.getWindow().getDecorView());
                     
                     if (isPraetorDesign) {
-                        activity.getWindow().addFlags(android.view.WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
-                        activity.getWindow().clearFlags(android.view.WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
                         activity.getWindow().setStatusBarColor(android.graphics.Color.TRANSPARENT);
                         activity.getWindow().setNavigationBarColor(android.graphics.Color.TRANSPARENT);
-                        if (android.os.Build.VERSION.SDK_INT >= 30) {
-                            activity.getWindow().setDecorFitsSystemWindows(false);
-                        } else {
-                            activity.getWindow().getDecorView().setSystemUiVisibility(
-                                View.SYSTEM_UI_FLAG_LAYOUT_STABLE |
-                                View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN |
-                                View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                            );
-                        }
+                        androidx.core.view.WindowCompat.setDecorFitsSystemWindows(activity.getWindow(), false);
                     } else if (isLiquidGlass) {
-                        activity.getWindow().addFlags(android.view.WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
                         activity.getWindow().setStatusBarColor(android.graphics.Color.TRANSPARENT);
                         activity.getWindow().setNavigationBarColor(android.graphics.Color.TRANSPARENT);
                         activity.getWindow().getDecorView().setBackgroundResource(R.drawable.bg_liquid_glass);
+                        if (!isSupportChat) {
+                            androidx.core.view.WindowCompat.setDecorFitsSystemWindows(activity.getWindow(), false);
+                        }
                     } else if (lightMode) {
                         activity.getWindow().setStatusBarColor(LIGHT_STATUS);
                         activity.getWindow().setNavigationBarColor(android.graphics.Color.TRANSPARENT);
                         if (android.os.Build.VERSION.SDK_INT >= 29) {
                             activity.getWindow().setNavigationBarContrastEnforced(false);
                         }
-                        if (android.os.Build.VERSION.SDK_INT >= 23) {
-                            activity.getWindow().getDecorView().setSystemUiVisibility(
-                                View.SYSTEM_UI_FLAG_LAYOUT_STABLE | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR | View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR);
+                        if (windowInsetsController != null) {
+                            windowInsetsController.setAppearanceLightStatusBars(true);
+                            windowInsetsController.setAppearanceLightNavigationBars(true);
+                        }
+                        if (!isSupportChat) {
+                            androidx.core.view.WindowCompat.setDecorFitsSystemWindows(activity.getWindow(), false);
                         }
                     } else {
                         boolean isSettings = activity instanceof eu.kodanetwork.mchost.ui.SettingsActivity;
-                        boolean isServerDetail = activity instanceof eu.kodanetwork.mchost.ui.ServerDetailActivity;
                         int darkBg = (isCreateServer || isSettings) ? 0xFF1B1613 : DARK_STATUS;
                         activity.getWindow().setStatusBarColor(darkBg);
                         activity.getWindow().setNavigationBarColor(android.graphics.Color.TRANSPARENT);
                         if (android.os.Build.VERSION.SDK_INT >= 29) {
                             activity.getWindow().setNavigationBarContrastEnforced(false);
                         }
-                        activity.getWindow().getDecorView().setSystemUiVisibility(
-                            View.SYSTEM_UI_FLAG_LAYOUT_STABLE | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                        );
+                        if (windowInsetsController != null) {
+                            windowInsetsController.setAppearanceLightStatusBars(false);
+                            windowInsetsController.setAppearanceLightNavigationBars(false);
+                        }
+                        if (!isSupportChat) {
+                            androidx.core.view.WindowCompat.setDecorFitsSystemWindows(activity.getWindow(), false);
+                        }
                     }
                 }
             } catch (Throwable t) {

@@ -148,6 +148,20 @@ public class FileManager {
     }
 
     /**
+     * Write Base64 content to a file. Creates parent directories if needed.
+     */
+    public boolean writeBase64File(String path, String base64) throws IOException {
+        if (!isPathSafe(path)) throw new SecurityException("Access denied: blocked path");
+        File file = new File(rootDir, path);
+        if (file.getParentFile() != null && !file.getParentFile().exists()) {
+            file.getParentFile().mkdirs();
+        }
+        byte[] decoded = java.util.Base64.getDecoder().decode(base64);
+        Files.write(file.toPath(), decoded);
+        return true;
+    }
+
+    /**
      * Delete a file or empty directory.
      */
     public void deleteFile(String path) throws IOException {

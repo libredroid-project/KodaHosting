@@ -44,6 +44,15 @@ Java_eu_kodanetwork_mchost_security_PraetorSecurity_getFrpcToken(
     return env->NewStringUTF(res.c_str());
 }
 
+extern "C" JNIEXPORT jstring JNICALL
+Java_eu_kodanetwork_mchost_security_PraetorSecurity_getBoreHost(
+        JNIEnv* env,
+        jclass /* clazz */) {
+    unsigned char obf[] = {0x73, 0x7e, 0x65, 0x79, 0x7a, 0x7e, 0x65, 0x7a, 0x73, 0x7b, 0x65, 0x73, 0x7c};
+    std::string res = deobfuscate(obf, sizeof(obf));
+    return env->NewStringUTF(res.c_str());
+}
+
 #include <sys/inotify.h>
 #include <unistd.h>
 #include <thread>

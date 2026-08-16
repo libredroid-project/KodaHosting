@@ -37,27 +37,27 @@
         android:networkSecurityConfig="@xml/network_security_config"
         android:largeHeap="true">
 
-        <activity android:name=".ui.SettingsActivity" android:screenOrientation="portrait"/>
+        <activity android:name=".ui.SettingsActivity" />
         <activity android:name=".ui.PraetorConfirmActivity" 
             android:theme="@style/Theme.KodaNetwork.Translucent"
-            android:screenOrientation="portrait"/>
+            />
         <activity android:name=".ui.PraetorMemoryLimitActivity" 
             android:theme="@style/Theme.KodaNetwork.Translucent"
-            android:screenOrientation="portrait"/>
-        <activity android:name=".ui.ScreensaverActivity" android:screenOrientation="portrait"/>
-        <activity android:name=".ui.CrashAlertActivity" android:screenOrientation="portrait"/>
+            />
+        <activity android:name=".ui.ScreensaverActivity" />
+        <activity android:name=".ui.CrashAlertActivity" />
 
         <activity
             android:name=".ui.design.HomePageActivity"
             android:exported="false"
-            android:screenOrientation="portrait"
+            
             android:windowSoftInputMode="adjustResize">
         </activity>
 
         <activity
             android:name=".ui.MainActivity"
             android:exported="true"
-            android:screenOrientation="portrait"
+            
             android:windowSoftInputMode="adjustResize">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
@@ -68,118 +68,118 @@
         <activity
             android:name=".ui.MaintenanceActivity"
             android:exported="false"
-            android:screenOrientation="portrait" />
+            />
             
         <activity
             android:name=".ui.BannedActivity"
             android:exported="false"
-            android:screenOrientation="portrait" />
+            />
 
         <activity
             android:name=".ui.ScaryBannedActivity"
             android:exported="false"
-            android:screenOrientation="portrait" />
+            />
 
         <activity
             android:name=".ui.DebugWarningActivity"
             android:exported="false"
-            android:screenOrientation="portrait" />
+            />
 
         <activity
             android:name=".ui.design.LoginPageActivity"
             android:exported="false"
-            android:screenOrientation="portrait"
+            
             android:windowSoftInputMode="adjustResize"/>
 
         <activity
             android:name=".ui.design.RegisterPageActivity"
             android:exported="false"
-            android:screenOrientation="portrait"
+            
             android:windowSoftInputMode="adjustResize"/>
 
         <activity
             android:name=".ui.design.DashboardPageActivity"
             android:exported="false"
-            android:screenOrientation="portrait"
+            
             android:windowSoftInputMode="adjustResize"/>
 
         <activity
             android:name=".ui.design.CompleteSetupPageActivity"
             android:exported="false"
-            android:screenOrientation="portrait"
+            
             android:windowSoftInputMode="adjustResize"/>
 
         <activity
             android:name=".ui.design.CheckoutPageActivity"
             android:exported="false"
-            android:screenOrientation="portrait"
+            
             android:windowSoftInputMode="adjustResize"/>
 
         <activity
             android:name=".ui.design.AdminPageActivity"
             android:exported="false"
-            android:screenOrientation="portrait"
+            
             android:windowSoftInputMode="adjustResize"/>
 
         <activity
             android:name=".ui.CreateServerActivity"
             android:exported="false"
-            android:screenOrientation="portrait"
+            
             android:windowSoftInputMode="adjustPan"/>
             
         <activity
             android:name=".ui.LicensesActivity"
             android:exported="false"
-            android:screenOrientation="portrait"
+            
             android:windowSoftInputMode="adjustPan"/>
 
         <activity
             android:name=".ui.CreateDatabaseActivity"
             android:exported="false"
-            android:screenOrientation="portrait"
+            
             android:windowSoftInputMode="adjustPan"/>
 
         <activity
             android:name=".ui.ServerDetailActivity"
             android:exported="false"
-            android:screenOrientation="portrait"
+            
             android:windowSoftInputMode="adjustResize"/>
 
         <activity
             android:name=".ui.DebugLogActivity"
             android:exported="false"
-            android:screenOrientation="portrait"
+            
             android:windowSoftInputMode="adjustResize"/>
 
         <activity android:name=".ui.FileEditorActivity"
             android:exported="false"
-            android:screenOrientation="portrait"
+            
             android:windowSoftInputMode="adjustResize"/>
 
         <activity android:name=".ui.BanEnforcementActivity"
             android:exported="false"
-            android:screenOrientation="portrait"
+            
             android:theme="@android:style/Theme.NoTitleBar.Fullscreen"/>
 
         <activity android:name=".ui.PraetorWarningActivity"
             android:exported="false"
             android:theme="@style/Theme.KodaNetwork.Translucent"
-            android:screenOrientation="portrait"/>
+            />
             
         <activity android:name=".ui.PraetorHibernateActivity"
             android:exported="false"
             android:theme="@style/Theme.KodaNetwork.Translucent"
-            android:screenOrientation="portrait"/>
+            />
 
         <activity android:name=".ui.LegacyModeWarningActivity"
             android:exported="false"
             android:theme="@style/Theme.KodaNetwork.Translucent"
-            android:screenOrientation="portrait"/>
+            />
 
         <activity android:name=".ui.BiometricAuthActivity"
             android:exported="false"
             android:theme="@android:style/Theme.Translucent.NoTitleBar"
-            android:screenOrientation="portrait"/>
+            />
 
 
         <service
@@ -205,29 +205,33 @@
         <activity android:name=".ui.PraetorAccountsActivity"
             android:exported="false"
             android:theme="@style/Theme.KodaNetwork"
-            android:screenOrientation="portrait"/>
+            />
 
         <activity android:name=".ui.CreateSupportTicketActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize"
-            android:screenOrientation="portrait"/>
+            />
             
         <activity android:name=".ui.SupportTicketListActivity"
             android:exported="false"
-            android:screenOrientation="portrait"/>
+            />
             
         <activity android:name=".ui.SupportChatActivity"
-            android:screenOrientation="portrait"
+            android:exported="false"
+            
             android:windowSoftInputMode="adjustResize"/>
             
         <activity android:name=".ui.UpdateServerActivity"
-            android:screenOrientation="portrait"/>
+            android:exported="false"
+            />
             
         <activity android:name=".ui.DeleteServerActivity"
-            android:screenOrientation="portrait"/>
+            android:exported="false"
+            />
             
         <activity android:name=".ui.CustomDnsWizardActivity"
-            android:screenOrientation="portrait"
+            android:exported="false"
+            
             android:windowSoftInputMode="adjustResize"/>
 
         <receiver

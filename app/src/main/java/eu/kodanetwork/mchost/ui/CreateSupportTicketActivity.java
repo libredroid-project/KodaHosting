@@ -55,6 +55,7 @@ public class CreateSupportTicketActivity extends AppCompatActivity {
 
     private void createTicket(String reference, String message) {
         String uuid = eu.kodanetwork.mchost.App.getPrefs(this).getString("app_uuid", null);
+        String sessionToken = eu.kodanetwork.mchost.App.getPrefs(this).getString("koda_session_token", null);
         if (uuid == null) {
             Toast.makeText(this, "Not logged in", Toast.LENGTH_SHORT).show();
             return;
@@ -64,54 +65,49 @@ public class CreateSupportTicketActivity extends AppCompatActivity {
             try {
                 if (ticketType.equals("SERVER_REPORT")) {
                     String checkResponse = SupportApi.makeSupabaseRequest(
-                            "rest/v1/koda_servers?host=eq." + reference + "&select=id", "GET", null);
+                            "rest/v1/koda_servers?host=eq." + reference + "&select=id", "GET", null, sessionToken);
                     if (checkResponse == null || checkResponse.equals("[]")) {
                         runOnUiThread(() -> Toast.makeText(this, "Error: Server does not exist on KodaNetwork", Toast.LENGTH_SHORT).show());
                         return;
                     }
                 }
 
-                // 1. Create the ticket
-                JSONObject ticketObj = new JSONObject();
-                ticketObj.put("reporter_uuid", uuid);
-                ticketObj.put("ticket_type", ticketType);
+                // 1. Create the ticket securely via RPC
+                JSONObject rpcObj = new JSONObject();
+                rpcObj.put("p_reporter_uuid", uuid);
+                rpcObj.put("p_ticket_type", ticketType);
                 if (ticketType.equals("SERVER_REPORT")) {
-                    ticketObj.put("reference_id", reference);
-                    ticketObj.put("title", "Server Report: " + reference);
+                    rpcObj.put("p_reference_id", reference);
+                    rpcObj.put("p_title", "Server Report: " + reference);
                 } else {
-                    ticketObj.put("title", reference);
+                    rpcObj.put("p_reference_id", "");
+                    rpcObj.put("p_title", reference);
                 }
 
                 String ticketResponseStr = SupportApi.makeSupabaseRequest(
-                        "rest/v1/support_tickets", "POST", ticketObj.toString());
+                        "rest/v1/rpc/rpc_create_ticket", "POST", rpcObj.toString(), sessionToken);
                 
-                // Fetch the created ticket ID (since we need it to create the first message)
-                // Wait, POST to rest/v1/support_tickets?select=id doesn't always return if header isn't set, but we can query it.
-                // Best way: append ?select=id or just query the latest ticket for this user.
-                String fetchResponse = SupportApi.makeSupabaseRequest(
-                        "rest/v1/support_tickets?reporter_uuid=eq." + uuid + "&order=created_at.desc&limit=1", "GET", null);
-                
-                JSONArray arr = new JSONArray(fetchResponse);
-                if (arr.length() > 0) {
-                    String ticketId = arr.getJSONObject(0).getString("id");
+                // PostgREST returns a JSON string, e.g. "uuid"
+                String ticketId = ticketResponseStr.replace("\"", "").trim();
 
+                if (ticketId != null && !ticketId.isEmpty() && !ticketId.startsWith("{")) {
                     // 2. Create the first message
                     JSONObject msgObj = new JSONObject();
-                    msgObj.put("ticket_id", ticketId);
-                    msgObj.put("sender_uuid", uuid);
-                    msgObj.put("message", message);
+                    msgObj.put("p_ticket_id", ticketId);
+                    msgObj.put("p_sender_uuid", uuid);
+                    msgObj.put("p_message", message);
 
                     SupportApi.makeSupabaseRequest(
-                            "rest/v1/support_ticket_messages", "POST", msgObj.toString());
+                            "rest/v1/rpc/rpc_create_ticket_message", "POST", msgObj.toString(), sessionToken);
 
                     // 2b. Append Diagnostic Telemetry
-                    String telemetry = getDiagnosticTelemetry(uuid);
+                    String telemetry = getDiagnosticTelemetry(uuid, sessionToken);
                     JSONObject sysObj = new JSONObject();
-                    sysObj.put("ticket_id", ticketId);
-                    sysObj.put("sender_uuid", "system");
-                    sysObj.put("message", telemetry);
+                    sysObj.put("p_ticket_id", ticketId);
+                    sysObj.put("p_sender_uuid", "system");
+                    sysObj.put("p_message", telemetry);
                     SupportApi.makeSupabaseRequest(
-                            "rest/v1/support_ticket_messages", "POST", sysObj.toString());
+                            "rest/v1/rpc/rpc_create_ticket_message", "POST", sysObj.toString(), sessionToken);
 
                     // 3. Open the chat activity
                     runOnUiThread(() -> {
@@ -133,7 +129,7 @@ public class CreateSupportTicketActivity extends AppCompatActivity {
         }).start();
     }
 
-    private String getDiagnosticTelemetry(String uuid) {
+    private String getDiagnosticTelemetry(String uuid, String sessionToken) {
         StringBuilder sb = new StringBuilder();
         sb.append("--- SYSTEM TELEMETRY ---\n");
         sb.append("Device: ").append(android.os.Build.MANUFACTURER).append(" ").append(android.os.Build.MODEL).append("\n");
@@ -182,7 +178,7 @@ public class CreateSupportTicketActivity extends AppCompatActivity {
 
         try {
             String serversResponse = SupportApi.makeSupabaseRequest(
-                "rest/v1/koda_servers?owner_app_uuid=eq." + uuid + "&select=host,server_version,is_banned", "GET", null);
+                "rest/v1/koda_servers?owner_app_uuid=eq." + uuid + "&select=host,server_version,is_banned", "GET", null, sessionToken);
             if (serversResponse != null && !serversResponse.equals("[]")) {
                 sb.append("\nOwned Servers:\n");
                 JSONArray arr = new JSONArray(serversResponse);

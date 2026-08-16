@@ -95,13 +95,17 @@ public class FilesRoute extends RouteHandler {
 
         try {
             JsonObject json = new JsonParser().parse(body).getAsJsonObject();
-            if (!json.has("content")) {
-                sendError(exchange, 400, "Missing 'content' parameter");
+            if (!json.has("content") && !json.has("base64")) {
+                sendError(exchange, 400, "Missing 'content' or 'base64' parameter");
                 return;
             }
 
-            String content = json.get("content").getAsString();
-            boolean success = plugin.getFileManager().writeFile(path, content);
+            boolean success;
+            if (json.has("base64")) {
+                success = plugin.getFileManager().writeBase64File(path, json.get("base64").getAsString());
+            } else {
+                success = plugin.getFileManager().writeFile(path, json.get("content").getAsString());
+            }
 
             if (success) {
                 JsonObject response = new JsonObject();

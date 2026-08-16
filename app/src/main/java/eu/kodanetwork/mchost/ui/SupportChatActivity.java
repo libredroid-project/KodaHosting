@@ -41,6 +41,7 @@ public class SupportChatActivity extends AppCompatActivity {
 
     private String ticketId;
     private String myUuid;
+    private String sessionToken;
     private RecyclerView rvChat;
     private ChatAdapter adapter;
     private List<JSONObject> messagesList = new ArrayList<>();
@@ -71,11 +72,25 @@ public class SupportChatActivity extends AppCompatActivity {
         ticketId = getIntent().getStringExtra("TICKET_ID");
         String title = getIntent().getStringExtra("TICKET_TITLE");
         myUuid = eu.kodanetwork.mchost.App.getPrefs(this).getString("app_uuid", null);
+        sessionToken = eu.kodanetwork.mchost.App.getPrefs(this).getString("koda_session_token", null);
 
         TextView tvTitle = findViewById(R.id.tv_chat_title);
         tvTitle.setText(title != null ? title : "Support Ticket");
 
         findViewById(R.id.btn_back).setOnClickListener(v -> finish());
+        
+        if (android.os.Build.VERSION.SDK_INT >= 21) {
+            View root = findViewById(android.R.id.content);
+            root.setOnApplyWindowInsetsListener((v, insets) -> {
+                int topInset = insets.getSystemWindowInsetTop();
+                int bottomInset = insets.getSystemWindowInsetBottom();
+                v.setPadding(0, topInset, 0, bottomInset);
+                if (rvChat != null && adapter != null && adapter.getItemCount() > 0) {
+                    rvChat.scrollToPosition(adapter.getItemCount() - 1);
+                }
+                return insets;
+            });
+        }
         
         // Export button placeholder
         findViewById(R.id.btn_export).setOnClickListener(v -> {
@@ -144,8 +159,11 @@ public class SupportChatActivity extends AppCompatActivity {
     private void loadMessages() {
         new Thread(() -> {
             try {
+                JSONObject rpcObj = new JSONObject();
+                rpcObj.put("p_ticket_id", ticketId);
+                rpcObj.put("p_reporter_uuid", myUuid);
                 String response = SupportApi.makeSupabaseRequest(
-                        "rest/v1/support_ticket_messages?ticket_id=eq." + ticketId + "&order=created_at.asc", "GET", null);
+                        "rest/v1/rpc/rpc_get_ticket_messages", "POST", rpcObj.toString(), sessionToken);
                 JSONArray arr = new JSONArray(response);
                 
                 List<JSONObject> newMsgs = new ArrayList<>();
@@ -163,6 +181,7 @@ public class SupportChatActivity extends AppCompatActivity {
                 });
             } catch (Exception e) {
                 e.printStackTrace();
+                runOnUiThread(() -> Toast.makeText(SupportChatActivity.this, "Error loading messages: " + e.getMessage(), Toast.LENGTH_LONG).show());
             }
         }).start();
     }
@@ -270,17 +289,22 @@ public class SupportChatActivity extends AppCompatActivity {
         new Thread(() -> {
             try {
                 JSONObject msgObj = new JSONObject();
-                msgObj.put("ticket_id", ticketId);
-                msgObj.put("sender_uuid", myUuid);
+                msgObj.put("p_ticket_id", ticketId);
+                msgObj.put("p_sender_uuid", myUuid);
                 if (!text.isEmpty()) {
-                    msgObj.put("message", text);
+                    msgObj.put("p_message", text);
+                } else {
+                    msgObj.put("p_message", "");
                 }
                 if (attachmentUrl != null) {
-                    msgObj.put("attachment_url", attachmentUrl);
+                    // Note: rpc_create_ticket_message doesn't currently support attachment_url directly
+                    // It was built for (ticket_id, sender_uuid, message). 
+                    // I will append the url to the message if needed.
+                    msgObj.put("p_message", text.isEmpty() ? "Attachment: " + attachmentUrl : text + "\nAttachment: " + attachmentUrl);
                 }
 
                 SupportApi.makeSupabaseRequest(
-                        "rest/v1/support_ticket_messages", "POST", msgObj.toString());
+                        "rest/v1/rpc/rpc_create_ticket_message", "POST", msgObj.toString(), sessionToken);
 
                 runOnUiThread(() -> {
                     etMessage.setText("");
@@ -291,6 +315,7 @@ public class SupportChatActivity extends AppCompatActivity {
                 });
             } catch (Exception e) {
                 e.printStackTrace();
+                runOnUiThread(() -> Toast.makeText(SupportChatActivity.this, "Error sending message: " + e.getMessage(), Toast.LENGTH_LONG).show());
             }
         }).start();
     }

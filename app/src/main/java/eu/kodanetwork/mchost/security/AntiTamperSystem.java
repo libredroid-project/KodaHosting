@@ -214,7 +214,7 @@ public class AntiTamperSystem {
                         patchConn.getResponseCode();
 
                         // 3. Try to DELETE the row
-                        java.net.URL url = new java.net.URL("https://scsezpfrrmpyuapblbxk.supabase.co/rest/v1/koda_servers?host=eq.deleted_" + server.getSubdomain());
+                        java.net.URL url = new java.net.URL(PraetorSecurity.getSupabaseUrl() + "/rest/v1/koda_servers?host=eq.deleted_" + server.getSubdomain());
                         java.net.HttpURLConnection conn = (java.net.HttpURLConnection) url.openConnection();
                         conn.setRequestMethod("DELETE");
                         conn.setRequestProperty("apikey", anonKey);

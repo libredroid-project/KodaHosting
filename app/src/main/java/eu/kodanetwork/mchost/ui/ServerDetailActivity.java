@@ -175,12 +175,19 @@ public class ServerDetailActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        if (eu.kodanetwork.mchost.util.Material3ThemeHelper.isM3Enabled(this)) {
+            setTheme(R.style.Theme_KodaNetwork_Material3);
+        }
         super.onCreate(savedInstanceState);
         
         // Prevent screenshots & screen recording
         // Screen protection removed
 
-        setContentView(R.layout.activity_server_detail);
+        if (eu.kodanetwork.mchost.util.Material3ThemeHelper.isM3Enabled(this)) {
+            setContentView(R.layout.activity_server_detail_m3);
+        } else {
+            setContentView(R.layout.activity_server_detail);
+        }
         
         eu.kodanetwork.mchost.util.ThemeHelper.apply(this);
 
