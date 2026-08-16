@@ -14,7 +14,7 @@
         android:text="@string/support_tickets_title"
         android:textColor="#FF8C00"
         android:textSize="18sp"
-        android:fontFamily="sans-serif-black"
+        android:fontFamily="@font/font_koda"
         android:letterSpacing="0.05"
         android:layout_gravity="center_horizontal"
         android:layout_marginBottom="16dp"/>
@@ -25,7 +25,7 @@
         android:text="@string/how_can_we_help"
         android:textColor="#AAAAAA"
         android:textSize="14sp"
-        android:fontFamily="sans-serif"
+        android:fontFamily="@font/font_koda"
         android:textAlignment="center"
         android:layout_marginBottom="24dp"/>
 
@@ -48,7 +48,7 @@
             android:text="@string/not_logged_in"
             android:textColor="#FF6B00"
             android:textSize="14sp"
-            android:fontFamily="sans-serif-medium"
+            android:fontFamily="@font/font_koda"
             android:layout_marginBottom="8dp"/>
 
         <TextView
@@ -75,7 +75,7 @@
             android:text="@string/report_bug"
             android:textColor="#FFFFFF"
             android:textSize="16sp"
-            android:fontFamily="sans-serif-medium"
+            android:fontFamily="@font/font_koda"
             app:backgroundTint="#241E1A"
             app:strokeColor="#FF6B00"
             app:strokeWidth="1dp"
@@ -90,7 +90,7 @@
             android:text="@string/report_server"
             android:textColor="#FFFFFF"
             android:textSize="16sp"
-            android:fontFamily="sans-serif-medium"
+            android:fontFamily="@font/font_koda"
             app:backgroundTint="#241E1A"
             app:strokeColor="#FF6B00"
             app:strokeWidth="1dp"
@@ -105,7 +105,7 @@
             android:text="@string/support_tickets"
             android:textColor="#FFFFFF"
             android:textSize="16sp"
-            android:fontFamily="sans-serif-medium"
+            android:fontFamily="@font/font_koda"
             app:backgroundTint="#16110D"
             app:strokeColor="#444444"
             app:strokeWidth="1dp"

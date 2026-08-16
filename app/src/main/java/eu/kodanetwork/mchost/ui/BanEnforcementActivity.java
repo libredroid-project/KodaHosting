@@ -37,7 +37,8 @@ public class BanEnforcementActivity extends Activity {
         TextView header = new TextView(this);
         header.setText("=== P.R.A.E.T.O.R ENFORCEMENT ACTION ===");
         header.setTextColor(0xFFFF3333); // Scary Red
-        header.setTypeface(Typeface.MONOSPACE, Typeface.BOLD);
+        Typeface kodaMonoBold = androidx.core.content.res.ResourcesCompat.getFont(this, R.font.jetbrains_mono_bold);
+        header.setTypeface(kodaMonoBold != null ? kodaMonoBold : Typeface.MONOSPACE, Typeface.BOLD);
         header.setTextSize(20);
         header.setGravity(android.view.Gravity.CENTER);
         header.setLetterSpacing(0.2f);
@@ -62,7 +63,8 @@ public class BanEnforcementActivity extends Activity {
         TextView msg = new TextView(this);
         msg.setText("Your access to KodaSMP has been terminated.\nAll assets have been seized.\n\n[ DISCONNECTING... ]");
         msg.setTextColor(0xFFCCCCCC);
-        msg.setTypeface(Typeface.MONOSPACE);
+        Typeface kodaMono = androidx.core.content.res.ResourcesCompat.getFont(this, R.font.font_koda_mono);
+        msg.setTypeface(kodaMono != null ? kodaMono : Typeface.MONOSPACE);
         msg.setTextSize(14);
         msg.setGravity(android.view.Gravity.CENTER);
         root.addView(msg);
@@ -94,14 +96,16 @@ public class BanEnforcementActivity extends Activity {
         TextView k = new TextView(this);
         k.setText(key + ": ");
         k.setTextColor(0xFF555555);
-        k.setTypeface(Typeface.MONOSPACE);
+        Typeface kodaMono = androidx.core.content.res.ResourcesCompat.getFont(this, R.font.font_koda_mono);
+        k.setTypeface(kodaMono != null ? kodaMono : Typeface.MONOSPACE);
         k.setTextSize(12);
         l.addView(k);
         
         TextView v = new TextView(this);
         v.setText(val);
         v.setTextColor(valCol);
-        v.setTypeface(Typeface.MONOSPACE, Typeface.BOLD);
+        Typeface kodaMonoBold = androidx.core.content.res.ResourcesCompat.getFont(this, R.font.jetbrains_mono_bold);
+        v.setTypeface(kodaMonoBold != null ? kodaMonoBold : Typeface.MONOSPACE, Typeface.BOLD);
         v.setTextSize(12);
         l.addView(v);
         

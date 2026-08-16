@@ -1,6 +1,6 @@
 Privacy Policy
 
-Last Updated: July 2026
+Last Updated: August 2026
 
 1. Introduction & Data Controller
 
@@ -11,63 +11,110 @@ Karol Brzostowski
 Deutschland Fixberg 17, 33106 Paderborn-Wewer
 Email: support@host.kodanetwork.eu
 
+Note on Legal Capacity: The developer of KodaHosting is a minor under German law (§ 106 BGB, beschränkte Geschäftsfähigkeit). Legal responsibility for the operation of this service, including data protection matters, is jointly held by the legal guardians. Correspondence regarding data protection, including requests under the GDPR, can be addressed to the email above. The legal guardians can be reached via the same address.
+
 2. Information We Collect & Process
 
 KodaHosting processes certain data to function correctly:
 
-- Account Information: When you register or log in, we securely process your email address and authentication details to manage your personal KodaHosting account. Authentication is handled securely by our partner, Supabase.
+- Account Information: When you register or log in, we securely process your email address and authentication details to manage your personal KodaHosting account. Authentication is handled securely by our partner, Supabase. We do not process your password directly. Supabase handles password storage and verification using industry-standard hashing algorithms.
 
-- Web Dashboard & Remote Control: When using the Web Dashboard, we process your authentication tokens and proxy server commands securely via our API to allow remote management of your Android-hosted servers.
+- Web Dashboard & Remote Control: When using the Web Dashboard, we process your authentication tokens and proxy server commands securely via our API to allow remote management of your Android-hosted servers. This includes server start, stop, restart, hibernate, wipe, and delete commands, as well as property changes (RAM, MOTD, gamemode, difficulty, max players, PvP, whitelist) and console commands.
 
-- Local Data: Your Minecraft server files, worlds, plugins, and configurations are stored purely locally on your device.
+- Local Data: Your Minecraft server files, worlds, plugins, and configurations are stored purely locally on your device. We never access, transmit, or store this data on our servers. The developer cannot access, view, or recover your server files under any circumstances.
 
-- Biometric Data: If you enable Biometric Security in the app settings, your device's fingerprint or face scan is used. This data never leaves your device and is processed securely by Android's local biometric system.
+- Biometric Data: If you enable Biometric Security in the app settings, your device's fingerprint or face scan is used. This data never leaves your device and is processed securely by Android's local biometric system. We have no access to biometric data and cannot store or transmit it.
 
-- Device Information: We check your device architecture (e.g., ARM64) and Android version locally to download the correct Java runtime environments and binary files.
+- Device Information: We check your device architecture (e.g., ARM64) and Android version locally to download the correct Java runtime environments and binary files. This information is not transmitted to us.
 
-- IP Privacy: Your personal home IP address is never leaked. All multiplayer traffic is routed through our central VPS infrastructure. Players connecting to your server will only ever see the IP address of our secure proxy.
+- IP Privacy: Your personal home IP address is never leaked. All multiplayer traffic is routed through our central VPS infrastructure. Players connecting to your server will only ever see the IP address of our secure proxy. We do not log player IP addresses beyond what is technically necessary for the operation of the proxy tunnel.
 
-- AI Server Builder: If you use the AI Server Builder, your text prompts are sent to the Google Gemini API for processing to generate server configurations. Do not submit sensitive personal information in these prompts. Data transferred outside the European Economic Area (EEA) to Google LLC is safeguarded under the EU-U.S. Data Privacy Framework (DPF) and Standard Contractual Clauses.
+- AI Server Builder: If you use the AI Server Builder, your text prompts are sent to the Google Gemini API for processing to generate server configurations. Do not submit sensitive personal information in these prompts. Data transferred outside the European Economic Area (EEA) to Google LLC is safeguarded under the EU-U.S. Data Privacy Framework (DPF) and Standard Contractual Clauses. We do not store your prompts or the generated configurations on our servers.
 
-3. Third-Party Services
+- Voluntary Donations: If you choose to support development via Ko-fi, you will be redirected to ko-fi.com, which processes the donation independently. Ko-fi may collect your name, email, and payment information. We do not process or store your payment data. Ko-fi's privacy policy applies to donations. Donations are voluntary gifts and do not create a customer relationship with us.
+
+3. Legal Basis for Processing (Art. 6 GDPR)
+
+We process your personal data on the following legal bases:
+
+- Article 6(1)(b) GDPR: For the performance of a contract (account creation, server hosting).
+- Article 6(1)(f) GDPR: Legitimate interests in operating and securing the Service, preventing abuse, and maintaining infrastructure.
+- Article 6(1)(a) GDPR: Your consent, where applicable (e.g., biometric authentication, AI Server Builder prompts).
+
+You may withdraw consent at any time without affecting the lawfulness of processing based on consent before its withdrawal.
+
+4. Third-Party Services
 
 The App utilizes certain third-party services that may collect information used to identify you or provide core functionalities:
 
 - Google Play Services: For app distribution, crash reporting, and standard analytics.
-
-- Google Play Billing: Used to process your one-time purchase of the KodaHosting app securely.
-
+- Supabase: For authentication and real-time database functionality (server management state). Supabase stores your email address and authentication token in encrypted form.
 - Modrinth API / Spigot: To search and download server plugins directly within the app.
-
 - GitHub Releases: Used to download essential server binaries like Java and secure tunnel clients.
-
 - Bore / FRP (Fast Reverse Proxy): Used exclusively to create the secure network tunnels between your device and our VPS infrastructure.
+- Ko-fi: Used for voluntary financial support of the developer. Ko-fi is an external service; visiting their site or making a donation is subject to their terms and privacy policy. Donations are voluntary gifts and do not unlock any features.
 
-4. Data Security
+Each third-party service is a separate data controller for the data it processes. We recommend reviewing their respective privacy policies.
+
+5. Data Security
 
 We value your trust in using our App. Since the core functionality is local server hosting, your personal server data remains entirely on your device. Any data transmitted to APIs (like plugin search queries) is sent over secure, encrypted connections (HTTPS).
 
-5. Your GDPR Rights (User Rights)
+However, no method of transmission over the Internet or method of electronic storage is 100% secure. While we strive to use commercially acceptable means to protect your personal data, we cannot guarantee absolute security. The Service is a hobby project maintained by a single developer and does not provide the security guarantees of a commercial enterprise-grade service.
+
+6. Data Retention
+
+We retain your account information (email address and authentication data) for as long as your account is active. Server management metadata (server names, configurations, status) is stored in the Supabase database and is deleted when you delete the corresponding server or your account.
+
+Upon account deletion, all associated data is permanently removed from our systems within 30 days, with the exception of data that we are legally required to retain or that is stored in backup systems (which will be deleted according to the backup retention cycle).
+
+7. Your GDPR Rights (User Rights)
 
 Under the General Data Protection Regulation (GDPR) and applicable privacy laws, you have the following rights:
 
-- Right to Access: You can request a copy of the personal data we hold about you.
+- Right to Access (Art. 15 GDPR): You can request a copy of the personal data we hold about you.
+- Right to Rectification (Art. 16 GDPR): You may update or correct your account information.
+- Right to Erasure (Art. 17 GDPR): You can request the permanent deletion of your account and associated email address at any time.
+- Right to Restriction of Processing (Art. 18 GDPR): You may request that we restrict the processing of your personal data under certain conditions.
+- Right to Data Portability (Art. 20 GDPR): You can request a machine-readable copy of your personal data.
+- Right to Object (Art. 21 GDPR): You may object to the processing of your personal data based on legitimate interests.
+- Right to Withdraw Consent (Art. 7(3) GDPR): You may withdraw any consent you have given at any time.
 
-- Right to Erasure (Right to be Forgotten): You can request the permanent deletion of your account and associated email address at any time.
+To exercise these rights, please contact us at support@host.kodanetwork.eu. If you are under 16, your request must be submitted by or with the consent of your legal guardian.
 
-- Right to Rectification: You may update or correct your account information.
+8. Children's Privacy
 
-To exercise these rights, please contact us via our support channels.
+The App is intended for general use. Under Article 8 of the GDPR as implemented in Germany, users under the age of 16 require the consent of their legal guardian to create an account and use services that process personal data.
 
-6. Children's Privacy
+If you are under 16, please ask your legal guardian to review this Privacy Policy and to consent to your use of KodaHosting on your behalf before you create an account.
 
-Our services are not directed to individuals under the age of 13 (or 16 in certain EU jurisdictions). We do not knowingly collect personal data from children. If we become aware that a child has provided us with personal data, we will take steps to delete such information.
+If we become aware that we have collected personal data from a child under 16 without verifiable parental consent, we will take steps to delete such information as soon as possible.
 
-7. Changes to This Privacy Policy
+9. International Data Transfers
 
-We may update our Privacy Policy from time to time. We will notify you of any changes by posting the new Privacy Policy on this page. You are advised to review this Privacy Policy periodically for any changes.
+Your personal data may be transferred to and processed in countries outside the European Economic Area (EEA), in particular:
 
-8. Contact Us
+- United States: For services like Supabase, Google, GitHub, and Ko-fi.
+- Other countries: As required by the third-party services listed in Section 4.
 
-If you have any questions or suggestions about our Privacy Policy, do not hesitate to contact us at:
+Such transfers are made only to recipients that provide an adequate level of protection as required by the GDPR, through Standard Contractual Clauses (SCCs), the EU-U.S. Data Privacy Framework (DPF), or other lawful transfer mechanisms.
+
+10. Changes to This Privacy Policy
+
+We may update our Privacy Policy from time to time. We will notify you of any material changes by posting the new Privacy Policy on this page and, where appropriate, via the app. You are advised to review this Privacy Policy periodically for any changes. Continued use of the Service after changes constitutes acceptance of the updated policy.
+
+11. Right to Lodge a Complaint
+
+You have the right to lodge a complaint with a supervisory authority, in particular in the EU member state of your habitual residence, place of work, or place of the alleged infringement, if you believe that the processing of your personal data infringes the GDPR.
+
+The competent supervisory authority for Germany is:
+Landesbeauftragte für Datenschutz und Informationsfreiheit Nordrhein-Westfalen
+Kavalleriestraße 2-4, 40213 Düsseldorf
+https://www.ldi.nrw.de
+
+12. Contact Us
+
+If you have any questions or suggestions about our Privacy Policy, or if you wish to exercise your data protection rights, please contact us at:
 Email: support@host.kodanetwork.eu
+
+For matters concerning the developer's status as a minor, the legal guardians can be reached via the same email address.

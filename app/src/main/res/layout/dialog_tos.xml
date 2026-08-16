@@ -7,14 +7,14 @@
     android:background="#0A0A0F"
     android:padding="24dp">
 
-    <!-- Title: Terms of Service -->
+    <!-- Title: Terms of Service, Privacy Policy & Impressum -->
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="TERMS OF SERVICE"
+        android:text="LEGAL AGREEMENT"
         android:textColor="#FFFFFF"
         android:textSize="24sp"
-        android:fontFamily="sans-serif-medium"
+        android:fontFamily="@font/font_koda"
         android:layout_marginBottom="16dp"/>
 
     <ScrollView

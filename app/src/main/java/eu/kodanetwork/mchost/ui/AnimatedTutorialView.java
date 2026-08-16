@@ -47,7 +47,8 @@ public class AnimatedTutorialView extends View {
         paint = new Paint(Paint.ANTI_ALIAS_FLAG);
         textPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         textPaint.setTextSize(getResources().getDisplayMetrics().density * 11);
-        textPaint.setTypeface(android.graphics.Typeface.create("sans-serif-medium", android.graphics.Typeface.NORMAL));
+        android.graphics.Typeface koda = androidx.core.content.res.ResourcesCompat.getFont(getContext(), R.font.font_koda);
+        textPaint.setTypeface(koda != null ? koda : android.graphics.Typeface.create("sans-serif-medium", android.graphics.Typeface.NORMAL));
 
         // Looping animator for step timeline
         animator = ValueAnimator.ofFloat(0f, 1f);

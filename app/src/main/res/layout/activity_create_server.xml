@@ -23,7 +23,7 @@
             <TextView android:layout_width="0dp" android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="@string/new_server" android:textColor="#F0F0F0"
-                android:textSize="18sp" android:fontFamily="sans-serif-medium"
+                android:textSize="18sp" android:fontFamily="@font/font_koda"
                 android:textStyle="bold" android:layout_marginStart="4dp"/>
         </LinearLayout>
     </LinearLayout>
@@ -47,7 +47,7 @@
                     android:text="@string/import_folder"
                     android:backgroundTint="#1A1A24"
                     android:textColor="#8A8A9A"
-                    android:fontFamily="sans-serif-medium"
+                    android:fontFamily="@font/font_koda"
                     android:textSize="13sp"
                     app:cornerRadius="12dp"
                     app:strokeColor="#2A2A35"
@@ -61,7 +61,7 @@
                     android:text="@string/import_zip"
                     android:backgroundTint="#1A1A24"
                     android:textColor="#8A8A9A"
-                    android:fontFamily="sans-serif-medium"
+                    android:fontFamily="@font/font_koda"
                     android:textSize="13sp"
                     app:cornerRadius="12dp"
                     app:strokeColor="#2A2A35"
@@ -77,13 +77,13 @@
                 android:orientation="vertical">
                 <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
                     android:text="@string/server_name_label" android:textColor="#F0F0F0"
-                    android:textSize="11sp" android:fontFamily="sans-serif-medium"
+                    android:textSize="11sp" android:fontFamily="@font/font_koda"
                     android:letterSpacing="0.1" android:layout_marginBottom="8dp"/>
                 <EditText android:id="@+id/et_name"
                     android:layout_width="match_parent" android:layout_height="52dp"
                     android:background="@drawable/input_field"
                     android:textColor="#F0F0F0" android:textSize="15sp"
-                    android:fontFamily="sans-serif"
+                    android:fontFamily="@font/font_koda"
                     android:hint="@string/server_name_hint"
                     android:textColorHint="#3A3A48"
                     android:paddingStart="16dp" android:paddingEnd="16dp"
@@ -100,19 +100,19 @@
                     <TextView android:id="@+id/tv_address_preview_label"
                         android:layout_width="wrap_content" android:layout_height="wrap_content"
                         android:text="@string/connect_address_label" android:textColor="#8A8A9A"
-                        android:textSize="10sp" android:fontFamily="sans-serif-medium"
+                        android:textSize="10sp" android:fontFamily="@font/font_koda"
                         android:letterSpacing="0.1"/>
                     <TextView android:id="@+id/tv_address_preview"
                         android:layout_width="wrap_content" android:layout_height="wrap_content"
                         android:text="yourserver.kodanetwork.eu"
                         android:textColor="#F0F0F0" android:textSize="15sp"
-                        android:fontFamily="sans-serif-medium" android:textStyle="bold"
+                        android:fontFamily="@font/font_koda" android:textStyle="bold"
                         android:layout_marginTop="6dp"/>
                     <TextView android:id="@+id/tv_velocity_label"
                         android:layout_width="wrap_content" android:layout_height="wrap_content"
                         android:text="Velocity: kodanetwork.eu"
                         android:textColor="#555566" android:textSize="10sp"
-                        android:fontFamily="sans-serif" android:layout_marginTop="4dp"
+                        android:fontFamily="@font/font_koda" android:layout_marginTop="4dp"
                         android:layout_marginBottom="12dp"/>
                     <FrameLayout android:id="@+id/container_domain"
                         android:layout_width="match_parent" android:layout_height="40dp"
@@ -134,7 +134,7 @@
                                     android:text="kodanetwork.eu"
                                     android:gravity="center" android:textSize="11sp"
                                     android:maxLines="1" android:ellipsize="end"
-                                    android:textColor="#FFFFFF" android:fontFamily="sans-serif-medium" />
+                                    android:textColor="#FFFFFF" android:fontFamily="@font/font_koda" />
                             </FrameLayout>
                             <FrameLayout android:id="@+id/wrapper_domain_kodaserv"
                                 android:layout_width="0dp" android:layout_height="match_parent"
@@ -144,7 +144,7 @@
                                     android:text="kodaserv.eu"
                                     android:gravity="center" android:textSize="11sp"
                                     android:maxLines="1" android:ellipsize="end"
-                                    android:textColor="#888899" android:fontFamily="sans-serif-medium" />
+                                    android:textColor="#888899" android:fontFamily="@font/font_koda" />
                                 <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
                                     android:text="NEW" android:textSize="8sp" android:textColor="#FFFFFF"
                                     android:background="@drawable/badge_new_bg"
@@ -152,7 +152,7 @@
                                     android:paddingTop="2dp" android:paddingBottom="2dp"
                                     android:layout_gravity="top|end"
                                     android:layout_marginTop="2dp" android:layout_marginEnd="6dp"
-                                    android:fontFamily="sans-serif-bold"/>
+                                    android:fontFamily="@font/font_koda"/>
                             </FrameLayout>
                         </LinearLayout>
                     </FrameLayout>
@@ -164,7 +164,7 @@
                 android:orientation="vertical">
             <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
                     android:text="@string/server_type_label" android:textColor="#F0F0F0"
-                    android:textSize="11sp" android:fontFamily="sans-serif-medium"
+                    android:textSize="11sp" android:fontFamily="@font/font_koda"
                     android:letterSpacing="0.1" android:layout_marginBottom="10dp"/>
                 <NumberPicker android:id="@+id/np_server_type"
                     android:layout_width="match_parent" android:layout_height="120dp"
@@ -182,12 +182,12 @@
                     <TextView android:layout_width="0dp" android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:text="@string/version_label" android:textColor="#F0F0F0"
-                        android:textSize="11sp" android:fontFamily="sans-serif-medium"
+                        android:textSize="11sp" android:fontFamily="@font/font_koda"
                         android:letterSpacing="0.1"/>
                     <TextView android:id="@+id/tv_version_loading"
                         android:layout_width="wrap_content" android:layout_height="wrap_content"
                         android:text="..." android:textColor="#555566"
-                        android:textSize="11sp" android:fontFamily="sans-serif"/>
+                        android:textSize="11sp" android:fontFamily="@font/font_koda"/>
                 </LinearLayout>
                 <LinearLayout android:id="@+id/layout_version_picker"
                     android:layout_width="match_parent" android:layout_height="52dp"
@@ -201,7 +201,7 @@
                         android:layout_width="0dp" android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:text="1.21.4" android:textColor="#F0F0F0"
-                        android:textSize="15sp" android:fontFamily="sans-serif-medium"/>
+                        android:textSize="15sp" android:fontFamily="@font/font_koda"/>
                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
                         android:text="▼" android:textColor="#FF6B00"
                         android:textSize="14sp"/>
@@ -215,12 +215,12 @@
                 <TextView android:layout_width="0dp" android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:text="@string/ram_label" android:textColor="#F0F0F0"
-                    android:textSize="11sp" android:fontFamily="sans-serif-medium"
+                    android:textSize="11sp" android:fontFamily="@font/font_koda"
                     android:letterSpacing="0.1"/>
                 <TextView android:id="@+id/tv_ram_value"
                     android:layout_width="wrap_content" android:layout_height="wrap_content"
                     android:textColor="#F0F0F0" android:textSize="16sp"
-                    android:fontFamily="sans-serif-medium" android:textStyle="bold"/>
+                    android:fontFamily="@font/font_koda" android:textStyle="bold"/>
             </LinearLayout>
             <SeekBar android:id="@+id/seek_ram"
                 android:layout_width="match_parent" android:layout_height="wrap_content"
@@ -232,10 +232,10 @@
                 <TextView android:layout_width="0dp" android:layout_height="wrap_content"
                     android:layout_weight="1" android:text="512MB"
                     android:textColor="#555566" android:textSize="10sp"
-                    android:fontFamily="sans-serif"/>
+                    android:fontFamily="@font/font_koda"/>
                 <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
                     android:text="8GB" android:textColor="#555566"
-                    android:textSize="10sp" android:fontFamily="sans-serif"/>
+                    android:textSize="10sp" android:fontFamily="@font/font_koda"/>
             </LinearLayout>
 
 
@@ -250,12 +250,12 @@
                     android:layout_weight="1" android:orientation="vertical">
                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
                         android:text="@string/execution_mode_native" android:textColor="#F0F0F0"
-                        android:textSize="14sp" android:fontFamily="sans-serif-medium"
+                        android:textSize="14sp" android:fontFamily="@font/font_koda"
                         android:textStyle="bold"/>
                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
                         android:text="@string/execution_mode_desc"
                         android:textColor="#8A8A9A" android:textSize="12sp"
-                        android:fontFamily="sans-serif"
+                        android:fontFamily="@font/font_koda"
                         android:layout_marginTop="3dp"/>
                 </LinearLayout>
                 <com.google.android.material.switchmaterial.SwitchMaterial
@@ -270,7 +270,7 @@
                 android:orientation="vertical">
                 <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
                     android:text="@string/setup_design_label" android:textColor="#F0F0F0"
-                    android:textSize="11sp" android:fontFamily="sans-serif-medium"
+                    android:textSize="11sp" android:fontFamily="@font/font_koda"
                     android:letterSpacing="0.1" android:layout_marginBottom="10dp"/>
                 <RadioGroup android:id="@+id/rg_setup_type"
                     android:layout_width="match_parent" android:layout_height="wrap_content"
@@ -280,7 +280,7 @@
                     <RadioButton android:id="@+id/rb_setup_koda"
                         android:layout_width="match_parent" android:layout_height="wrap_content"
                         android:text="@string/setup_koda"
-                        android:textColor="#F0F0F0" android:fontFamily="sans-serif"
+                        android:textColor="#F0F0F0" android:fontFamily="@font/font_koda"
                         android:textSize="13sp"
                         android:checked="true" android:buttonTint="#FF6B00"
                         android:paddingStart="8dp" android:paddingTop="4dp"
@@ -288,7 +288,7 @@
                     <RadioButton android:id="@+id/rb_setup_manual"
                         android:layout_width="match_parent" android:layout_height="wrap_content"
                         android:text="@string/setup_manual"
-                        android:textColor="#F0F0F0" android:fontFamily="sans-serif"
+                        android:textColor="#F0F0F0" android:fontFamily="@font/font_koda"
                         android:textSize="13sp"
                         android:buttonTint="#FF6B00"
                         android:paddingStart="8dp" android:paddingTop="4dp"
@@ -296,7 +296,7 @@
                     <RadioButton android:id="@+id/rb_setup_ai"
                         android:layout_width="match_parent" android:layout_height="wrap_content"
                         android:text="@string/setup_ai"
-                        android:textColor="#F0F0F0" android:fontFamily="sans-serif"
+                        android:textColor="#F0F0F0" android:fontFamily="@font/font_koda"
                         android:textSize="13sp"
                         android:buttonTint="#FF6B00"
                         android:paddingStart="8dp" android:paddingTop="4dp"
@@ -313,7 +313,7 @@
                 <RelativeLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginBottom="8dp">
                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
                         android:text="@string/ai_chat_label" android:textColor="#F0F0F0"
-                        android:textSize="11sp" android:fontFamily="sans-serif-medium"
+                        android:textSize="11sp" android:fontFamily="@font/font_koda"
                         android:letterSpacing="0.1" android:layout_centerVertical="true"/>
                     <ImageButton android:id="@+id/btn_ai_fullscreen"
                         android:layout_width="32dp" android:layout_height="32dp"
@@ -338,7 +338,7 @@
                         android:layout_weight="1"
                         android:background="@drawable/input_field"
                         android:textColor="#F0F0F0" android:textSize="14sp"
-                        android:fontFamily="sans-serif"
+                        android:fontFamily="@font/font_koda"
                         android:hint="@string/ai_chat_hint"
                         android:textColorHint="#3A3A48"
                         android:paddingStart="16dp" android:paddingEnd="16dp"
@@ -362,7 +362,7 @@
                     android:layout_width="match_parent" android:layout_height="54dp"
                     android:layout_marginTop="12dp"
                     android:text="@string/ai_approve_btn"
-                    android:textSize="14sp" android:fontFamily="sans-serif-medium"
+                    android:textSize="14sp" android:fontFamily="@font/font_koda"
                     android:textColor="#FFFFFF"
                     app:backgroundTint="#00E676"
                     app:cornerRadius="12dp"
@@ -380,7 +380,7 @@
                 android:orientation="vertical" android:layout_marginBottom="32dp">
                 <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
                     android:text="@string/theme_color_label" android:textColor="#F0F0F0"
-                    android:textSize="11sp" android:fontFamily="sans-serif-medium"
+                    android:textSize="11sp" android:fontFamily="@font/font_koda"
                     android:letterSpacing="0.1" android:layout_marginBottom="10dp"/>
                 <LinearLayout android:id="@+id/btn_color_picker"
                     android:layout_width="match_parent" android:layout_height="56dp"
@@ -395,11 +395,11 @@
                         android:layout_width="0dp" android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:text="#FF6B00" android:textColor="#F0F0F0"
-                        android:fontFamily="sans-serif-medium"
+                        android:fontFamily="@font/font_koda"
                         android:textSize="14sp"/>
                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
                         android:text="@string/tap_to_change" android:textColor="#555566"
-                        android:textSize="11sp" android:fontFamily="sans-serif"/>
+                        android:textSize="11sp" android:fontFamily="@font/font_koda"/>
                 </LinearLayout>
             </LinearLayout>
 
@@ -411,7 +411,7 @@
                 android:text="@string/btn_create_server"
                 android:textColor="#FFFFFF"
                 android:textSize="15sp"
-                android:fontFamily="sans-serif-medium"
+                android:fontFamily="@font/font_koda"
                 android:textStyle="bold"
                 app:backgroundTint="#FF6B00"
                 app:cornerRadius="12dp"
@@ -454,7 +454,7 @@
                 android:text="@string/preparing_java"
                 android:textColor="#F0F0F0"
                 android:textSize="18sp"
-                android:fontFamily="sans-serif-medium"
+                android:fontFamily="@font/font_koda"
                 android:textStyle="bold"
                 android:gravity="center"
                 android:textAlignment="center"

@@ -38,7 +38,37 @@ public class LicensesActivity extends AppCompatActivity {
         addLicense(container, "PCRE2", "pcre2.txt");
         addLicense(container, "Fast Reverse Proxy (FRP)", "frp.txt");
         addLicense(container, "Press Start 2P Font", "press_start_2p.txt");
+        addLicense(container, "Space Grotesk Font (SIL OFL 1.1)", "space_grotesk.txt");
+        addLicense(container, "JetBrains Mono Font (SIL OFL 1.1)", "jetbrains_mono.txt");
+        addLicense(container, "Lottie by Airbnb", "lottie.txt");
         addLicense(container, "TAB Plugin", "tab.txt");
+        addLicense(container, "LuckPerms", "luckperms.txt");
+        addLicense(container, "PlaceholderAPI", "placeholderapi.txt");
+        addLicense(container, "ProtocolLib", "protocollib.txt");
+        addLicense(container, "Simple Voice Chat", "voicechat.txt");
+        addLicense(container, "Geyser", "geyser.txt");
+        addLicense(container, "Floodgate", "floodgate.txt");
+        addLicense(container, "Pojav JRE (PojavLauncher)", "pojav.txt");
+        addLicense(container, "Paper, Folia & Velocity (PaperMC)", "papermc.txt");
+        addLicense(container, "Purpur", "purpur.txt");
+        addLicense(container, "Fabric Loader", "fabric_loader.txt");
+        addLicense(container, "Minecraft Forge & NeoForge", "forge.txt");
+        addLicense(container, "Minecraft Server (Mojang EULA)", "mojang_eula.txt");
+        addLicense(container, "Termux Bootstrap & Packages", "termux.txt");
+        addLicense(container, "proot", "proot.txt");
+        addLicense(container, "LLVM libc++_shared", "llvm_libcxx.txt");
+        addLicense(container, "Glide", "glide.txt");
+        addLicense(container, "AndroidX & Material Components (Apache 2.0)", "androidx.txt");
+        addLicense(container, "Kotlin Standard Library", "kotlin.txt");
+        addLicense(container, "Retrofit", "retrofit.txt");
+        addLicense(container, "OkHttp", "okhttp.txt");
+        addLicense(container, "Gson", "gson.txt");
+        addLicense(container, "org.json", "orgjson.txt");
+        addLicense(container, "XZ for Java", "xz_java.txt");
+        addLicense(container, "Apache Commons Compress", "commons_compress.txt");
+        addLicense(container, "Google Play Services (Auth, App Update, Integrity)", "play_services.txt");
+        addLicense(container, "RootBeer", "rootbeer.txt");
+        addLicense(container, "BlurView", "blurview.txt");
     }
 
     private void addLicense(LinearLayout container, String title, String filename) {

@@ -18,6 +18,8 @@
         <item name="android:windowLayoutInDisplayCutoutMode">shortEdges</item>
         <item name="android:windowLightStatusBar">false</item>
         <item name="android:textColor">#F0F0F0</item>
+        <item name="android:fontFamily">@font/font_koda</item>
+        <item name="fontFamily">@font/font_koda</item>
     </style>
 
     <style name="Theme.KodaNetwork.Translucent" parent="Theme.KodaNetwork">
@@ -35,7 +37,7 @@
         <item name="backgroundTint">#FF6B00</item>
         <item name="android:textColor">#FFFFFF</item>
         <item name="android:textStyle">bold</item>
-        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:fontFamily">@font/font_koda</item>
         <item name="android:letterSpacing">0.04</item>
         <item name="android:textSize">13sp</item>
         <item name="cornerRadius">12dp</item>
@@ -47,7 +49,7 @@
         <item name="strokeColor">#FF6B0088</item>
         <item name="strokeWidth">1dp</item>
         <item name="android:textColor">#FF8C38</item>
-        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:fontFamily">@font/font_koda</item>
         <item name="android:letterSpacing">0.04</item>
         <item name="android:textSize">13sp</item>
         <item name="cornerRadius">12dp</item>
@@ -57,7 +59,7 @@
     <style name="KodaButton.Danger" parent="Widget.MaterialComponents.Button">
         <item name="backgroundTint">#1A0000</item>
         <item name="android:textColor">#FF3344</item>
-        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:fontFamily">@font/font_koda</item>
         <item name="android:letterSpacing">0.04</item>
         <item name="android:textSize">13sp</item>
         <item name="cornerRadius">12dp</item>
@@ -68,7 +70,7 @@
     <!-- Tab text style -->
     <style name="MonoTabText" parent="@android:style/TextAppearance">
         <item name="android:textSize">11sp</item>
-        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:fontFamily">@font/font_koda</item>
         <item name="android:letterSpacing">0.06</item>
         <item name="android:textAllCaps">true</item>
     </style>

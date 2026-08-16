@@ -14,7 +14,7 @@
         <TextView android:id="@+id/btn_back"
             android:layout_width="40dp" android:layout_height="40dp"
             android:text="←" android:textColor="#F0F0F0" android:textSize="20sp"
-            android:gravity="center" android:fontFamily="sans-serif-medium"
+            android:gravity="center" android:fontFamily="@font/font_koda"
             android:background="?attr/selectableItemBackgroundBorderless"/>
         <TextView
             android:layout_width="wrap_content"
@@ -22,13 +22,13 @@
             android:text="@string/settings"
             android:textColor="#FFFFFF"
             android:textSize="24sp"
-            android:fontFamily="sans-serif-medium"
+            android:fontFamily="@font/font_koda"
             android:layout_gravity="center_vertical"/>
         <View android:layout_width="0dp" android:layout_height="0dp" android:layout_weight="1"/>
         <TextView android:id="@+id/tv_settings_version"
             android:layout_width="wrap_content" android:layout_height="wrap_content"
             android:text="v1.8502" android:textColor="#888899"
-            android:textSize="11sp" android:fontFamily="sans-serif"/>
+            android:textSize="11sp" android:fontFamily="@font/font_koda"/>
     </LinearLayout>
     
     <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#241C18"/>
@@ -53,12 +53,12 @@
                     
                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
                         android:text="@string/minecraft_account" android:textColor="#FF6B00"
-                        android:textSize="11sp" android:fontFamily="sans-serif-medium"
+                        android:textSize="11sp" android:fontFamily="@font/font_koda"
                         android:letterSpacing="0.1" android:layout_marginBottom="6dp"/>
                         
                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
                         android:text="@string/link_minecraft_instructions" android:textColor="#888899"
-                        android:textSize="12sp" android:fontFamily="sans-serif"
+                        android:textSize="12sp" android:fontFamily="@font/font_koda"
                         android:layout_marginBottom="12dp"/>
 
                     <LinearLayout android:id="@+id/ll_linked_accounts_container"
@@ -68,21 +68,21 @@
                         <TextView android:id="@+id/tv_link_status"
                             android:layout_width="wrap_content" android:layout_height="wrap_content"
                             android:text="@string/not_linked" android:textColor="#FF4444"
-                            android:textSize="13sp" android:fontFamily="sans-serif-medium"
+                            android:textSize="13sp" android:fontFamily="@font/font_koda"
                             android:layout_marginBottom="8dp"/>
 
                         <TextView android:id="@+id/tv_link_instructions"
                             android:layout_width="match_parent" android:layout_height="wrap_content"
                             android:text="@string/link_steps"
                             android:textColor="#AAAAAA" android:textSize="12sp"
-                            android:fontFamily="sans-serif" android:lineSpacingExtra="2dp"
+                            android:fontFamily="@font/font_koda" android:lineSpacingExtra="2dp"
                             android:layout_marginBottom="12dp"/>
 
                         <com.google.android.material.button.MaterialButton android:id="@+id/btn_generate_code"
                             android:layout_width="match_parent" android:layout_height="44dp"
                             android:text="@string/link_new_account" android:textSize="13sp"
                             android:textColor="#FFFFFF" android:textAllCaps="false"
-                            android:fontFamily="sans-serif-medium"
+                            android:fontFamily="@font/font_koda"
                             app:backgroundTint="#FF6B00"
                             app:cornerRadius="10dp"
                             app:rippleColor="#44FFFFFF"/>
@@ -102,12 +102,12 @@
 
                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
                         android:text="@string/appearance" android:textColor="#FF6B00"
-                        android:textSize="11sp" android:fontFamily="sans-serif-medium"
+                        android:textSize="11sp" android:fontFamily="@font/font_koda"
                         android:letterSpacing="0.1" android:layout_marginBottom="12dp"/>
 
                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
                         android:text="@string/theme_mode" android:textColor="#FFFFFF"
-                        android:textSize="13sp" android:fontFamily="sans-serif-medium"
+                        android:textSize="13sp" android:fontFamily="@font/font_koda"
                         android:layout_marginBottom="8dp"/>
 
                     <!-- Theme Mode Slider -->
@@ -127,56 +127,56 @@
                                 android:layout_width="0dp" android:layout_height="match_parent"
                                 android:layout_weight="1" android:text="@string/theme_dark"
                                 android:gravity="center" android:textSize="13sp"
-                                android:textColor="#FFFFFF" android:fontFamily="sans-serif-medium" />
+                                android:textColor="#FFFFFF" android:fontFamily="@font/font_koda" />
                             <TextView android:id="@+id/btn_theme_light"
                                 android:layout_width="0dp" android:layout_height="match_parent"
                                 android:layout_weight="1" android:text="@string/theme_light"
                                 android:gravity="center" android:textSize="13sp"
-                                android:textColor="#888899" android:fontFamily="sans-serif-medium" />
+                                android:textColor="#888899" android:fontFamily="@font/font_koda" />
                             <TextView android:id="@+id/btn_theme_auto"
                                 android:layout_width="0dp" android:layout_height="match_parent"
                                 android:layout_weight="1" android:text="@string/theme_auto"
                                 android:gravity="center" android:textSize="13sp"
-                                android:textColor="#888899" android:fontFamily="sans-serif-medium" />
+                                android:textColor="#888899" android:fontFamily="@font/font_koda" />
                         </LinearLayout>
                     </FrameLayout>
 
                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
                         android:text="@string/language" android:textColor="#FFFFFF"
-                        android:textSize="13sp" android:fontFamily="sans-serif-medium"
+                        android:textSize="13sp" android:fontFamily="@font/font_koda"
                         android:layout_marginBottom="8dp"/>
 
                     <com.google.android.material.button.MaterialButton android:id="@+id/btn_lang_selector"
                         android:layout_width="match_parent" android:layout_height="44dp"
                         android:text="Language: System Default"
                         android:textAllCaps="false" android:textSize="13sp"
-                        android:textColor="#FFFFFF" android:fontFamily="sans-serif-medium"
+                        android:textColor="#FFFFFF" android:fontFamily="@font/font_koda"
                         app:backgroundTint="#332A24" app:cornerRadius="10dp"
                         app:rippleColor="#22FFFFFF" android:layout_marginBottom="8dp" />
 
                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
                         android:text="@string/haptic_feedback" android:textColor="#FFFFFF"
-                        android:textSize="13sp" android:fontFamily="sans-serif-medium"
+                        android:textSize="13sp" android:fontFamily="@font/font_koda"
                         android:layout_marginTop="8dp" android:layout_marginBottom="8dp"/>
 
                     <com.google.android.material.button.MaterialButton android:id="@+id/btn_haptics_toggle"
                         android:layout_width="match_parent" android:layout_height="44dp"
                         android:text="Haptic Feedback: ON"
                         android:textAllCaps="false" android:textSize="13sp"
-                        android:textColor="#FFFFFF" android:fontFamily="sans-serif-medium"
+                        android:textColor="#FFFFFF" android:fontFamily="@font/font_koda"
                         app:backgroundTint="#332A24" app:cornerRadius="10dp"
                         app:rippleColor="#22FFFFFF" android:layout_marginBottom="8dp" />
 
                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
                         android:text="UI Animations" android:textColor="#FFFFFF"
-                        android:textSize="13sp" android:fontFamily="sans-serif-medium"
+                        android:textSize="13sp" android:fontFamily="@font/font_koda"
                         android:layout_marginTop="8dp" android:layout_marginBottom="8dp"/>
 
                     <com.google.android.material.button.MaterialButton android:id="@+id/btn_animations_toggle"
                         android:layout_width="match_parent" android:layout_height="44dp"
                         android:text="Animations: ON"
                         android:textAllCaps="false" android:textSize="13sp"
-                        android:textColor="#FFFFFF" android:fontFamily="sans-serif-medium"
+                        android:textColor="#FFFFFF" android:fontFamily="@font/font_koda"
                         app:backgroundTint="#332A24" app:cornerRadius="10dp"
                         app:rippleColor="#22FFFFFF" android:layout_marginBottom="8dp" />
                 </LinearLayout>
@@ -194,12 +194,12 @@
 
                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
                         android:text="@string/screensaver" android:textColor="#FF6B00"
-                        android:textSize="11sp" android:fontFamily="sans-serif-medium"
+                        android:textSize="11sp" android:fontFamily="@font/font_koda"
                         android:letterSpacing="0.1" android:layout_marginBottom="12dp"/>
 
                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
                         android:text="@string/style" android:textColor="#FFFFFF"
-                        android:textSize="13sp" android:fontFamily="sans-serif-medium"
+                        android:textSize="13sp" android:fontFamily="@font/font_koda"
                         android:layout_marginBottom="8dp"/>
 
                     <FrameLayout android:id="@+id/container_style"
@@ -217,23 +217,23 @@
                                 android:layout_width="0dp" android:layout_height="match_parent"
                                 android:layout_weight="1" android:text="@string/squares"
                                 android:gravity="center" android:textSize="13sp"
-                                android:textColor="#FFFFFF" android:fontFamily="sans-serif-medium" />
+                                android:textColor="#FFFFFF" android:fontFamily="@font/font_koda" />
                             <TextView android:id="@+id/btn_style_black"
                                 android:layout_width="0dp" android:layout_height="match_parent"
                                 android:layout_weight="1" android:text="@string/black"
                                 android:gravity="center" android:textSize="13sp"
-                                android:textColor="#888899" android:fontFamily="sans-serif-medium" />
+                                android:textColor="#888899" android:fontFamily="@font/font_koda" />
                             <TextView android:id="@+id/btn_style_off"
                                 android:layout_width="0dp" android:layout_height="match_parent"
                                 android:layout_weight="1" android:text="@string/off"
                                 android:gravity="center" android:textSize="13sp"
-                                android:textColor="#888899" android:fontFamily="sans-serif-medium" />
+                                android:textColor="#888899" android:fontFamily="@font/font_koda" />
                         </LinearLayout>
                     </FrameLayout>
 
                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
                         android:text="@string/afk_timeout" android:textColor="#FFFFFF"
-                        android:textSize="13sp" android:fontFamily="sans-serif-medium"
+                        android:textSize="13sp" android:fontFamily="@font/font_koda"
                         android:layout_marginBottom="8dp"/>
 
                     <FrameLayout android:id="@+id/container_timeout"
@@ -250,17 +250,17 @@
                                 android:layout_width="0dp" android:layout_height="match_parent"
                                 android:layout_weight="1" android:text="@string/min_1"
                                 android:gravity="center" android:textSize="13sp"
-                                android:textColor="#FFFFFF" android:fontFamily="sans-serif-medium" />
+                                android:textColor="#FFFFFF" android:fontFamily="@font/font_koda" />
                             <TextView android:id="@+id/btn_timeout_2m"
                                 android:layout_width="0dp" android:layout_height="match_parent"
                                 android:layout_weight="1" android:text="@string/min_2"
                                 android:gravity="center" android:textSize="13sp"
-                                android:textColor="#888899" android:fontFamily="sans-serif-medium" />
+                                android:textColor="#888899" android:fontFamily="@font/font_koda" />
                             <TextView android:id="@+id/btn_timeout_5m"
                                 android:layout_width="0dp" android:layout_height="match_parent"
                                 android:layout_weight="1" android:text="@string/min_5"
                                 android:gravity="center" android:textSize="13sp"
-                                android:textColor="#888899" android:fontFamily="sans-serif-medium" />
+                                android:textColor="#888899" android:fontFamily="@font/font_koda" />
                         </LinearLayout>
                     </FrameLayout>
                 </LinearLayout>
@@ -278,14 +278,14 @@
 
                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
                         android:text="@string/network_security" android:textColor="#FF6B00"
-                        android:textSize="11sp" android:fontFamily="sans-serif-medium"
+                        android:textSize="11sp" android:fontFamily="@font/font_koda"
                         android:letterSpacing="0.1" android:layout_marginBottom="12dp"/>
 
                     <com.google.android.material.button.MaterialButton android:id="@+id/btn_network_alarm"
                         android:layout_width="match_parent" android:layout_height="44dp"
                         android:text="@string/network_alarm_off"
                         android:textAllCaps="false" android:textSize="13sp"
-                        android:textColor="#FFFFFF" android:fontFamily="sans-serif-medium"
+                        android:textColor="#FFFFFF" android:fontFamily="@font/font_koda"
                         app:backgroundTint="#332A24" app:cornerRadius="10dp"
                         app:rippleColor="#22FFFFFF" android:layout_marginBottom="8dp"/>
 
@@ -293,7 +293,7 @@
                         android:layout_width="match_parent" android:layout_height="44dp"
                         android:text="@string/lobby_remote_on"
                         android:textAllCaps="false" android:textSize="13sp"
-                        android:textColor="#FFFFFF" android:fontFamily="sans-serif-medium"
+                        android:textColor="#FFFFFF" android:fontFamily="@font/font_koda"
                         app:backgroundTint="#332A24" app:cornerRadius="10dp"
                         app:rippleColor="#22FFFFFF" android:layout_marginBottom="8dp"/>
 
@@ -301,7 +301,7 @@
                         android:layout_width="match_parent" android:layout_height="44dp"
                         android:text="@string/beta_jni_off"
                         android:textAllCaps="false" android:textSize="13sp"
-                        android:textColor="#FFFFFF" android:fontFamily="sans-serif-medium"
+                        android:textColor="#FFFFFF" android:fontFamily="@font/font_koda"
                         app:backgroundTint="#332A24" app:cornerRadius="10dp"
                         app:rippleColor="#22FFFFFF" android:layout_marginBottom="16dp"/>
 
@@ -311,14 +311,14 @@
                     <TextView android:id="@+id/tv_2fa_status"
                         android:layout_width="match_parent" android:layout_height="wrap_content"
                         android:text="@string/twofa_disabled" android:textColor="#FF4444"
-                        android:textSize="13sp" android:fontFamily="sans-serif-medium"
+                        android:textSize="13sp" android:fontFamily="@font/font_koda"
                         android:layout_marginBottom="12dp"/>
 
                     <com.google.android.material.button.MaterialButton android:id="@+id/btn_2fa_toggle"
                         android:layout_width="match_parent" android:layout_height="44dp"
                         android:text="@string/enable_2fa"
                         android:textAllCaps="false" android:textSize="13sp"
-                        android:textColor="#FFFFFF" android:fontFamily="sans-serif-medium"
+                        android:textColor="#FFFFFF" android:fontFamily="@font/font_koda"
                         app:backgroundTint="#332A24" app:cornerRadius="10dp"
                         app:rippleColor="#22FFFFFF" android:layout_marginBottom="8dp"/>
 
@@ -326,7 +326,7 @@
                         android:layout_width="match_parent" android:layout_height="44dp"
                         android:text="@string/set_2fa_password"
                         android:textAllCaps="false" android:textSize="13sp"
-                        android:textColor="#FFFFFF" android:fontFamily="sans-serif-medium"
+                        android:textColor="#FFFFFF" android:fontFamily="@font/font_koda"
                         app:backgroundTint="#332A24" app:cornerRadius="10dp"
                         app:rippleColor="#22FFFFFF" android:visibility="gone" android:layout_marginBottom="16dp"/>
 
@@ -335,13 +335,13 @@
 
                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
                         android:text="@string/biometrics" android:textColor="#FF6B00"
-                        android:textSize="11sp" android:fontFamily="sans-serif-medium"
+                        android:textSize="11sp" android:fontFamily="@font/font_koda"
                         android:letterSpacing="0.1" android:layout_marginBottom="12dp"/>
 
                     <com.google.android.material.switchmaterial.SwitchMaterial android:id="@+id/switch_bio_main"
                         android:layout_width="match_parent" android:layout_height="wrap_content"
                         android:text="@string/enable_biometric" android:textColor="#FFFFFF"
-                        android:textSize="14sp" android:fontFamily="sans-serif-medium"
+                        android:textSize="14sp" android:fontFamily="@font/font_koda"
                         android:layout_marginBottom="8dp"/>
 
                     <LinearLayout android:id="@+id/ll_bio_options"
@@ -352,22 +352,22 @@
                         <com.google.android.material.checkbox.MaterialCheckBox android:id="@+id/cb_bio_resume"
                             android:layout_width="match_parent" android:layout_height="wrap_content"
                             android:text="@string/bio_resume" android:textColor="#CCCCCC"
-                            android:textSize="13sp" android:fontFamily="sans-serif"/>
+                            android:textSize="13sp" android:fontFamily="@font/font_koda"/>
 
                         <com.google.android.material.checkbox.MaterialCheckBox android:id="@+id/cb_bio_cold_start"
                             android:layout_width="match_parent" android:layout_height="wrap_content"
                             android:text="@string/bio_cold_start" android:textColor="#CCCCCC"
-                            android:textSize="13sp" android:fontFamily="sans-serif"/>
+                            android:textSize="13sp" android:fontFamily="@font/font_koda"/>
 
                         <com.google.android.material.checkbox.MaterialCheckBox android:id="@+id/cb_bio_server_click"
                             android:layout_width="match_parent" android:layout_height="wrap_content"
                             android:text="@string/bio_server_click" android:textColor="#CCCCCC"
-                            android:textSize="13sp" android:fontFamily="sans-serif"/>
+                            android:textSize="13sp" android:fontFamily="@font/font_koda"/>
 
                         <com.google.android.material.checkbox.MaterialCheckBox android:id="@+id/cb_bio_create_server"
                             android:layout_width="match_parent" android:layout_height="wrap_content"
                             android:text="@string/bio_create_server" android:textColor="#CCCCCC"
-                            android:textSize="13sp" android:fontFamily="sans-serif"/>
+                            android:textSize="13sp" android:fontFamily="@font/font_koda"/>
 
                     </LinearLayout>
                 </LinearLayout>
@@ -388,7 +388,7 @@
 
                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
                         android:text="@string/account" android:textColor="#FF6B00"
-                        android:textSize="11sp" android:fontFamily="sans-serif-medium"
+                        android:textSize="11sp" android:fontFamily="@font/font_koda"
                         android:letterSpacing="0.1" android:layout_marginBottom="12dp"/>
 
                     <TextView
@@ -403,7 +403,7 @@
                     <TextView android:id="@+id/tv_account_email"
                         android:layout_width="match_parent" android:layout_height="wrap_content"
                         android:text="@string/loading" android:textColor="#FFFFFF"
-                        android:textSize="15sp" android:fontFamily="sans-serif-medium"/>
+                        android:textSize="15sp" android:fontFamily="@font/font_koda"/>
 
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
@@ -419,7 +419,7 @@
 
                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
                         android:text="@string/support" android:textColor="#FF6B00"
-                        android:textSize="11sp" android:fontFamily="sans-serif-medium"
+                        android:textSize="11sp" android:fontFamily="@font/font_koda"
                         android:letterSpacing="0.1" android:layout_marginBottom="12dp"/>
 
                     <TextView android:id="@+id/tv_support_login_warning"
@@ -439,7 +439,7 @@
                             android:text="@string/report_bug" android:textSize="13sp"
                             android:textAllCaps="false"
                             android:textColor="#FFFFFF"
-                            android:fontFamily="sans-serif-medium"
+                            android:fontFamily="@font/font_koda"
                             android:layout_marginBottom="8dp"
                             app:backgroundTint="#302621" app:cornerRadius="10dp"
                             app:rippleColor="#22FFFFFF" />
@@ -449,7 +449,7 @@
                             android:text="@string/report_server" android:textSize="13sp"
                             android:textAllCaps="false"
                             android:textColor="#FFFFFF"
-                            android:fontFamily="sans-serif-medium"
+                            android:fontFamily="@font/font_koda"
                             android:layout_marginBottom="8dp"
                             app:backgroundTint="#302621" app:cornerRadius="10dp"
                             app:rippleColor="#22FFFFFF" />
@@ -459,7 +459,7 @@
                             android:text="My Tickets" android:textSize="13sp"
                             android:textAllCaps="false"
                             android:textColor="#FFFFFF"
-                            android:fontFamily="sans-serif-medium"
+                            android:fontFamily="@font/font_koda"
                             android:layout_marginBottom="0dp"
                             app:backgroundTint="#302621" app:cornerRadius="10dp"
                             app:rippleColor="#22FFFFFF" />
@@ -484,16 +484,16 @@
                             android:layout_weight="1" android:orientation="vertical">
                             <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
                                 android:text="GEMINI AI" android:textColor="#FF6B00"
-                                android:textSize="11sp" android:fontFamily="sans-serif-medium"
+                                android:textSize="11sp" android:fontFamily="@font/font_koda"
                                 android:letterSpacing="0.1"/>
                             <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
                                 android:text="AI Server Builder API Key" android:textColor="#888899"
-                                android:textSize="11sp" android:fontFamily="sans-serif"
+                                android:textSize="11sp" android:fontFamily="@font/font_koda"
                                 android:layout_marginTop="2dp"/>
                         </LinearLayout>
                         <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
                             android:text="BETA" android:textColor="#FFFFFF" android:textSize="9sp"
-                            android:fontFamily="sans-serif-medium" android:letterSpacing="0.1"
+                            android:fontFamily="@font/font_koda" android:letterSpacing="0.1"
                             android:background="#FF6B00" android:paddingStart="6dp" android:paddingEnd="6dp"
                             android:paddingTop="3dp" android:paddingBottom="3dp"/>
                     </LinearLayout>
@@ -510,7 +510,7 @@
                             android:textColor="#FFFFFF" android:textColorHint="#555566"
                             android:background="@null" android:textSize="13sp"
                             android:paddingStart="10dp" android:paddingEnd="10dp"
-                            android:inputType="textPassword" android:fontFamily="sans-serif"/>
+                            android:inputType="textPassword" android:fontFamily="@font/font_koda"/>
 
                         <com.google.android.material.button.MaterialButton
                             android:id="@+id/btn_save_gemini_key"
@@ -518,7 +518,7 @@
                             android:layout_width="wrap_content" android:layout_height="40dp"
                             android:text="Save" android:textColor="#FF6B00"
                             android:textAllCaps="false"
-                            android:textSize="13sp" android:fontFamily="sans-serif-medium"/>
+                            android:textSize="13sp" android:fontFamily="@font/font_koda"/>
                     </LinearLayout>
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
@@ -540,7 +540,7 @@
                         <TextView android:layout_width="0dp" android:layout_height="wrap_content"
                             android:layout_weight="1"
                             android:text="@string/device_info" android:textColor="#FF6B00"
-                            android:textSize="11sp" android:fontFamily="sans-serif-medium"
+                            android:textSize="11sp" android:fontFamily="@font/font_koda"
                             android:letterSpacing="0.1"/>
                         <TextView android:id="@+id/tv_info_icon"
                             android:layout_width="wrap_content" android:layout_height="wrap_content"
@@ -555,7 +555,7 @@
                         <TextView android:id="@+id/tv_info_text"
                             android:layout_width="match_parent" android:layout_height="wrap_content"
                             android:textColor="#AAAAAA" android:textSize="12sp"
-                            android:fontFamily="monospace" android:lineSpacingExtra="4dp"/>
+                            android:fontFamily="@font/font_koda_mono" android:lineSpacingExtra="4dp"/>
                     </LinearLayout>
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
@@ -578,7 +578,7 @@
                         android:layout_weight="1" android:orientation="vertical">
                         <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
                             android:text="Legal &amp; Licenses" android:textColor="#FFFFFF"
-                            android:textSize="14sp" android:fontFamily="sans-serif-medium"/>
+                            android:textSize="14sp" android:fontFamily="@font/font_koda"/>
                         <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
                             android:text="View open-source licenses and notices" android:textColor="#888899"
                             android:textSize="12sp" android:layout_marginTop="2dp"/>
@@ -603,12 +603,12 @@
                     <TextView android:id="@+id/tv_app_version_card"
                         android:layout_width="wrap_content" android:layout_height="wrap_content"
                         android:text="v1.8502" android:textColor="#FFFFFF"
-                        android:textSize="18sp" android:fontFamily="sans-serif-medium"
+                        android:textSize="18sp" android:fontFamily="@font/font_koda"
                         android:layout_marginBottom="4dp"/>
 
                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
                         android:text="by libredroid" android:textColor="#888899"
-                        android:textSize="12sp" android:fontFamily="sans-serif"/>
+                        android:textSize="12sp" android:fontFamily="@font/font_koda"/>
 
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
@@ -627,13 +627,13 @@
 
                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
                         android:text="@string/dev_options" android:textColor="@color/dev_purple"
-                        android:textSize="11sp" android:fontFamily="sans-serif-medium"
+                        android:textSize="11sp" android:fontFamily="@font/font_koda"
                         android:letterSpacing="0.1" android:layout_marginBottom="12dp"/>
 
                     <com.google.android.material.switchmaterial.SwitchMaterial android:id="@+id/switch_dev_liquid_glass"
                         android:layout_width="match_parent" android:layout_height="wrap_content"
                         android:text="@string/dev_liquid_glass" android:textColor="#FFFFFF"
-                        android:textSize="14sp" android:fontFamily="sans-serif-medium"
+                        android:textSize="14sp" android:fontFamily="@font/font_koda"
                         app:thumbTint="@color/dev_purple_dark"
                         app:trackTint="@color/dev_purple"
                         android:layout_marginBottom="8dp"/>
@@ -644,7 +644,7 @@
 
                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
                         android:text="Material Design 3" android:textColor="@color/dev_purple"
-                        android:textSize="11sp" android:fontFamily="sans-serif-medium"
+                        android:textSize="11sp" android:fontFamily="@font/font_koda"
                         android:letterSpacing="0.1" android:layout_marginBottom="8dp"/>
 
                     <!-- M3 Enable Switch -->
@@ -656,7 +656,7 @@
                             android:layout_weight="1" android:orientation="vertical">
                             <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
                                 android:text="Material You Theme" android:textColor="#FFFFFF"
-                                android:textSize="14sp" android:fontFamily="sans-serif-medium"/>
+                                android:textSize="14sp" android:fontFamily="@font/font_koda"/>
                             <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
                                 android:text="Modernes M3 Design mit Animationen"
                                 android:textColor="#888899" android:textSize="12sp"/>
@@ -677,7 +677,7 @@
                         <!-- Color Mode Segmented: Dynamic / Custom -->
                         <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
                             android:text="Farbmodus" android:textColor="#FFFFFF"
-                            android:textSize="13sp" android:fontFamily="sans-serif-medium"
+                            android:textSize="13sp" android:fontFamily="@font/font_koda"
                             android:layout_marginBottom="8dp"/>
 
                         <FrameLayout android:id="@+id/container_m3_color_mode"
@@ -695,12 +695,12 @@
                                     android:layout_width="0dp" android:layout_height="match_parent"
                                     android:layout_weight="1" android:text="Dynamic"
                                     android:gravity="center" android:textSize="13sp"
-                                    android:textColor="#FFFFFF" android:fontFamily="sans-serif-medium"/>
+                                    android:textColor="#FFFFFF" android:fontFamily="@font/font_koda"/>
                                 <TextView android:id="@+id/btn_m3_custom"
                                     android:layout_width="0dp" android:layout_height="match_parent"
                                     android:layout_weight="1" android:text="Custom"
                                     android:gravity="center" android:textSize="13sp"
-                                    android:textColor="#888899" android:fontFamily="sans-serif-medium"/>
+                                    android:textColor="#888899" android:fontFamily="@font/font_koda"/>
                             </LinearLayout>
                         </FrameLayout>
 
@@ -711,7 +711,7 @@
 
                             <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
                                 android:text="Akzentfarbe wählen" android:textColor="#FFFFFF"
-                                android:textSize="13sp" android:fontFamily="sans-serif-medium"
+                                android:textSize="13sp" android:fontFamily="@font/font_koda"
                                 android:layout_marginBottom="8dp"/>
 
                             <!-- Color circles container (filled programmatically) -->
@@ -741,11 +741,11 @@
 
                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
                         android:text="@string/danger_zone" android:textColor="#FF4444"
-                        android:textSize="11sp" android:fontFamily="sans-serif-medium"
+                        android:textSize="11sp" android:fontFamily="@font/font_koda"
                         android:letterSpacing="0.1" android:layout_marginBottom="6dp"/>
                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
                         android:text="@string/danger_zone_desc" android:textColor="#888899"
-                        android:textSize="12sp" android:fontFamily="sans-serif"
+                        android:textSize="12sp" android:fontFamily="@font/font_koda"
                         android:layout_marginBottom="16dp"/>
 
                     <com.google.android.material.button.MaterialButton android:id="@+id/btn_delete_servers"
@@ -753,7 +753,7 @@
                         android:text="DELETE ALL SERVERS"
                         android:textAllCaps="true" android:textSize="13sp"
                         android:textColor="#FFFFFF"
-                        android:fontFamily="sans-serif-medium"
+                        android:fontFamily="@font/font_koda"
                         app:backgroundTint="#FF4444" app:cornerRadius="10dp"
                         app:rippleColor="#44FFFFFF" android:layout_marginBottom="12dp" />
                     <com.google.android.material.button.MaterialButton android:id="@+id/btn_revoke_tos"
@@ -761,7 +761,7 @@
                         android:text="REVOKE TOS"
                         android:textAllCaps="true" android:textSize="13sp"
                         android:textColor="#FFFFFF"
-                        android:fontFamily="sans-serif-medium"
+                        android:fontFamily="@font/font_koda"
                         app:backgroundTint="#FF4444" app:cornerRadius="10dp"
                         app:rippleColor="#44FFFFFF" />
                 </LinearLayout>
@@ -783,12 +783,12 @@
                     <TextView android:id="@+id/tv_settings_app_uuid"
                         android:layout_width="wrap_content" android:layout_height="wrap_content"
                         android:text="Loading..." android:textColor="#FFFFFF"
-                        android:textSize="18sp" android:fontFamily="sans-serif-medium"
+                        android:textSize="18sp" android:fontFamily="@font/font_koda"
                         android:layout_marginBottom="4dp"/>
 
                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
                         android:text="Tap to copy UUID" android:textColor="#888899"
-                        android:textSize="12sp" android:fontFamily="sans-serif"/>
+                        android:textSize="12sp" android:fontFamily="@font/font_koda"/>
 
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
@@ -799,7 +799,7 @@
                 
                 <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
                     android:text="Not an official Minecraft product. Not approved by or associated with Mojang or Microsoft."
-                    android:textColor="#555566" android:textSize="10sp" android:textAlignment="center" android:fontFamily="sans-serif"
+                    android:textColor="#555566" android:textSize="10sp" android:textAlignment="center" android:fontFamily="@font/font_koda"
                     android:gravity="center_horizontal" />
             </LinearLayout>
 

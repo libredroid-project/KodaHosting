@@ -63,7 +63,7 @@
             android:text="HWID: ..."
             android:textSize="12sp"
             android:textColor="#666666"
-            android:fontFamily="monospace" />
+            android:fontFamily="@font/font_koda_mono" />
 
     </LinearLayout>
 

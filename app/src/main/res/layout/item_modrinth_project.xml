@@ -29,7 +29,7 @@
             android:layout_height="wrap_content"
             android:textColor="#FFFFFF"
             android:textSize="16sp"
-            android:fontFamily="sans-serif-medium"
+            android:fontFamily="@font/font_koda"
             android:textStyle="bold"
             android:singleLine="true"
             android:ellipsize="end"/>
@@ -40,7 +40,7 @@
             android:layout_height="wrap_content"
             android:textColor="#FF6B00"
             android:textSize="12sp"
-            android:fontFamily="sans-serif"
+            android:fontFamily="@font/font_koda"
             android:layout_marginBottom="4dp"
             android:singleLine="true"/>
 
@@ -50,7 +50,7 @@
             android:layout_height="wrap_content"
             android:textColor="#8A8A9A"
             android:textSize="12sp"
-            android:fontFamily="sans-serif"
+            android:fontFamily="@font/font_koda"
             android:maxLines="2"
             android:ellipsize="end"/>
     </LinearLayout>

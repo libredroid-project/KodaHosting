@@ -1,0 +1,17 @@
+Minecraft Forge and NeoForge
+https://github.com/MinecraftForge/MinecraftForge
+https://github.com/neoforged/NeoForge
+
+These mod loading platforms are distributed under the terms of the GNU Lesser
+General Public License version 2.1 (LGPL-2.1), with individual components
+available under more permissive licenses. NeoForge is a fork of Minecraft
+Forge and inherits its licensing.
+
+This program is distributed in the hope that it will be useful, but WITHOUT
+ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
+details.
+
+The installers are downloaded at runtime from the official Forge and NeoForge
+maven repositories.
+Full license text: https://www.gnu.org/licenses/old-licenses/lgpl-2.1.txt

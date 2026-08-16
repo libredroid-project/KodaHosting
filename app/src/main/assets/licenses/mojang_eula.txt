@@ -1,0 +1,13 @@
+Minecraft (Mojang Studios / Microsoft)
+
+Minecraft is not part of KodaHosting. KodaHosting is not an official
+Minecraft product, not approved by or associated with Mojang or Microsoft.
+
+The Minecraft server software and the Minecraft brand are the property of
+Mojang Studios (Microsoft). By downloading the vanilla server jar through
+this app you agree to the Minecraft EULA:
+
+https://www.minecraft.net/eula
+
+The vanilla server jar is downloaded at runtime from the official Mojang
+launchermeta API.

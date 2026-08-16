@@ -45,7 +45,7 @@
             android:text="Checking for updates..."
             android:textColor="#F0F0F0"
             android:textSize="18sp"
-            android:fontFamily="sans-serif-medium"
+            android:fontFamily="@font/font_koda"
             android:textStyle="bold"
             android:letterSpacing="0.05"
             android:gravity="center"/>
@@ -58,7 +58,7 @@
             android:text=""
             android:textColor="#888888"
             android:textSize="14sp"
-            android:fontFamily="sans-serif"
+            android:fontFamily="@font/font_koda"
             android:gravity="center"/>
             
     </LinearLayout>

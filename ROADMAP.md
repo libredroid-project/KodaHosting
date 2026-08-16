@@ -203,6 +203,11 @@ Bekannte Ursachen aus der Exploration:
   dev-gegated mit 6/58 Layouts (`Material3ThemeHelper`, `M3AnimationHelper`,
   `*_m3.xml`); keine Lottie. Ansatz: Font-Familie einsetzen, Lottie
   (`com.airbnb.android:lottie`) für Empty-States/Übergänge.
+- **Status 2026-08-17:** ✅ Lottie `6.7.1` in `app/build.gradle` (Build mit JDK 21).
+  Detailplan Font-Auswahl/Umsetzung + Lottie-Priorisierung:
+  `.zcode/plans/plan-font-animations.md` (Empfehlung: Space Grotesk UI-Font +
+  JetBrains Mono für Console/Adressen, gebundelte OFL-TTFs statt Downloadable Fonts,
+  zh-CJK-Fallback beachten).
 
 ---
 

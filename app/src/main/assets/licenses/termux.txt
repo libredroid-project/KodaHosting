@@ -1,0 +1,15 @@
+Termux bootstrap & packages
+Copyright (c) 2016-2024 Termux contributors
+
+The Termux app and bootstrap scripts are licensed under the
+GNU General Public License v3.0.
+https://www.gnu.org/licenses/gpl-3.0.txt
+
+Individual bundled packages keep their own licenses, among them:
+- MariaDB (GPLv2): mariadb.txt
+- Redis (BSD): redis.txt
+- OpenSSL (Apache 2.0): openssl.txt
+- zlib (zlib): zlib.txt
+- ncurses (MIT): ncurses.txt
+- PCRE2 (BSD): pcre2.txt
+https://github.com/termux/termux-packages

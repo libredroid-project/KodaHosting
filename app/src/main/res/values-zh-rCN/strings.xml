@@ -437,6 +437,10 @@
     <string name="pm_ban_title">封禁玩家</string>
     <string name="pm_ban_desc">封禁 %1$s？在解封之前，该玩家将无法重新加入。</string>
     <string name="pm_ban_confirm">封禁</string>
+    <string name="pm_stats">统计数据</string>
+    <string name="pm_offline_hint">无网络连接，操作已禁用</string>
+    <string name="pm_empty_players">还没有玩家，快加入服务器吧！</string>
+    <string name="sd_files_empty">此目录为空</string><string name="sd_close_loading">关闭加载画面</string>
 
     <!-- server.properties manual change warning -->
     <string name="sd_props_changed_title">server.properties 已被修改</string>
@@ -445,5 +449,5 @@
     <string name="sd_props_changed_suffix">保留手动修改的值，还是恢复应用值？</string>
     <string name="sd_props_use_manual">使用手动值</string>
     <string name="sd_props_use_app">使用应用值</string>
-    <string name="sd_props_port_ip_managed">server-port 和 server-ip 由应用管理，无法修改——你的更改已被还原。</string>
+    <string name="sd_props_port_ip_managed">server-port 和 server-ip 由应用管理，无法修改，你的更改已被还原。</string>
 </resources>

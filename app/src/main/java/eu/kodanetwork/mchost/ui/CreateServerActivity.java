@@ -723,7 +723,7 @@ public class CreateServerActivity extends AppCompatActivity {
         ServerInstance.Type type = TYPE_VALS[selectedTypeIndex];
         java.util.Map<String, String> descriptions = new java.util.LinkedHashMap<>();
         if (type == ServerInstance.Type.PAPER || type == ServerInstance.Type.PURPUR || type == ServerInstance.Type.FOLIA) {
-            if (!currentVersions.isEmpty()) descriptions.put(currentVersions.get(0), " Neueste Version – empfohlen");
+            if (!currentVersions.isEmpty()) descriptions.put(currentVersions.get(0), " Neueste Version, empfohlen");
             if (currentVersions.size() > 1) descriptions.put(currentVersions.get(1), "Stabil, viele Plugins verfügbar");
         }
         // Known descriptions for specific versions
@@ -731,8 +731,8 @@ public class CreateServerActivity extends AppCompatActivity {
         descriptions.put("1.21.1", "Sehr beliebt, viele Plugins");
         descriptions.put("1.20.1", "Sehr stabil, beste Mod-Unterstützung");
         descriptions.put("1.19.4", "Letzte 1.19er Version");
-        descriptions.put("1.18.2", "Cave Update – sehr beliebt");
-        descriptions.put("1.16.5", "Nether Update – viele Mods");
+        descriptions.put("1.18.2", "Cave Update, sehr beliebt");
+        descriptions.put("1.16.5", "Nether Update, viele Mods");
         descriptions.put("1.12.2", "Älteste stabile Version, größte Mod-Auswahl");
         descriptions.put("3.4.0", "Neueste Velocity Version");
         descriptions.put("3.3.0", "Stabile Velocity Version");

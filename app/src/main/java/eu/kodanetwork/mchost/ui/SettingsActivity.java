@@ -1470,7 +1470,8 @@ public class SettingsActivity extends Activity {
             }
             
             // Use premium clean modern sans-serif typography instead of monospace!
-            tv.setTypeface(android.graphics.Typeface.SANS_SERIF, tv.getTypeface() != null ? tv.getTypeface().getStyle() : android.graphics.Typeface.NORMAL);
+            android.graphics.Typeface koda = androidx.core.content.res.ResourcesCompat.getFont(this, R.font.font_koda);
+            tv.setTypeface(koda != null ? koda : android.graphics.Typeface.SANS_SERIF, tv.getTypeface() != null ? tv.getTypeface().getStyle() : android.graphics.Typeface.NORMAL);
         }
     }
 
@@ -1641,7 +1642,8 @@ public class SettingsActivity extends Activity {
             tvTitle.setText(getString(R.string.select_language));
             tvTitle.setTextColor(0xFFFF6B00);
             tvTitle.setTextSize(13);
-            tvTitle.setTypeface(android.graphics.Typeface.DEFAULT_BOLD);
+            android.graphics.Typeface kodaBold = androidx.core.content.res.ResourcesCompat.getFont(this, R.font.space_grotesk_bold);
+            tvTitle.setTypeface(kodaBold != null ? kodaBold : android.graphics.Typeface.DEFAULT_BOLD);
             tvTitle.setLetterSpacing(0.12f);
             tvTitle.setPadding(48, 40, 48, 24);
             container.addView(tvTitle);
@@ -1661,7 +1663,8 @@ public class SettingsActivity extends Activity {
                 boolean isSelected = codes[i].equals(prefs.getString("language", "system"));
                 if (isSelected) {
                     tv.setTextColor(0xFFFF6B00);
-                    tv.setTypeface(android.graphics.Typeface.DEFAULT_BOLD);
+                    android.graphics.Typeface kodaBoldSel = androidx.core.content.res.ResourcesCompat.getFont(this, R.font.space_grotesk_bold);
+                    tv.setTypeface(kodaBoldSel != null ? kodaBoldSel : android.graphics.Typeface.DEFAULT_BOLD);
                 } else {
                     tv.setTextColor(isLight() ? 0xFF111827 : 0xFFFFFFFF);
                 }

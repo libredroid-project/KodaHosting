@@ -242,7 +242,10 @@ public class PraetorConfirmActivity extends Activity {
                 Toast.makeText(PraetorConfirmActivity.this, "All servers deleted.", Toast.LENGTH_SHORT).show();
 
                 if ("revoke_tos".equals(action)) {
-                    eu.kodanetwork.mchost.App.getPrefs(PraetorConfirmActivity.this).edit().putBoolean("tos_accepted", false).apply();
+                    eu.kodanetwork.mchost.App.getPrefs(PraetorConfirmActivity.this).edit()
+                        .putBoolean("tos_accepted", false)
+                        .putBoolean("tos_accepted_v2", false)
+                        .putBoolean("tos_accepted_v3", false).apply();
                     
                     Intent intent = new Intent(PraetorConfirmActivity.this, MainActivity.class);
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);

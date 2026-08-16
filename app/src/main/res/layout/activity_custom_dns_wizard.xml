@@ -51,7 +51,7 @@
                     android:textColor="#F0F0F0"
                     android:textSize="18sp"
                     android:textStyle="bold"
-                    android:fontFamily="sans-serif-medium" />
+                    android:fontFamily="@font/font_koda" />
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -60,7 +60,7 @@
                     android:textColor="#555555"
                     android:textSize="10sp"
                     android:letterSpacing="0.15"
-                    android:fontFamily="sans-serif-medium" />
+                    android:fontFamily="@font/font_koda" />
             </LinearLayout>
 
             <!-- Step indicator dots -->
@@ -138,7 +138,7 @@
                     android:textColor="#F0F0F0"
                     android:textSize="22sp"
                     android:textStyle="bold"
-                    android:fontFamily="sans-serif-medium" />
+                    android:fontFamily="@font/font_koda" />
 
                 <View
                     android:layout_width="32dp"
@@ -154,7 +154,7 @@
                     android:textColor="#777777"
                     android:textSize="13sp"
                     android:lineSpacingExtra="3dp"
-                    android:fontFamily="sans-serif" />
+                    android:fontFamily="@font/font_koda" />
 
                 <com.google.android.material.chip.Chip
                     android:id="@+id/chip_existing_domain"
@@ -188,7 +188,7 @@
                         android:inputType="textUri|textNoSuggestions"
                         android:gravity="center_vertical|start"
                         android:textSize="15sp"
-                        android:fontFamily="sans-serif" />
+                        android:fontFamily="@font/font_koda" />
                 </eu.kodanetwork.mchost.ui.AnimatedBorderLayout>
 
                 <eu.kodanetwork.mchost.ui.AnimatedBorderLayout
@@ -226,7 +226,7 @@
                     android:textColor="#F0F0F0"
                     android:textSize="22sp"
                     android:textStyle="bold"
-                    android:fontFamily="sans-serif-medium" />
+                    android:fontFamily="@font/font_koda" />
 
                 <View
                     android:layout_width="32dp"
@@ -242,7 +242,7 @@
                     android:textColor="#777777"
                     android:textSize="13sp"
                     android:lineSpacingExtra="3dp"
-                    android:fontFamily="sans-serif" />
+                    android:fontFamily="@font/font_koda" />
 
                 <!-- SRV data block -->
                 <LinearLayout
@@ -261,7 +261,7 @@
                         android:text="@string/cdns_copy_type"
                         android:textColor="#CCCCCC"
                         android:textSize="13sp"
-                        android:fontFamily="monospace"
+                        android:fontFamily="@font/font_koda_mono"
                         android:background="?attr/selectableItemBackground"
                         android:clickable="true"
                         android:focusable="true" />
@@ -278,7 +278,7 @@
                         android:padding="10dp"
                         android:textColor="#CCCCCC"
                         android:textSize="13sp"
-                        android:fontFamily="monospace"
+                        android:fontFamily="@font/font_koda_mono"
                         android:background="?attr/selectableItemBackground"
                         android:clickable="true"
                         android:focusable="true" />
@@ -295,7 +295,7 @@
                         android:padding="10dp"
                         android:textColor="#CCCCCC"
                         android:textSize="13sp"
-                        android:fontFamily="monospace"
+                        android:fontFamily="@font/font_koda_mono"
                         android:background="?attr/selectableItemBackground"
                         android:clickable="true"
                         android:focusable="true" />
@@ -312,7 +312,7 @@
                         android:padding="10dp"
                         android:textColor="#CCCCCC"
                         android:textSize="13sp"
-                        android:fontFamily="monospace"
+                        android:fontFamily="@font/font_koda_mono"
                         android:background="?attr/selectableItemBackground"
                         android:clickable="true"
                         android:focusable="true" />
@@ -329,7 +329,7 @@
                         android:padding="10dp"
                         android:textColor="#CCCCCC"
                         android:textSize="13sp"
-                        android:fontFamily="monospace"
+                        android:fontFamily="@font/font_koda_mono"
                         android:background="?attr/selectableItemBackground"
                         android:clickable="true"
                         android:focusable="true" />
@@ -346,7 +346,7 @@
                         android:padding="10dp"
                         android:textColor="#CCCCCC"
                         android:textSize="13sp"
-                        android:fontFamily="monospace"
+                        android:fontFamily="@font/font_koda_mono"
                         android:background="?attr/selectableItemBackground"
                         android:clickable="true"
                         android:focusable="true" />
@@ -363,7 +363,7 @@
                         android:padding="10dp"
                         android:textColor="#CCCCCC"
                         android:textSize="13sp"
-                        android:fontFamily="monospace"
+                        android:fontFamily="@font/font_koda_mono"
                         android:background="?attr/selectableItemBackground"
                         android:clickable="true"
                         android:focusable="true" />
@@ -380,7 +380,7 @@
                         android:padding="10dp"
                         android:textColor="#CCCCCC"
                         android:textSize="13sp"
-                        android:fontFamily="monospace"
+                        android:fontFamily="@font/font_koda_mono"
                         android:background="?attr/selectableItemBackground"
                         android:clickable="true"
                         android:focusable="true" />
@@ -413,7 +413,7 @@
                         android:textSize="14sp"
                         android:textStyle="bold"
                         android:layout_marginBottom="8dp"
-                        android:fontFamily="sans-serif-medium" />
+                        android:fontFamily="@font/font_koda" />
 
                     <eu.kodanetwork.mchost.ui.AnimatedTutorialView
                         android:id="@+id/animated_tutorial_view"
@@ -513,7 +513,7 @@
                     android:textColor="#F0F0F0"
                     android:textSize="22sp"
                     android:textStyle="bold"
-                    android:fontFamily="sans-serif-medium" />
+                    android:fontFamily="@font/font_koda" />
 
                 <View
                     android:layout_width="32dp"
@@ -532,7 +532,7 @@
                     android:textColor="#777777"
                     android:textSize="13sp"
                     android:lineSpacingExtra="3dp"
-                    android:fontFamily="sans-serif" />
+                    android:fontFamily="@font/font_koda" />
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btn_finish"

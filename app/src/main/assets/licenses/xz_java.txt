@@ -1,0 +1,8 @@
+XZ for Java
+Copyright (c) 2011-2024 Lasse Collin
+
+This software is released into the public domain (Unlicense).
+
+You can do whatever you want with this software. It is still good manners
+to mention the original author when it is practical.
+https://tukaani.org/xz/java.html

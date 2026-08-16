@@ -65,6 +65,7 @@ public class ServerDetailActivity extends AppCompatActivity {
     // Tabs
     private TabLayout tabs;
     private View pDash, pConsole, pFiles, pSettings, pPlugins;
+    private android.app.Dialog propsDriftDialog;
 
     // Dashboard
     private TextView tvBadge, tvUptime, tvPlayers, tvJoinAddr, tvRamInfo, tvVerInfo, tvJavaInfo, tvBedrockPortDash;
@@ -129,7 +130,10 @@ public class ServerDetailActivity extends AppCompatActivity {
             stateCb = (id, s) -> {
                 if (id.equals(server.getId())) runOnUiThread(() -> {
                     if (layoutFullLoading != null) {
-                        if (s == ServerInstance.State.CRASHED || s == ServerInstance.State.ONLINE || s == ServerInstance.State.OFFLINE) {
+                        if (s == ServerInstance.State.ONLINE && layoutFullLoading.getVisibility() == View.VISIBLE) {
+                            // Server is up: blocks fly into the server name while the overlay fades
+                            playSuccessFlyAndDismiss();
+                        } else if (s == ServerInstance.State.CRASHED || s == ServerInstance.State.OFFLINE) {
                             layoutFullLoading.setVisibility(View.GONE);
                         } else if (s == ServerInstance.State.STARTING && layoutFullLoading.getVisibility() == View.VISIBLE) {
                             if (tvFullLoadingMsg != null) tvFullLoadingMsg.setText(getString(R.string.sd_starting_server));
@@ -141,12 +145,14 @@ public class ServerDetailActivity extends AppCompatActivity {
             logCb = (id, line) -> {
                 if (id.equals(server.getId())) runOnUiThread(() -> {
                     appendLog(line);
-                    if (line.contains("SETUP_COMPLETE_SUCCESS") || line.contains("DESIGN_APPLIED") || line.contains("KodaNetwork Error")) {
-                        if (layoutFullLoading != null) layoutFullLoading.setVisibility(View.GONE);
+                    if (line.contains("SETUP_COMPLETE_SUCCESS") || line.contains("DESIGN_APPLIED")) {
+                        playSuccessFlyAndDismiss();
                         if (server.state == ServerInstance.State.SETTING_UP) {
                             server.state = ServerInstance.State.ONLINE;
                             updateDash();
                         }
+                    } else if (line.contains("KodaNetwork Error")) {
+                        if (layoutFullLoading != null) layoutFullLoading.setVisibility(View.GONE);
                     }
                 });
             };
@@ -272,6 +278,13 @@ public class ServerDetailActivity extends AppCompatActivity {
             getIntent().removeExtra("auto_setup");
             if (layoutFullLoading != null) {
                 layoutFullLoading.setVisibility(View.VISIBLE);
+                layoutFullLoading.setAlpha(1f);
+                com.airbnb.lottie.LottieAnimationView boot = findViewById(R.id.lottie_full_loading);
+                if (boot != null) {
+                    boot.setVisibility(View.VISIBLE);
+                    boot.setProgress(0f);
+                    boot.playAnimation();
+                }
                 if (tvFullLoadingMsg != null) tvFullLoadingMsg.setText(getString(R.string.sd_auto_setup_running));
             }
             server.state = ServerInstance.State.SETTING_UP;
@@ -541,11 +554,16 @@ public class ServerDetailActivity extends AppCompatActivity {
                     return;
                 }
                 showTab(t.getPosition());
+                // Re-check server.properties for manual edits whenever the
+                // dashboard is (re)entered, not only when the screen opens
+                if (t.getPosition() == 0) checkPropsDriftAndWarn();
             }
             @Override public void onTabUnselected(TabLayout.Tab t) {}
             @Override public void onTabReselected(TabLayout.Tab t) {
                 if (t.getPosition() == 1 && server != null && server.state == ServerInstance.State.OFFLINE) {
                     tabs.selectTab(tabs.getTabAt(0));
+                } else if (t.getPosition() == 0) {
+                    checkPropsDriftAndWarn();
                 }
             }
         });
@@ -562,6 +580,7 @@ public class ServerDetailActivity extends AppCompatActivity {
         android.widget.LinearLayout containerOffline = sheet.findViewById(R.id.container_pm_offline);
         android.widget.TextView headerOnline = sheet.findViewById(R.id.tv_pm_online_header);
         android.widget.TextView headerOffline = sheet.findViewById(R.id.tv_pm_offline_header);
+        final android.view.View emptyState = sheet.findViewById(R.id.container_pm_empty);
 
         if (containerOnline != null && containerOffline != null && headerOnline != null && headerOffline != null) {
             containerOnline.removeAllViews();
@@ -595,10 +614,12 @@ public class ServerDetailActivity extends AppCompatActivity {
                 }
                 headerOnline.setVisibility(android.view.View.VISIBLE);
                 containerOnline.setVisibility(android.view.View.VISIBLE);
+                if (emptyState != null) emptyState.setVisibility(android.view.View.GONE);
             } else {
                 // Show empty state or hide
                 headerOnline.setVisibility(android.view.View.GONE);
                 containerOnline.setVisibility(android.view.View.GONE);
+                if (emptyState != null) emptyState.setVisibility(android.view.View.VISIBLE);
             }
             
             new Thread(() -> {
@@ -657,6 +678,7 @@ public class ServerDetailActivity extends AppCompatActivity {
                                 }
                                 headerOffline.setVisibility(android.view.View.VISIBLE);
                                 containerOffline.setVisibility(android.view.View.VISIBLE);
+                                if (emptyState != null) emptyState.setVisibility(android.view.View.GONE);
                             });
                         }
                     }
@@ -692,14 +714,11 @@ public class ServerDetailActivity extends AppCompatActivity {
         android.widget.Button btnBan = view.findViewById(R.id.btn_pm_ban);
         com.google.android.material.switchmaterial.SwitchMaterial switchWhitelist = view.findViewById(R.id.switch_pm_whitelist);
 
-        // Effect/kick commands need the player entity on the server; disable them
-        // for offline players instead of silently doing nothing
-        if (!isOnline) {
-            for (android.widget.Button b : new android.widget.Button[]{btnHeal, btnStarve, btnKill, btnFeed, btnKick}) {
-                b.setEnabled(false);
-                b.setAlpha(0.4f);
-            }
-        }
+        // Player heads, UUID lookups and item icons all need internet — gray out
+        // every action while offline; effect/kick commands additionally need the
+        // player entity on the server
+        applyPmAvailability(view, isOnline,
+            eu.kodanetwork.mchost.util.NetworkMonitorManager.isInternetAvailable(this));
 
         btnHeal.setOnClickListener(v -> {
             sendCmd("effect give " + player + " instant_health 1 255");
@@ -787,74 +806,139 @@ public class ServerDetailActivity extends AppCompatActivity {
                 .show();
         });
         
-        // Stats & Live Updates
+        // Stats & Live Updates — the loop keeps running (and retrying) while the
+        // sheet is open, so a failed or crashed load recovers on its own
         new Thread(() -> {
-            String uuid = eu.kodanetwork.mchost.util.PlayerStatsParser.getUuidFromName(new java.io.File(server.getServerDir()), player);
-            if (uuid != null) {
-                while (sheet.isShowing()) {
+            java.io.File serverDir = new java.io.File(server.getServerDir());
+            final boolean[] statsAnimated = {false};
+            final boolean[] invAnimated = {false};
+            while (sheet.isShowing()) {
+                boolean hasInternet = eu.kodanetwork.mchost.util.NetworkMonitorManager.isInternetAvailable(ServerDetailActivity.this);
+                String uuid = null;
+                eu.kodanetwork.mchost.util.PlayerStatsParser.PlayerStats stats = null;
+                boolean statsAvailable = false;
+                java.util.Map<String, Object> dat = null;
+                boolean datExists = false;
+                try {
+                    uuid = eu.kodanetwork.mchost.util.PlayerStatsParser.getUuidFromName(serverDir, player);
+                    if (uuid != null) {
+                        stats = eu.kodanetwork.mchost.util.PlayerStatsParser.getStats(serverDir, uuid);
+                        statsAvailable = eu.kodanetwork.mchost.util.PlayerStatsParser.getStatsFile(serverDir, uuid).exists()
+                                || eu.kodanetwork.mchost.util.PlayerStatsParser.getLiveStatsFile(serverDir, uuid).exists();
+                        java.io.File datFile = eu.kodanetwork.mchost.util.PlayerStatsParser.getPlayerDataFile(serverDir, uuid);
+                        datExists = datFile.exists();
+                        if (datExists) {
+                            // playerdata being rewritten mid-read fails — retry next tick
+                            try { dat = eu.kodanetwork.mchost.util.NbtParser.parsePlayerDat(datFile); } catch (Exception ignored) {}
+                        }
+                    }
+                } catch (Exception ignored) {}
+
+                // Read Whitelist
+                boolean isWhitelisted = false;
+                if (uuid != null) {
                     try {
-                        eu.kodanetwork.mchost.util.PlayerStatsParser.PlayerStats stats = eu.kodanetwork.mchost.util.PlayerStatsParser.getStats(new java.io.File(server.getServerDir()), uuid);
-                        
-                        // Read Whitelist
-                        boolean isWhitelisted = false;
-                        try {
-                            java.io.File wl = new java.io.File(server.getServerDir(), "whitelist.json");
-                            if (wl.exists()) {
-                                byte[] bytes = new byte[(int) wl.length()];
-                                try (java.io.FileInputStream fis = new java.io.FileInputStream(wl)) { fis.read(bytes); }
-                                org.json.JSONArray arr = new org.json.JSONArray(new String(bytes, java.nio.charset.StandardCharsets.UTF_8));
-                                for (int i = 0; i < arr.length(); i++) {
-                                    if (arr.getJSONObject(i).getString("uuid").equalsIgnoreCase(uuid)) {
-                                        isWhitelisted = true; break;
-                                    }
+                        java.io.File wl = new java.io.File(server.getServerDir(), "whitelist.json");
+                        if (wl.exists()) {
+                            byte[] bytes = new byte[(int) wl.length()];
+                            try (java.io.FileInputStream fis = new java.io.FileInputStream(wl)) { fis.read(bytes); }
+                            org.json.JSONArray arr = new org.json.JSONArray(new String(bytes, java.nio.charset.StandardCharsets.UTF_8));
+                            for (int i = 0; i < arr.length(); i++) {
+                                if (arr.getJSONObject(i).getString("uuid").equalsIgnoreCase(uuid)) {
+                                    isWhitelisted = true; break;
                                 }
                             }
-                        } catch(Exception ignored){}
-                        
-                        boolean finalIsWhitelisted = isWhitelisted;
-                        
-                        // Read Inventory — level-name aware instead of hardcoded "world/"
-                        java.io.File datFile = eu.kodanetwork.mchost.util.PlayerStatsParser.getPlayerDataFile(new java.io.File(server.getServerDir()), uuid);
-                        java.util.Map<String, Object> dat = datFile.exists()
-                                ? eu.kodanetwork.mchost.util.NbtParser.parsePlayerDat(datFile) : null;
-                        
-                        runOnUiThread(() -> {
-                            if (!sheet.isShowing()) return;
+                        }
+                    } catch(Exception ignored){}
+                }
+
+                boolean finalIsWhitelisted = isWhitelisted;
+                final String fUuid = uuid;
+                final eu.kodanetwork.mchost.util.PlayerStatsParser.PlayerStats fStats = stats;
+                final boolean fStatsAvailable = statsAvailable;
+                final java.util.Map<String, Object> fDat = dat;
+                final boolean fDatExists = datExists;
+                final boolean fHasInternet = hasInternet;
+                runOnUiThread(() -> {
+                    if (!sheet.isShowing()) return;
+                    applyPmAvailability(view, isOnline, fHasInternet);
+
+                    android.view.View pbStats = view.findViewById(R.id.pb_pm_stats);
+                    android.widget.GridLayout gridStats = view.findViewById(R.id.grid_pm_stats);
+                    if (fStatsAvailable) {
+                        if (fStats != null) {
                             TextView tvDeaths = view.findViewById(R.id.tv_pm_stat_deaths);
                             TextView tvMined = view.findViewById(R.id.tv_pm_stat_mined);
                             TextView tvHours = view.findViewById(R.id.tv_pm_stat_hours);
                             TextView tvMobs = view.findViewById(R.id.tv_pm_stat_mobs);
                             TextView tvDmg = view.findViewById(R.id.tv_pm_stat_dmg);
-                            
-                            tvDeaths.setText(String.valueOf(stats.deaths));
-                            tvMined.setText(String.valueOf(stats.blocksMined));
-                            tvHours.setText(String.valueOf(stats.hoursPlayed));
-                            tvMobs.setText(String.valueOf(stats.mobsKilled));
-                            tvDmg.setText(String.valueOf(stats.damageTaken));
-                            
-                            switchWhitelist.setOnCheckedChangeListener(null);
-                            switchWhitelist.setChecked(finalIsWhitelisted);
-                            switchWhitelist.setOnCheckedChangeListener((btn, isChecked) -> {
-                                sendCmd((isChecked ? "whitelist add " : "whitelist remove ") + player);
-                            });
-                            
-                            // Always build the empty grid so the inventory keeps its
-                            // shape even before/without readable playerdata, then
-                            // fill in items whenever data is available
-                            android.widget.GridLayout gridMain = view.findViewById(R.id.grid_inventory_main);
-                            if (gridMain != null && gridMain.getChildCount() == 0) {
-                                buildInventoryGrid(view);
-                            }
-                            if (dat != null && dat.containsKey("Inventory")) {
-                                fillInventoryItems(view, (java.util.List<Object>) dat.get("Inventory"));
-                            }
-                        });
-                        
-                        Thread.sleep(2000);
-                    } catch (Exception e) {
-                        try { Thread.sleep(2000); } catch (Exception ignored) {}
+
+                            tvDeaths.setText(String.valueOf(fStats.deaths));
+                            tvMined.setText(String.valueOf(fStats.blocksMined));
+                            tvHours.setText(String.valueOf(fStats.hoursPlayed));
+                            tvMobs.setText(String.valueOf(fStats.mobsKilled));
+                            tvDmg.setText(String.valueOf(fStats.damageTaken));
+                        }
+                        showLottie(pbStats, false);
+                        if (!statsAnimated[0]) {
+                            statsAnimated[0] = true;
+                            fadeIn(gridStats);
+                        }
+                    } else {
+                        // an online player gets live stats within seconds; an
+                        // offline player without a stats file stays at 0
+                        showLottie(pbStats, isOnline);
+                        statsAnimated[0] = false;
                     }
-                }
+
+                    if (fUuid != null) {
+                        switchWhitelist.setOnCheckedChangeListener(null);
+                        switchWhitelist.setChecked(finalIsWhitelisted);
+                        switchWhitelist.setOnCheckedChangeListener((btn, isChecked) -> {
+                            sendCmd((isChecked ? "whitelist add " : "whitelist remove ") + player);
+                        });
+                    }
+
+                    // Inventory — rebuild the grid whenever it is incomplete; a
+                    // crashed build can otherwise leave a single slot behind
+                    android.widget.GridLayout gridMain = view.findViewById(R.id.grid_inventory_main);
+                    android.widget.GridLayout gridHotbar = view.findViewById(R.id.grid_inventory_hotbar);
+                    android.widget.LinearLayout containerArmor = view.findViewById(R.id.container_armor);
+                    android.widget.FrameLayout containerOffhand = view.findViewById(R.id.container_offhand);
+                    if (gridMain == null || gridHotbar == null || containerArmor == null || containerOffhand == null) return;
+                    if (gridMain.getChildCount() != 27 || gridHotbar.getChildCount() != 9
+                            || containerArmor.getChildCount() != 4 || containerOffhand.getChildCount() != 1) {
+                        gridMain.removeAllViews();
+                        gridHotbar.removeAllViews();
+                        containerArmor.removeAllViews();
+                        containerOffhand.removeAllViews();
+                        buildInventoryGrid(view);
+                    }
+
+                    android.view.View pbInv = view.findViewById(R.id.pb_pm_inventory);
+                    android.view.View invContainer = view.findViewById(R.id.container_pm_inventory);
+                    java.util.List<Object> items = (fDat != null && fDat.get("Inventory") instanceof java.util.List)
+                            ? (java.util.List<Object>) fDat.get("Inventory") : java.util.Collections.emptyList();
+                    // fillInventoryItems resets all slots first, so an empty
+                    // list clears stale icons while (re)loading
+                    fillInventoryItems(view, items);
+                    if (fDat != null && fDat.containsKey("Inventory")) {
+                        showLottie(pbInv, false);
+                        if (!invAnimated[0]) {
+                            invAnimated[0] = true;
+                            fadeIn(invContainer);
+                        }
+                    } else {
+                        // spinner only while data is actually expected: unreadable
+                        // playerdata is retried, an online player's file may still
+                        // appear — an offline player without data is simply empty
+                        boolean waitingForData = fDat == null && (fDatExists || isOnline);
+                        showLottie(pbInv, waitingForData);
+                        invAnimated[0] = false;
+                    }
+                });
+
+                try { Thread.sleep(2000); } catch (Exception ignored) {}
             }
         }).start();
         
@@ -875,12 +959,64 @@ public class ServerDetailActivity extends AppCompatActivity {
         return false;
     }
 
+    /**
+     * Grays out every player-manager action while there is no internet
+     * connection; effect/kick commands additionally require the target player
+     * to be online. Re-applied on every refresh tick so buttons come back on
+     * their own once connectivity returns.
+     */
+    private void applyPmAvailability(android.view.View view, boolean isOnline, boolean hasInternet) {
+        android.widget.Button[] all = {
+            view.findViewById(R.id.btn_pm_heal), view.findViewById(R.id.btn_pm_starve),
+            view.findViewById(R.id.btn_pm_kill), view.findViewById(R.id.btn_pm_delete),
+            view.findViewById(R.id.btn_pm_feed), view.findViewById(R.id.btn_pm_op),
+            view.findViewById(R.id.btn_pm_kick), view.findViewById(R.id.btn_pm_ban)
+        };
+        java.util.List<android.widget.Button> needOnline = java.util.Arrays.asList(
+            view.findViewById(R.id.btn_pm_heal), view.findViewById(R.id.btn_pm_starve),
+            view.findViewById(R.id.btn_pm_kill), view.findViewById(R.id.btn_pm_feed),
+            view.findViewById(R.id.btn_pm_kick));
+        for (android.widget.Button b : all) {
+            if (b == null) continue;
+            boolean enabled = hasInternet && (isOnline || !needOnline.contains(b));
+            b.setEnabled(enabled);
+            b.setAlpha(enabled ? 1f : 0.4f);
+        }
+        android.widget.CompoundButton sw = view.findViewById(R.id.switch_pm_whitelist);
+        if (sw != null) {
+            sw.setEnabled(hasInternet);
+            sw.setAlpha(hasInternet ? 1f : 0.4f);
+        }
+        android.view.View hint = view.findViewById(R.id.tv_pm_offline_hint);
+        if (hint != null) hint.setVisibility(hasInternet ? android.view.View.GONE : android.view.View.VISIBLE);
+    }
+
+    /** Short fade-in used to animate (re)loaded stats/inventory content. */
+    private void fadeIn(android.view.View v) {
+        if (v == null) return;
+        v.clearAnimation();
+        v.animate().cancel();
+        v.setAlpha(0f);
+        v.animate().alpha(1f).setDuration(350).start();
+    }
+
+    /** Shows/hides a loading view; Lottie views also pause/resume with it. */
+    private void showLottie(android.view.View v, boolean show) {
+        if (v == null) return;
+        v.setVisibility(show ? android.view.View.VISIBLE : android.view.View.GONE);
+        if (v instanceof com.airbnb.lottie.LottieAnimationView) {
+            com.airbnb.lottie.LottieAnimationView lav = (com.airbnb.lottie.LottieAnimationView) v;
+            if (show) lav.playAnimation(); else lav.pauseAnimation();
+        }
+    }
+
     /** Inflates the empty armor/offhand/main/hotbar slots. Runs once per sheet. */
     private void buildInventoryGrid(android.view.View view) {
         android.widget.LinearLayout containerArmor = view.findViewById(R.id.container_armor);
         android.widget.FrameLayout containerOffhand = view.findViewById(R.id.container_offhand);
         android.widget.GridLayout gridMain = view.findViewById(R.id.grid_inventory_main);
         android.widget.GridLayout gridHotbar = view.findViewById(R.id.grid_inventory_hotbar);
+        if (containerArmor == null || containerOffhand == null || gridMain == null || gridHotbar == null) return;
 
         for (int i = 0; i < 4; i++) {
             containerArmor.addView(getLayoutInflater().inflate(R.layout.item_inventory_slot, containerArmor, false));
@@ -968,12 +1104,122 @@ public class ServerDetailActivity extends AppCompatActivity {
 
     private void showTab(int i) {
         int targetSettings = server.isDatabase() ? 3 : 4;
-        pDash    .setVisibility(i == 0 ? View.VISIBLE : View.GONE);
-        pConsole .setVisibility(i == 1 ? View.VISIBLE : View.GONE);
-        pFiles   .setVisibility(i == 2 ? View.VISIBLE : View.GONE);
-        if (pPlugins != null) pPlugins.setVisibility(!server.isDatabase() && i == 3 ? View.VISIBLE : View.GONE);
-        pSettings.setVisibility(i == targetSettings ? View.VISIBLE : View.GONE);
+        animatePanel(pDash, i == 0);
+        animatePanel(pConsole, i == 1);
+        animatePanel(pFiles, i == 2);
+        if (pPlugins != null) animatePanel(pPlugins, !server.isDatabase() && i == 3);
+        animatePanel(pSettings, i == targetSettings);
         if (i == 2) refreshFiles();
+    }
+
+    /** Fade/slide-in used when switching dashboard tabs. */
+    private void animatePanel(android.view.View panel, boolean show) {
+        if (panel == null) return;
+        panel.setVisibility(show ? View.VISIBLE : View.GONE);
+        if (!show) return;
+        panel.animate().cancel();
+        panel.setAlpha(0f);
+        panel.setTranslationY(14f * getResources().getDisplayMetrics().density);
+        panel.animate().alpha(1f).translationY(0f)
+            .setDuration(260)
+            .setInterpolator(new android.view.animation.DecelerateInterpolator())
+            .start();
+    }
+
+    private boolean successFlyRunning = false;
+
+    /**
+     * Success sequence when a setup finishes: the three orange loader blocks
+     * fly into the server name and merge with its letters while the loading
+     * overlay slowly turns transparent and disappears.
+     */
+    private void playSuccessFlyAndDismiss() {
+        if (layoutFullLoading == null || layoutFullLoading.getVisibility() != View.VISIBLE || successFlyRunning) return;
+        successFlyRunning = true;
+
+        com.airbnb.lottie.LottieAnimationView boot = findViewById(R.id.lottie_full_loading);
+        TextView title = findViewById(R.id.tv_title);
+        android.view.ViewGroup contentRoot = (android.view.ViewGroup) findViewById(android.R.id.content);
+
+        int[] bootPos = new int[2];
+        int bootW = 0, bootH = 0;
+        if (boot != null) {
+            boot.getLocationOnScreen(bootPos);
+            bootW = boot.getWidth();
+            bootH = boot.getHeight();
+            boot.pauseAnimation();
+        }
+        int[] titlePos = new int[2];
+        int titleW = 0, titleH = 0;
+        if (title != null) {
+            title.getLocationOnScreen(titlePos);
+            titleW = title.getWidth();
+            titleH = title.getHeight();
+        }
+        int[] rootPos = new int[2];
+        if (contentRoot != null) contentRoot.getLocationOnScreen(rootPos);
+
+        boolean canFly = contentRoot != null && bootW > 0 && bootH > 0 && titleW > 0 && titleH > 0;
+        if (canFly) {
+            float density = getResources().getDisplayMetrics().density;
+            // blocks sit at x 70/120/170 (of 240) and y 40 (of 80) in the boot animation
+            float[] relX = {70f, 120f, 170f};
+            float targetX = titlePos[0] - rootPos[0] + titleW / 2f;
+            float targetY = titlePos[1] - rootPos[1] + titleH / 2f;
+            float size = bootW * (28f / 240f);
+
+            for (int i = 0; i < 3; i++) {
+                float startX = bootPos[0] - rootPos[0] + bootW * (relX[i] / 240f) - size / 2f;
+                float startY = bootPos[1] - rootPos[1] + bootH * (40f / 80f) - size / 2f;
+
+                android.widget.ImageView block = new android.widget.ImageView(this);
+                android.graphics.drawable.GradientDrawable bg = new android.graphics.drawable.GradientDrawable();
+                bg.setShape(android.graphics.drawable.GradientDrawable.RECTANGLE);
+                bg.setCornerRadius(3f * density);
+                bg.setColor(i == 1 ? 0xFFFF8C38 : 0xFFFF6B00);
+                block.setBackground(bg);
+                block.setLayoutParams(new android.view.ViewGroup.LayoutParams((int) size, (int) size));
+                block.setElevation(200f * density); // above the fading overlay
+                contentRoot.addView(block);
+                block.setTranslationX(startX);
+                block.setTranslationY(startY);
+
+                // fly into the letters, shrink and fade as they merge
+                block.animate()
+                    .translationX(targetX - size / 2f)
+                    .translationY(targetY - size / 2f)
+                    .scaleX(0.15f).scaleY(0.15f)
+                    .alpha(0f)
+                    .setStartDelay(i * 90L)
+                    .setDuration(680L)
+                    .setInterpolator(new android.view.animation.DecelerateInterpolator(1.6f))
+                    .withEndAction(() -> contentRoot.removeView(block))
+                    .start();
+            }
+
+            // the name swallows the blocks with a small pulse
+            if (title != null) {
+                title.animate().cancel();
+                title.animate().scaleX(1.14f).scaleY(1.14f)
+                    .setStartDelay(240L).setDuration(160L)
+                    .withEndAction(() -> title.animate().scaleX(1f).scaleY(1f).setDuration(220L).start())
+                    .start();
+            }
+
+            if (boot != null) boot.setVisibility(View.INVISIBLE); // blocks took over
+        }
+
+        // the overlay turns transparent and vanishes while the blocks fly
+        layoutFullLoading.animate()
+            .alpha(0f)
+            .setDuration(canFly ? 950L : 450L)
+            .setInterpolator(new android.view.animation.DecelerateInterpolator())
+            .withEndAction(() -> {
+                layoutFullLoading.setVisibility(View.GONE);
+                layoutFullLoading.setAlpha(1f);
+                successFlyRunning = false;
+            })
+            .start();
     }
 
     // ── Dashboard ─────────────────────────────────────────────────────────────
@@ -1734,7 +1980,7 @@ public class ServerDetailActivity extends AppCompatActivity {
 
         File[] files = currentDir.listFiles();
         if (files == null || files.length == 0) {
-            if (currentDir.getAbsolutePath().equals(rootPath)) addFRow("(leer)", null);
+            if (currentDir.getAbsolutePath().equals(rootPath)) addFilesEmptyState();
             return;
         }
 
@@ -1754,12 +2000,39 @@ public class ServerDetailActivity extends AppCompatActivity {
     private boolean clipCut;
     private File pendingExportFile;
 
+    /** Animated empty state for the Files tab (Lottie cube + hint). */
+    private void addFilesEmptyState() {
+        float d = getResources().getDisplayMetrics().density;
+        android.widget.LinearLayout box = new android.widget.LinearLayout(this);
+        box.setOrientation(android.widget.LinearLayout.VERTICAL);
+        box.setGravity(android.view.Gravity.CENTER_HORIZONTAL);
+        box.setPadding(0, (int) (48 * d), 0, (int) (48 * d));
+
+        int size = (int) (96 * d);
+        com.airbnb.lottie.LottieAnimationView lav = new com.airbnb.lottie.LottieAnimationView(this);
+        lav.setLayoutParams(new android.view.ViewGroup.LayoutParams(size, size));
+        lav.setAnimation(R.raw.koda_empty);
+        lav.loop(true);
+        lav.playAnimation();
+        box.addView(lav);
+
+        TextView tv = new TextView(this);
+        tv.setText(getString(R.string.sd_files_empty));
+        tv.setTextColor(0xFF555566);
+        tv.setTextSize(13);
+        tv.setGravity(android.view.Gravity.CENTER);
+        box.addView(tv);
+
+        layoutFileList.addView(box);
+    }
+
     private void addFRow(String text, File file) {
         TextView tv = new TextView(this);
         tv.setText(text);
         tv.setTextSize(13);
         tv.setPadding(16, 24, 16, 24); // Taller rows for touch
-        tv.setTypeface(android.graphics.Typeface.MONOSPACE);
+        android.graphics.Typeface mono = androidx.core.content.res.ResourcesCompat.getFont(this, R.font.font_koda_mono);
+        if (mono != null) tv.setTypeface(mono);
         boolean light = eu.kodanetwork.mchost.util.ThemeHelper.isLightMode(this);
         tv.setTextColor(text.contains("📁") || text.startsWith("..") ? 0xFFFF6B00 : (light ? 0xFF333333 : 0xFFCCCCCC));
         
@@ -3241,105 +3514,138 @@ public class ServerDetailActivity extends AppCompatActivity {
 
         // Manual edits of server.properties are allowed, but writeProps() would
         // silently overwrite them from the model on the next start — warn instead
-        if (propsFile.exists()) {
-            // server-port and server-ip are strictly app-managed (tunnel/DNS wiring
-            // depends on them) — restore them immediately, never offer them as a choice
-            java.util.Map<String, String> enforce = new java.util.HashMap<>();
-            String filePort = props.getProperty("server-port");
-            if (filePort != null && !filePort.trim().equals(String.valueOf(server.getPort()).trim())) {
-                enforce.put("server-port", String.valueOf(server.getPort()));
-            }
-            String fileIp = props.getProperty("server-ip");
-            if (fileIp != null && !fileIp.trim().equals("127.0.0.1")) {
-                enforce.put("server-ip", "127.0.0.1");
-            }
-            if (!enforce.isEmpty()) {
-                writePropsEntries(propsFile, enforce);
-                android.widget.Toast.makeText(this, getString(R.string.sd_props_port_ip_managed), android.widget.Toast.LENGTH_LONG).show();
-            }
+        checkPropsDriftAndWarn();
+    }
 
-            java.util.LinkedHashMap<String, String> fileVals = new java.util.LinkedHashMap<>();
-            java.util.LinkedHashMap<String, String> modelVals = new java.util.LinkedHashMap<>();
-            collectPropsDrift(props, "motd", server.getMotd(), fileVals, modelVals);
-            collectPropsDrift(props, "gamemode", server.getGamemode() == null ? null : server.getGamemode().name(), fileVals, modelVals);
-            collectPropsDrift(props, "difficulty", server.getDifficulty() == null ? null : server.getDifficulty().name(), fileVals, modelVals);
-            collectPropsDrift(props, "pvp", String.valueOf(server.isPvp()), fileVals, modelVals);
-            collectPropsDrift(props, "white-list", String.valueOf(server.isWhitelist()), fileVals, modelVals);
-            collectPropsDrift(props, "max-players", String.valueOf(server.getMaxPlayers()), fileVals, modelVals);
+    /**
+     * Re-reads server.properties, restores the strictly app-managed port/ip and
+     * warns about manual edits of app-tracked values instead of clobbering them
+     * on the next server start. Called on screen setup and whenever the user
+     * (re)enters the dashboard tab.
+     */
+    private void checkPropsDriftAndWarn() {
+        File propsFile = new File(server.getServerDir(), "server.properties");
+        if (!propsFile.exists()) return;
+        if (propsDriftDialog != null && propsDriftDialog.isShowing()) return;
 
-            if (!fileVals.isEmpty()) {
-                StringBuilder msg = new StringBuilder(getString(R.string.sd_props_changed_prefix) + "\n\n");
-                for (java.util.Map.Entry<String, String> e : fileVals.entrySet()) {
-                    msg.append(e.getKey()).append(": \"").append(e.getValue())
-                       .append("\"\n").append(getString(R.string.sd_props_app_value)).append(" \"")
-                       .append(modelVals.get(e.getKey())).append("\"\n\n");
-                }
-                msg.append(getString(R.string.sd_props_changed_suffix));
+        java.util.Properties props = new java.util.Properties();
+        try (java.io.FileInputStream fis = new java.io.FileInputStream(propsFile)) {
+            props.load(fis);
+        } catch (Exception ignored) { return; }
 
-                android.app.Dialog driftDialog = new android.app.Dialog(this);
-                driftDialog.requestWindowFeature(android.view.Window.FEATURE_NO_TITLE);
-                driftDialog.setContentView(R.layout.dialog_praetor_delete);
-                if (driftDialog.getWindow() != null) {
-                    driftDialog.getWindow().setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT));
-                    driftDialog.getWindow().setLayout(android.view.ViewGroup.LayoutParams.MATCH_PARENT, android.view.ViewGroup.LayoutParams.MATCH_PARENT);
-                }
-                TextView driftTitle = driftDialog.findViewById(R.id.tv_dialog_title);
-                if (driftTitle != null) {
-                    String praetorHtml = "<font color=\"#555555\">P.R.</font><font color=\"#AAAAAA\">A</font><font color=\"#555555\">.</font><font color=\"#AAAAAA\">E</font><font color=\"#555555\">.</font><font color=\"#FFFFFF\">T</font><font color=\"#555555\">.</font><font color=\"#FFFFFF\">O</font><font color=\"#555555\">.</font><font color=\"#FFFFFF\">R.</font>";
-                    driftTitle.setText(android.text.Html.fromHtml(praetorHtml, android.text.Html.FROM_HTML_MODE_LEGACY));
-                }
-                ((TextView) driftDialog.findViewById(R.id.tv_delete_title)).setText(getString(R.string.sd_props_changed_title));
-                ((TextView) driftDialog.findViewById(R.id.tv_delete_body)).setText(msg.toString());
-
-                android.widget.Button btnUseManual = driftDialog.findViewById(R.id.btn_dialog_delete);
-                btnUseManual.setText(getString(R.string.sd_props_use_manual));
-                btnUseManual.setOnClickListener(x -> {
-                    for (java.util.Map.Entry<String, String> e : fileVals.entrySet()) {
-                        String v = e.getValue();
-                        switch (e.getKey()) {
-                            case "motd": server.setMotd(v); break;
-                            case "gamemode":
-                                try { server.setGamemode(ServerInstance.Gamemode.valueOf(v.toLowerCase())); } catch (Exception ignored) {} break;
-                            case "difficulty":
-                                try { server.setDifficulty(ServerInstance.Difficulty.valueOf(v.toLowerCase())); } catch (Exception ignored) {} break;
-                            case "pvp": server.setPvp(Boolean.parseBoolean(v)); break;
-                            case "white-list": server.setWhitelist(Boolean.parseBoolean(v)); break;
-                            case "max-players":
-                                try { server.setMaxPlayers(Integer.parseInt(v)); } catch (Exception ignored) {} break;
-                        }
-                    }
-                    repo.update(server);
-                    driftDialog.dismiss();
-                });
-
-                driftDialog.findViewById(R.id.btn_dialog_cancel).setOnClickListener(x -> {
-                    java.util.Map<String, String> restore = new java.util.HashMap<>();
-                    restore.put("motd", server.getMotd());
-                    if (server.getGamemode() != null) restore.put("gamemode", server.getGamemode().name());
-                    if (server.getDifficulty() != null) restore.put("difficulty", server.getDifficulty().name());
-                    restore.put("pvp", String.valueOf(server.isPvp()));
-                    restore.put("white-list", String.valueOf(server.isWhitelist()));
-                    restore.put("max-players", String.valueOf(server.getMaxPlayers()));
-                    writePropsEntries(propsFile, restore);
-
-                    // Reflect the restored model values in the widgets
-                    etMaxPlayers.setText(String.valueOf(server.getMaxPlayers()));
-                    if (etMotd != null && server.getMotd() != null) etMotd.setText(server.getMotd());
-                    if (spinnerGamemode != null && server.getGamemode() != null) {
-                        for (int i = 0; i < gamemodes.length; i++) {
-                            if (gamemodes[i].equalsIgnoreCase(server.getGamemode().name())) spinnerGamemode.setSelection(i);
-                        }
-                    }
-                    for (int i = 0; i < difficulties.length; i++) {
-                        if (difficulties[i].equalsIgnoreCase(server.getDifficulty().name())) spinnerDifficulty.setSelection(i);
-                    }
-                    switchPvp.setChecked(server.isPvp());
-                    driftDialog.dismiss();
-                });
-
-                driftDialog.show();
-            }
+        // server-port and server-ip are strictly app-managed (tunnel/DNS wiring
+        // depends on them) — restore them immediately, never offer them as a choice
+        java.util.Map<String, String> enforce = new java.util.HashMap<>();
+        String filePort = props.getProperty("server-port");
+        if (filePort != null && !filePort.trim().equals(String.valueOf(server.getPort()).trim())) {
+            enforce.put("server-port", String.valueOf(server.getPort()));
         }
+        String fileIp = props.getProperty("server-ip");
+        if (fileIp != null && !fileIp.trim().equals("127.0.0.1")) {
+            enforce.put("server-ip", "127.0.0.1");
+        }
+        if (!enforce.isEmpty()) {
+            writePropsEntries(propsFile, enforce);
+            android.widget.Toast.makeText(this, getString(R.string.sd_props_port_ip_managed), android.widget.Toast.LENGTH_LONG).show();
+        }
+
+        java.util.LinkedHashMap<String, String> fileVals = new java.util.LinkedHashMap<>();
+        java.util.LinkedHashMap<String, String> modelVals = new java.util.LinkedHashMap<>();
+        collectPropsDrift(props, "motd", server.getMotd(), fileVals, modelVals);
+        collectPropsDrift(props, "gamemode", server.getGamemode() == null ? null : server.getGamemode().name(), fileVals, modelVals);
+        collectPropsDrift(props, "difficulty", server.getDifficulty() == null ? null : server.getDifficulty().name(), fileVals, modelVals);
+        collectPropsDrift(props, "pvp", String.valueOf(server.isPvp()), fileVals, modelVals);
+        collectPropsDrift(props, "white-list", String.valueOf(server.isWhitelist()), fileVals, modelVals);
+        collectPropsDrift(props, "max-players", String.valueOf(server.getMaxPlayers()), fileVals, modelVals);
+
+        if (fileVals.isEmpty()) return;
+
+        StringBuilder msg = new StringBuilder(getString(R.string.sd_props_changed_prefix) + "\n\n");
+        for (java.util.Map.Entry<String, String> e : fileVals.entrySet()) {
+            msg.append(e.getKey()).append(": \"").append(e.getValue())
+               .append("\"\n").append(getString(R.string.sd_props_app_value)).append(" \"")
+               .append(modelVals.get(e.getKey())).append("\"\n\n");
+        }
+        msg.append(getString(R.string.sd_props_changed_suffix));
+
+        android.app.Dialog driftDialog = new android.app.Dialog(this);
+        driftDialog.requestWindowFeature(android.view.Window.FEATURE_NO_TITLE);
+        driftDialog.setContentView(R.layout.dialog_praetor_delete);
+        if (driftDialog.getWindow() != null) {
+            driftDialog.getWindow().setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT));
+            driftDialog.getWindow().setLayout(android.view.ViewGroup.LayoutParams.MATCH_PARENT, android.view.ViewGroup.LayoutParams.MATCH_PARENT);
+        }
+        TextView driftTitle = driftDialog.findViewById(R.id.tv_dialog_title);
+        if (driftTitle != null) {
+            String praetorHtml = "<font color=\"#555555\">P.R.</font><font color=\"#AAAAAA\">A</font><font color=\"#555555\">.</font><font color=\"#AAAAAA\">E</font><font color=\"#555555\">.</font><font color=\"#FFFFFF\">T</font><font color=\"#555555\">.</font><font color=\"#FFFFFF\">O</font><font color=\"#555555\">.</font><font color=\"#FFFFFF\">R.</font>";
+            driftTitle.setText(android.text.Html.fromHtml(praetorHtml, android.text.Html.FROM_HTML_MODE_LEGACY));
+        }
+        ((TextView) driftDialog.findViewById(R.id.tv_delete_title)).setText(getString(R.string.sd_props_changed_title));
+        ((TextView) driftDialog.findViewById(R.id.tv_delete_body)).setText(msg.toString());
+
+        android.widget.Button btnUseManual = driftDialog.findViewById(R.id.btn_dialog_delete);
+        btnUseManual.setText(getString(R.string.sd_props_use_manual));
+        btnUseManual.setOnClickListener(x -> {
+            for (java.util.Map.Entry<String, String> e : fileVals.entrySet()) {
+                String v = e.getValue();
+                switch (e.getKey()) {
+                    case "motd": server.setMotd(v); break;
+                    case "gamemode":
+                        try { server.setGamemode(ServerInstance.Gamemode.valueOf(v.toLowerCase())); } catch (Exception ignored) {} break;
+                    case "difficulty":
+                        try { server.setDifficulty(ServerInstance.Difficulty.valueOf(v.toLowerCase())); } catch (Exception ignored) {} break;
+                    case "pvp": server.setPvp(Boolean.parseBoolean(v)); break;
+                    case "white-list": server.setWhitelist(Boolean.parseBoolean(v)); break;
+                    case "max-players":
+                        try { server.setMaxPlayers(Integer.parseInt(v)); } catch (Exception ignored) {} break;
+                }
+            }
+            repo.update(server);
+            driftDialog.dismiss();
+        });
+
+        android.widget.Button btnUseApp = driftDialog.findViewById(R.id.btn_dialog_cancel);
+        btnUseApp.setText(getString(R.string.sd_props_use_app));
+        btnUseApp.setOnClickListener(x -> {
+            java.util.Map<String, String> restore = new java.util.HashMap<>();
+            if (server.getMotd() != null) restore.put("motd", server.getMotd());
+            if (server.getGamemode() != null) restore.put("gamemode", server.getGamemode().name());
+            if (server.getDifficulty() != null) restore.put("difficulty", server.getDifficulty().name());
+            restore.put("pvp", String.valueOf(server.isPvp()));
+            restore.put("white-list", String.valueOf(server.isWhitelist()));
+            restore.put("max-players", String.valueOf(server.getMaxPlayers()));
+
+            // Reflect the restored model values in the widgets; every programmatic
+            // change re-fires saveProps, so write the model values again last to
+            // guarantee the file ends up matching the model
+            EditText etMaxPlayers = findViewById(R.id.et_max_players);
+            EditText etMotd = findViewById(R.id.et_motd);
+            android.widget.Spinner spinnerDifficulty = findViewById(R.id.spinner_difficulty);
+            android.widget.Spinner spinnerGamemode = findViewById(R.id.spinner_gamemode);
+            android.widget.CompoundButton switchPvp = findViewById(R.id.switch_pvp);
+            if (etMaxPlayers != null) etMaxPlayers.setText(String.valueOf(server.getMaxPlayers()));
+            if (etMotd != null && server.getMotd() != null) etMotd.setText(server.getMotd());
+            if (spinnerGamemode != null && server.getGamemode() != null) {
+                String[] gamemodes = {"survival", "creative", "adventure", "spectator"};
+                for (int i = 0; i < gamemodes.length; i++) {
+                    if (gamemodes[i].equalsIgnoreCase(server.getGamemode().name())) spinnerGamemode.setSelection(i);
+                }
+            }
+            if (spinnerDifficulty != null && server.getDifficulty() != null) {
+                String[] difficulties = {"peaceful", "easy", "normal", "hard"};
+                for (int i = 0; i < difficulties.length; i++) {
+                    if (difficulties[i].equalsIgnoreCase(server.getDifficulty().name())) spinnerDifficulty.setSelection(i);
+                }
+            }
+            if (switchPvp != null) switchPvp.setChecked(server.isPvp());
+            writePropsEntries(propsFile, restore);
+
+            driftDialog.dismiss();
+        });
+
+        driftDialog.setOnDismissListener(d -> propsDriftDialog = null);
+        propsDriftDialog = driftDialog;
+        driftDialog.show();
     }
 
     private void collectPropsDrift(java.util.Properties props, String key, String modelVal,

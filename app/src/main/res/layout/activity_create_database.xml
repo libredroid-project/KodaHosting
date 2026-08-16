@@ -23,7 +23,7 @@
             <TextView android:layout_width="0dp" android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="@string/new_database" android:textColor="#F0F0F0"
-                android:textSize="18sp" android:fontFamily="sans-serif-medium"
+                android:textSize="18sp" android:fontFamily="@font/font_koda"
                 android:textStyle="bold" android:layout_marginStart="4dp"/>
         </LinearLayout>
     </LinearLayout>
@@ -42,13 +42,13 @@
                 android:orientation="vertical">
                 <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
                     android:text="@string/database_name" android:textColor="#F0F0F0"
-                    android:textSize="11sp" android:fontFamily="sans-serif-medium"
+                    android:textSize="11sp" android:fontFamily="@font/font_koda"
                     android:letterSpacing="0.1" android:layout_marginBottom="8dp"/>
                 <EditText android:id="@+id/et_name"
                     android:layout_width="match_parent" android:layout_height="52dp"
                     android:background="@drawable/input_field"
                     android:textColor="#F0F0F0" android:textSize="15sp"
-                    android:fontFamily="sans-serif"
+                    android:fontFamily="@font/font_koda"
                     android:hint="@string/database_name_hint"
                     android:textColorHint="#3A3A48"
                     android:paddingStart="16dp" android:paddingEnd="16dp"
@@ -61,7 +61,7 @@
                 android:orientation="vertical" android:layout_marginBottom="16dp">
                 <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
                     android:text="@string/database_engine" android:textColor="#F0F0F0"
-                    android:textSize="11sp" android:fontFamily="sans-serif-medium"
+                    android:textSize="11sp" android:fontFamily="@font/font_koda"
                     android:letterSpacing="0.1" android:layout_marginBottom="8dp"/>
                 <RadioGroup
                     android:id="@+id/rg_engine"
@@ -94,13 +94,13 @@
 
             <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
                 android:text="@string/database_port" android:textColor="#F0F0F0"
-                android:textSize="11sp" android:fontFamily="sans-serif-medium"
+                android:textSize="11sp" android:fontFamily="@font/font_koda"
                 android:letterSpacing="0.1" android:layout_marginBottom="8dp"/>
             <EditText android:id="@+id/et_port"
                 android:layout_width="match_parent" android:layout_height="52dp"
                 android:background="@drawable/input_field"
                 android:textColor="#F0F0F0" android:textSize="15sp"
-                android:fontFamily="sans-serif"
+                android:fontFamily="@font/font_koda"
                 android:hint="@string/database_port_hint"
                 android:textColorHint="#3A3A48"
                 android:paddingStart="16dp" android:paddingEnd="16dp"
@@ -109,13 +109,13 @@
 
             <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
                 android:text="@string/database_username" android:textColor="#F0F0F0"
-                android:textSize="11sp" android:fontFamily="sans-serif-medium"
+                android:textSize="11sp" android:fontFamily="@font/font_koda"
                 android:letterSpacing="0.1" android:layout_marginBottom="8dp"/>
             <EditText android:id="@+id/et_username"
                 android:layout_width="match_parent" android:layout_height="52dp"
                 android:background="@drawable/input_field"
                 android:textColor="#F0F0F0" android:textSize="15sp"
-                android:fontFamily="sans-serif"
+                android:fontFamily="@font/font_koda"
                 android:text="@string/database_username_default"
                 android:textColorHint="#3A3A48"
                 android:paddingStart="16dp" android:paddingEnd="16dp"
@@ -124,13 +124,13 @@
 
             <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
                 android:text="@string/database_password" android:textColor="#F0F0F0"
-                android:textSize="11sp" android:fontFamily="sans-serif-medium"
+                android:textSize="11sp" android:fontFamily="@font/font_koda"
                 android:letterSpacing="0.1" android:layout_marginBottom="8dp"/>
             <EditText android:id="@+id/et_password"
                 android:layout_width="match_parent" android:layout_height="52dp"
                 android:background="@drawable/input_field"
                 android:textColor="#F0F0F0" android:textSize="15sp"
-                android:fontFamily="sans-serif"
+                android:fontFamily="@font/font_koda"
                 android:text="@string/database_password_default"
                 android:textColorHint="#3A3A48"
                 android:paddingStart="16dp" android:paddingEnd="16dp"
@@ -144,7 +144,7 @@
                 android:text="@string/btn_create_database"
                 android:backgroundTint="#FF6B00"
                 android:textColor="#FFFFFF"
-                android:fontFamily="sans-serif-black"
+                android:fontFamily="@font/font_koda"
                 android:textSize="16sp"
                 android:letterSpacing="0.05"
                 app:cornerRadius="12dp"

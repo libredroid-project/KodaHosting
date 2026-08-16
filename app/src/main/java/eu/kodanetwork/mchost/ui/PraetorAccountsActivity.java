@@ -58,7 +58,8 @@ public class PraetorAccountsActivity extends Activity {
             cb.setText(perm.toUpperCase().replace("PERM_", ""));
             cb.setTextColor(0xFFFFFFFF);
             cb.setButtonTintList(android.content.res.ColorStateList.valueOf(0xFFFF0000));
-            cb.setTypeface(android.graphics.Typeface.MONOSPACE);
+            android.graphics.Typeface kodaMono = androidx.core.content.res.ResourcesCompat.getFont(this, R.font.font_koda_mono);
+            if (kodaMono != null) cb.setTypeface(kodaMono);
             cb.setTextSize(16);
             cb.setPadding(0, 16, 0, 16);
             

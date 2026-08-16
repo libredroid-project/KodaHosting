@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
@@ -39,8 +40,20 @@
                     android:text="Player Name"
                     android:textColor="#FFFFFF"
                     android:textSize="20sp"
-                    android:fontFamily="sans-serif-medium" />
+                    android:fontFamily="@font/font_koda" />
             </LinearLayout>
+
+            <!-- No-internet hint -->
+            <TextView
+                android:id="@+id/tv_pm_offline_hint"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/pm_offline_hint"
+                android:textColor="#FF6B00"
+                android:textSize="13sp"
+                android:gravity="center"
+                android:layout_marginBottom="12dp"
+                android:visibility="gone"/>
 
             <!-- Actions Row 1 -->
             <LinearLayout
@@ -170,8 +183,36 @@
                     android:layout_height="wrap_content"/>
             </LinearLayout>
 
+            <!-- Stats header with loading indicator -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginBottom="8dp">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/pm_stats"
+                    android:textColor="#FFFFFF"
+                    android:textSize="16sp"
+                    android:fontFamily="@font/font_koda"/>
+
+                <com.airbnb.lottie.LottieAnimationView
+                    android:id="@+id/pb_pm_stats"
+                    android:layout_width="22dp"
+                    android:layout_height="22dp"
+                    app:lottie_rawRes="@raw/koda_loader"
+                    app:lottie_autoPlay="true"
+                    app:lottie_loop="true"
+                    android:visibility="gone"/>
+            </LinearLayout>
+
             <!-- Stats Grid -->
             <GridLayout
+                android:id="@+id/grid_pm_stats"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:columnCount="2"
@@ -197,14 +238,31 @@
             </GridLayout>
 
             <!-- Inventory Section -->
-            <TextView
-                android:layout_width="wrap_content"
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/pm_inventory"
-                android:textColor="#FFFFFF"
-                android:textSize="16sp"
-                android:layout_marginBottom="8dp"
-                android:fontFamily="sans-serif-medium"/>
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginBottom="8dp">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/pm_inventory"
+                    android:textColor="#FFFFFF"
+                    android:textSize="16sp"
+                    android:fontFamily="@font/font_koda"/>
+
+                <com.airbnb.lottie.LottieAnimationView
+                    android:id="@+id/pb_pm_inventory"
+                    android:layout_width="22dp"
+                    android:layout_height="22dp"
+                    app:lottie_rawRes="@raw/koda_loader"
+                    app:lottie_autoPlay="true"
+                    app:lottie_loop="true"
+                    android:visibility="gone"/>
+            </LinearLayout>
 
             <HorizontalScrollView
                 android:layout_width="match_parent"
@@ -213,6 +271,7 @@
 
                 <!-- Minecraft Inventory Layout Container -->
                 <LinearLayout
+                    android:id="@+id/container_pm_inventory"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"

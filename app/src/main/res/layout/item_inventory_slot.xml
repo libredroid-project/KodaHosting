@@ -27,7 +27,7 @@
         android:shadowDx="2"
         android:shadowDy="2"
         android:shadowRadius="1"
-        android:fontFamily="monospace"
+        android:fontFamily="@font/font_koda_mono"
         android:visibility="gone"/>
         
     <View

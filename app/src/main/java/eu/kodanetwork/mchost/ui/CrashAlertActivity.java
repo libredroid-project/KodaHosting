@@ -17,6 +17,7 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 import android.graphics.Color;
 import android.graphics.Typeface;
+import eu.kodanetwork.mchost.R;
 import android.view.Gravity;
 import android.animation.ObjectAnimator;
 import android.animation.ArgbEvaluator;
@@ -83,7 +84,8 @@ public class CrashAlertActivity extends Activity {
             "SERVER CRASH", "SERVER ABGESTÜRZT"));
         tvTitle.setTextColor(0xFFFF3355);
         tvTitle.setTextSize(26f);
-        tvTitle.setTypeface(Typeface.DEFAULT_BOLD);
+        Typeface kodaBold = androidx.core.content.res.ResourcesCompat.getFont(this, R.font.space_grotesk_bold);
+        tvTitle.setTypeface(kodaBold != null ? kodaBold : Typeface.DEFAULT_BOLD);
         tvTitle.setGravity(Gravity.CENTER);
         tvTitle.setLetterSpacing(0.08f);
         tvTitle.setPadding(0, 12, 0, 0);

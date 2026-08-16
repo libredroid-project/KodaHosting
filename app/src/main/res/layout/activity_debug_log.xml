@@ -14,7 +14,7 @@
         <TextView android:layout_width="0dp" android:layout_height="wrap_content"
             android:layout_weight="1" android:text="VERBOSE DEBUG LOG"
             android:textColor="#F0F0F0" android:textSize="12sp"
-            android:fontFamily="sans-serif-medium" android:gravity="center"/>
+            android:fontFamily="@font/font_koda" android:gravity="center"/>
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_copy_debug" style="@style/KodaButton"
             android:layout_width="wrap_content" android:layout_height="32dp"
@@ -28,7 +28,7 @@
         <TextView android:id="@+id/tv_debug_log"
             android:layout_width="match_parent" android:layout_height="wrap_content"
             android:textColor="#E0E0E0" android:textSize="11sp"
-            android:fontFamily="monospace" android:lineSpacingMultiplier="1.4"
+            android:fontFamily="@font/font_koda_mono" android:lineSpacingMultiplier="1.4"
             android:textIsSelectable="true"/>
     </ScrollView>
 </LinearLayout>

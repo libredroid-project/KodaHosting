@@ -35,7 +35,7 @@
             android:text="Support Ticket"
             android:textColor="#FFFFFF"
             android:textSize="15sp"
-            android:fontFamily="sans-serif-medium"
+            android:fontFamily="@font/font_koda"
             android:maxLines="1"
             android:ellipsize="end"/>
 

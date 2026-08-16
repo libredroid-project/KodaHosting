@@ -23,7 +23,7 @@
                 android:layout_width="0dp" android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:textColor="#F0F0F0" android:textSize="16sp"
-                android:fontFamily="sans-serif-medium" android:textStyle="bold"
+                android:fontFamily="@font/font_koda" android:textStyle="bold"
                 android:letterSpacing="0.02"
                 android:paddingStart="8dp"
                 android:singleLine="true" android:ellipsize="end"/>
@@ -32,7 +32,7 @@
                 android:layout_marginEnd="8dp"/>
             <TextView android:id="@+id/tv_badge"
                 android:layout_width="wrap_content" android:layout_height="wrap_content"
-                android:textSize="11sp" android:fontFamily="sans-serif-medium"
+                android:textSize="11sp" android:fontFamily="@font/font_koda"
                 android:textStyle="bold" android:letterSpacing="0.04"/>
         </LinearLayout>
     </LinearLayout>
@@ -54,7 +54,7 @@
                 android:layout_weight="1"
                 android:text="@string/plugin_installed_restart_needed"
                 android:textColor="?attr/colorPrimary" android:textSize="14sp"
-                android:fontFamily="sans-serif-medium"
+                android:fontFamily="@font/font_koda"
                 android:lineSpacingExtra="2dp"/>
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btn_header_restart"
@@ -101,7 +101,7 @@
 
                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
                         android:text="@string/status_info" android:textColor="?attr/colorPrimary"
-                        android:textSize="11sp" android:fontFamily="sans-serif-medium"
+                        android:textSize="11sp" android:fontFamily="@font/font_koda"
                         android:letterSpacing="0.1" android:textStyle="bold"
                         android:layout_marginBottom="14dp"/>
 
@@ -111,12 +111,12 @@
                             android:layout_weight="1" android:orientation="vertical">
                             <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
                                 android:text="@string/uptime" android:textColor="#888899"
-                                android:textSize="9sp" android:fontFamily="sans-serif-medium"
+                                android:textSize="9sp" android:fontFamily="@font/font_koda"
                                 android:letterSpacing="0.1" android:layout_marginBottom="4dp"/>
                             <TextView android:id="@+id/tv_uptime"
                                 android:layout_width="wrap_content" android:layout_height="wrap_content"
                                 android:text="--:--:--" android:textColor="?attr/colorOnSurface"
-                                android:textSize="14sp" android:fontFamily="sans-serif"/>
+                                android:textSize="14sp" android:fontFamily="@font/font_koda"/>
                         </LinearLayout>
                         <LinearLayout android:id="@+id/card_players"
                             android:layout_width="0dp" android:layout_height="wrap_content"
@@ -125,12 +125,12 @@
                             android:clickable="true" android:focusable="true">
                             <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
                                 android:text="@string/online" android:textColor="#888899"
-                                android:textSize="9sp" android:fontFamily="sans-serif-medium"
+                                android:textSize="9sp" android:fontFamily="@font/font_koda"
                                 android:letterSpacing="0.1" android:layout_marginBottom="4dp"/>
                             <TextView android:id="@+id/tv_players"
                                 android:layout_width="wrap_content" android:layout_height="wrap_content"
                                 android:text="0 / 20 Spieler" android:textColor="?attr/colorOnSurface"
-                                android:textSize="14sp" android:fontFamily="sans-serif"
+                                android:textSize="14sp" android:fontFamily="@font/font_koda"
                                 android:paddingEnd="8dp"/>
                         </LinearLayout>
                     </LinearLayout>
@@ -145,18 +145,18 @@
                             android:layout_width="0dp" android:layout_height="wrap_content"
                             android:layout_weight="1"
                             android:textColor="#AAAAAA" android:textSize="13sp"
-                            android:fontFamily="sans-serif"
+                            android:fontFamily="@font/font_koda"
                             android:singleLine="true" android:ellipsize="end"/>
                         <TextView android:id="@+id/tv_ram_info"
                             android:layout_width="wrap_content" android:layout_height="wrap_content"
                             android:textColor="#AAAAAA" android:textSize="13sp"
-                            android:fontFamily="sans-serif"/>
+                            android:fontFamily="@font/font_koda"/>
                     </LinearLayout>
 
                     <TextView android:id="@+id/tv_java_info"
                         android:layout_width="wrap_content" android:layout_height="wrap_content"
                         android:textColor="#888899" android:textSize="12sp"
-                        android:fontFamily="sans-serif"
+                        android:fontFamily="@font/font_koda"
                         android:layout_marginTop="8dp"
                         android:singleLine="true" android:ellipsize="end"/>
                 </LinearLayout>
@@ -175,13 +175,13 @@
 
                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
                         android:text="@string/connection" android:textColor="?attr/colorPrimary"
-                        android:textSize="11sp" android:fontFamily="sans-serif-medium"
+                        android:textSize="11sp" android:fontFamily="@font/font_koda"
                         android:letterSpacing="0.1" android:textStyle="bold"
                         android:layout_marginBottom="14dp"/>
 
                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
                         android:text="@string/join_address_java" android:textColor="#888899"
-                        android:textSize="9sp" android:fontFamily="sans-serif-medium"
+                        android:textSize="9sp" android:fontFamily="@font/font_koda"
                         android:letterSpacing="0.1" android:layout_marginBottom="4dp"/>
                     <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
                         android:orientation="horizontal" android:gravity="center_vertical">
@@ -189,7 +189,7 @@
                             android:layout_width="0dp" android:layout_height="wrap_content"
                             android:layout_weight="1"
                             android:textColor="?attr/colorOnSurface" android:textSize="18sp"
-                            android:fontFamily="sans-serif-medium" android:textStyle="bold"
+                            android:fontFamily="@font/font_koda" android:textStyle="bold"
                             android:background="?attr/selectableItemBackground"
                             android:clickable="true" android:focusable="true"
                             android:padding="4dp" android:layout_marginStart="-4dp"
@@ -207,7 +207,7 @@
 
                         <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
                             android:text="@string/bedrock_port" android:textColor="#888899"
-                            android:textSize="9sp" android:fontFamily="sans-serif-medium"
+                            android:textSize="9sp" android:fontFamily="@font/font_koda"
                             android:letterSpacing="0.1" android:layout_marginBottom="4dp"/>
                         <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
                             android:orientation="horizontal" android:gravity="center_vertical">
@@ -215,7 +215,7 @@
                                 android:layout_width="0dp" android:layout_height="wrap_content"
                                 android:layout_weight="1"
                                 android:textColor="?attr/colorOnSurface" android:textSize="18sp"
-                                android:fontFamily="sans-serif-medium" android:textStyle="bold"
+                                android:fontFamily="@font/font_koda" android:textStyle="bold"
                                 android:background="?attr/selectableItemBackground"
                                 android:clickable="true" android:focusable="true"
                                 android:padding="4dp" android:layout_marginStart="-4dp"
@@ -243,7 +243,7 @@
                 android:layout_marginBottom="24dp"
                 android:text="@string/installing"
                 android:textColor="#F0F0F0"
-                android:fontFamily="sans-serif-medium"
+                android:fontFamily="@font/font_koda"
                 android:textStyle="bold"
                 android:letterSpacing="0.08"
                 android:textSize="13sp"/>
@@ -261,7 +261,7 @@
             <TextView android:id="@+id/tv_dl_msg"
                 android:layout_width="wrap_content" android:layout_height="wrap_content"
                 android:textColor="#FF8C38" android:textSize="11sp"
-                android:fontFamily="sans-serif" android:visibility="gone"
+                android:fontFamily="@font/font_koda" android:visibility="gone"
                 android:layout_marginBottom="10dp"/>
 
             <com.google.android.material.button.MaterialButton
@@ -270,7 +270,7 @@
                 android:text="@string/wake_up"
                 android:textColor="#44AAFF"
                 android:textSize="16sp"
-                android:fontFamily="sans-serif-medium"
+                android:fontFamily="@font/font_koda"
                 android:textStyle="bold"
                 app:backgroundTint="#1B1512"
                 app:cornerRadius="12dp"
@@ -296,7 +296,7 @@
                     android:orientation="vertical" android:padding="16dp" android:gravity="center">
                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
                         android:text="@string/controls" android:textColor="?attr/colorPrimary"
-                        android:textSize="11sp" android:fontFamily="sans-serif-medium"
+                        android:textSize="11sp" android:fontFamily="@font/font_koda"
                         android:letterSpacing="0.12" android:textStyle="bold"
                         android:layout_marginBottom="14dp" android:layout_gravity="start"/>
 
@@ -307,7 +307,7 @@
                             android:layout_width="140dp" android:layout_height="48dp"
                             android:layout_marginEnd="8dp"
                             android:text="@string/start"
-                            android:fontFamily="sans-serif-medium"
+                            android:fontFamily="@font/font_koda"
                             android:textSize="13sp"
                             app:cornerRadius="12dp"/>
                         <com.google.android.material.button.MaterialButton
@@ -315,7 +315,7 @@
                             android:layout_width="140dp" android:layout_height="48dp"
                             android:layout_marginStart="8dp"
                             android:text="@string/stop" android:enabled="false"
-                            android:fontFamily="sans-serif-medium"
+                            android:fontFamily="@font/font_koda"
                             android:textSize="13sp"
                             app:cornerRadius="12dp"/>
                     </LinearLayout>
@@ -325,7 +325,7 @@
                             android:id="@+id/btn_restart" style="@style/KodaButton.Outline"
                             android:layout_width="140dp" android:layout_height="44dp"
                             android:text="@string/restart" android:enabled="false"
-                            android:fontFamily="sans-serif-medium"
+                            android:fontFamily="@font/font_koda"
                             android:textSize="13sp"
                             app:cornerRadius="12dp"/>
                     </LinearLayout>
@@ -366,7 +366,7 @@
                 app:backgroundTint="?attr/colorSurfaceContainerHigh"
                 app:cornerRadius="8dp"
                 android:textSize="10sp"
-                android:fontFamily="sans-serif-medium"
+                android:fontFamily="@font/font_koda"
                 app:icon="@android:drawable/ic_menu_share"
                 app:iconTint="?attr/colorOnPrimary"
                 android:layout_marginEnd="8dp"/>
@@ -379,7 +379,7 @@
                 app:backgroundTint="?attr/colorSurfaceContainerHigh"
                 app:cornerRadius="8dp"
                 android:textSize="10sp"
-                android:fontFamily="sans-serif-medium"
+                android:fontFamily="@font/font_koda"
                 app:icon="@android:drawable/ic_menu_delete"
                 app:iconTint="#FF3344"/>
         </LinearLayout>
@@ -394,7 +394,7 @@
             <TextView android:id="@+id/tv_log"
                 android:layout_width="match_parent" android:layout_height="wrap_content"
                 android:textColor="#CCCCCC" android:textSize="12sp"
-                android:fontFamily="monospace"
+                android:fontFamily="@font/font_koda_mono"
                 android:lineSpacingMultiplier="1.3"
                 android:textIsSelectable="true"
                 android:paddingBottom="8dp"/>
@@ -416,7 +416,7 @@
                     android:layout_width="0dp" android:layout_height="match_parent"
                     android:layout_weight="1" android:background="@null"
                     android:textColor="#F0F0F0" android:textSize="16sp"
-                    android:fontFamily="sans-serif" android:hint="Enter a command..."
+                    android:fontFamily="@font/font_koda" android:hint="Enter a command..."
                     android:textColorHint="#666677" android:imeOptions="actionSend"
                     android:inputType="text" android:singleLine="true" android:tag="true"/>
                 
@@ -441,12 +441,12 @@
             android:paddingStart="16dp" android:paddingEnd="8dp">
             <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
                 android:text="~/servers/" android:textColor="?attr/colorPrimary"
-                android:textSize="12sp" android:fontFamily="sans-serif-medium"/>
+                android:textSize="12sp" android:fontFamily="@font/font_koda"/>
             <TextView android:id="@+id/tv_files_root"
                 android:layout_width="0dp" android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:textColor="?attr/colorOnSurfaceVariant" android:textSize="12sp"
-                android:fontFamily="sans-serif" android:singleLine="true"
+                android:fontFamily="@font/font_koda" android:singleLine="true"
                 android:ellipsize="middle"/>
             <ImageButton android:id="@+id/btn_import_file"
                 android:layout_width="32dp" android:layout_height="32dp"
@@ -480,7 +480,7 @@
                 android:layout_weight="1" android:background="@null"
                 android:padding="12dp" android:hint="Search Modrinth..."
                 android:textColorHint="#5A5A6A" android:textColor="#F0F0F0"
-                android:textSize="14sp" android:fontFamily="sans-serif"/>
+                android:textSize="14sp" android:fontFamily="@font/font_koda"/>
             <ImageButton android:id="@+id/btn_plugin_search"
                 android:layout_width="48dp" android:layout_height="48dp"
                 android:background="?attr/selectableItemBackgroundBorderless"
@@ -520,19 +520,19 @@
                     android:orientation="vertical" android:padding="16dp">
                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
                         android:text="DATABASE CONFIG" android:textColor="?attr/colorPrimary"
-                        android:textSize="11sp" android:fontFamily="sans-serif-medium"
+                        android:textSize="11sp" android:fontFamily="@font/font_koda"
                         android:letterSpacing="0.1" android:layout_marginBottom="12dp"/>
 
                     <!-- DATABASE NAME -->
                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
                         android:text="DATABASE NAME" android:textColor="?attr/colorOnSurfaceVariant"
-                        android:textSize="10sp" android:fontFamily="sans-serif-medium"
+                        android:textSize="10sp" android:fontFamily="@font/font_koda"
                         android:letterSpacing="0.1" android:layout_marginBottom="6dp"/>
                     <EditText android:id="@+id/et_db_name"
                         android:layout_width="match_parent" android:layout_height="52dp"
                         android:background="@drawable/input_field"
                         android:textColor="#F0F0F0" android:textSize="15sp"
-                        android:fontFamily="sans-serif"
+                        android:fontFamily="@font/font_koda"
                         android:textColorHint="#3A3A48"
                         android:paddingStart="16dp" android:paddingEnd="16dp"
                         android:inputType="text" android:singleLine="true"
@@ -544,13 +544,13 @@
                     <!-- USERNAME -->
                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
                         android:text="USERNAME" android:textColor="?attr/colorOnSurfaceVariant"
-                        android:textSize="10sp" android:fontFamily="sans-serif-medium"
+                        android:textSize="10sp" android:fontFamily="@font/font_koda"
                         android:letterSpacing="0.1" android:layout_marginBottom="6dp"/>
                     <EditText android:id="@+id/et_db_user"
                         android:layout_width="match_parent" android:layout_height="52dp"
                         android:background="@drawable/input_field"
                         android:textColor="#F0F0F0" android:textSize="15sp"
-                        android:fontFamily="sans-serif"
+                        android:fontFamily="@font/font_koda"
                         android:textColorHint="#3A3A48"
                         android:paddingStart="16dp" android:paddingEnd="16dp"
                         android:inputType="text" android:singleLine="true"
@@ -559,7 +559,7 @@
                     <!-- PASSWORD -->
                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
                         android:text="PASSWORD" android:textColor="?attr/colorOnSurfaceVariant"
-                        android:textSize="10sp" android:fontFamily="sans-serif-medium"
+                        android:textSize="10sp" android:fontFamily="@font/font_koda"
                         android:letterSpacing="0.1" android:layout_marginBottom="6dp"/>
                     <LinearLayout android:layout_width="match_parent" android:layout_height="52dp"
                         android:orientation="horizontal" android:gravity="center_vertical"
@@ -569,7 +569,7 @@
                             android:layout_weight="1"
                             android:background="@drawable/input_field"
                             android:textColor="#F0F0F0" android:textSize="15sp"
-                            android:fontFamily="sans-serif"
+                            android:fontFamily="@font/font_koda"
                             android:textColorHint="#3A3A48"
                             android:paddingStart="16dp" android:paddingEnd="16dp"
                             android:inputType="textPassword" android:singleLine="true"/>
@@ -596,12 +596,12 @@
                     android:orientation="vertical" android:padding="16dp">
                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
                         android:text="@string/server_info" android:textColor="?attr/colorPrimary"
-                        android:textSize="11sp" android:fontFamily="sans-serif-medium"
+                        android:textSize="11sp" android:fontFamily="@font/font_koda"
                         android:letterSpacing="0.1" android:layout_marginBottom="12dp"/>
                     <TextView android:id="@+id/tv_settings_info"
                         android:layout_width="match_parent" android:layout_height="wrap_content"
                         android:textColor="?attr/colorOnSurfaceVariant" android:textSize="12sp"
-                        android:fontFamily="sans-serif" android:lineSpacingMultiplier="1.6"/>
+                        android:fontFamily="@font/font_koda" android:lineSpacingMultiplier="1.6"/>
                         
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/btn_settings_update"
@@ -617,7 +617,7 @@
 
                     <TextView android:id="@+id/tv_icon_title" android:layout_width="wrap_content" android:layout_height="wrap_content"
                         android:text="Server Icon (MOTD)" android:textColor="?attr/colorOnSurface"
-                        android:textSize="13sp" android:fontFamily="sans-serif-medium"
+                        android:textSize="13sp" android:fontFamily="@font/font_koda"
                         android:layout_marginBottom="12dp"/>
 
                     <LinearLayout android:id="@+id/layout_server_icon" android:layout_width="match_parent" android:layout_height="wrap_content"
@@ -635,7 +635,7 @@
                                 style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                                 android:layout_width="match_parent" android:layout_height="40dp"
                                 android:text="Upload Icon" android:textColor="?attr/colorPrimary"
-                                android:textSize="12sp" android:fontFamily="sans-serif-medium"
+                                android:textSize="12sp" android:fontFamily="@font/font_koda"
                                 android:insetTop="0dp" android:insetBottom="0dp"/>
                             
                             <com.google.android.material.button.MaterialButton
@@ -643,7 +643,7 @@
                                 style="@style/Widget.MaterialComponents.Button.TextButton"
                                 android:layout_width="match_parent" android:layout_height="40dp"
                                 android:text="Reset to default" android:textColor="?attr/colorOnSurfaceVariant"
-                                android:textSize="11sp" android:fontFamily="sans-serif-medium"
+                                android:textSize="11sp" android:fontFamily="@font/font_koda"
                                 android:insetTop="0dp" android:insetBottom="0dp"/>
                         </LinearLayout>
                     </LinearLayout>
@@ -662,16 +662,16 @@
                     android:orientation="vertical" android:padding="16dp">
                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
                         android:text="@string/ram_allocation" android:textColor="?attr/colorPrimary"
-                        android:textSize="11sp" android:fontFamily="sans-serif-medium"
+                        android:textSize="11sp" android:fontFamily="@font/font_koda"
                         android:letterSpacing="0.1" android:layout_marginBottom="12dp"/>
                     <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
                         android:orientation="horizontal" android:gravity="center_vertical"
                         android:layout_marginBottom="12dp">
                         <TextView android:layout_width="0dp" android:layout_height="wrap_content"
                             android:layout_weight="1" android:text="@string/allocated_ram"
-                            android:textColor="?attr/colorOnSurface" android:textSize="13sp" android:fontFamily="sans-serif-medium"/>
+                            android:textColor="?attr/colorOnSurface" android:textSize="13sp" android:fontFamily="@font/font_koda"/>
                         <TextView android:id="@+id/tv_settings_ram" android:layout_width="wrap_content" android:layout_height="wrap_content"
-                            android:text="1024MB" android:textColor="?attr/colorPrimary" android:textSize="14sp" android:fontFamily="sans-serif-medium" android:textStyle="bold"/>
+                            android:text="1024MB" android:textColor="?attr/colorPrimary" android:textSize="14sp" android:fontFamily="@font/font_koda" android:textStyle="bold"/>
                     </LinearLayout>
                     <SeekBar android:id="@+id/seek_settings_ram"
                         android:layout_width="match_parent" android:layout_height="wrap_content"
@@ -691,22 +691,22 @@
                     android:orientation="vertical" android:padding="16dp">
                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
                         android:text="@string/network_automation" android:textColor="?attr/colorPrimary"
-                        android:textSize="11sp" android:fontFamily="sans-serif-medium"
+                        android:textSize="11sp" android:fontFamily="@font/font_koda"
                         android:letterSpacing="0.1" android:layout_marginBottom="12dp"/>
                     <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
                         android:text="@string/network_automation_desc"
                         android:textColor="?attr/colorOnSurfaceVariant" android:textSize="12sp"
-                        android:fontFamily="sans-serif" android:lineSpacingMultiplier="1.4"
+                        android:fontFamily="@font/font_koda" android:lineSpacingMultiplier="1.4"
                         android:layout_marginBottom="12dp"/>
 
                     <!-- Custom Domain -->
                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
                         android:text="@string/custom_domain" android:textColor="?attr/colorOnSurface"
-                        android:textSize="13sp" android:fontFamily="sans-serif-medium"
+                        android:textSize="13sp" android:fontFamily="@font/font_koda"
                         android:layout_marginBottom="8dp"/>
                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
                         android:text="@string/custom_domain_desc"
-                        android:textColor="?attr/colorOnSurfaceVariant" android:textSize="11sp" android:fontFamily="sans-serif"
+                        android:textColor="?attr/colorOnSurfaceVariant" android:textSize="11sp" android:fontFamily="@font/font_koda"
                         android:layout_marginBottom="12dp"/>
 
                     <LinearLayout android:id="@+id/ll_domain_input_container"
@@ -720,7 +720,7 @@
                             android:text="@string/change_join_address" android:textColor="?attr/colorOnPrimary"
                             app:backgroundTint="?attr/colorPrimary" app:cornerRadius="6dp"
                             android:textAllCaps="true"
-                            android:textSize="14sp" android:fontFamily="sans-serif-black"/>
+                            android:textSize="14sp" android:fontFamily="@font/font_koda"/>
 
                         <com.google.android.material.button.MaterialButton
                             android:id="@+id/btn_custom_dns_wizard"
@@ -729,7 +729,7 @@
                             android:text="@string/link_custom_domain" android:textColor="?attr/colorOnPrimary"
                             app:backgroundTint="?attr/colorPrimary" app:cornerRadius="6dp"
                             android:textAllCaps="true"
-                            android:textSize="14sp" android:fontFamily="sans-serif-black"/>
+                            android:textSize="14sp" android:fontFamily="@font/font_koda"/>
 
                         <com.google.android.material.button.MaterialButton
                             android:id="@+id/btn_change_name"
@@ -738,7 +738,7 @@
                             android:text="@string/change_server_name" android:textColor="?attr/colorOnPrimary"
                             app:backgroundTint="?attr/colorPrimary" app:cornerRadius="6dp"
                             android:textAllCaps="true"
-                            android:textSize="14sp" android:fontFamily="sans-serif-black"/>
+                            android:textSize="14sp" android:fontFamily="@font/font_koda"/>
                     </LinearLayout>
 
                     <!-- DNS Configuration Panel (Hidden by default) -->
@@ -753,22 +753,22 @@
                             
                         <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:layout_marginBottom="4dp">
                             <TextView android:layout_width="50dp" android:layout_height="wrap_content" android:text="Type:" android:textColor="?attr/colorOnSurfaceVariant" android:textSize="11sp"/>
-                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="SRV" android:textColor="?attr/colorOnSurface" android:textSize="11sp" android:fontFamily="monospace"/>
+                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="SRV" android:textColor="?attr/colorOnSurface" android:textSize="11sp" android:fontFamily="@font/font_koda_mono"/>
                         </LinearLayout>
                         <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:layout_marginBottom="4dp">
                             <TextView android:layout_width="50dp" android:layout_height="wrap_content" android:text="Name:" android:textColor="?attr/colorOnSurfaceVariant" android:textSize="11sp"/>
-                            <TextView android:id="@+id/tv_dns_name" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="_minecraft._tcp.play" android:textColor="?attr/colorOnSurface" android:textSize="11sp" android:fontFamily="monospace" android:textIsSelectable="true"/>
+                            <TextView android:id="@+id/tv_dns_name" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="_minecraft._tcp.play" android:textColor="?attr/colorOnSurface" android:textSize="11sp" android:fontFamily="@font/font_koda_mono" android:textIsSelectable="true"/>
                         </LinearLayout>
                         <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:layout_marginBottom="12dp">
                             <TextView android:layout_width="50dp" android:layout_height="wrap_content" android:text="Value:" android:textColor="?attr/colorOnSurfaceVariant" android:textSize="11sp"/>
-                            <TextView android:id="@+id/tv_dns_value" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="0 5 12345 xyz.playit.gg" android:textColor="?attr/colorOnSurface" android:textSize="11sp" android:fontFamily="monospace" android:textIsSelectable="true"/>
+                            <TextView android:id="@+id/tv_dns_value" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="0 5 12345 xyz.playit.gg" android:textColor="?attr/colorOnSurface" android:textSize="11sp" android:fontFamily="@font/font_koda_mono" android:textIsSelectable="true"/>
                         </LinearLayout>
 
                         <com.google.android.material.button.MaterialButton
                             android:id="@+id/btn_verify_domain"
                             android:layout_width="match_parent" android:layout_height="48dp"
                             android:text="@string/verify_configuration" android:textColor="#000000"
-                            android:textSize="13sp" android:fontFamily="sans-serif-medium"
+                            android:textSize="13sp" android:fontFamily="@font/font_koda"
                             app:backgroundTint="?attr/colorPrimary" app:cornerRadius="8dp"/>
                             
                         <TextView android:id="@+id/tv_verification_status" android:layout_width="match_parent" android:layout_height="wrap_content"
@@ -784,10 +784,10 @@
                             android:layout_weight="1" android:orientation="vertical">
                             <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
                                 android:text="@string/bedrock_support"
-                                android:textColor="?attr/colorOnSurface" android:textSize="13sp" android:fontFamily="sans-serif-medium"/>
+                                android:textColor="?attr/colorOnSurface" android:textSize="13sp" android:fontFamily="@font/font_koda"/>
                             <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
                                 android:text="@string/geyser_floodgate"
-                                android:textColor="?attr/colorOnSurfaceVariant" android:textSize="11sp" android:fontFamily="sans-serif"
+                                android:textColor="?attr/colorOnSurfaceVariant" android:textSize="11sp" android:fontFamily="@font/font_koda"
                                 android:layout_marginTop="2dp"/>
                         </LinearLayout>
                         <com.google.android.material.switchmaterial.SwitchMaterial
@@ -805,10 +805,10 @@
                             android:layout_weight="1" android:orientation="vertical">
                             <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
                                 android:text="@string/voicechat_support"
-                                android:textColor="?attr/colorOnSurface" android:textSize="13sp" android:fontFamily="sans-serif-medium"/>
+                                android:textColor="?attr/colorOnSurface" android:textSize="13sp" android:fontFamily="@font/font_koda"/>
                             <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
                                 android:text="@string/simple_voice_chat"
-                                android:textColor="?attr/colorOnSurfaceVariant" android:textSize="11sp" android:fontFamily="sans-serif"
+                                android:textColor="?attr/colorOnSurfaceVariant" android:textSize="11sp" android:fontFamily="@font/font_koda"
                                 android:layout_marginTop="2dp"/>
                         </LinearLayout>
                         <com.google.android.material.switchmaterial.SwitchMaterial
@@ -828,10 +828,10 @@
                             android:layout_weight="1" android:orientation="vertical">
                             <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
                                 android:text="KodaDash Web Control"
-                                android:textColor="?attr/colorPrimary" android:textSize="13sp" android:fontFamily="sans-serif-medium"/>
+                                android:textColor="?attr/colorPrimary" android:textSize="13sp" android:fontFamily="@font/font_koda"/>
                             <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
                                 android:text="⚠️ Beta: High RAM (~50MB), PaperMC/Purpur"
-                                android:textColor="?attr/colorError" android:textSize="11sp" android:fontFamily="sans-serif"
+                                android:textColor="?attr/colorError" android:textSize="11sp" android:fontFamily="@font/font_koda"
                                 android:layout_marginTop="2dp"/>
                         </LinearLayout>
                         <com.google.android.material.switchmaterial.SwitchMaterial
@@ -855,7 +855,7 @@
                     
                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
                         android:text="@string/gameplay_settings" android:textColor="?attr/colorPrimary"
-                        android:textSize="11sp" android:fontFamily="sans-serif-medium"
+                        android:textSize="11sp" android:fontFamily="@font/font_koda"
                         android:letterSpacing="0.1" android:layout_marginBottom="16dp"/>
                         
                     <!-- MOTD -->
@@ -1005,7 +1005,7 @@
                     </LinearLayout>
 
                     <!-- Resource Pack Section -->
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Resource Pack" android:textColor="?attr/colorPrimary" android:textSize="11sp" android:fontFamily="sans-serif-medium" android:letterSpacing="0.1" android:layout_marginBottom="8dp"/>
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Resource Pack" android:textColor="?attr/colorPrimary" android:textSize="11sp" android:fontFamily="@font/font_koda" android:letterSpacing="0.1" android:layout_marginBottom="8dp"/>
                     <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:background="?attr/colorSurfaceContainerHighest" android:padding="12dp" android:layout_marginBottom="8dp">
                         <TextView android:id="@+id/tv_resource_pack_url" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="No resource pack active." android:textColor="?attr/colorOnSurfaceVariant" android:textSize="12sp" android:layout_marginBottom="12dp" android:maxLines="2" android:ellipsize="end"/>
                         
@@ -1040,14 +1040,14 @@
                     
                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
                         android:text="DANGER ZONE" android:textColor="#FF4444"
-                        android:textSize="11sp" android:fontFamily="sans-serif-medium"
+                        android:textSize="11sp" android:fontFamily="@font/font_koda"
                         android:letterSpacing="0.1" android:layout_marginBottom="12dp"/>
 
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/btn_kill" style="@style/KodaButton.Outline"
                         android:layout_width="match_parent" android:layout_height="48dp"
                         android:text="@string/hard_reset" android:textColor="#FF3344"
-                        android:fontFamily="sans-serif-medium"
+                        android:fontFamily="@font/font_koda"
                         android:textSize="13sp"
                         app:cornerRadius="10dp"
                         android:layout_marginBottom="12dp"/>
@@ -1056,7 +1056,7 @@
                         android:id="@+id/btn_dl_jar" style="@style/KodaButton"
                         android:layout_width="match_parent" android:layout_height="48dp"
                         android:text="Redownload server.jar"
-                        android:fontFamily="sans-serif-medium"
+                        android:fontFamily="@font/font_koda"
                         android:textSize="13sp"
                         app:cornerRadius="10dp"
                         android:layout_marginBottom="12dp"/>
@@ -1065,7 +1065,7 @@
                         android:id="@+id/btn_export_zip" style="@style/KodaButton.Outline"
                         android:layout_width="match_parent" android:layout_height="48dp"
                         android:text="EXPORT AS ZIP"
-                        android:fontFamily="sans-serif-medium"
+                        android:fontFamily="@font/font_koda"
                         android:textSize="13sp"
                         app:cornerRadius="10dp"
                         android:layout_marginBottom="12dp"/>
@@ -1074,7 +1074,7 @@
                         android:id="@+id/btn_hibernate" style="@style/KodaButton.Outline"
                         android:layout_width="match_parent" android:layout_height="48dp"
                         android:text="WINTERSCHLAF (HIBERNATE)"
-                        android:fontFamily="sans-serif-medium"
+                        android:fontFamily="@font/font_koda"
                         android:textSize="13sp"
                         app:cornerRadius="10dp"
                         android:layout_marginBottom="12dp"/>
@@ -1083,7 +1083,7 @@
                         android:id="@+id/btn_del_server"
                         android:layout_width="match_parent" android:layout_height="48dp"
                         android:text="DELETE SERVER"
-                        android:fontFamily="sans-serif-medium"
+                        android:fontFamily="@font/font_koda"
                         android:textSize="13sp"
                         android:textColor="?attr/colorOnSurface"
                         app:backgroundTint="#FF4444" app:cornerRadius="10dp"
@@ -1112,45 +1112,33 @@
         <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
             android:orientation="vertical" android:gravity="center" android:layout_gravity="center"
             android:padding="32dp">
-            <ProgressBar android:layout_width="64dp" android:layout_height="64dp"
-                android:indeterminateTint="#FF6B00"/>
+            <com.airbnb.lottie.LottieAnimationView
+                android:id="@+id/lottie_full_loading"
+                android:layout_width="220dp" android:layout_height="80dp"
+                app:lottie_rawRes="@raw/koda_boot"
+                app:lottie_autoPlay="true"
+                app:lottie_loop="true"/>
             <TextView android:id="@+id/tv_full_loading_msg"
                 android:layout_width="wrap_content" android:layout_height="wrap_content"
-                android:layout_marginTop="28dp" android:text="INITIALIZING AUTO-SETUP..."
+                android:layout_marginTop="28dp" android:text="@string/sd_auto_setup_running"
                 android:textColor="#F0F0F0" android:textSize="14sp"
-                android:fontFamily="sans-serif-medium" android:gravity="center"
+                android:fontFamily="@font/font_koda" android:gravity="center"
                 android:letterSpacing="0.06"/>
             <TextView android:id="@+id/tv_full_loading_sub"
                 android:layout_width="wrap_content" android:layout_height="wrap_content"
                 android:layout_marginTop="10dp" android:text="KodaNetwork Orchestrator v3.0"
                 android:textColor="#555566" android:textSize="11sp"
-                android:fontFamily="sans-serif"/>
-
-            <!-- Success State (Hidden by default) -->
-            <LinearLayout android:id="@+id/layout_success_feedback"
-                android:layout_width="wrap_content" android:layout_height="wrap_content"
-                android:orientation="vertical" android:gravity="center"
-                android:visibility="gone" android:layout_marginTop="24dp">
-                <ImageView android:layout_width="80dp" android:layout_height="80dp"
-                    android:src="@android:drawable/checkbox_on_background"
-                    android:contentDescription="Success"
-                    app:tint="#00E676"/>
-                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                    android:text="SETUP ERFOLGREICH!" android:textColor="#00E676"
-                    android:textSize="16sp" android:textStyle="bold" android:fontFamily="sans-serif-medium"
-                    android:layout_marginTop="12dp"
-                    android:letterSpacing="0.04"/>
-            </LinearLayout>
+                android:fontFamily="@font/font_koda"/>
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btn_close_loading"
                 style="@style/KodaButton.Outline"
                 android:layout_width="wrap_content" android:layout_height="wrap_content"
                 android:layout_marginTop="44dp"
-                android:text="LADEBILDCHIRM SCHLIESSEN"
+                android:text="@string/sd_close_loading"
                 android:textSize="11sp"
                 android:textColor="#F0F0F0"
-                android:fontFamily="sans-serif-medium"
+                android:fontFamily="@font/font_koda"
                 app:cornerRadius="12dp"/>
         </LinearLayout>
     </FrameLayout>
@@ -1172,13 +1160,13 @@
                 
             <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
                 android:text="@string/server_banned_title" android:textColor="#FF3344"
-                android:textSize="20sp" android:textStyle="bold" android:fontFamily="sans-serif-medium"
+                android:textSize="20sp" android:textStyle="bold" android:fontFamily="@font/font_koda"
                 android:letterSpacing="0.04" android:layout_marginBottom="16dp"/>
                 
             <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
                 android:text="@string/server_banned_message"
                 android:textColor="#F0F0F0" android:textSize="14sp"
-                android:textAlignment="center" android:fontFamily="sans-serif"
+                android:textAlignment="center" android:fontFamily="@font/font_koda"
                 android:layout_marginBottom="24dp"/>
                 
             <com.google.android.material.card.MaterialCardView
@@ -1191,12 +1179,12 @@
                     android:orientation="vertical" android:padding="16dp">
                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
                         android:text="@string/server_banned_reason_label" android:textColor="?attr/colorOnSurfaceVariant"
-                        android:textSize="12sp" android:fontFamily="sans-serif-medium"
+                        android:textSize="12sp" android:fontFamily="@font/font_koda"
                         android:layout_marginBottom="4dp"/>
                     <TextView android:id="@+id/tv_banned_reason"
                         android:layout_width="match_parent" android:layout_height="wrap_content"
                         android:text="@string/server_banned_reason_unknown" android:textColor="#FF3344"
-                        android:textSize="14sp" android:fontFamily="sans-serif-medium"/>
+                        android:textSize="14sp" android:fontFamily="@font/font_koda"/>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
                 
@@ -1206,7 +1194,7 @@
                 android:layout_width="match_parent" android:layout_height="56dp"
                 android:text="@string/server_banned_download"
                 android:textSize="14sp"
-                android:fontFamily="sans-serif-medium"
+                android:fontFamily="@font/font_koda"
                 app:cornerRadius="12dp"
                 app:icon="@android:drawable/stat_sys_download"
                 app:iconGravity="textStart"/>

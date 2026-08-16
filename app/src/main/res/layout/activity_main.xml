@@ -31,11 +31,11 @@
         <TextView android:id="@+id/tv_server_count" android:layout_width="wrap_content" android:layout_height="wrap_content"
             android:layout_marginStart="8dp" android:layout_marginEnd="16dp"
             android:text="" android:textColor="#8A8A9A"
-            android:textSize="11sp" android:fontFamily="sans-serif-medium" android:letterSpacing="0.1"/>
+            android:textSize="11sp" android:fontFamily="@font/font_koda" android:letterSpacing="0.1"/>
 
         <TextView android:id="@+id/btn_debug_log" android:layout_width="wrap_content" android:layout_height="wrap_content"
             android:text="@string/log_button" android:textColor="#8A8A9A"
-            android:textSize="11sp" android:fontFamily="sans-serif-medium" android:letterSpacing="0.1"
+            android:textSize="11sp" android:fontFamily="@font/font_koda" android:letterSpacing="0.1"
             android:layout_marginEnd="16dp" android:background="?attr/selectableItemBackground" android:padding="4dp"/>
 
         <TextView android:id="@+id/btn_support_main"
@@ -82,12 +82,12 @@
                 
                 <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
                 android:text="@string/no_servers_yet" android:textColor="#8A8A9A"
-                android:textSize="16sp" android:fontFamily="sans-serif-medium"
+                android:textSize="16sp" android:fontFamily="@font/font_koda"
                 android:layout_marginBottom="8dp"/>
                 
                 <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
                 android:text="@string/create_first_server_desc"
-                android:textColor="#555566" android:textSize="13sp" android:fontFamily="sans-serif"/>
+                android:textColor="#555566" android:textSize="13sp" android:fontFamily="@font/font_koda"/>
             </LinearLayout>
         </LinearLayout>
 
@@ -106,12 +106,12 @@
         <TextView android:layout_width="0dp" android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="kodanetwork.eu" android:textColor="#2A2A35"
-            android:textSize="11sp" android:fontFamily="sans-serif"/>
+            android:textSize="11sp" android:fontFamily="@font/font_koda"/>
         
         <com.google.android.material.button.MaterialButton android:id="@+id/fab_add_db"
             android:layout_width="wrap_content" android:layout_height="40dp"
             android:text="＋ DB" android:textColor="#AAAAAA"
-            android:textSize="11sp" android:fontFamily="sans-serif-medium"
+            android:textSize="11sp" android:fontFamily="@font/font_koda"
             android:backgroundTint="#1A1A24"
             app:cornerRadius="20dp"
             android:insetTop="0dp" android:insetBottom="0dp"
@@ -122,7 +122,7 @@
         <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton android:id="@+id/fab_add"
             android:layout_width="wrap_content" android:layout_height="wrap_content"
             android:text="@string/new_server_btn" android:textColor="#FFFFFF"
-            android:textSize="13sp" android:fontFamily="sans-serif-medium"
+            android:textSize="13sp" android:fontFamily="@font/font_koda"
             app:backgroundTint="#FF6B00" app:iconTint="#FFFFFF"
             app:elevation="4dp" app:pressedTranslationZ="8dp"/>
     </LinearLayout>

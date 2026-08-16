@@ -22,7 +22,7 @@
             android:layout_width="0dp" android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="ONLINE" android:textColor="#F0F0F0"
-            android:textSize="12sp" android:fontFamily="sans-serif-medium"
+            android:textSize="12sp" android:fontFamily="@font/font_koda"
             android:textStyle="bold" android:letterSpacing="0.05"/>
         <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content"
             android:background="@drawable/pill_address_bg"
@@ -35,7 +35,7 @@
             <TextView android:id="@+id/tv_addr"
                 android:layout_width="wrap_content" android:layout_height="wrap_content"
                 android:text="elite-bee-17.arm-mc.com" android:textColor="#8A8A9A"
-                android:textSize="12sp" android:fontFamily="sans-serif-medium"/>
+                android:textSize="12sp" android:fontFamily="@font/font_koda"/>
         </LinearLayout>
     </LinearLayout>
 
@@ -55,12 +55,12 @@
             <TextView android:id="@+id/tv_name"
                 android:layout_width="wrap_content" android:layout_height="wrap_content"
                 android:text="Survival with friends" android:textColor="#F0F0F0"
-                android:textSize="20sp" android:fontFamily="sans-serif-medium"
+                android:textSize="20sp" android:fontFamily="@font/font_koda"
                 android:textStyle="bold"/>
             <TextView android:id="@+id/tv_ver"
                 android:layout_width="wrap_content" android:layout_height="wrap_content"
                 android:text="Pumpkin 1.21.11 • 5 players" android:textColor="#8A8A9A"
-                android:textSize="13sp" android:fontFamily="sans-serif"
+                android:textSize="13sp" android:fontFamily="@font/font_koda"
                 android:layout_marginTop="2dp"/>
             <!-- Hidden views to prevent crash -->
             <TextView android:id="@+id/tv_type" android:layout_width="0dp" android:layout_height="0dp"/>
@@ -78,12 +78,12 @@
             android:layout_marginEnd="16dp">
             <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
                 android:text="SERVER RAM USAGE" android:textColor="#8A8A9A"
-                android:textSize="10sp" android:fontFamily="sans-serif-medium"
+                android:textSize="10sp" android:fontFamily="@font/font_koda"
                 android:letterSpacing="0.05" android:layout_marginBottom="6dp"/>
             <TextView android:id="@+id/tv_ram"
                 android:layout_width="wrap_content" android:layout_height="wrap_content"
                 android:text="1.3GB / 1.9GB" android:textColor="#F0F0F0"
-                android:textSize="14sp" android:fontFamily="sans-serif-medium"
+                android:textSize="14sp" android:fontFamily="@font/font_koda"
                 android:textStyle="bold" android:layout_marginBottom="10dp"/>
             <ProgressBar android:id="@+id/pb_ram"
                 style="?android:attr/progressBarStyleHorizontal"
@@ -97,12 +97,12 @@
             android:layout_marginEnd="20dp">
             <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
                 android:text="TPS" android:textColor="#8A8A9A"
-                android:textSize="10sp" android:fontFamily="sans-serif-medium"
+                android:textSize="10sp" android:fontFamily="@font/font_koda"
                 android:letterSpacing="0.05" android:layout_marginBottom="4dp"/>
             <TextView android:id="@+id/tv_tps"
                 android:layout_width="wrap_content" android:layout_height="wrap_content"
                 android:text="20.0" android:textColor="#00E676"
-                android:textSize="16sp" android:fontFamily="sans-serif-medium"
+                android:textSize="16sp" android:fontFamily="@font/font_koda"
                 android:textStyle="bold"/>
         </LinearLayout>
 
@@ -122,7 +122,7 @@
                 <TextView android:id="@+id/tv_battery"
                     android:layout_width="wrap_content" android:layout_height="wrap_content"
                     android:text="50%" android:textColor="#F0F0F0"
-                    android:textSize="10sp" android:fontFamily="sans-serif-medium"
+                    android:textSize="10sp" android:fontFamily="@font/font_koda"
                     android:textStyle="bold"/>
             </LinearLayout>
         </FrameLayout>
@@ -136,7 +136,7 @@
             android:layout_width="0dp" android:layout_height="48dp"
             android:layout_weight="1" android:text="STOP"
             android:textColor="#111111" android:textSize="15sp"
-            android:fontFamily="sans-serif-medium" android:textStyle="bold"
+            android:fontFamily="@font/font_koda" android:textStyle="bold"
             app:backgroundTint="#FF5252" app:cornerRadius="28dp"
             android:insetTop="0dp" android:insetBottom="0dp"/>
     </LinearLayout>

@@ -64,7 +64,7 @@
                 android:text="EMAIL"
                 android:textColor="#888888"
                 android:textSize="12sp"
-                android:fontFamily="monospace"
+                android:fontFamily="@font/font_koda_mono"
                 android:layout_marginBottom="8dp"/>
 
             <EditText
@@ -76,7 +76,7 @@
                 android:inputType="textEmailAddress"
                 android:textColor="#F0F0F0"
                 android:textColorHint="#444444"
-                android:fontFamily="monospace"
+                android:fontFamily="@font/font_koda_mono"
                 android:paddingHorizontal="14dp"
                 android:textSize="14sp"
                 android:layout_marginBottom="16dp"/>
@@ -89,7 +89,7 @@
                 android:text="PASSKEY"
                 android:textColor="#888888"
                 android:textSize="12sp"
-                android:fontFamily="monospace"
+                android:fontFamily="@font/font_koda_mono"
                 android:layout_marginBottom="8dp"/>
 
             <EditText
@@ -101,7 +101,7 @@
                 android:inputType="textPassword"
                 android:textColor="#F0F0F0"
                 android:textColorHint="#444444"
-                android:fontFamily="monospace"
+                android:fontFamily="@font/font_koda_mono"
                 android:paddingHorizontal="14dp"
                 android:textSize="14sp"
                 android:layout_marginBottom="16dp"/>
@@ -112,7 +112,7 @@
                 android:text="INVITE CODE (OPTIONAL)"
                 android:textColor="#888888"
                 android:textSize="12sp"
-                android:fontFamily="monospace"
+                android:fontFamily="@font/font_koda_mono"
                 android:layout_marginBottom="8dp"/>
 
             <EditText
@@ -124,7 +124,7 @@
                 android:inputType="text"
                 android:textColor="#F0F0F0"
                 android:textColorHint="#444444"
-                android:fontFamily="monospace"
+                android:fontFamily="@font/font_koda_mono"
                 android:paddingHorizontal="14dp"
                 android:textSize="14sp"
                 android:layout_marginBottom="24dp"/>
@@ -168,7 +168,7 @@
                 android:layout_height="wrap_content"
                 android:text="Registered Entity? "
                 android:textColor="#555555"
-                android:fontFamily="monospace"
+                android:fontFamily="@font/font_koda_mono"
                 android:textSize="14sp"/>
 
             <TextView
@@ -177,7 +177,7 @@
                 android:layout_height="wrap_content"
                 android:text="AUTHENTICATE"
                 android:textColor="#FF0000"
-                android:fontFamily="monospace"
+                android:fontFamily="@font/font_koda_mono"
                 android:textSize="14sp"
                 android:textStyle="bold"/>
         </LinearLayout>

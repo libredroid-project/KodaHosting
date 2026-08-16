@@ -1,0 +1,10 @@
+Simple Voice Chat
+Copyright (c) henkelmax (Max Henkel)
+
+ALL RIGHTS RESERVED. This software and its official distributions are
+proprietary. Redistribution or modification is not permitted without
+explicit permission from the author.
+
+Within KodaNetwork the plugin is loaded from the author's official
+distribution channels. All rights remain with the author.
+https://github.com/henkelmax/simple-voice-chat

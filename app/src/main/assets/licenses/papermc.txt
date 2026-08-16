@@ -1,0 +1,15 @@
+Paper, Folia and Velocity
+Copyright (C) PaperMC contributors
+https://github.com/PaperMC
+
+These server software projects are licensed under the GNU General Public
+License version 3 (GPL-3.0), inherited through the Bukkit/Spigot project
+chain. Individual contributors may additionally release their own patches
+under the more permissive MIT License.
+
+This program is distributed in the hope that it will be useful, but WITHOUT
+ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+The server binaries are downloaded at runtime from the official PaperMC API.
+Full license text: https://www.gnu.org/licenses/gpl-3.0.txt
