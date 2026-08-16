@@ -60,6 +60,7 @@ public class ServerDetailActivity extends AppCompatActivity {
     private Runnable ticker;
     private static final int REQ_IMPORT_FILE = 9912;
     private static final int REQ_IMPORT_FOLDER = 9913;
+    private static final int REQ_EXPORT_FILE = 9914;
 
     // Tabs
     private TabLayout tabs;
@@ -351,13 +352,19 @@ public class ServerDetailActivity extends AppCompatActivity {
             btnImportFile.setOnClickListener(v -> {
                 new AlertDialog.Builder(this)
                     .setTitle(getString(R.string.sd_dialog_import_title))
-                    .setItems(new String[]{"File(s)", "Folder"}, (d, w) -> {
+                    .setItems(new String[]{"New File", "New Folder", "Import File(s)", "Import Folder"}, (d, w) -> {
                         if (w == 0) {
-                            Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+                            showCreateEntryDialog(true);
+                        } else if (w == 1) {
+                            showCreateEntryDialog(false);
+                        } else if (w == 2) {
+                            // SAF picker reaches every DocumentsProvider (USB, Drive,
+                            // Downloads, ...) — no chooser wrapper, it breaks the UI
+                            Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
                             intent.setType("*/*");
                             intent.addCategory(Intent.CATEGORY_OPENABLE);
                             intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
-                            startActivityForResult(Intent.createChooser(intent, "Import Files"), REQ_IMPORT_FILE);
+                            startActivityForResult(intent, REQ_IMPORT_FILE);
                         } else {
                             Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE);
                             startActivityForResult(intent, REQ_IMPORT_FOLDER);
@@ -1749,6 +1756,7 @@ public class ServerDetailActivity extends AppCompatActivity {
 
     private File clipFile;
     private boolean clipCut;
+    private File pendingExportFile;
 
     private void addFRow(String text, File file) {
         TextView tv = new TextView(this);
@@ -1808,7 +1816,7 @@ public class ServerDetailActivity extends AppCompatActivity {
                     return true;
                 }
                 
-                String[] actions = {getString(R.string.sd_dialog_rename), "Kopieren", "Ausschneiden", "Löschen"};
+                String[] actions = {getString(R.string.sd_dialog_rename), "Kopieren", "Ausschneiden", "Löschen", "Export"};
                 new AlertDialog.Builder(this)
                     .setTitle(file.getName())
                     .setItems(actions, (d, which) -> {
@@ -1838,6 +1846,13 @@ public class ServerDetailActivity extends AppCompatActivity {
                                 file.delete();
                             }
                             refreshFiles();
+                        } else if (which == 4 && file.isFile()) { // Export via SAF
+                            pendingExportFile = file;
+                            Intent intent = new Intent(Intent.ACTION_CREATE_DOCUMENT);
+                            intent.addCategory(Intent.CATEGORY_OPENABLE);
+                            intent.setType("*/*");
+                            intent.putExtra(Intent.EXTRA_TITLE, file.getName());
+                            startActivityForResult(intent, REQ_EXPORT_FILE);
                         }
                     })
                     .show();
@@ -1861,6 +1876,43 @@ public class ServerDetailActivity extends AppCompatActivity {
             }
         }
         fileOrDirectory.delete();
+    }
+
+    /** Creates a new file (opened in the editor right away) or folder in the current files-tab directory. */
+    private void showCreateEntryDialog(boolean isFile) {
+        if (currentDir == null || !currentDir.exists()) return;
+        String rel = currentDir.getAbsolutePath().replace(server.getServerDir(), "");
+        if (rel.isEmpty()) rel = "/";
+
+        android.widget.EditText input = new android.widget.EditText(this);
+        input.setHint(isFile ? "config.yml" : "plugins/myfolder");
+        new AlertDialog.Builder(this)
+            .setTitle((isFile ? "New File" : "New Folder") + " in " + rel)
+            .setView(input)
+            .setPositiveButton("Create", (d, w) -> {
+                String name = input.getText().toString().trim();
+                if (name.isEmpty() || name.contains("..")) {
+                    android.widget.Toast.makeText(this, "Invalid name", android.widget.Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                File target = new File(currentDir, name);
+                if (target.exists()) {
+                    android.widget.Toast.makeText(this, "Already exists", android.widget.Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                boolean ok = isFile ? false : target.mkdirs();
+                if (isFile) {
+                    try { ok = target.createNewFile(); } catch (Exception e) { ok = false; }
+                }
+                if (!ok) {
+                    android.widget.Toast.makeText(this, "Could not create " + name, android.widget.Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                refreshFiles();
+                if (isFile) openFileEditor(target);
+            })
+            .setNegativeButton("Cancel", null)
+            .show();
     }
 
     private void openFileEditor(File f) {
@@ -3649,6 +3701,26 @@ public class ServerDetailActivity extends AppCompatActivity {
             android.net.Uri treeUri = data.getData();
             if (treeUri != null && currentDir != null) {
                 importFolderToCurrentDir(treeUri);
+            }
+        } else if (requestCode == REQ_EXPORT_FILE && resultCode == RESULT_OK && data != null) {
+            android.net.Uri uri = data.getData();
+            if (uri != null && pendingExportFile != null && pendingExportFile.exists()) {
+                File src = pendingExportFile;
+                pendingExportFile = null;
+                new Thread(() -> {
+                    boolean ok = false;
+                    try (java.io.InputStream in = new java.io.FileInputStream(src);
+                         java.io.OutputStream out = getContentResolver().openOutputStream(uri)) {
+                        byte[] buf = new byte[8192];
+                        int len;
+                        while ((len = in.read(buf)) > 0) out.write(buf, 0, len);
+                        ok = true;
+                    } catch (Exception ignored) {}
+                    final boolean okF = ok;
+                    runOnUiThread(() -> Toast.makeText(this,
+                            okF ? "Exported " + src.getName() : "Export failed",
+                            Toast.LENGTH_SHORT).show());
+                }).start();
             }
         }
     }
