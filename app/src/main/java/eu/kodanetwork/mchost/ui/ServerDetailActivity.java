@@ -349,28 +349,7 @@ public class ServerDetailActivity extends AppCompatActivity {
         tvFilesRoot    = findViewById(R.id.tv_files_root);
         View btnImportFile = findViewById(R.id.btn_import_file);
         if (btnImportFile != null) {
-            btnImportFile.setOnClickListener(v -> {
-                new AlertDialog.Builder(this)
-                    .setTitle(getString(R.string.sd_dialog_import_title))
-                    .setItems(new String[]{"New File", "New Folder", "Import File(s)", "Import Folder"}, (d, w) -> {
-                        if (w == 0) {
-                            showCreateEntryDialog(true);
-                        } else if (w == 1) {
-                            showCreateEntryDialog(false);
-                        } else if (w == 2) {
-                            // SAF picker reaches every DocumentsProvider (USB, Drive,
-                            // Downloads, ...) — no chooser wrapper, it breaks the UI
-                            Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
-                            intent.setType("*/*");
-                            intent.addCategory(Intent.CATEGORY_OPENABLE);
-                            intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
-                            startActivityForResult(intent, REQ_IMPORT_FILE);
-                        } else {
-                            Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE);
-                            startActivityForResult(intent, REQ_IMPORT_FOLDER);
-                        }
-                    }).show();
-            });
+            btnImportFile.setOnClickListener(v -> showFilesActionDialog());
         }
 
         layoutFullLoading = findViewById(R.id.layout_full_loading);
@@ -729,7 +708,7 @@ public class ServerDetailActivity extends AppCompatActivity {
 
         btnFeed.setOnClickListener(v -> {
             sendCmd("effect give " + player + " saturation 30 0");
-            android.widget.Toast.makeText(this, "Fed " + player, android.widget.Toast.LENGTH_SHORT).show();
+            android.widget.Toast.makeText(this, getString(R.string.pm_fed_toast, player), android.widget.Toast.LENGTH_SHORT).show();
         });
 
         btnStarve.setOnClickListener(v -> {
@@ -744,30 +723,44 @@ public class ServerDetailActivity extends AppCompatActivity {
 
         btnKick.setOnClickListener(v -> {
             sendCmd("kick " + player);
-            android.widget.Toast.makeText(this, "Kicked " + player, android.widget.Toast.LENGTH_SHORT).show();
+            android.widget.Toast.makeText(this, getString(R.string.pm_kicked_toast, player), android.widget.Toast.LENGTH_SHORT).show();
         });
 
         btnBan.setOnClickListener(v -> {
-            new android.app.AlertDialog.Builder(this)
-                .setTitle("Ban Player")
-                .setMessage("Ban " + player + " from this server? They will not be able to rejoin until pardoned.")
-                .setPositiveButton("Ban", (d, w2) -> {
-                    sendCmd("ban " + player + " Banned via KodaNetwork");
-                    android.widget.Toast.makeText(this, "Banned " + player, android.widget.Toast.LENGTH_SHORT).show();
-                })
-                .setNegativeButton("Cancel", null)
-                .show();
+            android.app.Dialog banDialog = new android.app.Dialog(this);
+            banDialog.requestWindowFeature(android.view.Window.FEATURE_NO_TITLE);
+            banDialog.setContentView(R.layout.dialog_praetor_delete);
+            if (banDialog.getWindow() != null) {
+                banDialog.getWindow().setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT));
+                banDialog.getWindow().setLayout(android.view.ViewGroup.LayoutParams.MATCH_PARENT, android.view.ViewGroup.LayoutParams.MATCH_PARENT);
+            }
+            TextView banDialogTitle = banDialog.findViewById(R.id.tv_dialog_title);
+            if (banDialogTitle != null) {
+                String praetorHtml = "<font color=\"#555555\">P.R.</font><font color=\"#AAAAAA\">A</font><font color=\"#555555\">.</font><font color=\"#AAAAAA\">E</font><font color=\"#555555\">.</font><font color=\"#FFFFFF\">T</font><font color=\"#555555\">.</font><font color=\"#FFFFFF\">O</font><font color=\"#555555\">.</font><font color=\"#FFFFFF\">R.</font>";
+                banDialogTitle.setText(android.text.Html.fromHtml(praetorHtml, android.text.Html.FROM_HTML_MODE_LEGACY));
+            }
+            ((TextView) banDialog.findViewById(R.id.tv_delete_title)).setText(getString(R.string.pm_ban_title));
+            ((TextView) banDialog.findViewById(R.id.tv_delete_body)).setText(getString(R.string.pm_ban_desc, player));
+            android.widget.Button btnBanConfirm = banDialog.findViewById(R.id.btn_dialog_delete);
+            btnBanConfirm.setText(getString(R.string.pm_ban_confirm));
+            btnBanConfirm.setOnClickListener(x -> {
+                sendCmd("ban " + player + " Banned via KodaNetwork");
+                android.widget.Toast.makeText(this, getString(R.string.pm_banned_toast, player), android.widget.Toast.LENGTH_SHORT).show();
+                banDialog.dismiss();
+            });
+            banDialog.findViewById(R.id.btn_dialog_cancel).setOnClickListener(x -> banDialog.dismiss());
+            banDialog.show();
         });
 
         // OP state comes from ops.json so the button reflects reality and also
         // works for offline players
         final boolean[] opped = { isOperator(new java.io.File(server.getServerDir()), player) };
-        btnOp.setText(opped[0] ? "DeOP" : "OP");
+        btnOp.setText(getString(opped[0] ? R.string.pm_deop : R.string.pm_op));
         btnOp.setOnClickListener(v -> {
             opped[0] = !opped[0];
             sendCmd((opped[0] ? "op " : "deop ") + player);
-            btnOp.setText(opped[0] ? "DeOP" : "OP");
-            android.widget.Toast.makeText(this, (opped[0] ? "Opped " : "De-opped ") + player, android.widget.Toast.LENGTH_SHORT).show();
+            btnOp.setText(getString(opped[0] ? R.string.pm_deop : R.string.pm_op));
+            android.widget.Toast.makeText(this, getString(opped[0] ? R.string.pm_opped_toast : R.string.pm_deopped_toast, player), android.widget.Toast.LENGTH_SHORT).show();
         });
 
         btnDelete.setOnClickListener(v -> {
@@ -1789,7 +1782,7 @@ public class ServerDetailActivity extends AppCompatActivity {
                     if (clipFile != null) {
                         new AlertDialog.Builder(this)
                             .setTitle(getString(R.string.sd_dialog_paste_action))
-                            .setPositiveButton("Einfügen (" + clipFile.getName() + ")", (d, w) -> {
+                            .setPositiveButton(getString(R.string.sd_action_paste, clipFile.getName()), (d, w) -> {
                                 try {
                                     File dest = new File(currentDir, clipFile.getName());
                                     if (clipCut) {
@@ -1810,13 +1803,14 @@ public class ServerDetailActivity extends AppCompatActivity {
                                     });
                                 }
                             })
-                            .setNegativeButton("Abbrechen", null)
+                            .setNegativeButton(getString(R.string.sd_action_cancel), null)
                             .show();
                     }
                     return true;
                 }
                 
-                String[] actions = {getString(R.string.sd_dialog_rename), "Kopieren", "Ausschneiden", "Löschen", "Export"};
+                String[] actions = {getString(R.string.sd_dialog_rename), getString(R.string.sd_action_copy),
+                        getString(R.string.sd_action_cut), getString(R.string.sd_action_delete), getString(R.string.sd_files_export)};
                 new AlertDialog.Builder(this)
                     .setTitle(file.getName())
                     .setItems(actions, (d, which) -> {
@@ -1826,11 +1820,11 @@ public class ServerDetailActivity extends AppCompatActivity {
                             new AlertDialog.Builder(this)
                                 .setTitle(getString(R.string.sd_dialog_rename))
                                 .setView(input)
-                                .setPositiveButton("OK", (d2, w2) -> {
+                                .setPositiveButton(getString(R.string.sd_action_ok), (d2, w2) -> {
                                     file.renameTo(new File(file.getParent(), input.getText().toString()));
                                     refreshFiles();
                                 })
-                                .setNegativeButton("Abbrechen", null).show();
+                                .setNegativeButton(getString(R.string.sd_action_cancel), null).show();
                         } else if (which == 1) { // Kopieren
                             clipFile = file;
                             clipCut = false;
@@ -1878,41 +1872,92 @@ public class ServerDetailActivity extends AppCompatActivity {
         fileOrDirectory.delete();
     }
 
+    /** Praetor-styled action picker for the files tab plus button. */
+    private void showFilesActionDialog() {
+        android.app.Dialog dialog = new android.app.Dialog(this);
+        dialog.requestWindowFeature(android.view.Window.FEATURE_NO_TITLE);
+        dialog.setContentView(R.layout.dialog_praetor_files_action);
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT));
+            dialog.getWindow().setLayout(android.view.ViewGroup.LayoutParams.MATCH_PARENT, android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
+        }
+
+        dialog.findViewById(R.id.btn_files_new_file).setOnClickListener(v -> {
+            dialog.dismiss();
+            showCreateEntryDialog(true);
+        });
+        dialog.findViewById(R.id.btn_files_new_folder).setOnClickListener(v -> {
+            dialog.dismiss();
+            showCreateEntryDialog(false);
+        });
+        dialog.findViewById(R.id.btn_files_import_files).setOnClickListener(v -> {
+            dialog.dismiss();
+            // SAF picker reaches every DocumentsProvider (USB, Drive,
+            // Downloads, ...) — no chooser wrapper, it breaks the UI
+            Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+            intent.setType("*/*");
+            intent.addCategory(Intent.CATEGORY_OPENABLE);
+            intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
+            startActivityForResult(intent, REQ_IMPORT_FILE);
+        });
+        dialog.findViewById(R.id.btn_files_import_folder).setOnClickListener(v -> {
+            dialog.dismiss();
+            startActivityForResult(new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE), REQ_IMPORT_FOLDER);
+        });
+
+        dialog.show();
+    }
+
     /** Creates a new file (opened in the editor right away) or folder in the current files-tab directory. */
     private void showCreateEntryDialog(boolean isFile) {
         if (currentDir == null || !currentDir.exists()) return;
         String rel = currentDir.getAbsolutePath().replace(server.getServerDir(), "");
         if (rel.isEmpty()) rel = "/";
 
-        android.widget.EditText input = new android.widget.EditText(this);
+        android.app.Dialog dialog = new android.app.Dialog(this);
+        dialog.requestWindowFeature(android.view.Window.FEATURE_NO_TITLE);
+        dialog.setContentView(R.layout.dialog_praetor_input);
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT));
+            dialog.getWindow().setLayout(android.view.ViewGroup.LayoutParams.MATCH_PARENT, android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
+        }
+
+        String praetorHtml = "<font color=\"#555555\">P.R.</font><font color=\"#AAAAAA\">A</font><font color=\"#555555\">.</font><font color=\"#AAAAAA\">E</font><font color=\"#555555\">.</font><font color=\"#FFFFFF\">T</font><font color=\"#555555\">.</font><font color=\"#FFFFFF\">O</font><font color=\"#555555\">.</font><font color=\"#FFFFFF\">R.</font>";
+        ((TextView) dialog.findViewById(R.id.tv_dialog_title)).setText(android.text.Html.fromHtml(praetorHtml, android.text.Html.FROM_HTML_MODE_LEGACY));
+        ((TextView) dialog.findViewById(R.id.tv_dialog_subtitle)).setText(getString(R.string.sd_files_action_title));
+        ((TextView) dialog.findViewById(R.id.tv_dialog_message)).setText(getString(
+                isFile ? R.string.sd_files_create_file_msg : R.string.sd_files_create_folder_msg, rel));
+
+        android.widget.EditText input = dialog.findViewById(R.id.et_dialog_input);
         input.setHint(isFile ? "config.yml" : "plugins/myfolder");
-        new AlertDialog.Builder(this)
-            .setTitle((isFile ? "New File" : "New Folder") + " in " + rel)
-            .setView(input)
-            .setPositiveButton("Create", (d, w) -> {
-                String name = input.getText().toString().trim();
-                if (name.isEmpty() || name.contains("..")) {
-                    android.widget.Toast.makeText(this, "Invalid name", android.widget.Toast.LENGTH_SHORT).show();
-                    return;
-                }
-                File target = new File(currentDir, name);
-                if (target.exists()) {
-                    android.widget.Toast.makeText(this, "Already exists", android.widget.Toast.LENGTH_SHORT).show();
-                    return;
-                }
-                boolean ok = isFile ? false : target.mkdirs();
-                if (isFile) {
-                    try { ok = target.createNewFile(); } catch (Exception e) { ok = false; }
-                }
-                if (!ok) {
-                    android.widget.Toast.makeText(this, "Could not create " + name, android.widget.Toast.LENGTH_SHORT).show();
-                    return;
-                }
-                refreshFiles();
-                if (isFile) openFileEditor(target);
-            })
-            .setNegativeButton("Cancel", null)
-            .show();
+        ((android.widget.Button) dialog.findViewById(R.id.btn_dialog_confirm)).setText(getString(R.string.sd_files_create));
+
+        dialog.findViewById(R.id.btn_dialog_cancel).setOnClickListener(view -> dialog.dismiss());
+        dialog.findViewById(R.id.btn_dialog_confirm).setOnClickListener(view -> {
+            String name = input.getText().toString().trim();
+            if (name.isEmpty() || name.contains("..")) {
+                android.widget.Toast.makeText(this, getString(R.string.sd_files_name_invalid), android.widget.Toast.LENGTH_SHORT).show();
+                return;
+            }
+            File target = new File(currentDir, name);
+            if (target.exists()) {
+                android.widget.Toast.makeText(this, getString(R.string.sd_files_exists), android.widget.Toast.LENGTH_SHORT).show();
+                return;
+            }
+            boolean ok = isFile ? false : target.mkdirs();
+            if (isFile) {
+                try { ok = target.createNewFile(); } catch (Exception e) { ok = false; }
+            }
+            if (!ok) {
+                android.widget.Toast.makeText(this, getString(R.string.sd_files_create_failed, name), android.widget.Toast.LENGTH_SHORT).show();
+                return;
+            }
+            dialog.dismiss();
+            refreshFiles();
+            if (isFile) openFileEditor(target);
+        });
+
+        dialog.show();
     }
 
     private void openFileEditor(File f) {
@@ -3198,56 +3243,76 @@ public class ServerDetailActivity extends AppCompatActivity {
             collectPropsDrift(props, "max-players", String.valueOf(server.getMaxPlayers()), fileVals, modelVals);
 
             if (!fileVals.isEmpty()) {
-                StringBuilder msg = new StringBuilder("You changed these values manually in server.properties:\n\n");
+                StringBuilder msg = new StringBuilder(getString(R.string.sd_props_changed_prefix) + "\n\n");
                 for (java.util.Map.Entry<String, String> e : fileVals.entrySet()) {
                     msg.append(e.getKey()).append(": \"").append(e.getValue())
-                       .append("\"\nApp value: \"").append(modelVals.get(e.getKey())).append("\"\n\n");
+                       .append("\"\n").append(getString(R.string.sd_props_app_value)).append(" \"")
+                       .append(modelVals.get(e.getKey())).append("\"\n\n");
                 }
-                msg.append("Keep your manual values or restore the app values?");
-                new android.app.AlertDialog.Builder(this)
-                    .setTitle("server.properties was changed")
-                    .setMessage(msg.toString())
-                    .setPositiveButton("Use manual values", (d, w) -> {
-                        for (java.util.Map.Entry<String, String> e : fileVals.entrySet()) {
-                            String v = e.getValue();
-                            switch (e.getKey()) {
-                                case "motd": server.setMotd(v); break;
-                                case "gamemode":
-                                    try { server.setGamemode(ServerInstance.Gamemode.valueOf(v.toLowerCase())); } catch (Exception ignored) {} break;
-                                case "difficulty":
-                                    try { server.setDifficulty(ServerInstance.Difficulty.valueOf(v.toLowerCase())); } catch (Exception ignored) {} break;
-                                case "pvp": server.setPvp(Boolean.parseBoolean(v)); break;
-                                case "white-list": server.setWhitelist(Boolean.parseBoolean(v)); break;
-                                case "max-players":
-                                    try { server.setMaxPlayers(Integer.parseInt(v)); } catch (Exception ignored) {} break;
-                            }
-                        }
-                        repo.update(server);
-                    })
-                    .setNegativeButton("Use app values", (d, w) -> {
-                        java.util.Map<String, String> restore = new java.util.HashMap<>();
-                        restore.put("motd", server.getMotd());
-                        if (server.getGamemode() != null) restore.put("gamemode", server.getGamemode().name());
-                        if (server.getDifficulty() != null) restore.put("difficulty", server.getDifficulty().name());
-                        restore.put("pvp", String.valueOf(server.isPvp()));
-                        restore.put("white-list", String.valueOf(server.isWhitelist()));
-                        restore.put("max-players", String.valueOf(server.getMaxPlayers()));
-                        writePropsEntries(propsFile, restore);
+                msg.append(getString(R.string.sd_props_changed_suffix));
 
-                        // Reflect the restored model values in the widgets
-                        etMaxPlayers.setText(String.valueOf(server.getMaxPlayers()));
-                        if (etMotd != null && server.getMotd() != null) etMotd.setText(server.getMotd());
-                        if (spinnerGamemode != null && server.getGamemode() != null) {
-                            for (int i = 0; i < gamemodes.length; i++) {
-                                if (gamemodes[i].equalsIgnoreCase(server.getGamemode().name())) spinnerGamemode.setSelection(i);
-                            }
+                android.app.Dialog driftDialog = new android.app.Dialog(this);
+                driftDialog.requestWindowFeature(android.view.Window.FEATURE_NO_TITLE);
+                driftDialog.setContentView(R.layout.dialog_praetor_delete);
+                if (driftDialog.getWindow() != null) {
+                    driftDialog.getWindow().setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT));
+                    driftDialog.getWindow().setLayout(android.view.ViewGroup.LayoutParams.MATCH_PARENT, android.view.ViewGroup.LayoutParams.MATCH_PARENT);
+                }
+                TextView driftTitle = driftDialog.findViewById(R.id.tv_dialog_title);
+                if (driftTitle != null) {
+                    String praetorHtml = "<font color=\"#555555\">P.R.</font><font color=\"#AAAAAA\">A</font><font color=\"#555555\">.</font><font color=\"#AAAAAA\">E</font><font color=\"#555555\">.</font><font color=\"#FFFFFF\">T</font><font color=\"#555555\">.</font><font color=\"#FFFFFF\">O</font><font color=\"#555555\">.</font><font color=\"#FFFFFF\">R.</font>";
+                    driftTitle.setText(android.text.Html.fromHtml(praetorHtml, android.text.Html.FROM_HTML_MODE_LEGACY));
+                }
+                ((TextView) driftDialog.findViewById(R.id.tv_delete_title)).setText(getString(R.string.sd_props_changed_title));
+                ((TextView) driftDialog.findViewById(R.id.tv_delete_body)).setText(msg.toString());
+
+                android.widget.Button btnUseManual = driftDialog.findViewById(R.id.btn_dialog_delete);
+                btnUseManual.setText(getString(R.string.sd_props_use_manual));
+                btnUseManual.setOnClickListener(x -> {
+                    for (java.util.Map.Entry<String, String> e : fileVals.entrySet()) {
+                        String v = e.getValue();
+                        switch (e.getKey()) {
+                            case "motd": server.setMotd(v); break;
+                            case "gamemode":
+                                try { server.setGamemode(ServerInstance.Gamemode.valueOf(v.toLowerCase())); } catch (Exception ignored) {} break;
+                            case "difficulty":
+                                try { server.setDifficulty(ServerInstance.Difficulty.valueOf(v.toLowerCase())); } catch (Exception ignored) {} break;
+                            case "pvp": server.setPvp(Boolean.parseBoolean(v)); break;
+                            case "white-list": server.setWhitelist(Boolean.parseBoolean(v)); break;
+                            case "max-players":
+                                try { server.setMaxPlayers(Integer.parseInt(v)); } catch (Exception ignored) {} break;
                         }
-                        for (int i = 0; i < difficulties.length; i++) {
-                            if (difficulties[i].equalsIgnoreCase(server.getDifficulty().name())) spinnerDifficulty.setSelection(i);
+                    }
+                    repo.update(server);
+                    driftDialog.dismiss();
+                });
+
+                driftDialog.findViewById(R.id.btn_dialog_cancel).setOnClickListener(x -> {
+                    java.util.Map<String, String> restore = new java.util.HashMap<>();
+                    restore.put("motd", server.getMotd());
+                    if (server.getGamemode() != null) restore.put("gamemode", server.getGamemode().name());
+                    if (server.getDifficulty() != null) restore.put("difficulty", server.getDifficulty().name());
+                    restore.put("pvp", String.valueOf(server.isPvp()));
+                    restore.put("white-list", String.valueOf(server.isWhitelist()));
+                    restore.put("max-players", String.valueOf(server.getMaxPlayers()));
+                    writePropsEntries(propsFile, restore);
+
+                    // Reflect the restored model values in the widgets
+                    etMaxPlayers.setText(String.valueOf(server.getMaxPlayers()));
+                    if (etMotd != null && server.getMotd() != null) etMotd.setText(server.getMotd());
+                    if (spinnerGamemode != null && server.getGamemode() != null) {
+                        for (int i = 0; i < gamemodes.length; i++) {
+                            if (gamemodes[i].equalsIgnoreCase(server.getGamemode().name())) spinnerGamemode.setSelection(i);
                         }
-                        switchPvp.setChecked(server.isPvp());
-                    })
-                    .show();
+                    }
+                    for (int i = 0; i < difficulties.length; i++) {
+                        if (difficulties[i].equalsIgnoreCase(server.getDifficulty().name())) spinnerDifficulty.setSelection(i);
+                    }
+                    switchPvp.setChecked(server.isPvp());
+                    driftDialog.dismiss();
+                });
+
+                driftDialog.show();
             }
         }
     }
@@ -3718,7 +3783,7 @@ public class ServerDetailActivity extends AppCompatActivity {
                     } catch (Exception ignored) {}
                     final boolean okF = ok;
                     runOnUiThread(() -> Toast.makeText(this,
-                            okF ? "Exported " + src.getName() : "Export failed",
+                            okF ? getString(R.string.sd_files_exported, src.getName()) : getString(R.string.sd_files_export_failed),
                             Toast.LENGTH_SHORT).show());
                 }).start();
             }

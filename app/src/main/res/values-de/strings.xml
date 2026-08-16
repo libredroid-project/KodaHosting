@@ -388,4 +388,46 @@
     <string name="server_banned_reason_label">Grund: </string>
     <string name="server_banned_reason_unknown">Unbekannt</string>
     <string name="server_banned_download">Backup herunterladen</string>
+
+    <!-- Files tab actions -->
+    <string name="sd_files_action_title">DATEI-MANAGER</string>
+    <string name="sd_files_new_file">Neue Datei</string>
+    <string name="sd_files_new_folder">Neuer Ordner</string>
+    <string name="sd_files_import_files">Datei(en) importieren</string>
+    <string name="sd_files_import_folder">Ordner importieren</string>
+    <string name="sd_files_create_file_msg">Neue Datei in %1$s erstellen</string>
+    <string name="sd_files_create_folder_msg">Neuen Ordner in %1$s erstellen</string>
+    <string name="sd_files_create">Erstellen</string>
+    <string name="sd_files_name_invalid">Ungültiger Name</string>
+    <string name="sd_files_exists">Existiert bereits</string>
+    <string name="sd_files_create_failed">%1$s konnte nicht erstellt werden</string>
+    <string name="sd_files_export">Exportieren</string>
+    <string name="sd_files_exported">%1$s exportiert</string>
+    <string name="sd_files_export_failed">Export fehlgeschlagen</string>
+    <string name="sd_action_copy">Kopieren</string>
+    <string name="sd_action_cut">Ausschneiden</string>
+    <string name="sd_action_delete">Löschen</string>
+    <string name="sd_action_cancel">Abbrechen</string>
+    <string name="sd_action_paste">Einfügen (%1$s)</string>
+    <string name="sd_action_ok">OK</string>
+
+    <!-- Player manager -->
+    <string name="pm_op">OP</string>
+    <string name="pm_deop">DeOP</string>
+    <string name="pm_fed_toast">%1$s gefüttert</string>
+    <string name="pm_kicked_toast">%1$s wurde gekickt</string>
+    <string name="pm_banned_toast">%1$s wurde gebannt</string>
+    <string name="pm_opped_toast">%1$s hat jetzt OP</string>
+    <string name="pm_deopped_toast">%1$s hat kein OP mehr</string>
+    <string name="pm_ban_title">Spieler bannen</string>
+    <string name="pm_ban_desc">%1$s von diesem Server bannen? Ein Wiedereintritt ist erst nach einer Entbannung möglich.</string>
+    <string name="pm_ban_confirm">Bannen</string>
+
+    <!-- server.properties manual change warning -->
+    <string name="sd_props_changed_title">server.properties wurde geändert</string>
+    <string name="sd_props_changed_prefix">Du hast diese Werte manuell in der server.properties geändert:</string>
+    <string name="sd_props_app_value">App-Wert:</string>
+    <string name="sd_props_changed_suffix">Behalte deine manuellen Werte oder stelle die App-Werte wieder her?</string>
+    <string name="sd_props_use_manual">Manuelle Werte verwenden</string>
+    <string name="sd_props_use_app">App-Werte verwenden</string>
 </resources>

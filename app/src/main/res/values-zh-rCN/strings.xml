@@ -403,4 +403,46 @@
     <string name="server_banned_reason_label">原因：</string>
     <string name="server_banned_reason_unknown">未知</string>
     <string name="server_banned_download">下载备份</string>
+
+    <!-- Files tab actions -->
+    <string name="sd_files_action_title">文件管理器</string>
+    <string name="sd_files_new_file">新建文件</string>
+    <string name="sd_files_new_folder">新建文件夹</string>
+    <string name="sd_files_import_files">导入文件</string>
+    <string name="sd_files_import_folder">导入文件夹</string>
+    <string name="sd_files_create_file_msg">在 %1$s 中新建文件</string>
+    <string name="sd_files_create_folder_msg">在 %1$s 中新建文件夹</string>
+    <string name="sd_files_create">创建</string>
+    <string name="sd_files_name_invalid">名称无效</string>
+    <string name="sd_files_exists">已存在</string>
+    <string name="sd_files_create_failed">无法创建 %1$s</string>
+    <string name="sd_files_export">导出</string>
+    <string name="sd_files_exported">已导出 %1$s</string>
+    <string name="sd_files_export_failed">导出失败</string>
+    <string name="sd_action_copy">复制</string>
+    <string name="sd_action_cut">剪切</string>
+    <string name="sd_action_delete">删除</string>
+    <string name="sd_action_cancel">取消</string>
+    <string name="sd_action_paste">粘贴（%1$s）</string>
+    <string name="sd_action_ok">确定</string>
+
+    <!-- Player manager -->
+    <string name="pm_op">OP</string>
+    <string name="pm_deop">取消 OP</string>
+    <string name="pm_fed_toast">已喂食 %1$s</string>
+    <string name="pm_kicked_toast">已踢出 %1$s</string>
+    <string name="pm_banned_toast">已封禁 %1$s</string>
+    <string name="pm_opped_toast">已给予 %1$s OP 权限</string>
+    <string name="pm_deopped_toast">已移除 %1$s 的 OP 权限</string>
+    <string name="pm_ban_title">封禁玩家</string>
+    <string name="pm_ban_desc">封禁 %1$s？在解封之前，该玩家将无法重新加入。</string>
+    <string name="pm_ban_confirm">封禁</string>
+
+    <!-- server.properties manual change warning -->
+    <string name="sd_props_changed_title">server.properties 已被修改</string>
+    <string name="sd_props_changed_prefix">你手动修改了 server.properties 中的以下值：</string>
+    <string name="sd_props_app_value">应用值：</string>
+    <string name="sd_props_changed_suffix">保留手动修改的值，还是恢复应用值？</string>
+    <string name="sd_props_use_manual">使用手动值</string>
+    <string name="sd_props_use_app">使用应用值</string>
 </resources>

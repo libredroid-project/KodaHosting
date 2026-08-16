@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="@drawable/bg_dialog_custom"
+    android:padding="32dp"
+    android:gravity="center">
+
+    <!-- Title: P.R.A.E.T.O.R. -->
+    <TextView
+        android:id="@+id/tv_praetor_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/praetor_title"
+        android:textColor="#FF3333"
+        android:textSize="28sp"
+        android:textStyle="bold"
+        android:letterSpacing="0.1"
+        android:gravity="center" />
+
+    <!-- Subtitle -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/praetor_subtitle"
+        android:textColor="#8A8A9A"
+        android:textSize="10sp"
+        android:textStyle="bold"
+        android:letterSpacing="0.05"
+        android:gravity="center"
+        android:layout_marginTop="8dp" />
+
+    <View
+        android:layout_width="40dp"
+        android:layout_height="2dp"
+        android:background="#FF6B00"
+        android:layout_marginTop="24dp"
+        android:layout_marginBottom="24dp" />
+
+    <!-- Files action title -->
+    <TextView
+        android:id="@+id/tv_files_action_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/sd_files_action_title"
+        android:textColor="#F0F0F0"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:gravity="center"
+        android:layout_marginBottom="24dp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_files_new_file"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            style="@style/KodaButton"
+            android:text="@string/sd_files_new_file"
+            android:stateListAnimator="@null"
+            android:layout_marginBottom="8dp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_files_new_folder"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            style="@style/KodaButton.Outline"
+            android:text="@string/sd_files_new_folder"
+            android:stateListAnimator="@null"
+            android:layout_marginBottom="8dp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_files_import_files"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            style="@style/KodaButton.Outline"
+            android:text="@string/sd_files_import_files"
+            android:stateListAnimator="@null"
+            android:layout_marginBottom="8dp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_files_import_folder"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            style="@style/KodaButton.Outline"
+            android:text="@string/sd_files_import_folder"
+            android:stateListAnimator="@null" />
+    </LinearLayout>
+</LinearLayout>

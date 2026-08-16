@@ -372,4 +372,46 @@
     <string name="server_banned_reason_label">Reason: </string>
     <string name="server_banned_reason_unknown">Unknown</string>
     <string name="server_banned_download">Download Backup</string>
+
+    <!-- Files tab actions -->
+    <string name="sd_files_action_title">FILE MANAGER</string>
+    <string name="sd_files_new_file">New File</string>
+    <string name="sd_files_new_folder">New Folder</string>
+    <string name="sd_files_import_files">Import File(s)</string>
+    <string name="sd_files_import_folder">Import Folder</string>
+    <string name="sd_files_create_file_msg">Create a new file in %1$s</string>
+    <string name="sd_files_create_folder_msg">Create a new folder in %1$s</string>
+    <string name="sd_files_create">Create</string>
+    <string name="sd_files_name_invalid">Invalid name</string>
+    <string name="sd_files_exists">Already exists</string>
+    <string name="sd_files_create_failed">Could not create %1$s</string>
+    <string name="sd_files_export">Export</string>
+    <string name="sd_files_exported">Exported %1$s</string>
+    <string name="sd_files_export_failed">Export failed</string>
+    <string name="sd_action_copy">Copy</string>
+    <string name="sd_action_cut">Cut</string>
+    <string name="sd_action_delete">Delete</string>
+    <string name="sd_action_cancel">Cancel</string>
+    <string name="sd_action_paste">Paste (%1$s)</string>
+    <string name="sd_action_ok">OK</string>
+
+    <!-- Player manager -->
+    <string name="pm_op">OP</string>
+    <string name="pm_deop">DeOP</string>
+    <string name="pm_fed_toast">Fed %1$s</string>
+    <string name="pm_kicked_toast">Kicked %1$s</string>
+    <string name="pm_banned_toast">Banned %1$s</string>
+    <string name="pm_opped_toast">Opped %1$s</string>
+    <string name="pm_deopped_toast">De-opped %1$s</string>
+    <string name="pm_ban_title">Ban Player</string>
+    <string name="pm_ban_desc">Ban %1$s from this server? They will not be able to rejoin until pardoned.</string>
+    <string name="pm_ban_confirm">Ban</string>
+
+    <!-- server.properties manual change warning -->
+    <string name="sd_props_changed_title">server.properties was changed</string>
+    <string name="sd_props_changed_prefix">You changed these values manually in server.properties:</string>
+    <string name="sd_props_app_value">App value:</string>
+    <string name="sd_props_changed_suffix">Keep your manual values or restore the app values?</string>
+    <string name="sd_props_use_manual">Use manual values</string>
+    <string name="sd_props_use_app">Use app values</string>
 </resources>
