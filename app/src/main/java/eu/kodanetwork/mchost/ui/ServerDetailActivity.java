@@ -773,8 +773,9 @@ public class ServerDetailActivity extends AppCompatActivity {
                         try { Thread.sleep(1000); } catch(Exception ignored){}
                         String uuid = eu.kodanetwork.mchost.util.PlayerStatsParser.getUuidFromName(new java.io.File(server.getServerDir()), player);
                         if (uuid != null) {
-                            new java.io.File(server.getServerDir(), "world/playerdata/" + uuid + ".dat").delete();
-                            new java.io.File(server.getServerDir(), "world/stats/" + uuid + ".json").delete();
+                            java.io.File serverDir = new java.io.File(server.getServerDir());
+                            eu.kodanetwork.mchost.util.PlayerStatsParser.getPlayerDataFile(serverDir, uuid).delete();
+                            eu.kodanetwork.mchost.util.PlayerStatsParser.getStatsFile(serverDir, uuid).delete();
                             runOnUiThread(() -> {
                                 android.widget.Toast.makeText(this, "Wiped " + player, android.widget.Toast.LENGTH_SHORT).show();
                                 sheet.dismiss();
@@ -812,8 +813,10 @@ public class ServerDetailActivity extends AppCompatActivity {
                         
                         boolean finalIsWhitelisted = isWhitelisted;
                         
-                        // Read Inventory
-                        java.util.Map<String, Object> dat = eu.kodanetwork.mchost.util.NbtParser.parsePlayerDat(new java.io.File(server.getServerDir(), "world/playerdata/" + uuid + ".dat"));
+                        // Read Inventory — level-name aware instead of hardcoded "world/"
+                        java.io.File datFile = eu.kodanetwork.mchost.util.PlayerStatsParser.getPlayerDataFile(new java.io.File(server.getServerDir()), uuid);
+                        java.util.Map<String, Object> dat = datFile.exists()
+                                ? eu.kodanetwork.mchost.util.NbtParser.parsePlayerDat(datFile) : null;
                         
                         runOnUiThread(() -> {
                             if (!sheet.isShowing()) return;
@@ -1879,7 +1882,13 @@ public class ServerDetailActivity extends AppCompatActivity {
         dialog.setContentView(R.layout.dialog_praetor_files_action);
         if (dialog.getWindow() != null) {
             dialog.getWindow().setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT));
-            dialog.getWindow().setLayout(android.view.ViewGroup.LayoutParams.MATCH_PARENT, android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
+            dialog.getWindow().setLayout(android.view.ViewGroup.LayoutParams.MATCH_PARENT, android.view.ViewGroup.LayoutParams.MATCH_PARENT);
+        }
+
+        TextView filesActionTitle = dialog.findViewById(R.id.tv_praetor_title);
+        if (filesActionTitle != null) {
+            String praetorHtml = "<font color=\"#555555\">P.R.</font><font color=\"#AAAAAA\">A</font><font color=\"#555555\">.</font><font color=\"#AAAAAA\">E</font><font color=\"#555555\">.</font><font color=\"#FFFFFF\">T</font><font color=\"#555555\">.</font><font color=\"#FFFFFF\">O</font><font color=\"#555555\">.</font><font color=\"#FFFFFF\">R.</font>";
+            filesActionTitle.setText(android.text.Html.fromHtml(praetorHtml, android.text.Html.FROM_HTML_MODE_LEGACY));
         }
 
         dialog.findViewById(R.id.btn_files_new_file).setOnClickListener(v -> {
@@ -3233,6 +3242,22 @@ public class ServerDetailActivity extends AppCompatActivity {
         // Manual edits of server.properties are allowed, but writeProps() would
         // silently overwrite them from the model on the next start — warn instead
         if (propsFile.exists()) {
+            // server-port and server-ip are strictly app-managed (tunnel/DNS wiring
+            // depends on them) — restore them immediately, never offer them as a choice
+            java.util.Map<String, String> enforce = new java.util.HashMap<>();
+            String filePort = props.getProperty("server-port");
+            if (filePort != null && !filePort.trim().equals(String.valueOf(server.getPort()).trim())) {
+                enforce.put("server-port", String.valueOf(server.getPort()));
+            }
+            String fileIp = props.getProperty("server-ip");
+            if (fileIp != null && !fileIp.trim().equals("127.0.0.1")) {
+                enforce.put("server-ip", "127.0.0.1");
+            }
+            if (!enforce.isEmpty()) {
+                writePropsEntries(propsFile, enforce);
+                android.widget.Toast.makeText(this, getString(R.string.sd_props_port_ip_managed), android.widget.Toast.LENGTH_LONG).show();
+            }
+
             java.util.LinkedHashMap<String, String> fileVals = new java.util.LinkedHashMap<>();
             java.util.LinkedHashMap<String, String> modelVals = new java.util.LinkedHashMap<>();
             collectPropsDrift(props, "motd", server.getMotd(), fileVals, modelVals);

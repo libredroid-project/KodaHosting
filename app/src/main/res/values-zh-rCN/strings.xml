@@ -445,4 +445,5 @@
     <string name="sd_props_changed_suffix">保留手动修改的值，还是恢复应用值？</string>
     <string name="sd_props_use_manual">使用手动值</string>
     <string name="sd_props_use_app">使用应用值</string>
+    <string name="sd_props_port_ip_managed">server-port 和 server-ip 由应用管理，无法修改——你的更改已被还原。</string>
 </resources>

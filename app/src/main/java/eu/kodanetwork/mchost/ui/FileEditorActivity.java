@@ -151,11 +151,67 @@ public class FileEditorActivity extends AppCompatActivity {
     private void saveFile() {
         String content = etEditor.getText().toString();
         new Thread(() -> {
-            try (FileOutputStream fos = new FileOutputStream(targetFile, false)) {
-                fos.write(content.getBytes(StandardCharsets.UTF_8));
+            try {
+                String out = content;
+                if ("server.properties".equals(targetFile.getName())) {
+                    out = protectManagedProps(content);
+                }
+                try (FileOutputStream fos = new FileOutputStream(targetFile, false)) {
+                    fos.write(out.getBytes(StandardCharsets.UTF_8));
+                }
                 runOnUiThread(() -> { Toast.makeText(this, "Gespeichert", Toast.LENGTH_SHORT).show(); finish(); });
             } catch (IOException e) { runOnUiThread(() -> Toast.makeText(this, "Save Error", Toast.LENGTH_SHORT).show()); }
         }).start();
+    }
+
+    /**
+     * server-port and server-ip are app-managed (tunnel/DNS wiring depends on
+     * them); a manual change breaks the whole app. Re-applies the values from
+     * the file on disk and warns the user when an edit was reverted.
+     */
+    private String protectManagedProps(String newContent) {
+        java.util.Map<String, String> original = new java.util.HashMap<>();
+        try (BufferedReader reader = new BufferedReader(new FileReader(targetFile))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String t = line.trim();
+                if (t.startsWith("server-port=") || t.startsWith("server-ip=")) {
+                    int eq = t.indexOf('=');
+                    original.put(t.substring(0, eq), t.substring(eq + 1));
+                }
+            }
+        } catch (IOException ignored) {}
+
+        if (original.isEmpty()) return newContent;
+
+        StringBuilder sb = new StringBuilder();
+        java.util.Set<String> seen = new java.util.HashSet<>();
+        boolean changed = false;
+        for (String line : newContent.split("\n", -1)) {
+            String t = line.trim();
+            if (t.startsWith("server-port=") || t.startsWith("server-ip=")) {
+                int eq = t.indexOf('=');
+                String key = t.substring(0, eq);
+                seen.add(key);
+                String keep = key + "=" + original.get(key);
+                if (!t.equals(keep)) changed = true;
+                sb.append(keep);
+            } else {
+                sb.append(line);
+            }
+            sb.append("\n");
+        }
+        // Re-add the keys if the user deleted their lines entirely
+        for (java.util.Map.Entry<String, String> e : original.entrySet()) {
+            if (!seen.contains(e.getKey())) {
+                sb.append(e.getKey()).append("=").append(e.getValue()).append("\n");
+                changed = true;
+            }
+        }
+        if (changed) {
+            runOnUiThread(() -> Toast.makeText(this, getString(R.string.sd_props_port_ip_managed), Toast.LENGTH_LONG).show());
+        }
+        return sb.toString();
     }
 
     @Override

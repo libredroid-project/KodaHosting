@@ -118,70 +118,79 @@ public class PlayerStatsParser {
         PlayerStats stats = new PlayerStats();
         File normalFile = getStatsFile(serverDir, uuid);
         File liveFile = getLiveStatsFile(serverDir, uuid);
-        
+
+        // KodaTransfer refreshes its live file every 2s while the player is
+        // online — it is always at least as fresh as the vanilla stats file,
+        // so prefer it whenever it exists (mtime comparison loses that race
+        // whenever vanilla writes its stats between plugin ticks)
         File statsFile = normalFile;
         boolean isLiveFormat = false;
-        
+
         if (liveFile.exists()) {
-            if (!normalFile.exists() || liveFile.lastModified() > normalFile.lastModified()) {
-                statsFile = liveFile;
-                isLiveFormat = true;
-            }
+            statsFile = liveFile;
+            isLiveFormat = true;
         }
-        
+
         if (!statsFile.exists()) return stats;
         try {
-            byte[] bytes = new byte[(int) statsFile.length()];
-            try (FileInputStream fis = new FileInputStream(statsFile)) {
-                fis.read(bytes);
-            }
-            String jsonStr = new String(bytes, StandardCharsets.UTF_8);
-            JSONObject root = new JSONObject(jsonStr);
-            
-            if (isLiveFormat) {
-                // Parse our custom live stats format
-                if (root.has("hoursPlayed")) stats.hoursPlayed = root.getLong("hoursPlayed");
-                else if (root.has("playOneMinute")) stats.hoursPlayed = root.getLong("playOneMinute") / (20 * 60 * 60);
-                if (root.has("deaths")) stats.deaths = root.getLong("deaths");
-                if (root.has("mobsKilled")) stats.mobsKilled = root.getLong("mobsKilled");
-                if (root.has("damageTaken")) stats.damageTaken = root.getLong("damageTaken") / 10;
-                if (root.has("blocksMined")) stats.blocksMined = root.getLong("blocksMined");
-                return stats;
-            }
-            
-            if (!root.has("stats")) return stats;
-            JSONObject statsObj = root.getJSONObject("stats");
-
-            if (statsObj.has("minecraft:custom")) {
-                JSONObject custom = statsObj.getJSONObject("minecraft:custom");
-                if (custom.has("minecraft:play_time")) {
-                    stats.hoursPlayed = custom.getLong("minecraft:play_time") / (20 * 60 * 60);
-                }
-                if (custom.has("minecraft:deaths")) {
-                    stats.deaths = custom.getLong("minecraft:deaths");
-                }
-                if (custom.has("minecraft:mob_kills")) {
-                    stats.mobsKilled = custom.getLong("minecraft:mob_kills");
-                }
-                if (custom.has("minecraft:damage_taken")) {
-                    stats.damageTaken = custom.getLong("minecraft:damage_taken") / 10; // Minecraft stores damage in tenths of a heart
-                }
-            }
-
-            if (statsObj.has("minecraft:mined")) {
-                JSONObject mined = statsObj.getJSONObject("minecraft:mined");
-                long totalMined = 0;
-                java.util.Iterator<String> keys = mined.keys();
-                while (keys.hasNext()) {
-                    String key = keys.next();
-                    totalMined += mined.getLong(key);
-                }
-                stats.blocksMined = totalMined;
-            }
-
+            parseStatsInto(stats, statsFile, isLiveFormat);
         } catch (Exception e) {
-            e.printStackTrace();
+            // KodaTransfer rewrites its live file every 2s; reading it mid-write
+            // fails — fall back to the vanilla stats file instead of zeros
+            if (isLiveFormat && normalFile.exists()) {
+                try { parseStatsInto(stats, normalFile, false); } catch (Exception ignored) {}
+            }
         }
         return stats;
+    }
+
+    private static void parseStatsInto(PlayerStats stats, File file, boolean isLiveFormat) throws Exception {
+        byte[] bytes = new byte[(int) file.length()];
+        try (FileInputStream fis = new FileInputStream(file)) {
+            fis.read(bytes);
+        }
+        String jsonStr = new String(bytes, StandardCharsets.UTF_8);
+        JSONObject root = new JSONObject(jsonStr);
+
+        if (isLiveFormat) {
+            // Custom live format written by KodaTransfer every 2 seconds
+            if (root.has("hoursPlayed")) stats.hoursPlayed = root.getLong("hoursPlayed");
+            else if (root.has("playOneMinute")) stats.hoursPlayed = (root.getLong("playOneMinute") + 36000) / 72000; // round to nearest hour
+            if (root.has("deaths")) stats.deaths = root.getLong("deaths");
+            if (root.has("mobsKilled")) stats.mobsKilled = root.getLong("mobsKilled");
+            if (root.has("damageTaken")) stats.damageTaken = root.getLong("damageTaken") / 10;
+            if (root.has("blocksMined")) stats.blocksMined = root.getLong("blocksMined");
+            return;
+        }
+
+        if (!root.has("stats")) return;
+        JSONObject statsObj = root.getJSONObject("stats");
+
+        if (statsObj.has("minecraft:custom")) {
+            JSONObject custom = statsObj.getJSONObject("minecraft:custom");
+            if (custom.has("minecraft:play_time")) {
+                stats.hoursPlayed = (custom.getLong("minecraft:play_time") + 36000) / 72000; // round to nearest hour
+            }
+            if (custom.has("minecraft:deaths")) {
+                stats.deaths = custom.getLong("minecraft:deaths");
+            }
+            if (custom.has("minecraft:mob_kills")) {
+                stats.mobsKilled = custom.getLong("minecraft:mob_kills");
+            }
+            if (custom.has("minecraft:damage_taken")) {
+                stats.damageTaken = custom.getLong("minecraft:damage_taken") / 10; // Minecraft stores damage in tenths of a heart
+            }
+        }
+
+        if (statsObj.has("minecraft:mined")) {
+            JSONObject mined = statsObj.getJSONObject("minecraft:mined");
+            long totalMined = 0;
+            java.util.Iterator<String> keys = mined.keys();
+            while (keys.hasNext()) {
+                String key = keys.next();
+                totalMined += mined.getLong(key);
+            }
+            stats.blocksMined = totalMined;
+        }
     }
 }

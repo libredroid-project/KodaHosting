@@ -430,4 +430,5 @@
     <string name="sd_props_changed_suffix">Behalte deine manuellen Werte oder stelle die App-Werte wieder her?</string>
     <string name="sd_props_use_manual">Manuelle Werte verwenden</string>
     <string name="sd_props_use_app">App-Werte verwenden</string>
+    <string name="sd_props_port_ip_managed">server-port und server-ip werden von der App verwaltet und können nicht geändert werden — deine Änderung wurde zurückgesetzt.</string>
 </resources>

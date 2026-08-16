@@ -414,4 +414,5 @@
     <string name="sd_props_changed_suffix">Keep your manual values or restore the app values?</string>
     <string name="sd_props_use_manual">Use manual values</string>
     <string name="sd_props_use_app">Use app values</string>
+    <string name="sd_props_port_ip_managed">server-port and server-ip are managed by the app and cannot be changed — your edit was reverted.</string>
 </resources>

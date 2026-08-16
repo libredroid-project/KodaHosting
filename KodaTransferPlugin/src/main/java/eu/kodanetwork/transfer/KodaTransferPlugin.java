@@ -58,16 +58,25 @@ public class KodaTransferPlugin extends JavaPlugin implements Listener, CommandE
                         File statsDir = new File(getDataFolder(), "playerdata/stats");
                         if (!statsDir.exists()) statsDir.mkdirs();
                         File liveStats = new File(statsDir, target.getUniqueId().toString() + "_live.json");
-                        
+
                         org.json.simple.JSONObject json = new org.json.simple.JSONObject();
                         json.put("deaths", deaths);
                         json.put("mobsKilled", mobsKilled);
                         json.put("damageTaken", damageTaken);
                         json.put("playOneMinute", playOneMinute);
                         json.put("blocksMined", blocksMined);
-                        
-                        try (FileWriter fw = new FileWriter(liveStats)) {
+
+                        // Write via temp file + rename so the app never reads a
+                        // half-written JSON while we refresh it every 2 seconds
+                        File tmp = new File(statsDir, target.getUniqueId().toString() + "_live.json.tmp");
+                        try (FileWriter fw = new FileWriter(tmp)) {
                             fw.write(json.toJSONString());
+                        }
+                        if (liveStats.exists()) liveStats.delete();
+                        if (!tmp.renameTo(liveStats)) {
+                            try (FileWriter fw = new FileWriter(liveStats)) {
+                                fw.write(json.toJSONString());
+                            }
                         }
                     } catch (Exception ex) {
                         // ignore if failing to write to prevent spam
