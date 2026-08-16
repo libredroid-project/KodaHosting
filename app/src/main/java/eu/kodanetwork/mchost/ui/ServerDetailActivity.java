@@ -3085,25 +3085,7 @@ public class ServerDetailActivity extends AppCompatActivity {
             server.setPvp(switchPvp.isChecked());
             repo.update(server);
 
-            java.util.List<String> lines = new java.util.ArrayList<>();
-            if (propsFile.exists()) {
-                try (java.io.BufferedReader br = new java.io.BufferedReader(new java.io.FileReader(propsFile))) {
-                    String l; while ((l = br.readLine()) != null) lines.add(l);
-                } catch (Exception ignored) {}
-            }
-            for (java.util.Map.Entry<String, String> e : updates.entrySet()) {
-                boolean found = false;
-                for (int i = 0; i < lines.size(); i++) {
-                    if (lines.get(i).trim().startsWith(e.getKey() + "=")) {
-                        lines.set(i, e.getKey() + "=" + e.getValue());
-                        found = true; break;
-                    }
-                }
-                if (!found) lines.add(e.getKey() + "=" + e.getValue());
-            }
-            try (java.io.PrintWriter pw = new java.io.PrintWriter(new java.io.FileWriter(propsFile))) {
-                for (String l : lines) pw.println(l);
-            } catch (Exception ignored) {}
+            writePropsEntries(propsFile, updates);
         };
 
         // Listeners
@@ -3150,6 +3132,105 @@ public class ServerDetailActivity extends AppCompatActivity {
         switchPvp.setOnCheckedChangeListener(checkListener);
         switchFlight.setOnCheckedChangeListener(checkListener);
         if (switchForceGamemode != null) switchForceGamemode.setOnCheckedChangeListener(checkListener);
+
+        // Manual edits of server.properties are allowed, but writeProps() would
+        // silently overwrite them from the model on the next start — warn instead
+        if (propsFile.exists()) {
+            java.util.LinkedHashMap<String, String> fileVals = new java.util.LinkedHashMap<>();
+            java.util.LinkedHashMap<String, String> modelVals = new java.util.LinkedHashMap<>();
+            collectPropsDrift(props, "motd", server.getMotd(), fileVals, modelVals);
+            collectPropsDrift(props, "gamemode", server.getGamemode() == null ? null : server.getGamemode().name(), fileVals, modelVals);
+            collectPropsDrift(props, "difficulty", server.getDifficulty() == null ? null : server.getDifficulty().name(), fileVals, modelVals);
+            collectPropsDrift(props, "pvp", String.valueOf(server.isPvp()), fileVals, modelVals);
+            collectPropsDrift(props, "white-list", String.valueOf(server.isWhitelist()), fileVals, modelVals);
+            collectPropsDrift(props, "max-players", String.valueOf(server.getMaxPlayers()), fileVals, modelVals);
+
+            if (!fileVals.isEmpty()) {
+                StringBuilder msg = new StringBuilder("You changed these values manually in server.properties:\n\n");
+                for (java.util.Map.Entry<String, String> e : fileVals.entrySet()) {
+                    msg.append(e.getKey()).append(": \"").append(e.getValue())
+                       .append("\"\nApp value: \"").append(modelVals.get(e.getKey())).append("\"\n\n");
+                }
+                msg.append("Keep your manual values or restore the app values?");
+                new android.app.AlertDialog.Builder(this)
+                    .setTitle("server.properties was changed")
+                    .setMessage(msg.toString())
+                    .setPositiveButton("Use manual values", (d, w) -> {
+                        for (java.util.Map.Entry<String, String> e : fileVals.entrySet()) {
+                            String v = e.getValue();
+                            switch (e.getKey()) {
+                                case "motd": server.setMotd(v); break;
+                                case "gamemode":
+                                    try { server.setGamemode(ServerInstance.Gamemode.valueOf(v.toLowerCase())); } catch (Exception ignored) {} break;
+                                case "difficulty":
+                                    try { server.setDifficulty(ServerInstance.Difficulty.valueOf(v.toLowerCase())); } catch (Exception ignored) {} break;
+                                case "pvp": server.setPvp(Boolean.parseBoolean(v)); break;
+                                case "white-list": server.setWhitelist(Boolean.parseBoolean(v)); break;
+                                case "max-players":
+                                    try { server.setMaxPlayers(Integer.parseInt(v)); } catch (Exception ignored) {} break;
+                            }
+                        }
+                        repo.update(server);
+                    })
+                    .setNegativeButton("Use app values", (d, w) -> {
+                        java.util.Map<String, String> restore = new java.util.HashMap<>();
+                        restore.put("motd", server.getMotd());
+                        if (server.getGamemode() != null) restore.put("gamemode", server.getGamemode().name());
+                        if (server.getDifficulty() != null) restore.put("difficulty", server.getDifficulty().name());
+                        restore.put("pvp", String.valueOf(server.isPvp()));
+                        restore.put("white-list", String.valueOf(server.isWhitelist()));
+                        restore.put("max-players", String.valueOf(server.getMaxPlayers()));
+                        writePropsEntries(propsFile, restore);
+
+                        // Reflect the restored model values in the widgets
+                        etMaxPlayers.setText(String.valueOf(server.getMaxPlayers()));
+                        if (etMotd != null && server.getMotd() != null) etMotd.setText(server.getMotd());
+                        if (spinnerGamemode != null && server.getGamemode() != null) {
+                            for (int i = 0; i < gamemodes.length; i++) {
+                                if (gamemodes[i].equalsIgnoreCase(server.getGamemode().name())) spinnerGamemode.setSelection(i);
+                            }
+                        }
+                        for (int i = 0; i < difficulties.length; i++) {
+                            if (difficulties[i].equalsIgnoreCase(server.getDifficulty().name())) spinnerDifficulty.setSelection(i);
+                        }
+                        switchPvp.setChecked(server.isPvp());
+                    })
+                    .show();
+            }
+        }
+    }
+
+    private void collectPropsDrift(java.util.Properties props, String key, String modelVal,
+                                   java.util.Map<String, String> fileVals, java.util.Map<String, String> modelVals) {
+        if (modelVal == null) return;
+        String fileVal = props.getProperty(key);
+        if (fileVal != null && !fileVal.trim().equalsIgnoreCase(modelVal.trim())) {
+            fileVals.put(key, fileVal.trim());
+            modelVals.put(key, modelVal.trim());
+        }
+    }
+
+    /** Updates the given keys in a .properties-style file, preserving all other lines. */
+    private void writePropsEntries(File propsFile, java.util.Map<String, String> updates) {
+        java.util.List<String> lines = new java.util.ArrayList<>();
+        if (propsFile.exists()) {
+            try (java.io.BufferedReader br = new java.io.BufferedReader(new java.io.FileReader(propsFile))) {
+                String l; while ((l = br.readLine()) != null) lines.add(l);
+            } catch (Exception ignored) {}
+        }
+        for (java.util.Map.Entry<String, String> e : updates.entrySet()) {
+            boolean found = false;
+            for (int i = 0; i < lines.size(); i++) {
+                if (lines.get(i).trim().startsWith(e.getKey() + "=")) {
+                    lines.set(i, e.getKey() + "=" + e.getValue());
+                    found = true; break;
+                }
+            }
+            if (!found) lines.add(e.getKey() + "=" + e.getValue());
+        }
+        try (java.io.PrintWriter pw = new java.io.PrintWriter(new java.io.FileWriter(propsFile))) {
+            for (String l : lines) pw.println(l);
+        } catch (Exception ignored) {}
     }
 
     
