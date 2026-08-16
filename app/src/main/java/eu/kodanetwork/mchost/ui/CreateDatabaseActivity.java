@@ -141,6 +141,7 @@ public class CreateDatabaseActivity extends AppCompatActivity {
         ServerInstance s = new ServerInstance();
         s.setId(UUID.randomUUID().toString());
         s.setName(name);
+        s.setSubdomain(name);
         // We reuse serverDir as dbDir
         s.setServerDir(new File(getFilesDir(), "dbs/" + s.getId()).getAbsolutePath());
         

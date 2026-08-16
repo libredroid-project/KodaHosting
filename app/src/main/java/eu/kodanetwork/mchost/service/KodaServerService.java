@@ -271,10 +271,12 @@ public class KodaServerService extends Service {
                             s.setId(remoteId);
                             if (host.startsWith("db_")) {
                                 s.setName(host.substring(3));
+                                s.setSubdomain(host);
                                 s.setType(eu.kodanetwork.mchost.model.ServerInstance.Type.MARIADB);
                                 s.setUseNative(true);
                             } else {
                                 s.setName(host);
+                                s.setSubdomain(host);
                                 
                                 // Parse CMD:INSTALL_{ENGINE}_{VERSION}[_SETUP_{COLOR}]
                                 String[] parts = ver.split("_");

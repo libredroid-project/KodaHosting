@@ -198,7 +198,9 @@ public class ServerInstance {
     public String getId()                      { return id; }
     public void   setId(String v)              { id = v; }
     public String getName()                    { return name; }
-    public void   setName(String v)            { name = v; subdomain = sanitize(v); }
+    // Renaming only affects the local display name; the subdomain is the
+    // DNS identity and must only change via setSubdomain() (e.g. at creation).
+    public void   setName(String v)            { name = v; }
     public Type   getType()                    { return type; }
     public String getVersion()                 { return version; }
     public void   setVersion(String v)         { version = v; }
