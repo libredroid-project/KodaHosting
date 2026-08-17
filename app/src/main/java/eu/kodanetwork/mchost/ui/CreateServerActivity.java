@@ -48,7 +48,13 @@ import eu.kodanetwork.mchost.model.ServerRepo;
 
 public class CreateServerActivity extends AppCompatActivity {
 
-    private static final String[] FABRIC_VERSIONS  = {"1.21.4","1.21.3","1.21.1","1.20.6","1.20.4","1.20.1","1.19.4"};
+    private static final String[] FABRIC_VERSIONS  = {
+        "1.21.4","1.21.3","1.21.1","1.20.6","1.20.4","1.20.2","1.20.1","1.20",
+        "1.19.4","1.19.3","1.19.2","1.19.1","1.19",
+        "1.18.2","1.18.1","1.18",
+        "1.17.1","1.17",
+        "1.16.5","1.16.4","1.16.3","1.16.2","1.16.1","1.16"
+    };
     private static final String[] VANILLA_VERSIONS = {"1.21.4","1.21.3","1.21.1","1.20.6","1.20.4","1.20.1","1.19.4","1.18.2","1.17.1","1.16.5"};
     private static final String[] FORGE_VERSIONS   = {"1.21.1","1.20.1","1.19.2","1.18.2","1.16.5","1.12.2"};
     private static final String[] NEOFORGE_VERSIONS= {"1.21.4","1.21.3","1.21.1","1.20.6","1.20.4","1.20.1"};
