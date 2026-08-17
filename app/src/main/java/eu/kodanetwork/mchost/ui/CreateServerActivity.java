@@ -22,6 +22,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import androidx.documentfile.provider.DocumentFile;
 import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.LinearSnapHelper;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.airbnb.lottie.LottieAnimationView;
@@ -740,13 +741,10 @@ public class CreateServerActivity extends AppCompatActivity {
         ServerInstance.Type type = TYPE_VALS[selectedTypeIndex];
         Map<String, String> descriptions = new LinkedHashMap<>();
 
-        // Paper / Purpur / Folia specific
         if (type == ServerInstance.Type.PAPER || type == ServerInstance.Type.PURPUR || type == ServerInstance.Type.FOLIA) {
             if (!currentVersions.isEmpty()) descriptions.put(currentVersions.get(0), getString(R.string.version_desc_latest));
             if (currentVersions.size() > 1) descriptions.put(currentVersions.get(1), getString(R.string.version_desc_stable));
         }
-
-        // Minecraft versions with specific descriptions
         descriptions.put("1.21.4", getString(R.string.version_desc_1_21_4));
         descriptions.put("1.21.1", getString(R.string.version_desc_1_21_1));
         descriptions.put("1.20.1", getString(R.string.version_desc_1_20_1));
@@ -754,113 +752,149 @@ public class CreateServerActivity extends AppCompatActivity {
         descriptions.put("1.18.2", getString(R.string.version_desc_1_18_2));
         descriptions.put("1.16.5", getString(R.string.version_desc_1_16_5));
         descriptions.put("1.12.2", getString(R.string.version_desc_1_12_2));
-
-        // Velocity versions
         descriptions.put("3.4.0", getString(R.string.version_desc_velocity_latest));
         descriptions.put("3.3.0", getString(R.string.version_desc_velocity_stable));
-
-        // Generic fallback
         String genericDesc = getString(R.string.version_desc_generic);
 
-        // --- Build the BottomSheetDialog with Koda style ---
         BottomSheetDialog sheet = new BottomSheetDialog(this, R.style.KodaBottomSheetDialog);
+        float density = getResources().getDisplayMetrics().density;
+        int itemHeight = (int)(56 * density);
+        int wheelHeight = (int)(208 * density);
 
         LinearLayout container = new LinearLayout(this);
         container.setOrientation(LinearLayout.VERTICAL);
         container.setBackgroundColor(0xFF0E0E14);
         container.setPadding(0, 0, 0, 48);
 
-        // --- Header Row: Lottie + Title ---
-        LinearLayout headerRow = new LinearLayout(this);
-        headerRow.setOrientation(LinearLayout.HORIZONTAL);
-        headerRow.setGravity(android.view.Gravity.CENTER_VERTICAL);
-        headerRow.setPadding(48, 40, 48, 24);
-
-        // Lottie Animation
+        // --- Lottie cube on top, replays on every version change ---
         LottieAnimationView lottie = new LottieAnimationView(this);
         lottie.setAnimation(R.raw.koda_version);
-        lottie.setLayoutParams(new LinearLayout.LayoutParams(
-            (int)(48 * getResources().getDisplayMetrics().density),
-            (int)(48 * getResources().getDisplayMetrics().density)
-        ));
+        LinearLayout.LayoutParams lottieLp = new LinearLayout.LayoutParams(
+            (int)(64 * density), (int)(64 * density));
+        lottieLp.gravity = android.view.Gravity.CENTER_HORIZONTAL;
+        lottieLp.topMargin = (int)(28 * density);
+        lottie.setLayoutParams(lottieLp);
         lottie.loop(true);
         lottie.playAnimation();
-        headerRow.addView(lottie);
+        container.addView(lottie);
 
-        // Title Text
+        // --- Title ---
         TextView tvTitle = new TextView(this);
         tvTitle.setText(getString(R.string.version_picker_title));
         tvTitle.setTextColor(0xFFFF6B00);
         tvTitle.setTextSize(13);
         tvTitle.setTypeface(android.graphics.Typeface.DEFAULT_BOLD);
         tvTitle.setLetterSpacing(0.12f);
-        tvTitle.setPadding(16, 0, 0, 0);
-        headerRow.addView(tvTitle);
+        tvTitle.setGravity(android.view.Gravity.CENTER);
+        LinearLayout.LayoutParams titleLp = new LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        titleLp.topMargin = (int)(8 * density);
+        container.addView(tvTitle, titleLp);
 
-        container.addView(headerRow);
+        // --- Wheel: center pill + snap list + edge fades ---
+        FrameLayout wheelFrame = new FrameLayout(this);
+        wheelFrame.setClipChildren(false);
+        LinearLayout.LayoutParams wfLp = new LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.MATCH_PARENT, wheelHeight);
+        wfLp.topMargin = (int)(16 * density);
+        container.addView(wheelFrame, wfLp);
 
-        // Divider
-        View div = new View(this);
-        div.setBackgroundColor(0xFF222230);
-        div.setLayoutParams(new LinearLayout.LayoutParams(
-            LinearLayout.LayoutParams.MATCH_PARENT, 1));
-        container.addView(div);
+        View pill = new View(this);
+        pill.setBackgroundResource(R.drawable.picker_center_pill);
+        FrameLayout.LayoutParams pillLp = new FrameLayout.LayoutParams(
+            LinearLayout.LayoutParams.MATCH_PARENT, itemHeight, android.view.Gravity.CENTER_VERTICAL);
+        pillLp.leftMargin = (int)(40 * density);
+        pillLp.rightMargin = (int)(40 * density);
+        wheelFrame.addView(pill, pillLp);
 
-        // --- RecyclerView for version list ---
         RecyclerView recyclerView = new RecyclerView(this);
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        recyclerView.setHasFixedSize(true);
+        LinearLayoutManager layoutManager = new LinearLayoutManager(this);
+        recyclerView.setLayoutManager(layoutManager);
         recyclerView.setOverScrollMode(View.OVER_SCROLL_NEVER);
+        recyclerView.setClipChildren(false);
+        new LinearSnapHelper().attachToRecyclerView(recyclerView);
 
-        // Limit max height to ~320dp
-        int maxHeight = (int)(320 * getResources().getDisplayMetrics().density);
-        LinearLayout.LayoutParams rvLp = new LinearLayout.LayoutParams(
-            LinearLayout.LayoutParams.MATCH_PARENT,
-            LinearLayout.LayoutParams.WRAP_CONTENT);
-        rvLp.setMargins(24, 24, 24, 16);
-        recyclerView.setLayoutParams(rvLp);
-
-        // Adapter
-        final int[] selectedIndex = {0};
+        int initialIdx = 0;
         if (selectedVersion != null) {
             int idx = currentVersions.indexOf(selectedVersion);
-            if (idx >= 0) selectedIndex[0] = idx;
+            if (idx >= 0) initialIdx = idx;
         }
 
-        VersionAdapter adapter = new VersionAdapter(currentVersions, descriptions, genericDesc, selectedIndex[0], position -> {
-            HapticUtil.forceVibrate(this, 80);
-            selectedIndex[0] = position;
-        });
+        VersionWheelAdapter adapter = new VersionWheelAdapter(currentVersions, itemHeight,
+            recyclerView::smoothScrollToPosition);
         recyclerView.setAdapter(adapter);
-        container.addView(recyclerView);
+        layoutManager.scrollToPositionWithOffset(initialIdx, (wheelHeight - itemHeight) / 2);
+        wheelFrame.addView(recyclerView, new FrameLayout.LayoutParams(
+            FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT));
+
+        View fadeTop = new View(this);
+        fadeTop.setBackgroundResource(R.drawable.picker_fade_top);
+        FrameLayout.LayoutParams fadeTopLp = new FrameLayout.LayoutParams(
+            FrameLayout.LayoutParams.MATCH_PARENT, (int)(32 * density), android.view.Gravity.TOP);
+        wheelFrame.addView(fadeTop, fadeTopLp);
+
+        View fadeBottom = new View(this);
+        fadeBottom.setBackgroundResource(R.drawable.picker_fade_bottom);
+        FrameLayout.LayoutParams fadeBottomLp = new FrameLayout.LayoutParams(
+            FrameLayout.LayoutParams.MATCH_PARENT, (int)(32 * density), android.view.Gravity.BOTTOM);
+        wheelFrame.addView(fadeBottom, fadeBottomLp);
+
+        // --- Description under the wheel ---
+        TextView tvDesc = new TextView(this);
+        tvDesc.setTextColor(0xFF8A8A9A);
+        tvDesc.setTextSize(12);
+        tvDesc.setGravity(android.view.Gravity.CENTER);
+        tvDesc.setText(descriptions.getOrDefault(currentVersions.get(initialIdx), genericDesc));
+        LinearLayout.LayoutParams descLp = new LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        descLp.topMargin = (int)(4 * density);
+        container.addView(tvDesc, descLp);
+
+        // --- Wheel mechanics: depth scaling while scrolling, react on settle ---
+        final int[] currentPos = {initialIdx};
+        recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrolled(RecyclerView rv, int dx, int dy) {
+                applyWheelTransform(rv, itemHeight);
+            }
+
+            @Override
+            public void onScrollStateChanged(RecyclerView rv, int newState) {
+                if (newState == RecyclerView.SCROLL_STATE_IDLE) {
+                    int pos = centeredWheelPosition(rv);
+                    if (pos >= 0 && pos != currentPos[0]) {
+                        currentPos[0] = pos;
+                        HapticUtil.forceVibrate(CreateServerActivity.this, 60);
+                        tvDesc.setText(descriptions.getOrDefault(currentVersions.get(pos), genericDesc));
+                        lottie.setProgress(0f);
+                        lottie.playAnimation();
+                    }
+                }
+            }
+        });
+        recyclerView.post(() -> applyWheelTransform(recyclerView, itemHeight));
 
         // --- Confirm Button ---
         MaterialButton btnConfirm = new MaterialButton(this);
         btnConfirm.setText(getString(R.string.version_picker_confirm));
         btnConfirm.setTextColor(0xFF000000);
         btnConfirm.setBackgroundColor(0xFFFF6B00);
-        btnConfirm.setCornerRadius((int)(12 * getResources().getDisplayMetrics().density));
+        btnConfirm.setCornerRadius((int)(12 * density));
         btnConfirm.setTextSize(13);
         btnConfirm.setTypeface(androidx.core.content.res.ResourcesCompat.getFont(this, R.font.font_koda), android.graphics.Typeface.BOLD);
         btnConfirm.setLetterSpacing(0.04f);
         LinearLayout.LayoutParams btnLp = new LinearLayout.LayoutParams(
             LinearLayout.LayoutParams.MATCH_PARENT,
-            LinearLayout.LayoutParams.WRAP_CONTENT);
-        btnLp.setMargins(48, 16, 48, 16);
-        btnLp.height = (int)(56 * getResources().getDisplayMetrics().density);
-        btnConfirm.setLayoutParams(btnLp);
+            (int)(56 * density));
+        btnLp.setMargins(48, (int)(20 * density), 48, (int)(24 * density));
         btnConfirm.setOnClickListener(v -> {
-            selectedVersion = currentVersions.get(selectedIndex[0]);
+            selectedVersion = currentVersions.get(currentPos[0]);
             if (tvVersionSelected != null) tvVersionSelected.setText(selectedVersion);
             sheet.dismiss();
         });
         container.addView(btnConfirm, btnLp);
 
-        // Wrap in ScrollView
-        android.widget.ScrollView scrollView = new android.widget.ScrollView(this);
-        scrollView.setFillViewport(false);
-        scrollView.addView(container);
-        sheet.setContentView(scrollView);
+        sheet.setContentView(container);
 
         // Edge-to-edge window decor
         android.view.Window w = sheet.getWindow();
@@ -892,83 +926,71 @@ public class CreateServerActivity extends AppCompatActivity {
         });
 
         sheet.show();
-        HapticUtil.applyHapticsToView(scrollView, this);
+        HapticUtil.applyHapticsToView(container, this);
     }
 
-    // Inner class for RecyclerView adapter
-    private static class VersionAdapter extends RecyclerView.Adapter<VersionAdapter.VH> {
-        private final List<String> versions;
-        private final Map<String, String> descriptions;
-        private final String genericDesc;
-        private int selectedPos;
-        private final OnVersionClickListener listener;
+    // Scales/fades wheel items by distance to the center; center item turns orange
+    private void applyWheelTransform(RecyclerView rv, int itemHeight) {
+        int center = rv.getHeight() / 2;
+        for (int i = 0; i < rv.getChildCount(); i++) {
+            View child = rv.getChildAt(i);
+            if (!(child instanceof TextView)) continue;
+            TextView tv = (TextView) child;
+            float childCenter = child.getY() + child.getHeight() / 2f;
+            float dist = Math.abs(center - childCenter);
+            float t = Math.min(1f, dist / (rv.getHeight() * 0.6f));
+            tv.setScaleX(1.15f - 0.30f * t);
+            tv.setScaleY(1.15f - 0.30f * t);
+            tv.setAlpha(1f - 0.68f * t);
+            tv.setTextColor(dist < itemHeight * 0.5f ? 0xFFFF6B00 : 0xFF8A8A9A);
+        }
+    }
 
-        interface OnVersionClickListener {
+    private int centeredWheelPosition(RecyclerView rv) {
+        int center = rv.getHeight() / 2;
+        View best = null;
+        float bestDist = Float.MAX_VALUE;
+        for (int i = 0; i < rv.getChildCount(); i++) {
+            View c = rv.getChildAt(i);
+            float d = Math.abs(c.getY() + c.getHeight() / 2f - center);
+            if (d < bestDist) { bestDist = d; best = c; }
+        }
+        return best != null ? rv.getChildAdapterPosition(best) : -1;
+    }
+
+    // Wheel items: just the version number, full-width and centered
+    private static class VersionWheelAdapter extends RecyclerView.Adapter<VersionWheelAdapter.VH> {
+        interface OnItemClickListener {
             void onClick(int position);
         }
 
-        VersionAdapter(List<String> versions, Map<String, String> descriptions, String genericDesc,
-                       int selectedPos, OnVersionClickListener listener) {
+        private final List<String> versions;
+        private final int itemHeightPx;
+        private final OnItemClickListener clickListener;
+
+        VersionWheelAdapter(List<String> versions, int itemHeightPx, OnItemClickListener clickListener) {
             this.versions = versions;
-            this.descriptions = descriptions;
-            this.genericDesc = genericDesc;
-            this.selectedPos = selectedPos;
-            this.listener = listener;
+            this.itemHeightPx = itemHeightPx;
+            this.clickListener = clickListener;
         }
 
         @Override
         public VH onCreateViewHolder(ViewGroup parent, int viewType) {
-            LinearLayout card = new LinearLayout(parent.getContext());
-            card.setOrientation(LinearLayout.VERTICAL);
-            card.setPadding(24, 20, 24, 20);
-            card.setBackgroundResource(R.drawable.bg_rounded_card);
-            LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-            lp.setMargins(0, 0, 0, 12);
-            card.setLayoutParams(lp);
-
-            // Version text
-            TextView tvVersion = new TextView(parent.getContext());
-            tvVersion.setId(View.generateViewId());
-            tvVersion.setTextColor(0xFFF0F0F0);
-            tvVersion.setTextSize(15);
-            tvVersion.setTypeface(androidx.core.content.res.ResourcesCompat.getFont(parent.getContext(), R.font.font_koda));
-            card.addView(tvVersion);
-
-            // Description text
-            TextView tvDesc = new TextView(parent.getContext());
-            tvDesc.setId(View.generateViewId());
-            tvDesc.setTextColor(0xFF8A8A9A);
-            tvDesc.setTextSize(12);
-            tvDesc.setPadding(0, 4, 0, 0);
-            card.addView(tvDesc);
-
-            return new VH(card, tvVersion, tvDesc);
+            TextView tv = new TextView(parent.getContext());
+            tv.setGravity(android.view.Gravity.CENTER);
+            tv.setTextColor(0xFF8A8A9A);
+            tv.setTextSize(22);
+            tv.setTypeface(androidx.core.content.res.ResourcesCompat.getFont(parent.getContext(), R.font.font_koda));
+            tv.setLayoutParams(new RecyclerView.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, itemHeightPx));
+            return new VH(tv);
         }
 
         @Override
         public void onBindViewHolder(VH holder, int position) {
-            String ver = versions.get(position);
-            holder.tvVersion.setText(ver);
-            holder.tvDesc.setText(descriptions.getOrDefault(ver, genericDesc));
-
-            boolean isSelected = position == selectedPos;
-            if (isSelected) {
-                holder.itemView.setBackgroundColor(0xFF2B221E);
-                // Add orange left border via padding + background drawable would be cleaner
-                // For programmatic: just change background color slightly
-                holder.tvVersion.setTextColor(0xFFFFB68C);
-            } else {
-                holder.itemView.setBackgroundResource(R.drawable.bg_rounded_card);
-                holder.tvVersion.setTextColor(0xFFF0F0F0);
-            }
-
-            holder.itemView.setOnClickListener(v -> {
-                if (selectedPos != position) {
-                    selectedPos = position;
-                    notifyDataSetChanged();
-                }
-                if (listener != null) listener.onClick(position);
+            holder.tv.setText(versions.get(position));
+            holder.tv.setOnClickListener(v -> {
+                if (clickListener != null) clickListener.onClick(position);
             });
         }
 
@@ -978,15 +1000,11 @@ public class CreateServerActivity extends AppCompatActivity {
         }
 
         static class VH extends RecyclerView.ViewHolder {
-            LinearLayout itemView;
-            TextView tvVersion;
-            TextView tvDesc;
+            final TextView tv;
 
-            VH(LinearLayout itemView, TextView tvVersion, TextView tvDesc) {
-                super(itemView);
-                this.itemView = itemView;
-                this.tvVersion = tvVersion;
-                this.tvDesc = tvDesc;
+            VH(TextView tv) {
+                super(tv);
+                this.tv = tv;
             }
         }
     }
