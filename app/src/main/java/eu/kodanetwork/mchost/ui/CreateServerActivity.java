@@ -7,6 +7,8 @@ import android.os.Looper;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.FrameLayout;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
@@ -19,7 +21,12 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import androidx.documentfile.provider.DocumentFile;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
+import com.airbnb.lottie.LottieAnimationView;
+import com.google.android.material.bottomsheet.BottomSheetBehavior;
+import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.button.MaterialButton;
 
 import java.io.BufferedReader;
@@ -34,6 +41,8 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -45,6 +54,7 @@ import java.util.zip.ZipInputStream;
 import eu.kodanetwork.mchost.R;
 import eu.kodanetwork.mchost.model.ServerInstance;
 import eu.kodanetwork.mchost.model.ServerRepo;
+import eu.kodanetwork.mchost.util.HapticUtil;
 
 public class CreateServerActivity extends AppCompatActivity {
 
@@ -721,120 +731,264 @@ public class CreateServerActivity extends AppCompatActivity {
     }
 
     private void showVersionPicker() {
-        if (currentVersions.isEmpty()) { Toast.makeText(this, "Versions are still beeing loaded...", Toast.LENGTH_SHORT).show(); return; }
-
-        // Descriptions per type for context
-        ServerInstance.Type type = TYPE_VALS[selectedTypeIndex];
-        java.util.Map<String, String> descriptions = new java.util.LinkedHashMap<>();
-        if (type == ServerInstance.Type.PAPER || type == ServerInstance.Type.PURPUR || type == ServerInstance.Type.FOLIA) {
-            if (!currentVersions.isEmpty()) descriptions.put(currentVersions.get(0), " Neueste Version, empfohlen");
-            if (currentVersions.size() > 1) descriptions.put(currentVersions.get(1), "Stabil, viele Plugins verfügbar");
+        if (currentVersions.isEmpty()) {
+            Toast.makeText(this, getString(R.string.version_loading), Toast.LENGTH_SHORT).show();
+            return;
         }
-        // Known descriptions for specific versions
-        descriptions.put("1.21.4", "Neueste stabile Version");
-        descriptions.put("1.21.1", "Sehr beliebt, viele Plugins");
-        descriptions.put("1.20.1", "Sehr stabil, beste Mod-Unterstützung");
-        descriptions.put("1.19.4", "Letzte 1.19er Version");
-        descriptions.put("1.18.2", "Cave Update, sehr beliebt");
-        descriptions.put("1.16.5", "Nether Update, viele Mods");
-        descriptions.put("1.12.2", "Älteste stabile Version, größte Mod-Auswahl");
-        descriptions.put("3.4.0", "Neueste Velocity Version");
-        descriptions.put("3.3.0", "Stabile Velocity Version");
 
-        com.google.android.material.bottomsheet.BottomSheetDialog sheet = 
-            new com.google.android.material.bottomsheet.BottomSheetDialog(this);
-        
+        // Build descriptions map from string resources (localized)
+        ServerInstance.Type type = TYPE_VALS[selectedTypeIndex];
+        Map<String, String> descriptions = new LinkedHashMap<>();
+
+        // Paper / Purpur / Folia specific
+        if (type == ServerInstance.Type.PAPER || type == ServerInstance.Type.PURPUR || type == ServerInstance.Type.FOLIA) {
+            if (!currentVersions.isEmpty()) descriptions.put(currentVersions.get(0), getString(R.string.version_desc_latest));
+            if (currentVersions.size() > 1) descriptions.put(currentVersions.get(1), getString(R.string.version_desc_stable));
+        }
+
+        // Minecraft versions with specific descriptions
+        descriptions.put("1.21.4", getString(R.string.version_desc_1_21_4));
+        descriptions.put("1.21.1", getString(R.string.version_desc_1_21_1));
+        descriptions.put("1.20.1", getString(R.string.version_desc_1_20_1));
+        descriptions.put("1.19.4", getString(R.string.version_desc_1_19_4));
+        descriptions.put("1.18.2", getString(R.string.version_desc_1_18_2));
+        descriptions.put("1.16.5", getString(R.string.version_desc_1_16_5));
+        descriptions.put("1.12.2", getString(R.string.version_desc_1_12_2));
+
+        // Velocity versions
+        descriptions.put("3.4.0", getString(R.string.version_desc_velocity_latest));
+        descriptions.put("3.3.0", getString(R.string.version_desc_velocity_stable));
+
+        // Generic fallback
+        String genericDesc = getString(R.string.version_desc_generic);
+
+        // --- Build the BottomSheetDialog with Koda style ---
+        BottomSheetDialog sheet = new BottomSheetDialog(this, R.style.KodaBottomSheetDialog);
+
         LinearLayout container = new LinearLayout(this);
         container.setOrientation(LinearLayout.VERTICAL);
         container.setBackgroundColor(0xFF0E0E14);
         container.setPadding(0, 0, 0, 48);
 
-        // Title
+        // --- Header Row: Lottie + Title ---
+        LinearLayout headerRow = new LinearLayout(this);
+        headerRow.setOrientation(LinearLayout.HORIZONTAL);
+        headerRow.setGravity(android.view.Gravity.CENTER_VERTICAL);
+        headerRow.setPadding(48, 40, 48, 24);
+
+        // Lottie Animation
+        LottieAnimationView lottie = new LottieAnimationView(this);
+        lottie.setAnimation(R.raw.koda_version);
+        lottie.setLayoutParams(new LinearLayout.LayoutParams(
+            (int)(48 * getResources().getDisplayMetrics().density),
+            (int)(48 * getResources().getDisplayMetrics().density)
+        ));
+        lottie.loop(true);
+        lottie.playAnimation();
+        headerRow.addView(lottie);
+
+        // Title Text
         TextView tvTitle = new TextView(this);
-        tvTitle.setText("VERSION WÄHLEN");
+        tvTitle.setText(getString(R.string.version_picker_title));
         tvTitle.setTextColor(0xFFFF6B00);
         tvTitle.setTextSize(13);
         tvTitle.setTypeface(android.graphics.Typeface.DEFAULT_BOLD);
         tvTitle.setLetterSpacing(0.12f);
-        tvTitle.setPadding(48, 40, 48, 24);
-        container.addView(tvTitle);
+        tvTitle.setPadding(16, 0, 0, 0);
+        headerRow.addView(tvTitle);
+
+        container.addView(headerRow);
 
         // Divider
         View div = new View(this);
         div.setBackgroundColor(0xFF222230);
-        div.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 1));
+        div.setLayoutParams(new LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.MATCH_PARENT, 1));
         container.addView(div);
 
-        // NumberPicker (Dreh-Rad)
-        android.widget.NumberPicker picker = new android.widget.NumberPicker(this);
-        picker.setMinValue(0);
-        picker.setMaxValue(currentVersions.size() - 1);
-        String[] displayVals = currentVersions.toArray(new String[0]);
-        picker.setDisplayedValues(displayVals);
-        picker.setDescendantFocusability(android.widget.NumberPicker.FOCUS_BLOCK_DESCENDANTS);
-        
-        if (android.os.Build.VERSION.SDK_INT >= 29) {
-            picker.setTextColor(0xFFF0F0F0);
-        }
+        // --- RecyclerView for version list ---
+        RecyclerView recyclerView = new RecyclerView(this);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        recyclerView.setHasFixedSize(true);
+        recyclerView.setOverScrollMode(View.OVER_SCROLL_NEVER);
 
-        LinearLayout.LayoutParams pickerLp = new LinearLayout.LayoutParams(
-            LinearLayout.LayoutParams.MATCH_PARENT, 
-            (int)(200 * getResources().getDisplayMetrics().density));
-        pickerLp.setMargins(48, 24, 48, 24);
-        container.addView(picker, pickerLp);
+        // Limit max height to ~320dp
+        int maxHeight = (int)(320 * getResources().getDisplayMetrics().density);
+        LinearLayout.LayoutParams rvLp = new LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.MATCH_PARENT,
+            LinearLayout.LayoutParams.WRAP_CONTENT);
+        rvLp.setMargins(24, 24, 24, 16);
+        recyclerView.setLayoutParams(rvLp);
 
-        // Description Text
-        TextView tvDesc = new TextView(this);
-        tvDesc.setTextColor(0xFF8A8A9A);
-        tvDesc.setTextSize(14);
-        tvDesc.setGravity(android.view.Gravity.CENTER);
-        tvDesc.setPadding(48, 0, 48, 32);
-        container.addView(tvDesc);
-
-        // Initial selection
-        int initialIdx = 0;
+        // Adapter
+        final int[] selectedIndex = {0};
         if (selectedVersion != null) {
-            initialIdx = currentVersions.indexOf(selectedVersion);
-            if (initialIdx < 0) initialIdx = 0;
+            int idx = currentVersions.indexOf(selectedVersion);
+            if (idx >= 0) selectedIndex[0] = idx;
         }
-        picker.setValue(initialIdx);
-        tvDesc.setText(descriptions.getOrDefault(currentVersions.get(initialIdx), "Standard Version ohne spezifische Beschreibung. Bietet allgemeine Stabilität und Kompatibilität für deinen Server."));
 
-        // Update description on scroll
-        picker.setOnValueChangedListener((p, oldVal, newVal) -> {
-            eu.kodanetwork.mchost.util.HapticUtil.forceVibrate(this, 80);
-            String ver = currentVersions.get(newVal);
-            String d = descriptions.getOrDefault(ver, "Standard Version ohne spezifische Beschreibung. Bietet allgemeine Stabilität und Kompatibilität für deinen Server.");
-            tvDesc.setText(d);
+        VersionAdapter adapter = new VersionAdapter(currentVersions, descriptions, genericDesc, selectedIndex[0], position -> {
+            HapticUtil.forceVibrate(this, 80);
+            selectedIndex[0] = position;
         });
+        recyclerView.setAdapter(adapter);
+        container.addView(recyclerView);
 
-        // Confirm Button
-        com.google.android.material.button.MaterialButton btnConfirm = new com.google.android.material.button.MaterialButton(this);
-        btnConfirm.setText("VERSION ÜBERNEHMEN");
+        // --- Confirm Button ---
+        MaterialButton btnConfirm = new MaterialButton(this);
+        btnConfirm.setText(getString(R.string.version_picker_confirm));
         btnConfirm.setTextColor(0xFF000000);
         btnConfirm.setBackgroundColor(0xFFFF6B00);
+        btnConfirm.setCornerRadius((int)(12 * getResources().getDisplayMetrics().density));
+        btnConfirm.setTextSize(13);
+        btnConfirm.setTypeface(androidx.core.content.res.ResourcesCompat.getFont(this, R.font.font_koda), android.graphics.Typeface.BOLD);
+        btnConfirm.setLetterSpacing(0.04f);
         LinearLayout.LayoutParams btnLp = new LinearLayout.LayoutParams(
-            LinearLayout.LayoutParams.MATCH_PARENT, 
+            LinearLayout.LayoutParams.MATCH_PARENT,
             LinearLayout.LayoutParams.WRAP_CONTENT);
         btnLp.setMargins(48, 16, 48, 16);
+        btnLp.height = (int)(56 * getResources().getDisplayMetrics().density);
+        btnConfirm.setLayoutParams(btnLp);
         btnConfirm.setOnClickListener(v -> {
-            selectedVersion = currentVersions.get(picker.getValue());
+            selectedVersion = currentVersions.get(selectedIndex[0]);
             if (tvVersionSelected != null) tvVersionSelected.setText(selectedVersion);
             sheet.dismiss();
         });
         container.addView(btnConfirm, btnLp);
 
+        // Wrap in ScrollView
         android.widget.ScrollView scrollView = new android.widget.ScrollView(this);
+        scrollView.setFillViewport(false);
         scrollView.addView(container);
         sheet.setContentView(scrollView);
-        
+
+        // Edge-to-edge window decor
         android.view.Window w = sheet.getWindow();
         if (w != null) {
-            w.setNavigationBarColor(0xFF0D0D14);
-            w.setStatusBarColor(0xFF0D0D14);
+            w.addFlags(android.view.WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+            if (android.os.Build.VERSION.SDK_INT >= 23) {
+                w.setStatusBarColor(android.graphics.Color.TRANSPARENT);
+                w.setNavigationBarColor(android.graphics.Color.TRANSPARENT);
+                androidx.core.view.WindowCompat.setDecorFitsSystemWindows(w, false);
+                boolean isLight = eu.kodanetwork.mchost.util.ThemeHelper.isLightMode(this);
+                int flags = android.view.View.SYSTEM_UI_FLAG_LAYOUT_STABLE | android.view.View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION;
+                if (isLight) {
+                    flags |= android.view.View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR | android.view.View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR;
+                }
+                w.getDecorView().setSystemUiVisibility(flags);
+                if (android.os.Build.VERSION.SDK_INT >= 29) {
+                    w.setNavigationBarContrastEnforced(false);
+                }
+            }
         }
+
+        // Force expanded state on show
+        sheet.setOnShowListener(d -> {
+            BottomSheetDialog bsd = (BottomSheetDialog) d;
+            FrameLayout bottomSheet = bsd.findViewById(com.google.android.material.R.id.design_bottom_sheet);
+            if (bottomSheet != null) {
+                BottomSheetBehavior.from(bottomSheet).setState(BottomSheetBehavior.STATE_EXPANDED);
+            }
+        });
+
         sheet.show();
-        eu.kodanetwork.mchost.util.HapticUtil.applyHapticsToView(scrollView, this);
+        HapticUtil.applyHapticsToView(scrollView, this);
+    }
+
+    // Inner class for RecyclerView adapter
+    private static class VersionAdapter extends RecyclerView.Adapter<VersionAdapter.VH> {
+        private final List<String> versions;
+        private final Map<String, String> descriptions;
+        private final String genericDesc;
+        private int selectedPos;
+        private final OnVersionClickListener listener;
+
+        interface OnVersionClickListener {
+            void onClick(int position);
+        }
+
+        VersionAdapter(List<String> versions, Map<String, String> descriptions, String genericDesc,
+                       int selectedPos, OnVersionClickListener listener) {
+            this.versions = versions;
+            this.descriptions = descriptions;
+            this.genericDesc = genericDesc;
+            this.selectedPos = selectedPos;
+            this.listener = listener;
+        }
+
+        @Override
+        public VH onCreateViewHolder(ViewGroup parent, int viewType) {
+            LinearLayout card = new LinearLayout(parent.getContext());
+            card.setOrientation(LinearLayout.VERTICAL);
+            card.setPadding(24, 20, 24, 20);
+            card.setBackgroundResource(R.drawable.bg_rounded_card);
+            LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+            lp.setMargins(0, 0, 0, 12);
+            card.setLayoutParams(lp);
+
+            // Version text
+            TextView tvVersion = new TextView(parent.getContext());
+            tvVersion.setId(View.generateViewId());
+            tvVersion.setTextColor(0xFFF0F0F0);
+            tvVersion.setTextSize(15);
+            tvVersion.setTypeface(androidx.core.content.res.ResourcesCompat.getFont(parent.getContext(), R.font.font_koda));
+            card.addView(tvVersion);
+
+            // Description text
+            TextView tvDesc = new TextView(parent.getContext());
+            tvDesc.setId(View.generateViewId());
+            tvDesc.setTextColor(0xFF8A8A9A);
+            tvDesc.setTextSize(12);
+            tvDesc.setPadding(0, 4, 0, 0);
+            card.addView(tvDesc);
+
+            return new VH(card, tvVersion, tvDesc);
+        }
+
+        @Override
+        public void onBindViewHolder(VH holder, int position) {
+            String ver = versions.get(position);
+            holder.tvVersion.setText(ver);
+            holder.tvDesc.setText(descriptions.getOrDefault(ver, genericDesc));
+
+            boolean isSelected = position == selectedPos;
+            if (isSelected) {
+                holder.itemView.setBackgroundColor(0xFF2B221E);
+                // Add orange left border via padding + background drawable would be cleaner
+                // For programmatic: just change background color slightly
+                holder.tvVersion.setTextColor(0xFFFFB68C);
+            } else {
+                holder.itemView.setBackgroundResource(R.drawable.bg_rounded_card);
+                holder.tvVersion.setTextColor(0xFFF0F0F0);
+            }
+
+            holder.itemView.setOnClickListener(v -> {
+                if (selectedPos != position) {
+                    selectedPos = position;
+                    notifyDataSetChanged();
+                }
+                if (listener != null) listener.onClick(position);
+            });
+        }
+
+        @Override
+        public int getItemCount() {
+            return versions.size();
+        }
+
+        static class VH extends RecyclerView.ViewHolder {
+            LinearLayout itemView;
+            TextView tvVersion;
+            TextView tvDesc;
+
+            VH(LinearLayout itemView, TextView tvVersion, TextView tvDesc) {
+                super(itemView);
+                this.itemView = itemView;
+                this.tvVersion = tvVersion;
+                this.tvDesc = tvDesc;
+            }
+        }
     }
 
     private List<String> fetchPurpurVersions() {
