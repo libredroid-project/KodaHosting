@@ -22,6 +22,7 @@ public class BanEnforcementActivity extends Activity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        eu.kodanetwork.mchost.util.Material3ThemeHelper.applyTheme(this);
         super.onCreate(savedInstanceState);
         
         // Fullscreen and Keep Screen On

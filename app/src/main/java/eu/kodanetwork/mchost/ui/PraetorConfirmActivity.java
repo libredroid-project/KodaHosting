@@ -32,6 +32,7 @@ public class PraetorConfirmActivity extends Activity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        eu.kodanetwork.mchost.util.Material3ThemeHelper.applyTheme(this);
         super.onCreate(savedInstanceState);
         
         requestWindowFeature(Window.FEATURE_NO_TITLE);

@@ -17,6 +17,7 @@ public class BiometricAuthActivity extends FragmentActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        eu.kodanetwork.mchost.util.Material3ThemeHelper.applyTheme(this);
         super.onCreate(savedInstanceState);
 
         // Make activity invisible

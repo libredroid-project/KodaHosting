@@ -74,10 +74,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        android.content.SharedPreferences prefsForTheme = eu.kodanetwork.mchost.App.getPrefs(this);
-        if (prefsForTheme.getBoolean("dev_material3_enabled", false)) {
-            setTheme(R.style.Theme_KodaNetwork_Material3);
-        }
+        eu.kodanetwork.mchost.util.Material3ThemeHelper.applyTheme(this);
         super.onCreate(savedInstanceState);
         
         android.content.SharedPreferences prefs = eu.kodanetwork.mchost.App.getPrefs(this);

@@ -37,6 +37,7 @@ public class CrashAlertActivity extends Activity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        eu.kodanetwork.mchost.util.Material3ThemeHelper.applyTheme(this);
         super.onCreate(savedInstanceState);
         getWindow().addFlags(
             WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON |

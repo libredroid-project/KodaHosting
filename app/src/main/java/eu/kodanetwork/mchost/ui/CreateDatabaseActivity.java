@@ -25,9 +25,7 @@ public class CreateDatabaseActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        if (eu.kodanetwork.mchost.util.Material3ThemeHelper.isM3Enabled(this)) {
-            setTheme(R.style.Theme_KodaNetwork_Material3);
-        }
+        eu.kodanetwork.mchost.util.Material3ThemeHelper.applyTheme(this);
         super.onCreate(savedInstanceState);
         
         if (eu.kodanetwork.mchost.util.Material3ThemeHelper.isM3Enabled(this)) {

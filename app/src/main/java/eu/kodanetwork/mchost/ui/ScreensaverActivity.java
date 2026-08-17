@@ -18,6 +18,7 @@ public class ScreensaverActivity extends Activity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        eu.kodanetwork.mchost.util.Material3ThemeHelper.applyTheme(this);
         super.onCreate(savedInstanceState);
         SharedPreferences prefs = eu.kodanetwork.mchost.App.getPrefs(this);
         String style = prefs.getString("afk_style", "squares");

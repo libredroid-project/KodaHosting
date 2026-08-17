@@ -21,6 +21,7 @@ public class CreateSupportTicketActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        eu.kodanetwork.mchost.util.Material3ThemeHelper.applyTheme(this);
         super.onCreate(savedInstanceState);
         ThemeHelper.apply(this);
         setContentView(R.layout.activity_create_support_ticket);

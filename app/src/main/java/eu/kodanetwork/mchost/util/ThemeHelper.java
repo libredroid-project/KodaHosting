@@ -71,6 +71,7 @@ public class ThemeHelper {
     public static void apply(Activity activity) {
         // M3 Theme delegation
         if (Material3ThemeHelper.isM3Enabled(activity)) {
+            Material3ThemeHelper.apply(activity);
             return;
         }
         apply(activity, null);
@@ -80,6 +81,7 @@ public class ThemeHelper {
         if (dialog == null || !dialog.isShowing()) return;
         // M3 Theme delegation
         if (Material3ThemeHelper.isM3Enabled(dialog.getContext())) {
+            Material3ThemeHelper.apply(dialog);
             return;
         }
         main.postDelayed(() -> {
@@ -111,6 +113,7 @@ public class ThemeHelper {
 
         // M3 Theme delegation
         if (Material3ThemeHelper.isM3Enabled(activity)) {
+            Material3ThemeHelper.apply(activity);
             return;
         }
 
@@ -250,6 +253,11 @@ public class ThemeHelper {
     public static void applyToView(View root, boolean lightMode, int themeColor, boolean isCyber) {
         if (root == null) return;
         android.content.SharedPreferences prefs = eu.kodanetwork.mchost.App.getPrefs(root.getContext());
+        // M3 Theme delegation
+        if (Material3ThemeHelper.isM3Enabled(root.getContext())) {
+            Material3ThemeHelper.styleTree(root, Material3ThemeHelper.resolveRoles(root.getContext()));
+            return;
+        }
         boolean isLiquidGlass = prefs.getBoolean("dev_liquid_glass", false);
         if (isLiquidGlass) {
             themeColor = 0xFFB388FF;

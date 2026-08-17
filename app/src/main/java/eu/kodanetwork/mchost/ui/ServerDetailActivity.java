@@ -182,9 +182,7 @@ public class ServerDetailActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        if (eu.kodanetwork.mchost.util.Material3ThemeHelper.isM3Enabled(this)) {
-            setTheme(R.style.Theme_KodaNetwork_Material3);
-        }
+        eu.kodanetwork.mchost.util.Material3ThemeHelper.applyTheme(this);
         super.onCreate(savedInstanceState);
         
         // Prevent screenshots & screen recording
@@ -1112,18 +1110,13 @@ public class ServerDetailActivity extends AppCompatActivity {
         if (i == 2) refreshFiles();
     }
 
-    /** Fade/slide-in used when switching dashboard tabs. */
+    /** Toggles dashboard tab visibility without animation. */
     private void animatePanel(android.view.View panel, boolean show) {
         if (panel == null) return;
-        panel.setVisibility(show ? View.VISIBLE : View.GONE);
-        if (!show) return;
         panel.animate().cancel();
-        panel.setAlpha(0f);
-        panel.setTranslationY(14f * getResources().getDisplayMetrics().density);
-        panel.animate().alpha(1f).translationY(0f)
-            .setDuration(260)
-            .setInterpolator(new android.view.animation.DecelerateInterpolator())
-            .start();
+        panel.setAlpha(1f);
+        panel.setTranslationY(0f);
+        panel.setVisibility(show ? View.VISIBLE : View.GONE);
     }
 
     private boolean successFlyRunning = false;
