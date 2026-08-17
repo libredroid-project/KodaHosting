@@ -25,7 +25,6 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.LinearSnapHelper;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.airbnb.lottie.LottieAnimationView;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.button.MaterialButton;
@@ -763,20 +762,19 @@ public class CreateServerActivity extends AppCompatActivity {
 
         LinearLayout container = new LinearLayout(this);
         container.setOrientation(LinearLayout.VERTICAL);
-        container.setBackgroundColor(0xFF0E0E14);
         container.setPadding(0, 0, 0, 48);
 
-        // --- Lottie cube on top, replays on every version change ---
-        LottieAnimationView lottie = new LottieAnimationView(this);
-        lottie.setAnimation(R.raw.koda_version);
-        LinearLayout.LayoutParams lottieLp = new LinearLayout.LayoutParams(
-            (int)(64 * density), (int)(64 * density));
-        lottieLp.gravity = android.view.Gravity.CENTER_HORIZONTAL;
-        lottieLp.topMargin = (int)(28 * density);
-        lottie.setLayoutParams(lottieLp);
-        lottie.loop(true);
-        lottie.playAnimation();
-        container.addView(lottie);
+        // --- Drag handle + title on the sheet's rounded top ---
+        View handle = new View(this);
+        android.graphics.drawable.GradientDrawable handleBg = new android.graphics.drawable.GradientDrawable();
+        handleBg.setColor(0xFF3A3A48);
+        handleBg.setCornerRadius(2 * density);
+        handle.setBackground(handleBg);
+        LinearLayout.LayoutParams handleLp = new LinearLayout.LayoutParams(
+            (int)(32 * density), (int)(4 * density));
+        handleLp.gravity = android.view.Gravity.CENTER_HORIZONTAL;
+        handleLp.topMargin = (int)(14 * density);
+        container.addView(handle, handleLp);
 
         // --- Title ---
         TextView tvTitle = new TextView(this);
@@ -788,24 +786,16 @@ public class CreateServerActivity extends AppCompatActivity {
         tvTitle.setGravity(android.view.Gravity.CENTER);
         LinearLayout.LayoutParams titleLp = new LinearLayout.LayoutParams(
             LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-        titleLp.topMargin = (int)(8 * density);
+        titleLp.topMargin = (int)(18 * density);
         container.addView(tvTitle, titleLp);
 
-        // --- Wheel: center pill + snap list + edge fades ---
+        // --- Wheel: snap list + edge fades ---
         FrameLayout wheelFrame = new FrameLayout(this);
         wheelFrame.setClipChildren(false);
         LinearLayout.LayoutParams wfLp = new LinearLayout.LayoutParams(
             LinearLayout.LayoutParams.MATCH_PARENT, wheelHeight);
         wfLp.topMargin = (int)(16 * density);
         container.addView(wheelFrame, wfLp);
-
-        View pill = new View(this);
-        pill.setBackgroundResource(R.drawable.picker_center_pill);
-        FrameLayout.LayoutParams pillLp = new FrameLayout.LayoutParams(
-            LinearLayout.LayoutParams.MATCH_PARENT, itemHeight, android.view.Gravity.CENTER_VERTICAL);
-        pillLp.leftMargin = (int)(40 * density);
-        pillLp.rightMargin = (int)(40 * density);
-        wheelFrame.addView(pill, pillLp);
 
         RecyclerView recyclerView = new RecyclerView(this);
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
@@ -841,7 +831,7 @@ public class CreateServerActivity extends AppCompatActivity {
 
         // --- Description under the wheel ---
         TextView tvDesc = new TextView(this);
-        tvDesc.setTextColor(0xFF8A8A9A);
+        tvDesc.setTextColor(0x99F0F0F0);
         tvDesc.setTextSize(12);
         tvDesc.setGravity(android.view.Gravity.CENTER);
         tvDesc.setText(descriptions.getOrDefault(currentVersions.get(initialIdx), genericDesc));
@@ -866,8 +856,6 @@ public class CreateServerActivity extends AppCompatActivity {
                         currentPos[0] = pos;
                         HapticUtil.forceVibrate(CreateServerActivity.this, 60);
                         tvDesc.setText(descriptions.getOrDefault(currentVersions.get(pos), genericDesc));
-                        lottie.setProgress(0f);
-                        lottie.playAnimation();
                     }
                 }
             }
@@ -929,7 +917,7 @@ public class CreateServerActivity extends AppCompatActivity {
         HapticUtil.applyHapticsToView(container, this);
     }
 
-    // Scales/fades wheel items by distance to the center; center item turns orange
+    // Scales/fades wheel items by distance to the center; center item is bigger and Koda orange
     private void applyWheelTransform(RecyclerView rv, int itemHeight) {
         int center = rv.getHeight() / 2;
         for (int i = 0; i < rv.getChildCount(); i++) {
@@ -939,10 +927,10 @@ public class CreateServerActivity extends AppCompatActivity {
             float childCenter = child.getY() + child.getHeight() / 2f;
             float dist = Math.abs(center - childCenter);
             float t = Math.min(1f, dist / (rv.getHeight() * 0.6f));
-            tv.setScaleX(1.15f - 0.30f * t);
-            tv.setScaleY(1.15f - 0.30f * t);
-            tv.setAlpha(1f - 0.68f * t);
-            tv.setTextColor(dist < itemHeight * 0.5f ? 0xFFFF6B00 : 0xFF8A8A9A);
+            tv.setScaleX(1.25f - 0.35f * t);
+            tv.setScaleY(1.25f - 0.35f * t);
+            tv.setAlpha(1f - 0.72f * t);
+            tv.setTextColor(dist < itemHeight * 0.5f ? 0xFFFF6B00 : 0xFFF0F0F0);
         }
     }
 
@@ -978,7 +966,7 @@ public class CreateServerActivity extends AppCompatActivity {
         public VH onCreateViewHolder(ViewGroup parent, int viewType) {
             TextView tv = new TextView(parent.getContext());
             tv.setGravity(android.view.Gravity.CENTER);
-            tv.setTextColor(0xFF8A8A9A);
+            tv.setTextColor(0xFFF0F0F0);
             tv.setTextSize(22);
             tv.setTypeface(androidx.core.content.res.ResourcesCompat.getFont(parent.getContext(), R.font.font_koda));
             tv.setLayoutParams(new RecyclerView.LayoutParams(
