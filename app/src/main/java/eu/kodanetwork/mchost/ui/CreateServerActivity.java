@@ -756,6 +756,7 @@ public class CreateServerActivity extends AppCompatActivity {
         String genericDesc = getString(R.string.version_desc_generic);
 
         BottomSheetDialog sheet = new BottomSheetDialog(this, R.style.KodaBottomSheetDialog);
+        final View versionField = findViewById(R.id.layout_version_picker);
         float density = getResources().getDisplayMetrics().density;
         int itemHeight = (int)(56 * density);
         int wheelHeight = (int)(208 * density);
@@ -842,10 +843,12 @@ public class CreateServerActivity extends AppCompatActivity {
 
         // --- Wheel mechanics: depth scaling while scrolling, react on settle ---
         final int[] currentPos = {initialIdx};
+        // While the fly-in/fly-out number is on stage, the real center item stays invisible
+        final boolean[] centerHidden = {versionField != null};
         recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrolled(RecyclerView rv, int dx, int dy) {
-                applyWheelTransform(rv, itemHeight);
+                applyWheelTransform(rv, itemHeight, centerHidden[0]);
             }
 
             @Override
@@ -860,9 +863,15 @@ public class CreateServerActivity extends AppCompatActivity {
                 }
             }
         });
-        recyclerView.post(() -> applyWheelTransform(recyclerView, itemHeight));
+        recyclerView.post(() -> applyWheelTransform(recyclerView, itemHeight, centerHidden[0]));
 
-        // --- Confirm Button ---
+        // --- Root overlay so the version number can fly across the whole sheet ---
+        FrameLayout root = new FrameLayout(this);
+        root.addView(container);
+        sheet.setContentView(root);
+        if (versionField != null) container.setAlpha(0f);
+
+        // --- Confirm Button: number flies back and merges into the field ---
         MaterialButton btnConfirm = new MaterialButton(this);
         btnConfirm.setText(getString(R.string.version_picker_confirm));
         btnConfirm.setTextColor(0xFF000000);
@@ -876,13 +885,50 @@ public class CreateServerActivity extends AppCompatActivity {
             (int)(56 * density));
         btnLp.setMargins(48, (int)(20 * density), 48, (int)(24 * density));
         btnConfirm.setOnClickListener(v -> {
-            selectedVersion = currentVersions.get(currentPos[0]);
-            if (tvVersionSelected != null) tvVersionSelected.setText(selectedVersion);
-            sheet.dismiss();
+            String chosen = currentVersions.get(currentPos[0]);
+            selectedVersion = chosen;
+            if (versionField == null) {
+                if (tvVersionSelected != null) tvVersionSelected.setText(chosen);
+                sheet.dismiss();
+                return;
+            }
+            centerHidden[0] = true;
+            applyWheelTransform(recyclerView, itemHeight, true);
+            float[] f = centerOfOnScreen(versionField, root);
+            float[] w = centerOfOnScreen(wheelFrame, root);
+            TextView ghost = createGhostNumber(chosen);
+            ghost.setTextColor(0xFFFF6B00);
+            root.addView(ghost);
+            // Undim so the destination field is fully visible while merging
+            if (sheet.getWindow() != null) {
+                android.animation.ValueAnimator dim = android.animation.ValueAnimator.ofFloat(1f, 0f);
+                dim.setDuration(300);
+                dim.addUpdateListener(a -> {
+                    if (sheet.getWindow() != null) sheet.getWindow().setDimAmount((float) a.getAnimatedValue());
+                });
+                dim.start();
+            }
+            container.animate().alpha(0f).setDuration(300).start();
+            ghost.post(() -> {
+                ghost.setScaleX(1.9f);
+                ghost.setScaleY(1.9f);
+                ghost.setTranslationX(w[0] - ghost.getWidth() / 2f);
+                ghost.setTranslationY(w[1] - ghost.getHeight() / 2f);
+                ghost.animate()
+                    .translationX(f[0] - ghost.getWidth() / 2f)
+                    .translationY(f[1] - ghost.getHeight() / 2f)
+                    .scaleX(1f).scaleY(1f)
+                    .setDuration(320)
+                    .setInterpolator(new android.view.animation.AccelerateInterpolator())
+                    .withEndAction(() -> {
+                        if (tvVersionSelected != null) tvVersionSelected.setText(chosen);
+                        sheet.dismiss();
+                    })
+                    .start();
+                animateTextColor(ghost, 0xFFFF6B00, 0xFFF0F0F0, 320);
+            });
         });
         container.addView(btnConfirm, btnLp);
-
-        sheet.setContentView(container);
 
         // Edge-to-edge window decor
         android.view.Window w = sheet.getWindow();
@@ -904,13 +950,54 @@ public class CreateServerActivity extends AppCompatActivity {
             }
         }
 
-        // Force expanded state on show
+        // Force expanded state on show; once settled, the number flies out of the field
         sheet.setOnShowListener(d -> {
             BottomSheetDialog bsd = (BottomSheetDialog) d;
-            FrameLayout bottomSheet = bsd.findViewById(com.google.android.material.R.id.design_bottom_sheet);
-            if (bottomSheet != null) {
-                BottomSheetBehavior.from(bottomSheet).setState(BottomSheetBehavior.STATE_EXPANDED);
+            FrameLayout bottomSheetInternal = bsd.findViewById(com.google.android.material.R.id.design_bottom_sheet);
+            if (bottomSheetInternal == null) return;
+            BottomSheetBehavior<FrameLayout> behavior = BottomSheetBehavior.from(bottomSheetInternal);
+            behavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+            if (versionField == null) {
+                container.animate().alpha(1f).setDuration(200).start();
+                return;
             }
+            behavior.addBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
+                boolean flew = false;
+
+                @Override
+                public void onStateChanged(View bottomSheet, int newState) {}
+
+                @Override
+                public void onSlide(View bottomSheet, float slideOffset) {
+                    if (flew || slideOffset < 1f) return;
+                    flew = true;
+                    behavior.removeBottomSheetCallback(this);
+                    root.post(() -> {
+                        container.animate().alpha(1f).setDuration(280).start();
+                        float[] f = centerOfOnScreen(versionField, root);
+                        float[] w = centerOfOnScreen(wheelFrame, root);
+                        TextView ghost = createGhostNumber(currentVersions.get(currentPos[0]));
+                        root.addView(ghost);
+                        ghost.post(() -> {
+                            ghost.setTranslationX(f[0] - ghost.getWidth() / 2f);
+                            ghost.setTranslationY(f[1] - ghost.getHeight() / 2f);
+                            ghost.animate()
+                                .translationX(w[0] - ghost.getWidth() / 2f)
+                                .translationY(w[1] - ghost.getHeight() / 2f)
+                                .scaleX(1.9f).scaleY(1.9f)
+                                .setDuration(380)
+                                .setInterpolator(new android.view.animation.DecelerateInterpolator(1.2f))
+                                .withEndAction(() -> {
+                                    root.removeView(ghost);
+                                    centerHidden[0] = false;
+                                    applyWheelTransform(recyclerView, itemHeight, false);
+                                })
+                                .start();
+                            animateTextColor(ghost, 0xFFF0F0F0, 0xFFFF6B00, 380);
+                        });
+                    });
+                }
+            });
         });
 
         sheet.show();
@@ -918,7 +1005,7 @@ public class CreateServerActivity extends AppCompatActivity {
     }
 
     // Scales/fades wheel items by distance to the center; center item is bigger and Koda orange
-    private void applyWheelTransform(RecyclerView rv, int itemHeight) {
+    private void applyWheelTransform(RecyclerView rv, int itemHeight, boolean hideCenter) {
         int center = rv.getHeight() / 2;
         for (int i = 0; i < rv.getChildCount(); i++) {
             View child = rv.getChildAt(i);
@@ -929,8 +1016,13 @@ public class CreateServerActivity extends AppCompatActivity {
             float t = Math.min(1f, dist / (rv.getHeight() * 0.6f));
             tv.setScaleX(1.25f - 0.35f * t);
             tv.setScaleY(1.25f - 0.35f * t);
-            tv.setAlpha(1f - 0.72f * t);
-            tv.setTextColor(dist < itemHeight * 0.5f ? 0xFFFF6B00 : 0xFFF0F0F0);
+            if (hideCenter && dist < itemHeight * 0.5f) {
+                tv.setAlpha(0f);
+                tv.setTextColor(0xFFFF6B00);
+            } else {
+                tv.setAlpha(1f - 0.72f * t);
+                tv.setTextColor(dist < itemHeight * 0.5f ? 0xFFFF6B00 : 0xFFF0F0F0);
+            }
         }
     }
 
@@ -944,6 +1036,33 @@ public class CreateServerActivity extends AppCompatActivity {
             if (d < bestDist) { bestDist = d; best = c; }
         }
         return best != null ? rv.getChildAdapterPosition(best) : -1;
+    }
+
+    // Flying version number used for the picker open/confirm transitions
+    private TextView createGhostNumber(String text) {
+        TextView g = new TextView(this);
+        g.setText(text);
+        g.setTextSize(15);
+        g.setTypeface(androidx.core.content.res.ResourcesCompat.getFont(this, R.font.font_koda));
+        g.setTextColor(0xFFF0F0F0);
+        return g;
+    }
+
+    // Center point of a view in the coordinate space of another view (both on screen)
+    private float[] centerOfOnScreen(View view, View relativeTo) {
+        int[] a = new int[2];
+        int[] b = new int[2];
+        view.getLocationOnScreen(a);
+        relativeTo.getLocationOnScreen(b);
+        return new float[]{a[0] + view.getWidth() / 2f - b[0], a[1] + view.getHeight() / 2f - b[1]};
+    }
+
+    private void animateTextColor(TextView tv, int from, int to, long duration) {
+        android.animation.ValueAnimator va =
+            android.animation.ValueAnimator.ofObject(new android.animation.ArgbEvaluator(), from, to);
+        va.setDuration(duration);
+        va.addUpdateListener(anim -> tv.setTextColor((int) anim.getAnimatedValue()));
+        va.start();
     }
 
     // Wheel items: just the version number, full-width and centered
