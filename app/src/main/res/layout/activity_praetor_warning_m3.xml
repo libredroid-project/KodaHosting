@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#A6000000"
+    android:gravity="center"
+    android:padding="32dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_margin="32dp"
+        android:background="@drawable/bg_dialog_custom"
+        android:padding="32dp"
+        android:gravity="center">
+
+            <!-- Title: P.R.A.E.T.O.R. (Colors applied in Java) -->
+            <TextView
+                android:id="@+id/tv_praetor_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/praetor_title"
+                android:textColor="?attr/colorError"
+                android:textSize="36sp"
+                android:textStyle="bold"
+                android:letterSpacing="0.1"
+                android:gravity="center" />
+
+            <!-- Subtitle -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/praetor_subtitle"
+                android:textColor="?attr/colorOnSurfaceVariant"
+                android:textSize="10sp"
+                android:textStyle="bold"
+                android:letterSpacing="0.05"
+                android:gravity="center"
+                android:layout_marginTop="8dp" />
+            
+            <View
+                android:layout_width="40dp"
+                android:layout_height="2dp"
+                android:background="?attr/colorPrimary"
+                android:layout_marginTop="24dp"
+                android:layout_marginBottom="24dp" />
+
+            <!-- Warning Icon -->
+            <TextView
+                android:id="@+id/tv_warning_icon"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="⚠"
+                android:textColor="?attr/colorError"
+                android:textSize="48sp"
+                android:layout_marginBottom="16dp" />
+
+            <!-- Reason Message -->
+            <TextView
+        android:id="@+id/tv_praetor_reason"
+        android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:text="@string/praetor_security_violation"
+        android:textColor="?attr/colorOnSurface" android:textSize="16sp"
+        android:gravity="center" android:layout_marginBottom="24dp"/>
+
+            <!-- Math input (Hidden by Default) -->
+            <EditText
+                android:id="@+id/et_math_answer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Answer"
+                android:textColorHint="#555555"
+                android:textColor="?attr/colorOnSurface"
+                android:inputType="number"
+                android:gravity="center"
+                android:visibility="gone"
+                android:layout_marginBottom="16dp" />
+
+            <!-- Countdown Timer (Hidden by Default) -->
+            <TextView
+                android:id="@+id/tv_praetor_countdown"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="#FFA500"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:visibility="gone"
+                android:layout_marginBottom="16dp" />
+
+            <!-- Default Action Button -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_praetor_action"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                style="@style/Widget.Material3.Button"
+                android:text="@string/praetor_action_fix"
+                android:stateListAnimator="@null" />
+
+            <!-- RAM Conflict Buttons (Hidden by Default) -->
+            <LinearLayout
+                android:id="@+id/layout_ram_buttons"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:visibility="gone">
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_praetor_fix_ram"
+                    android:layout_width="match_parent"
+                    android:layout_height="56dp"
+                    style="@style/Widget.Material3.Button"
+                    app:backgroundTint="#00E676"
+                    android:text="@string/praetor_action_auto_ram"
+                    android:stateListAnimator="@null"
+                    android:layout_marginBottom="8dp"/>
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_praetor_proceed"
+                    android:layout_width="match_parent"
+                    android:layout_height="56dp"
+                    style="@style/KodaButton.Danger"
+                    android:text="@string/praetor_action_start_anyway"
+                    android:stateListAnimator="@null"
+                    android:layout_marginBottom="8dp"/>
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_praetor_cancel"
+                    android:layout_width="match_parent"
+                    android:layout_height="56dp"
+                    style="@style/Widget.Material3.Button.OutlinedButton"
+                    android:text="@string/praetor_action_cancel"
+                    android:stateListAnimator="@null" />
+            </LinearLayout>
+
+        </LinearLayout>
+</LinearLayout>

@@ -41,7 +41,8 @@ public class FileEditorActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         eu.kodanetwork.mchost.util.Material3ThemeHelper.applyTheme(this);
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_file_editor);
+        setContentView(eu.kodanetwork.mchost.util.Material3ThemeHelper.isM3Enabled(this)
+                ? R.layout.activity_file_editor_m3 : R.layout.activity_file_editor);
 
         android.content.SharedPreferences prefs = eu.kodanetwork.mchost.App.getPrefs(this);
         lastTheme = prefs.getString("app_theme", "modern");

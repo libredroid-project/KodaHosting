@@ -68,7 +68,8 @@ public class SupportChatActivity extends AppCompatActivity {
         eu.kodanetwork.mchost.util.Material3ThemeHelper.applyTheme(this);
         super.onCreate(savedInstanceState);
         ThemeHelper.apply(this);
-        setContentView(R.layout.activity_support_chat);
+        setContentView(eu.kodanetwork.mchost.util.Material3ThemeHelper.isM3Enabled(this)
+                ? R.layout.activity_support_chat_m3 : R.layout.activity_support_chat);
 
         ticketId = getIntent().getStringExtra("TICKET_ID");
         String title = getIntent().getStringExtra("TICKET_TITLE");

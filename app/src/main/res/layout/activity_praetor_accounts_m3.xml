@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="?attr/colorSurface"
+    android:padding="24dp">
+
+    <!-- Title -->
+    <TextView
+        android:id="@+id/tv_praetor_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="P.R.A.E.T.O.R. SECURITY"
+        android:textColor="#FF0000"
+        android:textSize="22sp"
+        android:textStyle="bold"
+        android:fontFamily="@font/font_koda_mono"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginBottom="8dp"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="SUB-ACCOUNT PERMISSIONS"
+        android:textColor="#555555"
+        android:textSize="14sp"
+        android:fontFamily="@font/font_koda_mono"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginBottom="32dp"/>
+
+    <TextView
+        android:id="@+id/tv_account_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="User: Unknown"
+        android:textColor="?attr/colorOnSurface"
+        android:textSize="18sp"
+        android:fontFamily="@font/font_koda_mono"
+        android:layout_marginBottom="24dp"/>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <LinearLayout
+            android:id="@+id/ll_permissions_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+            <!-- Dynamically populated toggles will go here -->
+        </LinearLayout>
+    </ScrollView>
+
+    <Button
+        android:id="@+id/btn_praetor_save"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:text="APPLY PROTOCOLS"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:textColor="#000000"
+        android:backgroundTint="#FF0000"
+        android:fontFamily="@font/font_koda_mono"
+        android:layout_marginTop="16dp"/>
+
+    <Button
+        android:id="@+id/btn_praetor_cancel"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:text="ABORT"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:textColor="?attr/colorOnPrimary"
+        android:backgroundTint="#333333"
+        android:fontFamily="@font/font_koda_mono"
+        android:layout_marginTop="8dp"/>
+
+</LinearLayout>

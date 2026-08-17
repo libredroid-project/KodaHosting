@@ -42,7 +42,8 @@ public class DeleteServerActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         eu.kodanetwork.mchost.util.Material3ThemeHelper.applyTheme(this);
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_delete_server);
+        setContentView(eu.kodanetwork.mchost.util.Material3ThemeHelper.isM3Enabled(this)
+                ? R.layout.activity_delete_server_m3 : R.layout.activity_delete_server);
         
         tvMsg = findViewById(R.id.tv_delete_msg);
         tvSubMsg = findViewById(R.id.tv_delete_submsg);

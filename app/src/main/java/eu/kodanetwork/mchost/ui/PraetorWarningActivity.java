@@ -29,7 +29,8 @@ public class PraetorWarningActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         eu.kodanetwork.mchost.util.Material3ThemeHelper.applyTheme(this);
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_praetor_warning);
+        setContentView(eu.kodanetwork.mchost.util.Material3ThemeHelper.isM3Enabled(this)
+                ? R.layout.activity_praetor_warning_m3 : R.layout.activity_praetor_warning);
         
         targetFolderPath = getIntent().getStringExtra("target_folder_path");
         String reason = getIntent().getStringExtra(EXTRA_REASON);

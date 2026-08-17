@@ -29,7 +29,8 @@ public class ScaryBannedActivity extends AppCompatActivity {
         layoutParams.screenBrightness = WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_FULL;
         window.setAttributes(layoutParams);
 
-        setContentView(R.layout.activity_scary_banned);
+        setContentView(eu.kodanetwork.mchost.util.Material3ThemeHelper.isM3Enabled(this)
+                ? R.layout.activity_scary_banned_m3 : R.layout.activity_scary_banned);
 
         TextView hwidText = findViewById(R.id.bannedHwidText);
         String uuid = eu.kodanetwork.mchost.App.getPrefs(this).getString("app_uuid", "");

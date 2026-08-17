@@ -12,7 +12,8 @@ public class MaintenanceActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         eu.kodanetwork.mchost.util.Material3ThemeHelper.applyTheme(this);
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_maintenance);
+        setContentView(eu.kodanetwork.mchost.util.Material3ThemeHelper.isM3Enabled(this)
+                ? R.layout.activity_maintenance_m3 : R.layout.activity_maintenance);
 
         TextView reasonText = findViewById(R.id.maintenanceReasonText);
         TextView durationText = findViewById(R.id.maintenanceDurationText);

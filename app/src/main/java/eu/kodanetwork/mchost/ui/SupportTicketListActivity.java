@@ -35,7 +35,8 @@ public class SupportTicketListActivity extends AppCompatActivity {
         eu.kodanetwork.mchost.util.Material3ThemeHelper.applyTheme(this);
         super.onCreate(savedInstanceState);
         ThemeHelper.apply(this);
-        setContentView(R.layout.activity_support_tickets);
+        setContentView(eu.kodanetwork.mchost.util.Material3ThemeHelper.isM3Enabled(this)
+                ? R.layout.activity_support_tickets_m3 : R.layout.activity_support_tickets);
 
         findViewById(R.id.btn_back).setOnClickListener(v -> finish());
 

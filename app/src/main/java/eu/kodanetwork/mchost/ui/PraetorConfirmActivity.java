@@ -42,7 +42,8 @@ public class PraetorConfirmActivity extends Activity {
             getWindow().setNavigationBarColor(0xFF0A0000);
         }
 
-        setContentView(R.layout.activity_praetor_confirm);
+        setContentView(eu.kodanetwork.mchost.util.Material3ThemeHelper.isM3Enabled(this)
+                ? R.layout.activity_praetor_confirm_m3 : R.layout.activity_praetor_confirm);
 
         action = getIntent().getStringExtra("action");
         if (action == null) action = "";

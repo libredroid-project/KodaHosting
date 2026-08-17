@@ -24,7 +24,8 @@ public class CreateSupportTicketActivity extends AppCompatActivity {
         eu.kodanetwork.mchost.util.Material3ThemeHelper.applyTheme(this);
         super.onCreate(savedInstanceState);
         ThemeHelper.apply(this);
-        setContentView(R.layout.activity_create_support_ticket);
+        setContentView(eu.kodanetwork.mchost.util.Material3ThemeHelper.isM3Enabled(this)
+                ? R.layout.activity_create_support_ticket_m3 : R.layout.activity_create_support_ticket);
 
         ticketType = getIntent().getStringExtra("TICKET_TYPE");
         if (ticketType == null) ticketType = "BUG";

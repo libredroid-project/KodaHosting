@@ -18,7 +18,8 @@ public class DebugWarningActivity extends AppCompatActivity {
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         // Screen protection removed
 
-        setContentView(R.layout.activity_debug_warning);
+        setContentView(eu.kodanetwork.mchost.util.Material3ThemeHelper.isM3Enabled(this)
+                ? R.layout.activity_debug_warning_m3 : R.layout.activity_debug_warning);
 
         TextView countdownText = findViewById(R.id.countdownText);
 

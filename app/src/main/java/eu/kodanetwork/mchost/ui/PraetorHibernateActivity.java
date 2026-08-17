@@ -20,7 +20,8 @@ public class PraetorHibernateActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         eu.kodanetwork.mchost.util.Material3ThemeHelper.applyTheme(this);
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_praetor_hibernate);
+        setContentView(eu.kodanetwork.mchost.util.Material3ThemeHelper.isM3Enabled(this)
+                ? R.layout.activity_praetor_hibernate_m3 : R.layout.activity_praetor_hibernate);
 
         TextView tvTitle = findViewById(R.id.tv_praetor_title);
         String praetorHtml = "<font color='#555555'>P.R.</font><font color='#AAAAAA'>A.E.T.</font><font color='#FFFFFF'>O.R.</font>";

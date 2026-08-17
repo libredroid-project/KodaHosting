@@ -253,7 +253,8 @@ public class Material3ThemeHelper {
         main.postDelayed(() -> {
             try {
                 Roles roles = resolveRoles(dialog.getContext());
-                if (dialog.getWindow() != null) {
+                if (dialog.getWindow() != null
+                        && !(dialog instanceof com.google.android.material.bottomsheet.BottomSheetDialog)) {
                     dialog.getWindow().setBackgroundDrawable(new ColorDrawable(roles.surfaceContainerHigh));
                 }
                 View root = dialog.findViewById(android.R.id.content);
@@ -347,7 +348,13 @@ public class Material3ThemeHelper {
                         ? tv.getResources().getDisplayMetrics().scaledDensity : 1f);
                 boolean header = sp > 22;
                 int cur = tv.getTextColors().getDefaultColor();
-                if (isOrange(cur)) {
+                if (cur == roles.primary || cur == roles.onSurface
+                        || cur == roles.onSurfaceVariant || cur == roles.error
+                        || cur == roles.primaryContainer || cur == roles.onPrimary
+                        || cur == roles.onPrimaryContainer || cur == roles.tertiary) {
+                    // already a resolved M3 token (token-based layout or
+                    // previous engine pass) – keep it
+                } else if (isOrange(cur)) {
                     tv.setTextColor(roles.primary);
                 } else if (isRedish(cur)) {
                     tv.setTextColor(roles.error);

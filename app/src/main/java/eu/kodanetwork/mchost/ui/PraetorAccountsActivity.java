@@ -43,7 +43,8 @@ public class PraetorAccountsActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         eu.kodanetwork.mchost.util.Material3ThemeHelper.applyTheme(this);
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_praetor_accounts);
+        setContentView(eu.kodanetwork.mchost.util.Material3ThemeHelper.isM3Enabled(this)
+                ? R.layout.activity_praetor_accounts_m3 : R.layout.activity_praetor_accounts);
 
         rowId = getIntent().getStringExtra("extra_row_id");
         mcName = getIntent().getStringExtra("extra_mc_name");

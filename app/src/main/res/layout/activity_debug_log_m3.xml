@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:fitsSystemWindows="true"
+    android:layout_width="match_parent" android:layout_height="match_parent"
+    android:orientation="vertical" android:background="?attr/colorSurface">
+
+    <LinearLayout android:layout_width="match_parent" android:layout_height="50dp"
+        android:orientation="horizontal" android:gravity="center_vertical"
+        android:background="?attr/colorSurface" android:paddingStart="16dp" android:paddingEnd="16dp">
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_back_debug" style="@style/Widget.Material3.Button.OutlinedButton"
+            android:layout_width="wrap_content" android:layout_height="32dp"
+            android:text="BACK" android:textSize="10sp"/>
+        <TextView android:layout_width="0dp" android:layout_height="wrap_content"
+            android:layout_weight="1" android:text="VERBOSE DEBUG LOG"
+            android:textColor="?attr/colorOnSurface" android:textSize="12sp"
+            android:fontFamily="@font/font_koda" android:gravity="center"/>
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_copy_debug" style="@style/Widget.Material3.Button"
+            android:layout_width="wrap_content" android:layout_height="32dp"
+            android:text="COPY" android:textSize="10sp"/>
+    </LinearLayout>
+
+    <View android:layout_width="match_parent" android:layout_height="1dp" android:background="?attr/colorPrimary"/>
+
+    <ScrollView android:layout_width="match_parent" android:layout_height="match_parent"
+        android:background="?attr/colorSurface" android:padding="12dp">
+        <TextView android:id="@+id/tv_debug_log"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:textColor="?attr/colorOnSurface" android:textSize="11sp"
+            android:fontFamily="@font/font_koda_mono" android:lineSpacingMultiplier="1.4"
+            android:textIsSelectable="true"/>
+    </ScrollView>
+</LinearLayout>

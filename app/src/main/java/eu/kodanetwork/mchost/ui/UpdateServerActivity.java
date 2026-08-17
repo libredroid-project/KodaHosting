@@ -39,7 +39,8 @@ public class UpdateServerActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         eu.kodanetwork.mchost.util.Material3ThemeHelper.applyTheme(this);
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_update_server);
+        setContentView(eu.kodanetwork.mchost.util.Material3ThemeHelper.isM3Enabled(this)
+                ? R.layout.activity_update_server_m3 : R.layout.activity_update_server);
         
         tvMsg = findViewById(R.id.tv_update_msg);
         tvSubMsg = findViewById(R.id.tv_update_submsg);

@@ -15,7 +15,8 @@ public class LicensesActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         eu.kodanetwork.mchost.util.Material3ThemeHelper.applyTheme(this);
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_licenses);
+        setContentView(eu.kodanetwork.mchost.util.Material3ThemeHelper.isM3Enabled(this)
+                ? R.layout.activity_licenses_m3 : R.layout.activity_licenses);
 
         android.content.SharedPreferences prefs = eu.kodanetwork.mchost.App.getPrefs(this);
         if ("cyber".equals(prefs.getString("app_theme", "modern"))) {
