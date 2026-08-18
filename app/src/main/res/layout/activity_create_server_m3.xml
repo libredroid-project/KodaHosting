@@ -163,6 +163,14 @@
                                 android:layout_width="wrap_content" android:layout_height="wrap_content"
                                 android:text="..." android:textColor="?attr/colorOnSurfaceVariant"/>
                         </LinearLayout>
+                        <TextView android:id="@+id/tv_type_unsupported"
+                            android:layout_width="match_parent" android:layout_height="wrap_content"
+                            android:background="?attr/colorSurfaceContainerHighest"
+                            android:padding="16dp" android:layout_marginBottom="8dp"
+                            android:gravity="center"
+                            android:textColor="?attr/colorPrimary"
+                            android:textAppearance="?attr/textAppearanceBodyMedium"
+                            android:visibility="gone"/>
                         <LinearLayout android:id="@+id/layout_version_picker"
                             android:layout_width="match_parent" android:layout_height="52dp"
                             android:background="?attr/colorSurfaceContainerHighest"

@@ -58,8 +58,12 @@ import eu.kodanetwork.mchost.util.HapticUtil;
 
 public class CreateServerActivity extends AppCompatActivity {
 
+    // Offline fallback for Fabric — the real list is fetched live from meta.fabricmc.net
     private static final String[] FABRIC_VERSIONS  = {
-        "1.21.4","1.21.3","1.21.1","1.20.6","1.20.4","1.20.2","1.20.1","1.20",
+        "26.2","26.1",
+        "1.21.11","1.21.10","1.21.9","1.21.8","1.21.7","1.21.6","1.21.5",
+        "1.21.4","1.21.3","1.21.2","1.21.1","1.21",
+        "1.20.6","1.20.5","1.20.4","1.20.3","1.20.2","1.20.1","1.20",
         "1.19.4","1.19.3","1.19.2","1.19.1","1.19",
         "1.18.2","1.18.1","1.18",
         "1.17.1","1.17",
@@ -86,6 +90,8 @@ public class CreateServerActivity extends AppCompatActivity {
     private SeekBar seekRam;
     private TextView tvRamValue, tvAddressPreview, tvVersionLoading;
     private TextView tvVersionSelected;
+    private TextView tvTypeUnsupported;
+    private View layoutVersionPickerRow;
     private String selectedVersion = "1.21.4";
     private List<String> currentVersions = new ArrayList<>();
     private LinearLayout layoutThemeColor;
@@ -241,6 +247,8 @@ public class CreateServerActivity extends AppCompatActivity {
         tvAddressPreview= findViewById(R.id.tv_address_preview);
         tvVersionLoading= findViewById(R.id.tv_version_loading);
         tvVersionSelected = findViewById(R.id.tv_version_selected);
+        tvTypeUnsupported = findViewById(R.id.tv_type_unsupported);
+        layoutVersionPickerRow = findViewById(R.id.layout_version_picker);
         // Setup version picker click
         View layoutVersionPicker = findViewById(R.id.layout_version_picker);
         if (layoutVersionPicker != null) layoutVersionPicker.setOnClickListener(v -> showVersionPicker());
@@ -671,8 +679,17 @@ public class CreateServerActivity extends AppCompatActivity {
         if (layoutThemeColor != null && !supportsAutoDesign) {
             layoutThemeColor.setVisibility(View.GONE);
         }
-        // Velocity has no version picker in the usual sense — hide version section for now and prefill
-        boolean isVelocity = type == ServerInstance.Type.VELOCITY;
+        // Forge / NeoForge are not usable yet — show a notice instead of the version picker
+        boolean unsupported = type == ServerInstance.Type.FORGE || type == ServerInstance.Type.NEOFORGE;
+        if (tvTypeUnsupported != null) {
+            tvTypeUnsupported.setVisibility(unsupported ? View.VISIBLE : View.GONE);
+            tvTypeUnsupported.setText(type == ServerInstance.Type.FORGE
+                    ? R.string.forge_in_dev : R.string.neoforge_in_dev);
+        }
+        if (layoutVersionPickerRow != null) {
+            layoutVersionPickerRow.setVisibility(unsupported ? View.GONE : View.VISIBLE);
+        }
+        if (unsupported && tvVersionLoading != null) tvVersionLoading.setVisibility(View.GONE);
         if (layoutVersionSection != null) layoutVersionSection.setVisibility(View.VISIBLE);
         loadVersionsForType(idx);
     }
@@ -692,16 +709,53 @@ public class CreateServerActivity extends AppCompatActivity {
                     setVersionList(versions);
                 });
             });
+        } else if (type == ServerInstance.Type.FABRIC) {
+            // Live version list from the official Fabric meta API (1.16 up to the newest release)
+            executor.submit(() -> {
+                final List<String> fetched = fetchFabricVersions();
+                mainHandler.post(() -> {
+                    if (tvVersionLoading != null) tvVersionLoading.setVisibility(View.GONE);
+                    setVersionList(fetched.isEmpty() ? listOf(FABRIC_VERSIONS) : fetched);
+                });
+            });
         } else {
             List<String> versions;
             if (type == ServerInstance.Type.NEOFORGE) versions = listOf(NEOFORGE_VERSIONS);
             else if (type == ServerInstance.Type.FORGE) versions = listOf(FORGE_VERSIONS);
-            else if (type == ServerInstance.Type.FABRIC) versions = listOf(FABRIC_VERSIONS);
             else if (type == ServerInstance.Type.VELOCITY) versions = listOf(VELOCITY_VERSIONS);
             else versions = listOf(VANILLA_VERSIONS);
             if (tvVersionLoading != null) tvVersionLoading.setVisibility(View.GONE);
             setVersionList(versions);
         }
+    }
+
+    /** All stable Fabric-supported game versions from 1.16 upwards, newest first. */
+    private List<String> fetchFabricVersions() {
+        try {
+            String json = get("https://meta.fabricmc.net/v2/versions/game");
+            org.json.JSONArray arr = new org.json.JSONArray(json);
+            List<String> res = new ArrayList<>();
+            for (int i = 0; i < arr.length(); i++) {
+                org.json.JSONObject o = arr.getJSONObject(i);
+                if (!o.optBoolean("stable", false)) continue;
+                String v = o.optString("version", "");
+                if (isFabricSupportedVersion(v)) res.add(v);
+            }
+            return res;
+        } catch (Exception ignored) {}
+        return new ArrayList<>();
+    }
+
+    /** 1.x counts from 1.16 upwards; the new year-based scheme (26.x, …) is always supported. */
+    private boolean isFabricSupportedVersion(String v) {
+        if (v == null || v.isEmpty()) return false;
+        String[] parts = v.split("\\.");
+        try {
+            int major = Integer.parseInt(parts[0]);
+            if (major > 1) return true;
+            if (major == 1 && parts.length >= 2) return Integer.parseInt(parts[1]) >= 16;
+        } catch (NumberFormatException ignored) {}
+        return false;
     }
 
     private void setVersionList(List<String> versions) {
@@ -1386,6 +1440,12 @@ public class CreateServerActivity extends AppCompatActivity {
         int port = 30000 + new java.util.Random().nextInt(10000);
         String version = selectedVersion != null && !selectedVersion.isEmpty() ? selectedVersion : "1.21.4";
         ServerInstance.Type type = TYPE_VALS[selectedTypeIndex];
+        // Safety net: Forge/NeoForge are still in development — block before anything is allocated
+        if (type == ServerInstance.Type.FORGE || type == ServerInstance.Type.NEOFORGE) {
+            Toast.makeText(this, getString(type == ServerInstance.Type.FORGE
+                    ? R.string.forge_in_dev : R.string.neoforge_in_dev), Toast.LENGTH_LONG).show();
+            return;
+        }
         String id  = UUID.randomUUID().toString();
         boolean useNative = swUseNative.isChecked();
         String dir = useNative ? new File(getFilesDir(), "servers/" + id).getAbsolutePath() : android.os.Environment.getExternalStoragePublicDirectory(android.os.Environment.DIRECTORY_DOCUMENTS) + "/KodaNetwork/servers/" + id;
