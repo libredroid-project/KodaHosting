@@ -884,14 +884,8 @@ public class CreateServerActivity extends AppCompatActivity {
             applyWheelTransform(recyclerView, itemHeight, centerHidden[0]);
         });
 
-        // --- Root overlay so the version number can fly across the whole sheet ---
-        FrameLayout root = new FrameLayout(this);
-        root.setClipChildren(false);
-        root.addView(container);
-        sheet.setContentView(root);
+        sheet.setContentView(container);
         if (versionField != null) container.setAlpha(0f);
-        // Full-screen host for the flying number, resolved once the dialog decor exists
-        final ViewGroup[] overlayHost = {root};
 
         // --- Confirm Button: number flies back and merges into the field ---
         MaterialButton btnConfirm = new MaterialButton(this);
@@ -909,47 +903,58 @@ public class CreateServerActivity extends AppCompatActivity {
         btnConfirm.setOnClickListener(v -> {
             String chosen = currentVersions.get(currentPos[0]);
             selectedVersion = chosen;
-            if (versionField == null) {
+            if (versionField == null || tvVersionSelected == null) {
                 if (tvVersionSelected != null) tvVersionSelected.setText(chosen);
+                sheet.dismiss();
+                return;
+            }
+            ViewGroup activityContent = (ViewGroup) findViewById(android.R.id.content);
+            if (activityContent == null) {
+                tvVersionSelected.setText(chosen);
                 sheet.dismiss();
                 return;
             }
             centerHidden[0] = true;
             applyWheelTransform(recyclerView, itemHeight, true);
-            ViewGroup host = overlayHost[0];
-            float[] f = centerOfOnScreen(versionField, host);
-            float[] w = centerOfOnScreen(wheelFrame, host);
+            float[] f = centerOfOnScreen(versionField, activityContent);
+            float[] w = centerOfOnScreen(wheelFrame, activityContent);
             TextView ghost = createGhostNumber(chosen);
             ghost.setTextColor(0xFFFF6B00);
-            host.addView(ghost);
-            // Undim so the destination field is fully visible while merging
-            if (sheet.getWindow() != null) {
-                android.animation.ValueAnimator dim = android.animation.ValueAnimator.ofFloat(1f, 0f);
-                dim.setDuration(300);
-                dim.addUpdateListener(a -> {
-                    if (sheet.getWindow() != null) sheet.getWindow().setDimAmount((float) a.getAnimatedValue());
-                });
-                dim.start();
-            }
-            container.animate().alpha(0f).setDuration(300).start();
-            ghost.post(() -> {
-                ghost.setScaleX(1.9f);
-                ghost.setScaleY(1.9f);
-                ghost.setTranslationX(w[0] - ghost.getWidth() / 2f);
-                ghost.setTranslationY(w[1] - ghost.getHeight() / 2f);
-                ghost.animate()
-                    .translationX(f[0] - ghost.getWidth() / 2f)
-                    .translationY(f[1] - ghost.getHeight() / 2f)
-                    .scaleX(1f).scaleY(1f)
-                    .setDuration(320)
-                    .setInterpolator(new android.view.animation.AccelerateInterpolator())
-                    .withEndAction(() -> {
-                        if (tvVersionSelected != null) tvVersionSelected.setText(chosen);
-                        sheet.dismiss();
-                    })
-                    .start();
-                animateTextColor(ghost, 0xFFFF6B00, 0xFFF0F0F0, 320);
+            ghost.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED);
+            float wx = w[0] - ghost.getMeasuredWidth() / 2f;
+            float wy = w[1] - ghost.getMeasuredHeight() / 2f;
+            float fx = f[0] - ghost.getMeasuredWidth() / 2f;
+            float fy = f[1] - ghost.getMeasuredHeight() / 2f;
+            // Position everything before adding so the ghost never flashes at (0,0)
+            ghost.setScaleX(1.9f);
+            ghost.setScaleY(1.9f);
+            ghost.setTranslationX(wx);
+            ghost.setTranslationY(wy);
+            ghost.setAlpha(0f);
+            activityContent.addView(ghost);
+            // Sheet slides away and unveils the number emerging from the wheel
+            sheet.dismiss();
+            android.animation.ValueAnimator fly = android.animation.ValueAnimator.ofFloat(0f, 1f);
+            fly.setDuration(320);
+            fly.setInterpolator(new android.view.animation.AccelerateInterpolator());
+            fly.addUpdateListener(anim -> {
+                float p = (float) anim.getAnimatedValue();
+                ghost.setTranslationX((1f - p) * wx + p * fx);
+                ghost.setTranslationY((1f - p) * wy + p * fy);
+                float s = 1.9f - 0.9f * p;
+                ghost.setScaleX(s);
+                ghost.setScaleY(s);
+                ghost.setAlpha(Math.min(1f, p / 0.3f));
             });
+            fly.addListener(new android.animation.AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(android.animation.Animator animation) {
+                    activityContent.removeView(ghost);
+                    tvVersionSelected.setText(chosen);
+                }
+            });
+            fly.start();
+            animateTextColor(ghost, 0xFFFF6B00, 0xFFF0F0F0, 320);
         });
         container.addView(btnConfirm, btnLp);
 
@@ -981,50 +986,70 @@ public class CreateServerActivity extends AppCompatActivity {
                 container.setAlpha(1f);
                 return;
             }
-            // Let the flying number draw outside the sheet bounds (the field sits above the sheet)
-            bottomSheetInternal.setClipChildren(false);
-            bottomSheetInternal.setClipToPadding(false);
-            android.view.ViewGroup sheetParent = (android.view.ViewGroup) bottomSheetInternal.getParent();
-            if (sheetParent != null) sheetParent.setClipChildren(false);
-            // Prefer the full-screen decor content as ghost host so nothing can clip it
-            android.view.ViewGroup decorContent = (android.view.ViewGroup) bsd.getWindow().findViewById(android.R.id.content);
-            if (decorContent != null) {
-                decorContent.setClipChildren(false);
-                overlayHost[0] = decorContent;
-            }
             BottomSheetBehavior<FrameLayout> behavior = BottomSheetBehavior.from(bottomSheetInternal);
             behavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+            // Lighter scrim so the flying number stays clearly visible over the activity
+            if (bsd.getWindow() != null) bsd.getWindow().setDimAmount(0.35f);
             // Content fades in on its own so the sheet can never appear empty
-            root.post(() -> container.animate().alpha(1f).setDuration(240).start());
+            container.post(() -> container.animate().alpha(1f).setDuration(240).start());
             if (versionField == null) return;
 
             final boolean[] flew = {false};
             final Runnable flyIn = () -> {
                 if (flew[0] || !sheet.isShowing()) return;
                 flew[0] = true;
-                root.post(() -> {
-                    ViewGroup host = overlayHost[0];
-                    float[] f = centerOfOnScreen(versionField, host);
-                    float[] w = centerOfOnScreen(wheelFrame, host);
+                container.post(() -> {
+                    ViewGroup activityContent = (ViewGroup) findViewById(android.R.id.content);
+                    if (activityContent == null) {
+                        centerHidden[0] = false;
+                        applyWheelTransform(recyclerView, itemHeight, false);
+                        return;
+                    }
+                    float[] f = centerOfOnScreen(versionField, activityContent);
+                    float[] w = centerOfOnScreen(wheelFrame, activityContent);
                     TextView ghost = createGhostNumber(currentVersions.get(currentPos[0]));
-                    host.addView(ghost);
-                    ghost.post(() -> {
-                        ghost.setTranslationX(f[0] - ghost.getWidth() / 2f);
-                        ghost.setTranslationY(f[1] - ghost.getHeight() / 2f);
-                        ghost.animate()
-                            .translationX(w[0] - ghost.getWidth() / 2f)
-                            .translationY(w[1] - ghost.getHeight() / 2f)
-                            .scaleX(1.9f).scaleY(1.9f)
-                            .setDuration(380)
-                            .setInterpolator(new android.view.animation.DecelerateInterpolator(1.2f))
-                            .withEndAction(() -> {
-                                ((ViewGroup) ghost.getParent()).removeView(ghost);
-                                centerHidden[0] = false;
-                                applyWheelTransform(recyclerView, itemHeight, false);
-                            })
-                            .start();
-                        animateTextColor(ghost, 0xFFF0F0F0, 0xFFFF6B00, 380);
+                    ghost.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED);
+                    float fx = f[0] - ghost.getMeasuredWidth() / 2f;
+                    float fy = f[1] - ghost.getMeasuredHeight() / 2f;
+                    float wx = w[0] - ghost.getMeasuredWidth() / 2f;
+                    float wy = w[1] - ghost.getMeasuredHeight() / 2f;
+                    // Position everything before adding so the ghost never flashes at (0,0)
+                    ghost.setTranslationX(fx);
+                    ghost.setTranslationY(fy);
+                    ghost.setAlpha(1f);
+                    activityContent.addView(ghost);
+                    final boolean[] revealed = {false};
+                    final Runnable revealCenter = () -> {
+                        if (revealed[0]) return;
+                        revealed[0] = true;
+                        centerHidden[0] = false;
+                        applyWheelTransform(recyclerView, itemHeight, false);
+                    };
+                    android.animation.ValueAnimator fly = android.animation.ValueAnimator.ofFloat(0f, 1f);
+                    fly.setDuration(380);
+                    fly.setInterpolator(new android.view.animation.DecelerateInterpolator(1.2f));
+                    fly.addUpdateListener(anim -> {
+                        float p = (float) anim.getAnimatedValue();
+                        ghost.setTranslationX((1f - p) * fx + p * wx);
+                        ghost.setTranslationY((1f - p) * fy + p * wy);
+                        float s = 1f + 0.9f * p;
+                        ghost.setScaleX(s);
+                        ghost.setScaleY(s);
+                        // Dips into the sheet: fade out while the real center item takes over
+                        if (p > 0.55f) {
+                            ghost.setAlpha(Math.max(0f, 1f - (p - 0.55f) / 0.3f));
+                            revealCenter.run();
+                        }
                     });
+                    fly.addListener(new android.animation.AnimatorListenerAdapter() {
+                        @Override
+                        public void onAnimationEnd(android.animation.Animator animation) {
+                            activityContent.removeView(ghost);
+                            revealCenter.run();
+                        }
+                    });
+                    fly.start();
+                    animateTextColor(ghost, 0xFFF0F0F0, 0xFFFF6B00, 380);
                 });
             };
             behavior.addBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
@@ -1039,7 +1064,7 @@ public class CreateServerActivity extends AppCompatActivity {
                 }
             });
             // Fallback in case no callback ever reports the expanded state
-            root.postDelayed(flyIn, 350);
+            container.postDelayed(flyIn, 350);
         });
 
         sheet.show();
