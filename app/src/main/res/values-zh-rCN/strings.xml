@@ -242,6 +242,8 @@
     <string name="version_desc_velocity_latest">最新 Velocity，推荐</string>
     <string name="version_desc_velocity_stable">稳定 Velocity 版本</string>
     <string name="version_loading">版本仍在加载中...</string>
+    <string name="server_row_sync_failed">服务器已在本地创建，但云端条目保存失败。稍后会自动同步。</string>
+    <string name="cloud_servers_restored">已从云端恢复 %1$d 个服务器（休眠状态）</string>
     <string name="download_error">下载错误</string>
     <string name="error_loading">加载错误</string>
     <string name="no_compatible_version_found">未找到兼容版本。</string>

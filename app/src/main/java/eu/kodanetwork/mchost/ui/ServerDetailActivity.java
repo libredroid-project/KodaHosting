@@ -1553,13 +1553,15 @@ public class ServerDetailActivity extends AppCompatActivity {
         dialog.findViewById(R.id.btn_dialog_confirm).setOnClickListener(view -> {
             String newSubdomain = input.getText().toString().trim().toLowerCase();
             if (newSubdomain.matches("^[a-z0-9-]+$") && newSubdomain.length() >= 3) {
+                String oldSubdomain = server.getSubdomain();
                 String domain = newSubdomain + "." + server.getBaseDomain();
                 server.setSubdomain(newSubdomain);
                 server.setDomainLink(domain);
                 repo.update(server);
                 dialog.dismiss();
-                // Retry wake up
+                // Retry wake up, keep DB host in sync first
                 new Thread(() -> {
+                    patchServerHostInSupabase(oldSubdomain, newSubdomain, server.getBaseDomain());
                     try {
                         eu.kodanetwork.mchost.utils.HibernationManager.wakeUpServer(this, server, repo);
                         runOnUiThread(() -> {
@@ -3087,63 +3089,81 @@ public class ServerDetailActivity extends AppCompatActivity {
 
     private void handleDomainLink() {
         if (!eu.kodanetwork.mchost.security.PraetorSystem.checkNetwork(this)) return;
-        
+
         long lastChange = eu.kodanetwork.mchost.App.getPrefs(this).getLong("last_join_change_" + server.getId(), 0);
         if (System.currentTimeMillis() - lastChange < 24 * 60 * 60 * 1000L) {
             Toast.makeText(this, getString(R.string.sd_toast_subdomain_limit), Toast.LENGTH_LONG).show();
             return;
         }
-        
+
         android.app.Dialog dialog = new android.app.Dialog(this);
         dialog.setContentView(R.layout.dialog_praetor_input);
         dialog.getWindow().setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT));
         dialog.getWindow().setLayout(android.view.ViewGroup.LayoutParams.MATCH_PARENT, android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
-        
-        String praetorHtml = "<font color=\"#555555\">P.R.</font><font color=\"#AAAAAA\">A</font><font color=\"#555555\">.</font><font color=\"#AAAAAA\">E</font><font color=\"#555555\">.</font><font color=\"#FFFFFF\">T</font><font color=\"#555555\">.</font><font color=\"#FFFFFF\">O</font><font color=\"#555555\">.</font><font color=\"#FFFFFF\">R.</font>";
+
+        String praetorHtml = "<font color=\"#555555\">P.R.</font><font color=\"#AAAAAA\">A</font><font color=\"#555555\">.</font><font color=\"#AAAAAA\">E</font><font color=\"#555555\">.</font><font color=\"#AAAAAA\">E</font><font color=\"#555555\">.</font><font color=\"#FFFFFF\">T</font><font color=\"#555555\">.</font><font color=\"#FFFFFF\">O</font><font color=\"#555555\">.</font><font color=\"#FFFFFF\">R.</font>";
         ((android.widget.TextView) dialog.findViewById(R.id.tv_dialog_title)).setText(android.text.Html.fromHtml(praetorHtml, android.text.Html.FROM_HTML_MODE_LEGACY));
         ((android.widget.TextView) dialog.findViewById(R.id.tv_dialog_subtitle)).setText(R.string.praetor_subtitle);
         ((android.widget.TextView) dialog.findViewById(R.id.tv_dialog_message)).setText(R.string.praetor_message_change_domain);
-        
+
         android.widget.EditText input = dialog.findViewById(R.id.et_dialog_input);
         input.setHint(R.string.praetor_hint_change_domain);
         if (server.getSubdomain() != null) input.setText(server.getSubdomain());
-        
-        android.view.View suffix = dialog.findViewById(R.id.tv_dialog_suffix);
-        if (suffix != null) suffix.setVisibility(android.view.View.VISIBLE);
-        
+
+        // Suffix acts as toggle between the two base domains
+        final String[] selectedDomain = {server.getBaseDomain()};
+        android.widget.TextView suffix = dialog.findViewById(R.id.tv_dialog_suffix);
+        if (suffix != null) {
+            suffix.setVisibility(android.view.View.VISIBLE);
+            suffix.setText("." + selectedDomain[0]);
+            suffix.setTextColor(0xFFFF6B00);
+            suffix.setOnClickListener(v -> {
+                selectedDomain[0] = "kodanetwork.eu".equals(selectedDomain[0]) ? "kodaserv.eu" : "kodanetwork.eu";
+                suffix.setText("." + selectedDomain[0]);
+            });
+        }
+
         dialog.findViewById(R.id.btn_dialog_cancel).setOnClickListener(view -> dialog.dismiss());
         dialog.findViewById(R.id.btn_dialog_confirm).setOnClickListener(view -> {
             String newSubdomain = input.getText().toString().trim().toLowerCase();
             if (newSubdomain.matches("^[a-z0-9-]+$") && newSubdomain.length() >= 3) {
                 dialog.dismiss();
+                String newBaseDomain = selectedDomain[0];
                 io.execute(() -> {
                     try {
-                        String domain = newSubdomain + "." + server.getBaseDomain();
                         String oldSubdomain = server.getSubdomain();
-                        
+                        String oldBaseDomain = server.getBaseDomain();
+                        String domain = newSubdomain + "." + newBaseDomain;
+                        eu.kodanetwork.mchost.network.supabase.SupabaseFunctionsClient client =
+                                new eu.kodanetwork.mchost.network.supabase.SupabaseFunctionsClient(this);
+
+                        // Delete old record if it exists (old zone!)
+                        if (oldSubdomain != null && !oldSubdomain.isEmpty()) {
+                            try {
+                                client.deleteDnsLink("", oldSubdomain, oldBaseDomain);
+                            } catch (Exception ignored) {}
+                        }
+
                         if (server.getPlayitAddress() != null && !server.getPlayitAddress().isEmpty()) {
-                            eu.kodanetwork.mchost.network.supabase.SupabaseFunctionsClient client = new eu.kodanetwork.mchost.network.supabase.SupabaseFunctionsClient(this);
-                            
-                            // Delete old record if it exists
-                            if (oldSubdomain != null && !oldSubdomain.isEmpty()) {
-                                try {
-                                    client.deleteDnsLink("", oldSubdomain, server.getBaseDomain());
-                                } catch (Exception ignored) {}
-                            }
-                            
                             String[] parts = server.getPlayitAddress().split(":");
                             String target = parts[0];
                             int port = parts.length > 1 ? Integer.parseInt(parts[1]) : server.getPort();
-                            
-                            client.createDnsLink("", newSubdomain, server.getBaseDomain(), target, port, "tcp");
+
+                            client.createDnsLink("", newSubdomain, newBaseDomain, target, port, "tcp");
                             server.setDomainLink(domain + " -> " + server.getPlayitAddress());
                         } else {
                             server.setDomainLink("");
                         }
-                        
+
                         server.setSubdomain(newSubdomain);
-                        
+                        server.setBaseDomain(newBaseDomain);
                         repo.update(server);
+
+                        // Keep Supabase in sync so status reports don't hit a missing row
+                        if (!patchServerHostInSupabase(oldSubdomain, newSubdomain, newBaseDomain)) {
+                            android.util.Log.w("ServerDetail", "Host patch failed for " + newSubdomain + " — retrying later");
+                        }
+
                         eu.kodanetwork.mchost.App.getPrefs(this).edit().putLong("last_join_change_" + server.getId(), System.currentTimeMillis()).apply();
                         runOnUiThread(() -> {
                             if (server.getPlayitAddress() != null && !server.getPlayitAddress().isEmpty()) {
@@ -3166,6 +3186,41 @@ public class ServerDetailActivity extends AppCompatActivity {
             }
         });
         dialog.show();
+    }
+
+    /** Patches host (+ base_domain) of the koda_servers row so DB matches the app. */
+    private boolean patchServerHostInSupabase(String oldHost, String newHost, String baseDomain) {
+        for (int attempt = 0; attempt < 2; attempt++) {
+            try {
+                org.json.JSONObject payload = new org.json.JSONObject().put("host", newHost);
+                if (baseDomain != null) payload.put("base_domain", baseDomain);
+                org.json.JSONObject body = new org.json.JSONObject()
+                        .put("p_app_uuid", eu.kodanetwork.mchost.App.getPrefs(this).getString("app_uuid", ""))
+                        .put("p_host", oldHost)
+                        .put("p_payload", payload);
+                java.net.HttpURLConnection conn = (java.net.HttpURLConnection) new java.net.URL(
+                        eu.kodanetwork.mchost.security.PraetorSecurity.getSupabaseUrl() + "/rest/v1/rpc/rpc_patch_server").openConnection();
+                conn.setRequestMethod("POST");
+                conn.setRequestProperty("Content-Type", "application/json");
+                conn.setRequestProperty("apikey", eu.kodanetwork.mchost.security.PraetorSecurity.getSupabaseKey());
+                conn.setRequestProperty("Authorization", "Bearer " +
+                        eu.kodanetwork.mchost.network.supabase.SupabaseAuth.getSessionToken(this));
+                conn.setRequestProperty("Prefer", "return=minimal");
+                conn.setDoOutput(true);
+                conn.getOutputStream().write(body.toString().getBytes());
+                int code = conn.getResponseCode();
+                conn.disconnect();
+                if (code == 401 && attempt == 0) {
+                    eu.kodanetwork.mchost.network.supabase.SupabaseAuth.refreshTokenSync(this);
+                    continue;
+                }
+                if (code >= 200 && code < 300) return true;
+                android.util.Log.w("ServerDetail", "patchServerHost HTTP " + code);
+            } catch (Exception e) {
+                android.util.Log.e("ServerDetail", "patchServerHost error", e);
+            }
+        }
+        return false;
     }
 
     private void showAddonOptions(String addonType, android.widget.CompoundButton toggleSwitch) {

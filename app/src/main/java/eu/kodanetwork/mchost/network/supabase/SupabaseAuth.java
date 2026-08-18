@@ -292,6 +292,15 @@ public class SupabaseAuth {
         return eu.kodanetwork.mchost.App.getPrefs(ctx).contains("koda_session_token");
     }
 
+    /** Session token from the encrypted prefs; falls back to the anon key when logged out. */
+    public static String getSessionToken(Context ctx) {
+        String token = eu.kodanetwork.mchost.App.getPrefs(ctx).getString("koda_session_token", null);
+        if (token == null || token.trim().isEmpty()) {
+            return eu.kodanetwork.mchost.security.PraetorSecurity.getSupabaseKey();
+        }
+        return token;
+    }
+
     public static boolean refreshTokenSync(Context ctx) {
         try {
             SharedPreferences prefs = eu.kodanetwork.mchost.App.getPrefs(ctx);

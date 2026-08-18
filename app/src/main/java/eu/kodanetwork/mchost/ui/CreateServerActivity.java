@@ -1490,21 +1490,43 @@ public class CreateServerActivity extends AppCompatActivity {
                         } catch (Exception ignored) {}
                         try {
                             String appUuid = eu.kodanetwork.mchost.App.getPrefs(this).getString("app_uuid", "unknown");
-                            java.net.URL url = new java.net.URL(eu.kodanetwork.mchost.security.PraetorSecurity.getSupabaseUrl() + "/rest/v1/koda_servers");
-                            java.net.HttpURLConnection conn = (java.net.HttpURLConnection) url.openConnection();
-                            conn.setRequestMethod("POST");
-                            conn.setRequestProperty("Content-Type", "application/json");
-                            conn.setRequestProperty("Prefer", "resolution=merge-duplicates");
                             String anonKey = eu.kodanetwork.mchost.security.PraetorSecurity.getSupabaseKey();
-                            conn.setRequestProperty("apikey", anonKey);
-                            conn.setRequestProperty("Authorization", "Bearer " + anonKey);
-                            conn.setDoOutput(true);
-                            String json = "{\"host\":\"" + s.getSubdomain() + "\", \"owner_app_uuid\":\"" + appUuid + "\", \"base_domain\":\"" + s.getBaseDomain() + "\"}";
-                            java.io.OutputStream os = conn.getOutputStream();
-                            os.write(json.getBytes());
-                            os.flush(); os.close();
-                            conn.getResponseCode();
-                        } catch (Exception ignored) {}
+                            org.json.JSONObject json = new org.json.JSONObject()
+                                    .put("host", s.getSubdomain())
+                                    .put("owner_app_uuid", appUuid)
+                                    .put("base_domain", s.getBaseDomain());
+                            boolean inserted = false;
+                            for (int attempt = 0; attempt < 3 && !inserted; attempt++) {
+                                java.net.HttpURLConnection conn = (java.net.HttpURLConnection) new java.net.URL(
+                                        eu.kodanetwork.mchost.security.PraetorSecurity.getSupabaseUrl() + "/rest/v1/koda_servers").openConnection();
+                                conn.setRequestMethod("POST");
+                                conn.setRequestProperty("Content-Type", "application/json");
+                                conn.setRequestProperty("Prefer", "resolution=merge-duplicates");
+                                conn.setRequestProperty("apikey", anonKey);
+                                conn.setRequestProperty("Authorization", "Bearer " + anonKey);
+                                conn.setConnectTimeout(10000);
+                                conn.setReadTimeout(15000);
+                                conn.setDoOutput(true);
+                                java.io.OutputStream os = conn.getOutputStream();
+                                os.write(json.toString().getBytes());
+                                os.flush(); os.close();
+                                int code = conn.getResponseCode();
+                                conn.disconnect();
+                                if (code >= 200 && code < 300) { inserted = true; break; }
+                                android.util.Log.w("CreateServer", "koda_servers insert HTTP " + code + " (attempt " + (attempt + 1) + ")");
+                                Thread.sleep(1000L * (attempt + 1));
+                            }
+                            if (!inserted) {
+                                // Row missing -> status reports and delete would 400 later.
+                                // Flag for self-heal via Settings-Sync / heartbeat.
+                                eu.kodanetwork.mchost.App.getPrefs(this).edit().putBoolean("pending_row_sync", true).apply();
+                                mainHandler.post(() -> android.widget.Toast.makeText(CreateServerActivity.this,
+                                        getString(R.string.server_row_sync_failed), android.widget.Toast.LENGTH_LONG).show());
+                            }
+                        } catch (Exception e) {
+                            eu.kodanetwork.mchost.App.getPrefs(this).edit().putBoolean("pending_row_sync", true).apply();
+                            android.util.Log.e("CreateServer", "koda_servers insert failed", e);
+                        }
                     }).start();
                     eu.kodanetwork.mchost.App.getPrefs(this).edit().putLong("last_server_create_time", System.currentTimeMillis()).apply();
                     if (loadingOverlay != null) loadingOverlay.setVisibility(android.view.View.GONE);

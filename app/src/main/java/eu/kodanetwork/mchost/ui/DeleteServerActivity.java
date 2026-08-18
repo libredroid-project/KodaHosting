@@ -168,25 +168,32 @@ public class DeleteServerActivity extends AppCompatActivity {
                 // 3. Mark as deleted in Supabase (Do NOT delete row)
                 setMsg(getString(R.string.delete_server_db), getString(R.string.delete_server_db_sub));
                 try {
+                    String appUuid = prefs.getString("app_uuid", "unknown");
+                    org.json.JSONObject payload = new org.json.JSONObject()
+                            .put("host", "deleted_" + server.getSubdomain())
+                            .put("server_version", "DELETED");
+                    org.json.JSONObject body = new org.json.JSONObject()
+                            .put("p_app_uuid", appUuid)
+                            .put("p_host", server.getSubdomain())
+                            .put("p_payload", payload);
+                    String jsonPatch = body.toString();
+
                     java.net.HttpURLConnection patchConn = (java.net.HttpURLConnection) new java.net.URL(eu.kodanetwork.mchost.security.PraetorSecurity.getSupabaseUrl() + "/rest/v1/rpc/rpc_patch_server").openConnection();
                     patchConn.setRequestMethod("POST");
                     patchConn.setRequestProperty("apikey", anonKey);
                     patchConn.setRequestProperty("Authorization", authHeader);
                     patchConn.setRequestProperty("Content-Type", "application/json");
                     patchConn.setDoOutput(true);
-                    
-                    String appUuid = prefs.getString("app_uuid", "unknown");
-                    String jsonPatch = "{\"p_app_uuid\":\"" + appUuid + "\", \"p_host\":\"" + server.getSubdomain() + "\", \"p_payload\": {\"host\": \"deleted_" + server.getSubdomain() + "\", \"server_version\": \"DELETED\"}}";
                     patchConn.getOutputStream().write(jsonPatch.getBytes());
                     int responseCode = patchConn.getResponseCode();
-                    
+
                     if (responseCode == 401) {
                         // Token might be expired, try to refresh
                         if (eu.kodanetwork.mchost.network.supabase.SupabaseAuth.refreshTokenSync(this)) {
                             // Token refreshed successfully, try again
                             token = prefs.getString("koda_session_token", null);
                             authHeader = token != null ? "Bearer " + token : "Bearer " + anonKey;
-                            
+
                             patchConn = (java.net.HttpURLConnection) new java.net.URL(eu.kodanetwork.mchost.security.PraetorSecurity.getSupabaseUrl() + "/rest/v1/rpc/rpc_patch_server").openConnection();
                             patchConn.setRequestMethod("POST");
                             patchConn.setRequestProperty("apikey", anonKey);
@@ -197,10 +204,25 @@ public class DeleteServerActivity extends AppCompatActivity {
                             responseCode = patchConn.getResponseCode();
                         }
                     }
-                    
+
                     if (responseCode >= 400) {
-                        showError(getString(R.string.delete_server_db_failed), "Failed to update server status (Code " + responseCode + ")");
-                        return;
+                        String errBody = "";
+                        try (java.io.BufferedReader br = new java.io.BufferedReader(
+                                new java.io.InputStreamReader(patchConn.getErrorStream()))) {
+                            StringBuilder sb = new StringBuilder();
+                            String ln;
+                            while ((ln = br.readLine()) != null) sb.append(ln);
+                            errBody = sb.toString();
+                        } catch (Exception ignored) {}
+                        // Row never existed (e.g. creation INSERT failed earlier) —
+                        // nothing to clean up in the DB, continue with local deletion.
+                        if (errBody.contains("Server not found")) {
+                            android.util.Log.w("DeleteServer", "No DB row for " + server.getSubdomain() + ", continuing");
+                        } else {
+                            showError(getString(R.string.delete_server_db_failed),
+                                    "Failed to update server status (Code " + responseCode + ")");
+                            return;
+                        }
                     }
                 } catch (Exception e) {
                     showError(getString(R.string.delete_server_db_failed), e.getMessage());

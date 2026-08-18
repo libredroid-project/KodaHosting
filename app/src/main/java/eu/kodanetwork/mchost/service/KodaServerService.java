@@ -145,6 +145,7 @@ public class KodaServerService extends Service {
                 checkRemoteCommands(srv);
                 checkFileTransfers(srv);
             }
+            selfHealPendingRows();
         }, 10, 10, java.util.concurrent.TimeUnit.SECONDS);
         
         // Capacity Watchdog: Checks every 30s if we bypassed the queue while offline
@@ -231,6 +232,45 @@ public class KodaServerService extends Service {
         });
     }
 
+    /** Re-inserts missing koda_servers rows when a creation INSERT failed (pending_row_sync flag). */
+    private void selfHealPendingRows() {
+        android.content.SharedPreferences prefs = eu.kodanetwork.mchost.App.getPrefs(this);
+        if (!prefs.getBoolean("pending_row_sync", false)) return;
+        String appUuid = prefs.getString("app_uuid", "");
+        if (appUuid.isEmpty()) return;
+        exec.submit(() -> {
+            try {
+                boolean allOk = true;
+                for (ServerInstance srv : ServerRepo.get(this).all()) {
+                    if (srv.getSubdomain() == null || srv.getSubdomain().isEmpty()) continue;
+                    org.json.JSONObject row = new org.json.JSONObject()
+                            .put("host", srv.getSubdomain())
+                            .put("owner_app_uuid", appUuid)
+                            .put("base_domain", srv.getBaseDomain());
+                    okhttp3.RequestBody body = okhttp3.RequestBody.create(
+                            row.toString(), okhttp3.MediaType.parse("application/json"));
+                    okhttp3.Request req = new okhttp3.Request.Builder()
+                            .url(SUPABASE_REST + "/koda_servers")
+                            .post(body)
+                            .addHeader("Content-Type", "application/json")
+                            .addHeader("Prefer", "resolution=merge-duplicates")
+                            .addHeader("apikey", SUPABASE_KEY)
+                            .addHeader("Authorization", "Bearer " + SUPABASE_KEY)
+                            .build();
+                    try (okhttp3.Response resp = httpClient.newCall(req).execute()) {
+                        if (!resp.isSuccessful()) allOk = false;
+                    }
+                }
+                if (allOk) {
+                    prefs.edit().putBoolean("pending_row_sync", false).apply();
+                    Log.i(TAG, "Self-heal: missing server rows re-synced");
+                }
+            } catch (Exception e) {
+                Log.w(TAG, "Self-heal row sync failed: " + e.getMessage());
+            }
+        });
+    }
+
     private void pollNewRemoteServers() {
         android.content.SharedPreferences prefs = eu.kodanetwork.mchost.App.getPrefs(this);
         String uuid = prefs.getString("app_uuid", "");
@@ -239,7 +279,7 @@ public class KodaServerService extends Service {
         exec.submit(() -> {
             try {
                 okhttp3.Request request = new okhttp3.Request.Builder()
-                    .url(SUPABASE_REST + "/koda_servers?owner_app_uuid=eq." + uuid + "&select=id,host,ram_mb,server_version")
+                    .url(SUPABASE_REST + "/koda_servers?owner_app_uuid=eq." + uuid + "&select=id,host,ram_mb,server_version,base_domain")
                     .get()
                     .addHeader("apikey", SUPABASE_KEY)
                     .addHeader("Authorization", "Bearer " + SUPABASE_KEY)
@@ -248,6 +288,9 @@ public class KodaServerService extends Service {
                 if (response.isSuccessful() && response.body() != null) {
                     String json = response.body().string();
                     org.json.JSONArray arr = new org.json.JSONArray(json);
+                    // Empty local repo = fresh install after reinstall -> restore cloud rows as placeholders
+                    boolean freshInstall = ServerRepo.get(this).all().isEmpty();
+                    int restored = 0;
                     for (int i = 0; i < arr.length(); i++) {
                         org.json.JSONObject obj = arr.getJSONObject(i);
                         String remoteId = obj.optString("id");
@@ -319,10 +362,42 @@ public class KodaServerService extends Service {
                             }
                             s.setRamMB(ram);
                             ServerRepo.get(this).add(s);
-                            
+
                             // Automatically start it so it installs
                             mainHandler.post(() -> startServer(s));
+                        } else if (freshInstall && !ver.equals("DELETED") && !ver.startsWith("CMD:")) {
+                            // Reinstall recovery: local repo is empty but the cloud still has rows.
+                            // Restore them as HIBERNATED placeholders so name/settings/dashboard stay consistent.
+                            Log.i(TAG, "Restoring server from cloud (hibernated): " + host);
+                            ServerInstance s = new ServerInstance();
+                            s.setId(remoteId);
+                            if (host.startsWith("db_")) {
+                                s.setName(host.substring(3));
+                                s.setType(eu.kodanetwork.mchost.model.ServerInstance.Type.MARIADB);
+                                s.setUseNative(true);
+                            } else {
+                                s.setName(host);
+                                s.setType(eu.kodanetwork.mchost.model.ServerInstance.Type.VANILLA);
+                            }
+                            s.setSubdomain(host);
+                            String baseDomain = obj.optString("base_domain", "");
+                            if (!baseDomain.isEmpty()) s.setBaseDomain(baseDomain);
+                            String realVer = ver;
+                            if (realVer.startsWith("OFFLINE|")) realVer = realVer.substring("OFFLINE|".length());
+                            if (realVer.contains(" | ")) realVer = realVer.substring(0, realVer.indexOf(" | "));
+                            if (realVer.isEmpty() || realVer.equals("HIBERNATED")) realVer = "1.21.11";
+                            s.setVersion(realVer);
+                            s.setRamMB(ram);
+                            s.state = ServerInstance.State.HIBERNATED;
+                            ServerRepo.get(this).add(s);
+                            restored++;
                         }
+                    }
+                    if (restored > 0) {
+                        final int count = restored;
+                        mainHandler.post(() -> android.widget.Toast.makeText(this,
+                                getString(R.string.cloud_servers_restored, count),
+                                android.widget.Toast.LENGTH_LONG).show());
                     }
                 }
             } catch (Exception e) {
@@ -2767,13 +2842,26 @@ public class KodaServerService extends Service {
                             } else if (cmd.equals("DELETE")) {
                                 try { stopServer(srv, true); } catch (Exception e) {}
                                 ServerRepo.get(KodaServerService.this).delete(srv.getId());
-                                okhttp3.Request delReq = new okhttp3.Request.Builder()
-                                    .url(SUPABASE_REST + "/koda_servers?host=eq." + srv.getSubdomain())
-                                    .delete()
-                                    .addHeader("apikey", SUPABASE_KEY)
-                                    .addHeader("Authorization", "Bearer " + SUPABASE_KEY)
-                                    .build();
-                                try { httpClient.newCall(delReq).execute().close(); } catch(Exception e){}
+                                // Tombstone via RPC (direct DELETE is blocked by RLS policy)
+                                try {
+                                    org.json.JSONObject delPayload = new org.json.JSONObject()
+                                            .put("host", "deleted_" + srv.getSubdomain())
+                                            .put("server_version", "DELETED");
+                                    org.json.JSONObject delBody = new org.json.JSONObject()
+                                            .put("p_app_uuid", eu.kodanetwork.mchost.App.getPrefs(KodaServerService.this).getString("app_uuid", ""))
+                                            .put("p_host", srv.getSubdomain())
+                                            .put("p_payload", delPayload);
+                                    okhttp3.RequestBody delReqBody = okhttp3.RequestBody.create(
+                                            delBody.toString(), okhttp3.MediaType.parse("application/json"));
+                                    okhttp3.Request delReq = new okhttp3.Request.Builder()
+                                        .url(SUPABASE_REST + "/rpc/rpc_patch_server")
+                                        .post(delReqBody)
+                                        .addHeader("Content-Type", "application/json")
+                                        .addHeader("apikey", SUPABASE_KEY)
+                                        .addHeader("Authorization", "Bearer " + SUPABASE_KEY)
+                                        .build();
+                                    httpClient.newCall(delReq).execute().close();
+                                } catch (Exception e) {}
                                 return;
                             } else if (cmd.equals("WIPE")) {
                                 try { stopServer(srv, true); } catch (Exception e) {}

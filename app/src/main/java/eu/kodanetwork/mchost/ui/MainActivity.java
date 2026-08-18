@@ -112,9 +112,11 @@ public class MainActivity extends AppCompatActivity {
                         patchConn.setRequestProperty("Authorization", "Bearer " + eu.kodanetwork.mchost.security.PraetorSecurity.getSupabaseKey());
                         patchConn.setRequestProperty("Prefer", "return=minimal");
                         patchConn.setDoOutput(true);
-                        String pJson = "{\"p_old_app_uuid\":\"" + finalOld + "\", \"p_new_app_uuid\":\"" + finalNew + "\"}";
+                        org.json.JSONObject pJson = new org.json.JSONObject()
+                                .put("p_old_app_uuid", finalOld)
+                                .put("p_new_app_uuid", finalNew);
                         java.io.OutputStream os = patchConn.getOutputStream();
-                        os.write(pJson.getBytes());
+                        os.write(pJson.toString().getBytes());
                         os.flush(); os.close();
                         patchConn.getResponseCode();
                     } catch (Exception ignored) {}
@@ -734,7 +736,8 @@ public class MainActivity extends AppCompatActivity {
                         try (okhttp3.Response response = new okhttp3.OkHttpClient().newCall(request).execute()) {
                             if (response.isSuccessful() && response.body() != null) {
                                 String json = response.body().string();
-                                if (json.contains("\"server_version\":\"HIBERNATED\"") || json.contains("\"server_version\": \"HIBERNATED\"")) {
+                                org.json.JSONArray arr = new org.json.JSONArray(json);
+                                if (arr.length() > 0 && "HIBERNATED".equals(arr.getJSONObject(0).optString("server_version"))) {
                                     Log.d(TAG, "Server " + srv.getName() + " is offline but hibernated remotely. Zipping...");
                                     eu.kodanetwork.mchost.utils.HibernationManager.hibernateServer(this, srv, repo);
                                     refresh();

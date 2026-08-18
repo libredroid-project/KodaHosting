@@ -210,6 +210,8 @@
     <string name="version_desc_velocity_latest">Latest Velocity, recommended</string>
     <string name="version_desc_velocity_stable">Stable Velocity release</string>
     <string name="version_loading">Versions are still being loaded...</string>
+    <string name="server_row_sync_failed">Server created locally, but the cloud entry could not be saved. It will sync automatically later.</string>
+    <string name="cloud_servers_restored">%1$d server(s) restored from the cloud (hibernated)</string>
     <string name="download_error">Download Error</string>
     <string name="error_loading">Error loading</string>
     <string name="no_compatible_version_found">No compatible version found.</string>
