@@ -804,12 +804,24 @@ public class CreateServerActivity extends AppCompatActivity {
         recyclerView.setOverScrollMode(View.OVER_SCROLL_NEVER);
         recyclerView.setClipChildren(false);
         new LinearSnapHelper().attachToRecyclerView(recyclerView);
+        // Spacer above the first and below the last item so every version can reach the center
+        recyclerView.addItemDecoration(new RecyclerView.ItemDecoration() {
+            @Override
+            public void getItemOffsets(android.graphics.Rect outRect, View view, RecyclerView parent, RecyclerView.State state) {
+                int pos = parent.getChildAdapterPosition(view);
+                if (pos == RecyclerView.NO_POSITION) return;
+                int spacer = (wheelHeight - itemHeight) / 2;
+                if (pos == 0) outRect.top = spacer;
+                if (pos == currentVersions.size() - 1) outRect.bottom = spacer;
+            }
+        });
 
         int initialIdx = 0;
         if (selectedVersion != null) {
             int idx = currentVersions.indexOf(selectedVersion);
             if (idx >= 0) initialIdx = idx;
         }
+        final int startIdx = initialIdx;
 
         VersionWheelAdapter adapter = new VersionWheelAdapter(currentVersions, itemHeight,
             recyclerView::smoothScrollToPosition);
@@ -863,7 +875,14 @@ public class CreateServerActivity extends AppCompatActivity {
                 }
             }
         });
-        recyclerView.post(() -> applyWheelTransform(recyclerView, itemHeight, centerHidden[0]));
+        recyclerView.post(() -> {
+            View target = layoutManager.findViewByPosition(startIdx);
+            if (target != null) {
+                float delta = target.getY() + target.getHeight() / 2f - recyclerView.getHeight() / 2f;
+                recyclerView.scrollBy(0, Math.round(delta));
+            }
+            applyWheelTransform(recyclerView, itemHeight, centerHidden[0]);
+        });
 
         // --- Root overlay so the version number can fly across the whole sheet ---
         FrameLayout root = new FrameLayout(this);
@@ -871,6 +890,8 @@ public class CreateServerActivity extends AppCompatActivity {
         root.addView(container);
         sheet.setContentView(root);
         if (versionField != null) container.setAlpha(0f);
+        // Full-screen host for the flying number, resolved once the dialog decor exists
+        final ViewGroup[] overlayHost = {root};
 
         // --- Confirm Button: number flies back and merges into the field ---
         MaterialButton btnConfirm = new MaterialButton(this);
@@ -895,11 +916,12 @@ public class CreateServerActivity extends AppCompatActivity {
             }
             centerHidden[0] = true;
             applyWheelTransform(recyclerView, itemHeight, true);
-            float[] f = centerOfOnScreen(versionField, root);
-            float[] w = centerOfOnScreen(wheelFrame, root);
+            ViewGroup host = overlayHost[0];
+            float[] f = centerOfOnScreen(versionField, host);
+            float[] w = centerOfOnScreen(wheelFrame, host);
             TextView ghost = createGhostNumber(chosen);
             ghost.setTextColor(0xFFFF6B00);
-            root.addView(ghost);
+            host.addView(ghost);
             // Undim so the destination field is fully visible while merging
             if (sheet.getWindow() != null) {
                 android.animation.ValueAnimator dim = android.animation.ValueAnimator.ofFloat(1f, 0f);
@@ -964,6 +986,12 @@ public class CreateServerActivity extends AppCompatActivity {
             bottomSheetInternal.setClipToPadding(false);
             android.view.ViewGroup sheetParent = (android.view.ViewGroup) bottomSheetInternal.getParent();
             if (sheetParent != null) sheetParent.setClipChildren(false);
+            // Prefer the full-screen decor content as ghost host so nothing can clip it
+            android.view.ViewGroup decorContent = (android.view.ViewGroup) bsd.getWindow().findViewById(android.R.id.content);
+            if (decorContent != null) {
+                decorContent.setClipChildren(false);
+                overlayHost[0] = decorContent;
+            }
             BottomSheetBehavior<FrameLayout> behavior = BottomSheetBehavior.from(bottomSheetInternal);
             behavior.setState(BottomSheetBehavior.STATE_EXPANDED);
             // Content fades in on its own so the sheet can never appear empty
@@ -975,10 +1003,11 @@ public class CreateServerActivity extends AppCompatActivity {
                 if (flew[0] || !sheet.isShowing()) return;
                 flew[0] = true;
                 root.post(() -> {
-                    float[] f = centerOfOnScreen(versionField, root);
-                    float[] w = centerOfOnScreen(wheelFrame, root);
+                    ViewGroup host = overlayHost[0];
+                    float[] f = centerOfOnScreen(versionField, host);
+                    float[] w = centerOfOnScreen(wheelFrame, host);
                     TextView ghost = createGhostNumber(currentVersions.get(currentPos[0]));
-                    root.addView(ghost);
+                    host.addView(ghost);
                     ghost.post(() -> {
                         ghost.setTranslationX(f[0] - ghost.getWidth() / 2f);
                         ghost.setTranslationY(f[1] - ghost.getHeight() / 2f);
@@ -989,7 +1018,7 @@ public class CreateServerActivity extends AppCompatActivity {
                             .setDuration(380)
                             .setInterpolator(new android.view.animation.DecelerateInterpolator(1.2f))
                             .withEndAction(() -> {
-                                root.removeView(ghost);
+                                ((ViewGroup) ghost.getParent()).removeView(ghost);
                                 centerHidden[0] = false;
                                 applyWheelTransform(recyclerView, itemHeight, false);
                             })
