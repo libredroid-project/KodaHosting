@@ -756,7 +756,6 @@ public class CreateServerActivity extends AppCompatActivity {
         String genericDesc = getString(R.string.version_desc_generic);
 
         BottomSheetDialog sheet = new BottomSheetDialog(this, R.style.KodaBottomSheetDialog);
-        final View versionField = findViewById(R.id.layout_version_picker);
         float density = getResources().getDisplayMetrics().density;
         int itemHeight = (int)(56 * density);
         int wheelHeight = (int)(208 * density);
@@ -855,12 +854,10 @@ public class CreateServerActivity extends AppCompatActivity {
 
         // --- Wheel mechanics: depth scaling while scrolling, react on settle ---
         final int[] currentPos = {initialIdx};
-        // While the fly-in/fly-out number is on stage, the real center item stays invisible
-        final boolean[] centerHidden = {versionField != null};
         recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrolled(RecyclerView rv, int dx, int dy) {
-                applyWheelTransform(rv, itemHeight, centerHidden[0]);
+                applyWheelTransform(rv, itemHeight);
             }
 
             @Override
@@ -881,11 +878,10 @@ public class CreateServerActivity extends AppCompatActivity {
                 float delta = target.getY() + target.getHeight() / 2f - recyclerView.getHeight() / 2f;
                 recyclerView.scrollBy(0, Math.round(delta));
             }
-            applyWheelTransform(recyclerView, itemHeight, centerHidden[0]);
+            applyWheelTransform(recyclerView, itemHeight);
         });
 
         sheet.setContentView(container);
-        if (versionField != null) container.setAlpha(0f);
 
         // --- Confirm Button: number flies back and merges into the field ---
         MaterialButton btnConfirm = new MaterialButton(this);
@@ -901,60 +897,9 @@ public class CreateServerActivity extends AppCompatActivity {
             (int)(56 * density));
         btnLp.setMargins(48, (int)(20 * density), 48, (int)(24 * density));
         btnConfirm.setOnClickListener(v -> {
-            String chosen = currentVersions.get(currentPos[0]);
-            selectedVersion = chosen;
-            if (versionField == null || tvVersionSelected == null) {
-                if (tvVersionSelected != null) tvVersionSelected.setText(chosen);
-                sheet.dismiss();
-                return;
-            }
-            ViewGroup activityContent = (ViewGroup) findViewById(android.R.id.content);
-            if (activityContent == null) {
-                tvVersionSelected.setText(chosen);
-                sheet.dismiss();
-                return;
-            }
-            centerHidden[0] = true;
-            applyWheelTransform(recyclerView, itemHeight, true);
-            float[] f = centerOfOnScreen(versionField, activityContent);
-            float[] w = centerOfOnScreen(wheelFrame, activityContent);
-            TextView ghost = createGhostNumber(chosen);
-            ghost.setTextColor(0xFFFF6B00);
-            ghost.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED);
-            float wx = w[0] - ghost.getMeasuredWidth() / 2f;
-            float wy = w[1] - ghost.getMeasuredHeight() / 2f;
-            float fx = f[0] - ghost.getMeasuredWidth() / 2f;
-            float fy = f[1] - ghost.getMeasuredHeight() / 2f;
-            // Position everything before adding so the ghost never flashes at (0,0)
-            ghost.setScaleX(1.9f);
-            ghost.setScaleY(1.9f);
-            ghost.setTranslationX(wx);
-            ghost.setTranslationY(wy);
-            ghost.setAlpha(0f);
-            activityContent.addView(ghost);
-            // Sheet slides away and unveils the number emerging from the wheel
+            selectedVersion = currentVersions.get(currentPos[0]);
+            if (tvVersionSelected != null) tvVersionSelected.setText(selectedVersion);
             sheet.dismiss();
-            android.animation.ValueAnimator fly = android.animation.ValueAnimator.ofFloat(0f, 1f);
-            fly.setDuration(320);
-            fly.setInterpolator(new android.view.animation.AccelerateInterpolator());
-            fly.addUpdateListener(anim -> {
-                float p = (float) anim.getAnimatedValue();
-                ghost.setTranslationX((1f - p) * wx + p * fx);
-                ghost.setTranslationY((1f - p) * wy + p * fy);
-                float s = 1.9f - 0.9f * p;
-                ghost.setScaleX(s);
-                ghost.setScaleY(s);
-                ghost.setAlpha(Math.min(1f, p / 0.3f));
-            });
-            fly.addListener(new android.animation.AnimatorListenerAdapter() {
-                @Override
-                public void onAnimationEnd(android.animation.Animator animation) {
-                    activityContent.removeView(ghost);
-                    tvVersionSelected.setText(chosen);
-                }
-            });
-            fly.start();
-            animateTextColor(ghost, 0xFFFF6B00, 0xFFF0F0F0, 320);
         });
         container.addView(btnConfirm, btnLp);
 
@@ -978,93 +923,13 @@ public class CreateServerActivity extends AppCompatActivity {
             }
         }
 
-        // Force expanded state on show; once settled, the number flies out of the field
+        // Force expanded state on show
         sheet.setOnShowListener(d -> {
             BottomSheetDialog bsd = (BottomSheetDialog) d;
-            FrameLayout bottomSheetInternal = bsd.findViewById(com.google.android.material.R.id.design_bottom_sheet);
-            if (bottomSheetInternal == null) {
-                container.setAlpha(1f);
-                return;
+            FrameLayout bottomSheet = bsd.findViewById(com.google.android.material.R.id.design_bottom_sheet);
+            if (bottomSheet != null) {
+                BottomSheetBehavior.from(bottomSheet).setState(BottomSheetBehavior.STATE_EXPANDED);
             }
-            BottomSheetBehavior<FrameLayout> behavior = BottomSheetBehavior.from(bottomSheetInternal);
-            behavior.setState(BottomSheetBehavior.STATE_EXPANDED);
-            // Lighter scrim so the flying number stays clearly visible over the activity
-            if (bsd.getWindow() != null) bsd.getWindow().setDimAmount(0.35f);
-            // Content fades in on its own so the sheet can never appear empty
-            container.post(() -> container.animate().alpha(1f).setDuration(240).start());
-            if (versionField == null) return;
-
-            final boolean[] flew = {false};
-            final Runnable flyIn = () -> {
-                if (flew[0] || !sheet.isShowing()) return;
-                flew[0] = true;
-                container.post(() -> {
-                    ViewGroup activityContent = (ViewGroup) findViewById(android.R.id.content);
-                    if (activityContent == null) {
-                        centerHidden[0] = false;
-                        applyWheelTransform(recyclerView, itemHeight, false);
-                        return;
-                    }
-                    float[] f = centerOfOnScreen(versionField, activityContent);
-                    float[] w = centerOfOnScreen(wheelFrame, activityContent);
-                    TextView ghost = createGhostNumber(currentVersions.get(currentPos[0]));
-                    ghost.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED);
-                    float fx = f[0] - ghost.getMeasuredWidth() / 2f;
-                    float fy = f[1] - ghost.getMeasuredHeight() / 2f;
-                    float wx = w[0] - ghost.getMeasuredWidth() / 2f;
-                    float wy = w[1] - ghost.getMeasuredHeight() / 2f;
-                    // Position everything before adding so the ghost never flashes at (0,0)
-                    ghost.setTranslationX(fx);
-                    ghost.setTranslationY(fy);
-                    ghost.setAlpha(1f);
-                    activityContent.addView(ghost);
-                    final boolean[] revealed = {false};
-                    final Runnable revealCenter = () -> {
-                        if (revealed[0]) return;
-                        revealed[0] = true;
-                        centerHidden[0] = false;
-                        applyWheelTransform(recyclerView, itemHeight, false);
-                    };
-                    android.animation.ValueAnimator fly = android.animation.ValueAnimator.ofFloat(0f, 1f);
-                    fly.setDuration(380);
-                    fly.setInterpolator(new android.view.animation.DecelerateInterpolator(1.2f));
-                    fly.addUpdateListener(anim -> {
-                        float p = (float) anim.getAnimatedValue();
-                        ghost.setTranslationX((1f - p) * fx + p * wx);
-                        ghost.setTranslationY((1f - p) * fy + p * wy);
-                        float s = 1f + 0.9f * p;
-                        ghost.setScaleX(s);
-                        ghost.setScaleY(s);
-                        // Dips into the sheet: fade out while the real center item takes over
-                        if (p > 0.55f) {
-                            ghost.setAlpha(Math.max(0f, 1f - (p - 0.55f) / 0.3f));
-                            revealCenter.run();
-                        }
-                    });
-                    fly.addListener(new android.animation.AnimatorListenerAdapter() {
-                        @Override
-                        public void onAnimationEnd(android.animation.Animator animation) {
-                            activityContent.removeView(ghost);
-                            revealCenter.run();
-                        }
-                    });
-                    fly.start();
-                    animateTextColor(ghost, 0xFFF0F0F0, 0xFFFF6B00, 380);
-                });
-            };
-            behavior.addBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
-                @Override
-                public void onStateChanged(View bottomSheet, int newState) {
-                    if (newState == BottomSheetBehavior.STATE_EXPANDED) flyIn.run();
-                }
-
-                @Override
-                public void onSlide(View bottomSheet, float slideOffset) {
-                    if (slideOffset >= 0.999f) flyIn.run();
-                }
-            });
-            // Fallback in case no callback ever reports the expanded state
-            container.postDelayed(flyIn, 350);
         });
 
         sheet.show();
@@ -1072,7 +937,7 @@ public class CreateServerActivity extends AppCompatActivity {
     }
 
     // Scales/fades wheel items by distance to the center; center item is bigger and Koda orange
-    private void applyWheelTransform(RecyclerView rv, int itemHeight, boolean hideCenter) {
+    private void applyWheelTransform(RecyclerView rv, int itemHeight) {
         int center = rv.getHeight() / 2;
         for (int i = 0; i < rv.getChildCount(); i++) {
             View child = rv.getChildAt(i);
@@ -1083,13 +948,8 @@ public class CreateServerActivity extends AppCompatActivity {
             float t = Math.min(1f, dist / (rv.getHeight() * 0.6f));
             tv.setScaleX(1.25f - 0.35f * t);
             tv.setScaleY(1.25f - 0.35f * t);
-            if (hideCenter && dist < itemHeight * 0.5f) {
-                tv.setAlpha(0f);
-                tv.setTextColor(0xFFFF6B00);
-            } else {
-                tv.setAlpha(1f - 0.72f * t);
-                tv.setTextColor(dist < itemHeight * 0.5f ? 0xFFFF6B00 : 0xFFF0F0F0);
-            }
+            tv.setAlpha(1f - 0.72f * t);
+            tv.setTextColor(dist < itemHeight * 0.5f ? 0xFFFF6B00 : 0xFFF0F0F0);
         }
     }
 
@@ -1103,33 +963,6 @@ public class CreateServerActivity extends AppCompatActivity {
             if (d < bestDist) { bestDist = d; best = c; }
         }
         return best != null ? rv.getChildAdapterPosition(best) : -1;
-    }
-
-    // Flying version number used for the picker open/confirm transitions
-    private TextView createGhostNumber(String text) {
-        TextView g = new TextView(this);
-        g.setText(text);
-        g.setTextSize(15);
-        g.setTypeface(androidx.core.content.res.ResourcesCompat.getFont(this, R.font.font_koda));
-        g.setTextColor(0xFFF0F0F0);
-        return g;
-    }
-
-    // Center point of a view in the coordinate space of another view (both on screen)
-    private float[] centerOfOnScreen(View view, View relativeTo) {
-        int[] a = new int[2];
-        int[] b = new int[2];
-        view.getLocationOnScreen(a);
-        relativeTo.getLocationOnScreen(b);
-        return new float[]{a[0] + view.getWidth() / 2f - b[0], a[1] + view.getHeight() / 2f - b[1]};
-    }
-
-    private void animateTextColor(TextView tv, int from, int to, long duration) {
-        android.animation.ValueAnimator va =
-            android.animation.ValueAnimator.ofObject(new android.animation.ArgbEvaluator(), from, to);
-        va.setDuration(duration);
-        va.addUpdateListener(anim -> tv.setTextColor((int) anim.getAnimatedValue()));
-        va.start();
     }
 
     // Wheel items: just the version number, full-width and centered
