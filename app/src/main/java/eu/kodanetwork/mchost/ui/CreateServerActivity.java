@@ -806,11 +806,12 @@ public class CreateServerActivity extends AppCompatActivity {
         android.widget.ProgressBar pb = sheet.findViewById(R.id.pb_modrinth_search);
         RecyclerView rv = sheet.findViewById(R.id.rv_modrinth_results);
         if (etQuery != null) etQuery.setHint(getString(R.string.modpack_search_hint));
+        rv.setLayoutManager(new LinearLayoutManager(this));
 
 
         // --- State + adapter (item_modrinth_project rows like the resource pack list) ---
         final String[] filterVersion = {selectedVersion != null ? selectedVersion : ""};
-        final boolean[] filterToSelected = {true};
+        final boolean[] filterToSelected = {false};
         final java.util.List<eu.kodanetwork.mchost.util.ModrinthHelper.ModpackHit> hits = new ArrayList<>();
         final int[] totalHits = {0};
         final boolean[] selecting = {false};
@@ -1000,18 +1001,35 @@ public class CreateServerActivity extends AppCompatActivity {
             }
         });
 
-        // Force full-height expanded sheet like the resource pack browser
+        // Force full-height expanded sheet exactly like the resource pack browser
+        // (peek = full height avoids the visible half->full "double open" and enables swipe-down dismiss)
         sheet.setOnShowListener(d -> {
             com.google.android.material.bottomsheet.BottomSheetDialog bsd =
                     (com.google.android.material.bottomsheet.BottomSheetDialog) d;
             FrameLayout bottomSheet = bsd.findViewById(com.google.android.material.R.id.design_bottom_sheet);
             if (bottomSheet != null) {
+                com.google.android.material.bottomsheet.BottomSheetBehavior<android.view.View> behavior =
+                        com.google.android.material.bottomsheet.BottomSheetBehavior.from(bottomSheet);
                 bottomSheet.getLayoutParams().height = FrameLayout.LayoutParams.MATCH_PARENT;
                 bottomSheet.requestLayout();
-                com.google.android.material.bottomsheet.BottomSheetBehavior.from(bottomSheet)
-                        .setState(com.google.android.material.bottomsheet.BottomSheetBehavior.STATE_EXPANDED);
+                behavior.setPeekHeight(android.content.res.Resources.getSystem().getDisplayMetrics().heightPixels);
+                behavior.setState(com.google.android.material.bottomsheet.BottomSheetBehavior.STATE_EXPANDED);
             }
         });
+
+        // Edge-to-edge decor like the resource pack sheet (transparent nav bar)
+        android.view.Window win = sheet.getWindow();
+        if (win != null) {
+            win.addFlags(android.view.WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+            if (android.os.Build.VERSION.SDK_INT >= 23) {
+                win.setStatusBarColor(android.graphics.Color.TRANSPARENT);
+                win.setNavigationBarColor(android.graphics.Color.TRANSPARENT);
+                androidx.core.view.WindowCompat.setDecorFitsSystemWindows(win, false);
+                if (android.os.Build.VERSION.SDK_INT >= 29) {
+                    win.setNavigationBarContrastEnforced(false);
+                }
+            }
+        }
 
         sheet.show();
         HapticUtil.applyHapticsToView(sheet.findViewById(R.id.ll_modrinth_root), this);

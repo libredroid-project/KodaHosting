@@ -114,6 +114,7 @@ public class ModrinthHelper {
                     mainHandler.post(() -> cb.onResult(res, total));
                 } finally { c.disconnect(); }
             } catch (Exception e) {
+                android.util.Log.e("ModrinthModpack", "search failed: " + e, e);
                 mainHandler.post(() -> cb.onError(e.getMessage() == null ? "error" : e.getMessage()));
             }
         });
