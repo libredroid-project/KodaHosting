@@ -1,0 +1,1 @@
+[{"row_to_json":{"key":"latest_tos_version","value":1711200000}},{"row_to_json":{"key":"maintenance_mode","value":{"active":false,"reason":"Fixing a criticla bug","duration_minutes":600}}},{"row_to_json":{"key":"latest_app_version","value":8502}}]
