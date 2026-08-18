@@ -266,6 +266,9 @@
     <string name="modpack_installing_files">正在安装模组 (%1$d/%2$d)</string>
     <string name="modpack_failed">模组包安装失败：%1$s</string>
     <string name="modpack_version_applied">版本已设为 %1$s（来自模组包）</string>
+    <string name="setup_standard">标准（空白 Fabric 服务器）</string>
+    <string name="modpack_filter_version">版本：%1$s</string>
+    <string name="modpack_filter_all">所有版本</string>
     <string name="download_error">下载错误</string>
     <string name="error_loading">加载错误</string>
     <string name="no_compatible_version_found">未找到兼容版本。</string>

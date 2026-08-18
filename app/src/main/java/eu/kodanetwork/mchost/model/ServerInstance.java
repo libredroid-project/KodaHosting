@@ -45,6 +45,7 @@ public class ServerInstance {
     private String    themeColor    = "#FF6B00"; 
     private boolean   autoSetup     = true;
     private String    aiPrompt      = "";
+    private String    modpackName   = "";
     private boolean   bedrockSupport = false;
     private int       bedrockPort    = 0;
     private boolean   voicechat      = false;
@@ -116,6 +117,7 @@ public class ServerInstance {
         j.put("themeColor", themeColor);
         j.put("autoSetup", autoSetup);
         j.put("aiPrompt", aiPrompt);
+        j.put("modpackName", modpackName);
         j.put("bedrockSupport", bedrockSupport);
         j.put("bedrockPort", bedrockPort);
         j.put("voicechat", voicechat);
@@ -165,6 +167,7 @@ public class ServerInstance {
         s.themeColor     = j.optString("themeColor", "#FF6B00");
         s.autoSetup      = j.optBoolean("autoSetup", true);
         s.aiPrompt       = j.optString("aiPrompt", "");
+        s.modpackName    = j.optString("modpackName", "");
         s.bedrockSupport = j.optBoolean("bedrockSupport", false);
         s.bedrockPort    = j.optInt("bedrockPort", 0);
         s.voicechat      = j.optBoolean("voicechat", false);
@@ -239,6 +242,8 @@ public class ServerInstance {
     public void   setAutoSetup(boolean v)      { autoSetup = v; }
     public String getAiPrompt()                { return aiPrompt == null ? "" : aiPrompt; }
     public void   setAiPrompt(String v)        { aiPrompt = v; }
+    public String getModpackName()             { return modpackName == null ? "" : modpackName; }
+    public void   setModpackName(String v)     { modpackName = v; }
     public boolean isBedrockSupport()          { return bedrockSupport; }
     public void   setBedrockSupport(boolean v) { bedrockSupport = v; }
     public int    getBedrockPort()             { return bedrockPort; }

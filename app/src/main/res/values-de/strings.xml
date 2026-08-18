@@ -252,6 +252,9 @@
     <string name="modpack_installing_files">Mods werden installiert (%1$d/%2$d)</string>
     <string name="modpack_failed">Modpack-Installation fehlgeschlagen: %1$s</string>
     <string name="modpack_version_applied">Version auf %1$s gesetzt (aus Modpack)</string>
+    <string name="setup_standard">Standard (leerer Fabric-Server)</string>
+    <string name="modpack_filter_version">Version: %1$s</string>
+    <string name="modpack_filter_all">Alle Versionen</string>
     <string name="download_error">Download-Fehler</string>
     <string name="error_loading">Fehler beim Laden</string>
     <string name="no_compatible_version_found">Keine kompatible Version gefunden.</string>

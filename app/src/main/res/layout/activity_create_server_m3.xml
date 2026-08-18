@@ -255,27 +255,23 @@
                             <RadioButton android:id="@+id/rb_setup_ai"
                                 android:layout_width="match_parent" android:layout_height="wrap_content"
                                 android:text="@string/setup_ai" android:visibility="gone"/>
-                        </RadioGroup>
-
-                        <!-- MODPACK PICKER (Fabric only) -->
-                        <LinearLayout android:id="@+id/layout_modpack_area"
-                            android:layout_width="match_parent" android:layout_height="wrap_content"
-                            android:orientation="vertical" android:layout_marginTop="12dp"
-                            android:visibility="gone">
-                            <com.google.android.material.button.MaterialButton
-                                android:id="@+id/btn_modpack"
-                                android:layout_width="match_parent" android:layout_height="56dp"
-                                style="@style/Widget.Material3.Button.OutlinedButton"
-                                android:text="@string/modpack_button"
-                                android:stateListAnimator="@null"/>
-                            <TextView android:id="@+id/tv_modpack_selected"
+                            <RadioButton android:id="@+id/rb_setup_modpack"
                                 android:layout_width="match_parent" android:layout_height="wrap_content"
-                                android:gravity="center"
-                                android:textColor="?attr/colorPrimary"
-                                android:textAppearance="?attr/textAppearanceBodySmall"
+                                android:text="@string/modpack_button"
+                                android:background="@drawable/border_modpack_option"
+                                android:padding="10dp"
                                 android:layout_marginTop="8dp"
                                 android:visibility="gone"/>
-                        </LinearLayout>
+                        </RadioGroup>
+
+                        <!-- Selected modpack label (Fabric only) -->
+                        <TextView android:id="@+id/tv_modpack_selected"
+                            android:layout_width="match_parent" android:layout_height="wrap_content"
+                            android:gravity="center"
+                            android:textColor="?attr/colorPrimary"
+                            android:textAppearance="?attr/textAppearanceBodySmall"
+                            android:layout_marginTop="8dp"
+                            android:visibility="gone"/>
                     </LinearLayout>
                     
                     <LinearLayout android:id="@+id/layout_theme_color"

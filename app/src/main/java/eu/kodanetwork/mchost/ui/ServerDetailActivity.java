@@ -2305,9 +2305,14 @@ public class ServerDetailActivity extends AppCompatActivity {
         String addressLabel = server.isDatabase() ? "Verbindungs-Adresse:" : "Beitritts-Adresse:";
         String addressValue = server.isDatabase() ? "127.0.0.1 (Lokal)" : server.getJoinAddress();
 
+        String modpackLine = server.getModpackName().isEmpty()
+                ? ""
+                : "Modpack:   " + server.getModpackName() + "\n";
+
         tvSettingsInfo.setText(
             "Name:       " + server.getName() + "\n" +
             "Typ:        " + server.getType().name() + " " + server.getVersion() + "\n" +
+            modpackLine +
             "RAM:        " + server.getRamMB() + " MB\n" +
             "Port:       " + server.getPort() + "\n" +
             addressLabel + "\n" + addressValue + "\n\n" +
@@ -3145,7 +3150,7 @@ public class ServerDetailActivity extends AppCompatActivity {
         android.app.Dialog dialog = new android.app.Dialog(this);
         dialog.setContentView(R.layout.dialog_join_address);
         dialog.getWindow().setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT));
-        dialog.getWindow().setLayout(android.view.ViewGroup.LayoutParams.MATCH_PARENT, android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
+        dialog.getWindow().setLayout(android.view.ViewGroup.LayoutParams.MATCH_PARENT, android.view.ViewGroup.LayoutParams.MATCH_PARENT);
 
         String praetorHtml = "<font color=\"#555555\">P.R.</font><font color=\"#AAAAAA\">A</font><font color=\"#555555\">.</font><font color=\"#AAAAAA\">E</font><font color=\"#555555\">.</font><font color=\"#AAAAAA\">E</font><font color=\"#555555\">.</font><font color=\"#FFFFFF\">T</font><font color=\"#555555\">.</font><font color=\"#FFFFFF\">O</font><font color=\"#555555\">.</font><font color=\"#FFFFFF\">R.</font>";
         ((android.widget.TextView) dialog.findViewById(R.id.tv_dialog_title)).setText(android.text.Html.fromHtml(praetorHtml, android.text.Html.FROM_HTML_MODE_LEGACY));

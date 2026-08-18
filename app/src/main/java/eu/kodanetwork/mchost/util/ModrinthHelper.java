@@ -71,13 +71,17 @@ public class ModrinthHelper {
         void onError(String err);
     }
 
-    /** Searches Fabric modpacks, 20 per page (offset = page*20). Empty query = browse by downloads. */
-    public static void searchModpacks(String query, int offset, ModpackSearchCallback cb) {
+    /** Searches Fabric modpacks, 20 per page (offset = page*20). Empty query = browse by downloads. gameVersion null = all versions. */
+    public static void searchModpacks(String query, String gameVersion, int offset, ModpackSearchCallback cb) {
         executor.submit(() -> {
             try {
                 StringBuilder url = new StringBuilder(API_BASE + "/search?limit=20&offset=" + Math.max(0, offset));
-                String facets = URLEncoder.encode("[[\"project_type:modpack\"],[\"categories:fabric\"]]", "UTF-8");
-                url.append("&facets=").append(facets);
+                String facets = "[[\"project_type:modpack\"],[\"categories:fabric\"]";
+                if (gameVersion != null && !gameVersion.trim().isEmpty()) {
+                    facets += ",[\"versions:" + gameVersion.trim() + "\"]";
+                }
+                facets += "]";
+                url.append("&facets=").append(URLEncoder.encode(facets, "UTF-8"));
                 if (query != null && !query.trim().isEmpty()) {
                     url.append("&query=").append(URLEncoder.encode(query.trim(), "UTF-8"));
                 } else {
