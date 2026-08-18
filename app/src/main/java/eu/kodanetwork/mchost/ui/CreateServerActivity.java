@@ -867,6 +867,7 @@ public class CreateServerActivity extends AppCompatActivity {
 
         // --- Root overlay so the version number can fly across the whole sheet ---
         FrameLayout root = new FrameLayout(this);
+        root.setClipChildren(false);
         root.addView(container);
         sheet.setContentView(root);
         if (versionField != null) container.setAlpha(0f);
@@ -931,21 +932,21 @@ public class CreateServerActivity extends AppCompatActivity {
         container.addView(btnConfirm, btnLp);
 
         // Edge-to-edge window decor
-        android.view.Window w = sheet.getWindow();
-        if (w != null) {
-            w.addFlags(android.view.WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+        android.view.Window win = sheet.getWindow();
+        if (win != null) {
+            win.addFlags(android.view.WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
             if (android.os.Build.VERSION.SDK_INT >= 23) {
-                w.setStatusBarColor(android.graphics.Color.TRANSPARENT);
-                w.setNavigationBarColor(android.graphics.Color.TRANSPARENT);
-                androidx.core.view.WindowCompat.setDecorFitsSystemWindows(w, false);
+                win.setStatusBarColor(android.graphics.Color.TRANSPARENT);
+                win.setNavigationBarColor(android.graphics.Color.TRANSPARENT);
+                androidx.core.view.WindowCompat.setDecorFitsSystemWindows(win, false);
                 boolean isLight = eu.kodanetwork.mchost.util.ThemeHelper.isLightMode(this);
                 int flags = android.view.View.SYSTEM_UI_FLAG_LAYOUT_STABLE | android.view.View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION;
                 if (isLight) {
                     flags |= android.view.View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR | android.view.View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR;
                 }
-                w.getDecorView().setSystemUiVisibility(flags);
+                win.getDecorView().setSystemUiVisibility(flags);
                 if (android.os.Build.VERSION.SDK_INT >= 29) {
-                    w.setNavigationBarContrastEnforced(false);
+                    win.setNavigationBarContrastEnforced(false);
                 }
             }
         }
@@ -954,50 +955,62 @@ public class CreateServerActivity extends AppCompatActivity {
         sheet.setOnShowListener(d -> {
             BottomSheetDialog bsd = (BottomSheetDialog) d;
             FrameLayout bottomSheetInternal = bsd.findViewById(com.google.android.material.R.id.design_bottom_sheet);
-            if (bottomSheetInternal == null) return;
-            BottomSheetBehavior<FrameLayout> behavior = BottomSheetBehavior.from(bottomSheetInternal);
-            behavior.setState(BottomSheetBehavior.STATE_EXPANDED);
-            if (versionField == null) {
-                container.animate().alpha(1f).setDuration(200).start();
+            if (bottomSheetInternal == null) {
+                container.setAlpha(1f);
                 return;
             }
-            behavior.addBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
-                boolean flew = false;
+            // Let the flying number draw outside the sheet bounds (the field sits above the sheet)
+            bottomSheetInternal.setClipChildren(false);
+            bottomSheetInternal.setClipToPadding(false);
+            android.view.ViewGroup sheetParent = (android.view.ViewGroup) bottomSheetInternal.getParent();
+            if (sheetParent != null) sheetParent.setClipChildren(false);
+            BottomSheetBehavior<FrameLayout> behavior = BottomSheetBehavior.from(bottomSheetInternal);
+            behavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+            // Content fades in on its own so the sheet can never appear empty
+            root.post(() -> container.animate().alpha(1f).setDuration(240).start());
+            if (versionField == null) return;
 
+            final boolean[] flew = {false};
+            final Runnable flyIn = () -> {
+                if (flew[0] || !sheet.isShowing()) return;
+                flew[0] = true;
+                root.post(() -> {
+                    float[] f = centerOfOnScreen(versionField, root);
+                    float[] w = centerOfOnScreen(wheelFrame, root);
+                    TextView ghost = createGhostNumber(currentVersions.get(currentPos[0]));
+                    root.addView(ghost);
+                    ghost.post(() -> {
+                        ghost.setTranslationX(f[0] - ghost.getWidth() / 2f);
+                        ghost.setTranslationY(f[1] - ghost.getHeight() / 2f);
+                        ghost.animate()
+                            .translationX(w[0] - ghost.getWidth() / 2f)
+                            .translationY(w[1] - ghost.getHeight() / 2f)
+                            .scaleX(1.9f).scaleY(1.9f)
+                            .setDuration(380)
+                            .setInterpolator(new android.view.animation.DecelerateInterpolator(1.2f))
+                            .withEndAction(() -> {
+                                root.removeView(ghost);
+                                centerHidden[0] = false;
+                                applyWheelTransform(recyclerView, itemHeight, false);
+                            })
+                            .start();
+                        animateTextColor(ghost, 0xFFF0F0F0, 0xFFFF6B00, 380);
+                    });
+                });
+            };
+            behavior.addBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
                 @Override
-                public void onStateChanged(View bottomSheet, int newState) {}
+                public void onStateChanged(View bottomSheet, int newState) {
+                    if (newState == BottomSheetBehavior.STATE_EXPANDED) flyIn.run();
+                }
 
                 @Override
                 public void onSlide(View bottomSheet, float slideOffset) {
-                    if (flew || slideOffset < 1f) return;
-                    flew = true;
-                    behavior.removeBottomSheetCallback(this);
-                    root.post(() -> {
-                        container.animate().alpha(1f).setDuration(280).start();
-                        float[] f = centerOfOnScreen(versionField, root);
-                        float[] w = centerOfOnScreen(wheelFrame, root);
-                        TextView ghost = createGhostNumber(currentVersions.get(currentPos[0]));
-                        root.addView(ghost);
-                        ghost.post(() -> {
-                            ghost.setTranslationX(f[0] - ghost.getWidth() / 2f);
-                            ghost.setTranslationY(f[1] - ghost.getHeight() / 2f);
-                            ghost.animate()
-                                .translationX(w[0] - ghost.getWidth() / 2f)
-                                .translationY(w[1] - ghost.getHeight() / 2f)
-                                .scaleX(1.9f).scaleY(1.9f)
-                                .setDuration(380)
-                                .setInterpolator(new android.view.animation.DecelerateInterpolator(1.2f))
-                                .withEndAction(() -> {
-                                    root.removeView(ghost);
-                                    centerHidden[0] = false;
-                                    applyWheelTransform(recyclerView, itemHeight, false);
-                                })
-                                .start();
-                            animateTextColor(ghost, 0xFFF0F0F0, 0xFFFF6B00, 380);
-                        });
-                    });
+                    if (slideOffset >= 0.999f) flyIn.run();
                 }
             });
+            // Fallback in case no callback ever reports the expanded state
+            root.postDelayed(flyIn, 350);
         });
 
         sheet.show();
