@@ -48,6 +48,113 @@ public class ModrinthHelper {
         void onError(String err);
     }
 
+    // ---- Modpack support (.mrpack via Modrinth) ----
+
+    public static class ModpackHit {
+        public String id;
+        public String title;
+        public String description;
+        public String author;
+        public String iconUrl;
+        public long downloads;
+    }
+
+    public static class MrpackInfo {
+        public String downloadUrl;
+        public String filename;
+        public String sha1;
+        public String gameVersion;
+    }
+
+    public interface ModpackSearchCallback {
+        void onResult(List<ModpackHit> hits, int totalHits);
+        void onError(String err);
+    }
+
+    /** Searches Fabric modpacks, 20 per page (offset = page*20). Empty query = browse by downloads. */
+    public static void searchModpacks(String query, int offset, ModpackSearchCallback cb) {
+        executor.submit(() -> {
+            try {
+                StringBuilder url = new StringBuilder(API_BASE + "/search?limit=20&offset=" + Math.max(0, offset));
+                String facets = URLEncoder.encode("[[\"project_type:modpack\"],[\"categories:fabric\"]]", "UTF-8");
+                url.append("&facets=").append(facets);
+                if (query != null && !query.trim().isEmpty()) {
+                    url.append("&query=").append(URLEncoder.encode(query.trim(), "UTF-8"));
+                } else {
+                    url.append("&index=downloads");
+                }
+                HttpURLConnection c = (HttpURLConnection) new URL(url.toString()).openConnection();
+                c.setConnectTimeout(10000);
+                c.setReadTimeout(15000);
+                c.setRequestProperty("User-Agent", "KodaNetwork/3.0");
+                try (InputStream is = c.getInputStream()) {
+                    StringBuilder sb = new StringBuilder();
+                    byte[] b = new byte[8192];
+                    int r;
+                    while ((r = is.read(b)) != -1) sb.append(new String(b, 0, r));
+                    JSONObject obj = new JSONObject(sb.toString());
+                    int total = obj.optInt("total_hits", 0);
+                    JSONArray hits = obj.getJSONArray("hits");
+                    List<ModpackHit> res = new ArrayList<>();
+                    for (int i = 0; i < hits.length(); i++) {
+                        JSONObject h = hits.getJSONObject(i);
+                        ModpackHit m = new ModpackHit();
+                        m.id = h.optString("project_id");
+                        m.title = h.optString("title");
+                        m.description = h.optString("description");
+                        m.author = h.optString("author");
+                        m.iconUrl = h.optString("icon_url");
+                        m.downloads = h.optLong("downloads", 0);
+                        res.add(m);
+                    }
+                    mainHandler.post(() -> cb.onResult(res, total));
+                } finally { c.disconnect(); }
+            } catch (Exception e) {
+                mainHandler.post(() -> cb.onError(e.getMessage() == null ? "error" : e.getMessage()));
+            }
+        });
+    }
+
+    /** Latest Fabric .mrpack of a project (primary file), or null. Blocking — call off the main thread. */
+    public static MrpackInfo getLatestMrpackSync(String projectId) {
+        try {
+            String loaders = URLEncoder.encode("[\"fabric\"]", "UTF-8");
+            HttpURLConnection c = (HttpURLConnection) new URL(
+                    API_BASE + "/project/" + projectId + "/version?loaders=" + loaders + "&include_changelog=false").openConnection();
+            c.setConnectTimeout(10000);
+            c.setReadTimeout(15000);
+            c.setRequestProperty("User-Agent", "KodaNetwork/3.0");
+            try (InputStream is = c.getInputStream()) {
+                StringBuilder sb = new StringBuilder();
+                byte[] b = new byte[8192];
+                int r;
+                while ((r = is.read(b)) != -1) sb.append(new String(b, 0, r));
+                JSONArray versions = new JSONArray(sb.toString());
+                if (versions.length() == 0) return null;
+                JSONObject v = versions.getJSONObject(0);
+                JSONArray files = v.getJSONArray("files");
+                JSONObject file = null;
+                for (int i = 0; i < files.length(); i++) {
+                    JSONObject f = files.getJSONObject(i);
+                    String fn = f.optString("filename", "");
+                    if (f.optBoolean("primary", false) && fn.endsWith(".mrpack")) { file = f; break; }
+                    if (file == null && fn.endsWith(".mrpack")) file = f;
+                }
+                if (file == null) return null;
+                MrpackInfo info = new MrpackInfo();
+                info.downloadUrl = file.getString("url");
+                info.filename = file.optString("filename", "modpack.mrpack");
+                info.sha1 = file.optJSONObject("hashes") != null
+                        ? file.getJSONObject("hashes").optString("sha1", "") : "";
+                JSONArray gv = v.optJSONArray("game_versions");
+                info.gameVersion = gv != null && gv.length() > 0 ? gv.getString(0) : "";
+                return info;
+            } finally { c.disconnect(); }
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
     public static void search(String query, ServerInstance.Type type, SearchCallback cb) {
         executor.submit(() -> {
             try {

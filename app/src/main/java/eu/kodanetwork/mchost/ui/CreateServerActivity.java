@@ -104,6 +104,12 @@ public class CreateServerActivity extends AppCompatActivity {
     private String selectedColor = "#FF6B00";
     private android.net.Uri sourceUri = null;
     private boolean isZipImport = false;
+    // Modpack selection (Fabric only)
+    private eu.kodanetwork.mchost.util.ModrinthHelper.MrpackInfo selectedModpack;
+    private String selectedModpackTitle = null;
+    private View layoutModpackArea;
+    private MaterialButton btnModpack;
+    private TextView tvModpackSelected;
 
     private int ramMB = 1024;
     private int selectedTypeIndex = 0;
@@ -253,6 +259,27 @@ public class CreateServerActivity extends AppCompatActivity {
         View layoutVersionPicker = findViewById(R.id.layout_version_picker);
         if (layoutVersionPicker != null) layoutVersionPicker.setOnClickListener(v -> showVersionPicker());
         npServerType    = findViewById(R.id.np_server_type);
+        layoutModpackArea = findViewById(R.id.layout_modpack_area);
+        btnModpack      = findViewById(R.id.btn_modpack);
+        tvModpackSelected = findViewById(R.id.tv_modpack_selected);
+        if (btnModpack != null) {
+            btnModpack.setOnClickListener(v -> {
+                HapticUtil.forceVibrate(this, 80);
+                openModpackBrowser();
+            });
+            // Subtle attention pulse (pure scale loop — never triggers the click listener)
+            final Runnable[] pulse = new Runnable[1];
+            pulse[0] = () -> {
+                if (btnModpack == null || layoutModpackArea == null
+                        || layoutModpackArea.getVisibility() != View.VISIBLE) return;
+                btnModpack.animate().scaleX(1.03f).scaleY(1.03f).setDuration(700)
+                        .setInterpolator(new android.view.animation.AccelerateDecelerateInterpolator())
+                        .withEndAction(() -> btnModpack.animate().scaleX(1f).scaleY(1f).setDuration(700)
+                                .setInterpolator(new android.view.animation.AccelerateDecelerateInterpolator())
+                                .withEndAction(pulse[0]).start()).start();
+            };
+            btnModpack.post(pulse[0]);
+        }
         btnCreate       = findViewById(R.id.btn_create);
         btnImport       = findViewById(R.id.btn_import);
         btnImportZip    = findViewById(R.id.btn_import_zip);
@@ -672,10 +699,14 @@ public class CreateServerActivity extends AppCompatActivity {
         // Show/hide Auto Design option depending on type
         ServerInstance.Type type = TYPE_VALS[idx];
         boolean supportsAutoDesign = AUTO_DESIGN_TYPES.contains(type);
+        boolean isFabric = type == ServerInstance.Type.FABRIC;
         if (layoutSetupSection != null) {
-            layoutSetupSection.setVisibility(supportsAutoDesign ? View.VISIBLE : View.GONE);
+            layoutSetupSection.setVisibility(supportsAutoDesign || isFabric ? View.VISIBLE : View.GONE);
             if (!supportsAutoDesign) rgSetupType.check(R.id.rb_setup_manual);
         }
+        // Fabric: setup section shows the Modpack picker instead of the setup radios
+        if (rgSetupType != null) rgSetupType.setVisibility(isFabric ? View.GONE : View.VISIBLE);
+        if (layoutModpackArea != null) layoutModpackArea.setVisibility(isFabric ? View.VISIBLE : View.GONE);
         if (layoutThemeColor != null && !supportsAutoDesign) {
             layoutThemeColor.setVisibility(View.GONE);
         }
@@ -756,6 +787,300 @@ public class CreateServerActivity extends AppCompatActivity {
             if (major == 1 && parts.length >= 2) return Integer.parseInt(parts[1]) >= 16;
         } catch (NumberFormatException ignored) {}
         return false;
+    }
+
+    /** Fullscreen modpack browser that expands out of the Modpack button. */
+    private void openModpackBrowser() {
+        if (btnModpack == null || selectedTypeIndex < 0
+                || TYPE_VALS[selectedTypeIndex] != ServerInstance.Type.FABRIC) return;
+
+        ViewGroup content = (ViewGroup) findViewById(android.R.id.content);
+        if (content == null) return;
+
+        float density = getResources().getDisplayMetrics().density;
+
+        FrameLayout overlay = new FrameLayout(this);
+        overlay.setBackgroundColor(0xF20A0807);
+        content.addView(overlay, new FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT));
+
+        LinearLayout panel = new LinearLayout(this);
+        panel.setOrientation(LinearLayout.VERTICAL);
+        panel.setPadding((int)(20 * density), (int)(28 * density), (int)(20 * density), (int)(16 * density));
+        overlay.addView(panel, new FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT));
+
+        // --- Header: title + close ---
+        LinearLayout header = new LinearLayout(this);
+        header.setOrientation(LinearLayout.HORIZONTAL);
+        header.setGravity(android.view.Gravity.CENTER_VERTICAL);
+        panel.addView(header, new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
+
+        TextView tvTitle = new TextView(this);
+        tvTitle.setText(getString(R.string.modpack_browser_title));
+        tvTitle.setTextColor(0xFFFF6B00);
+        tvTitle.setTextSize(14);
+        tvTitle.setTypeface(android.graphics.Typeface.DEFAULT_BOLD);
+        tvTitle.setLetterSpacing(0.12f);
+        header.addView(tvTitle, new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f));
+
+        MaterialButton btnClose = new MaterialButton(this);
+        btnClose.setText("✕");
+        btnClose.setTextColor(0xFFF0F0F0);
+        btnClose.setBackgroundColor(0x00000000);
+        btnClose.setCornerRadius((int)(12 * density));
+        header.addView(btnClose, new LinearLayout.LayoutParams(
+                (int)(44 * density), (int)(44 * density)));
+
+        // --- Search bar ---
+        LinearLayout searchRow = new LinearLayout(this);
+        searchRow.setOrientation(LinearLayout.HORIZONTAL);
+        searchRow.setGravity(android.view.Gravity.CENTER_VERTICAL);
+        searchRow.setBackgroundResource(R.drawable.input_field);
+        LinearLayout.LayoutParams srLp = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT, (int)(52 * density));
+        srLp.topMargin = (int)(16 * density);
+        srLp.bottomMargin = (int)(12 * density);
+        panel.addView(searchRow, srLp);
+
+        EditText etQuery = new EditText(this);
+        etQuery.setHint(getString(R.string.modpack_search_hint));
+        etQuery.setTextColor(0xFFF0F0F0);
+        etQuery.setHintTextColor(0xFF555566);
+        etQuery.setBackgroundColor(0x00000000);
+        etQuery.setPadding((int)(16 * density), 0, (int)(8 * density), 0);
+        etQuery.setSingleLine(true);
+        etQuery.setImeOptions(android.view.inputmethod.EditorInfo.IME_ACTION_SEARCH);
+        etQuery.setInputType(android.text.InputType.TYPE_CLASS_TEXT);
+        searchRow.addView(etQuery, new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.MATCH_PARENT, 1f));
+
+        MaterialButton btnSearch = new MaterialButton(this);
+        btnSearch.setText("🔍");
+        btnSearch.setBackgroundColor(0x00000000);
+        searchRow.addView(btnSearch, new LinearLayout.LayoutParams(
+                (int)(48 * density), LinearLayout.LayoutParams.MATCH_PARENT));
+
+        // --- Status line ---
+        TextView tvStatus = new TextView(this);
+        tvStatus.setTextColor(0xFF8A8A9A);
+        tvStatus.setTextSize(12);
+        tvStatus.setGravity(android.view.Gravity.CENTER);
+        tvStatus.setPadding(0, (int)(8 * density), 0, (int)(8 * density));
+        panel.addView(tvStatus, new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
+
+        // --- Results ---
+        RecyclerView rv = new RecyclerView(this);
+        rv.setLayoutManager(new LinearLayoutManager(this));
+        panel.addView(rv, new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT, 0, 1f));
+
+        // --- Browser state (Runnable arrays so the adapter can reference helpers declared below) ---
+        final java.util.List<eu.kodanetwork.mchost.util.ModrinthHelper.ModpackHit> hits = new ArrayList<>();
+        final int[] totalHits = {0};
+        final String[] query = {""};
+        final boolean[] selecting = {false};
+        final Runnable[] loadPageRef = new Runnable[1];
+        final Runnable[] closeRef = new Runnable[1];
+        final androidx.activity.OnBackPressedCallback[] backCbRef = new androidx.activity.OnBackPressedCallback[1];
+
+        final RecyclerView.Adapter<RecyclerView.ViewHolder> adapter = new RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+            private static final int TYPE_ITEM = 0;
+            private static final int TYPE_FOOTER = 1;
+
+            @Override
+            public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+                if (viewType == TYPE_FOOTER) {
+                    MaterialButton more = new MaterialButton(CreateServerActivity.this);
+                    more.setText(getString(R.string.modpack_load_more));
+                    more.setTextColor(0xFF000000);
+                    more.setBackgroundColor(0xFFFF6B00);
+                    more.setCornerRadius((int)(12 * density));
+                    more.setLayoutParams(new RecyclerView.LayoutParams(
+                            ViewGroup.LayoutParams.MATCH_PARENT, (int)(48 * density)));
+                    return new RecyclerView.ViewHolder(more) {};
+                }
+                LinearLayout row = new LinearLayout(CreateServerActivity.this);
+                row.setOrientation(LinearLayout.HORIZONTAL);
+                row.setGravity(android.view.Gravity.CENTER_VERTICAL);
+                row.setPadding(0, (int)(10 * density), 0, (int)(10 * density));
+                row.setLayoutParams(new RecyclerView.LayoutParams(
+                        ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+
+                android.widget.ImageView icon = new android.widget.ImageView(CreateServerActivity.this);
+                icon.setLayoutParams(new LinearLayout.LayoutParams(
+                        (int)(48 * density), (int)(48 * density)));
+                icon.setScaleType(android.widget.ImageView.ScaleType.CENTER_CROP);
+                icon.setImageResource(android.R.drawable.ic_menu_gallery);
+                row.addView(icon);
+
+                LinearLayout textCol = new LinearLayout(CreateServerActivity.this);
+                textCol.setOrientation(LinearLayout.VERTICAL);
+                textCol.setPadding((int)(14 * density), 0, 0, 0);
+                row.addView(textCol, new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f));
+
+                TextView title = new TextView(CreateServerActivity.this);
+                title.setTextColor(0xFFF0F0F0);
+                title.setTextSize(15);
+                title.setTypeface(androidx.core.content.res.ResourcesCompat.getFont(CreateServerActivity.this, R.font.font_koda));
+                textCol.addView(title);
+
+                TextView meta = new TextView(CreateServerActivity.this);
+                meta.setTextColor(0xFF8A8A9A);
+                meta.setTextSize(11);
+                textCol.addView(meta);
+
+                TextView desc = new TextView(CreateServerActivity.this);
+                desc.setTextColor(0xFF8A8A9A);
+                desc.setTextSize(12);
+                desc.setMaxLines(2);
+                desc.setEllipsize(android.text.TextUtils.TruncateAt.END);
+                textCol.addView(desc);
+
+                return new RecyclerView.ViewHolder(row) {};
+            }
+
+            @Override
+            public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
+                if (getItemViewType(position) == TYPE_FOOTER) {
+                    holder.itemView.setOnClickListener(v -> { if (loadPageRef[0] != null) loadPageRef[0].run(); });
+                    return;
+                }
+                final eu.kodanetwork.mchost.util.ModrinthHelper.ModpackHit hit = hits.get(position);
+                LinearLayout row = (LinearLayout) holder.itemView;
+                android.widget.ImageView icon = (android.widget.ImageView) row.getChildAt(0);
+                LinearLayout textCol = (LinearLayout) row.getChildAt(1);
+                TextView title = (TextView) textCol.getChildAt(0);
+                TextView meta = (TextView) textCol.getChildAt(1);
+                TextView desc = (TextView) textCol.getChildAt(2);
+                title.setText(hit.title);
+                meta.setText(hit.author + "  ·  ⬇ " + android.text.format.Formatter.formatShortFileSize(
+                        CreateServerActivity.this, Math.max(0, hit.downloads)));
+                desc.setText(hit.description);
+                if (hit.iconUrl != null && !hit.iconUrl.isEmpty()) {
+                    eu.kodanetwork.mchost.util.ModrinthHelper.loadIcon(hit.iconUrl, icon);
+                }
+                row.setOnClickListener(v -> {
+                    if (selecting[0]) return;
+                    selecting[0] = true;
+                    HapticUtil.forceVibrate(CreateServerActivity.this, 60);
+                    tvStatus.setText(getString(R.string.modpack_loading_page));
+                    executor.submit(() -> {
+                        final eu.kodanetwork.mchost.util.ModrinthHelper.MrpackInfo info =
+                                eu.kodanetwork.mchost.util.ModrinthHelper.getLatestMrpackSync(hit.id);
+                        mainHandler.post(() -> {
+                            selecting[0] = false;
+                            if (info == null) {
+                                tvStatus.setText(getString(R.string.modpack_none_found));
+                                return;
+                            }
+                            selectedModpack = info;
+                            selectedModpackTitle = hit.title;
+                            if (!info.gameVersion.isEmpty()) {
+                                selectedVersion = info.gameVersion;
+                                if (tvVersionSelected != null) tvVersionSelected.setText(selectedVersion);
+                                Toast.makeText(CreateServerActivity.this,
+                                        getString(R.string.modpack_version_applied, info.gameVersion),
+                                        Toast.LENGTH_SHORT).show();
+                            }
+                            if (tvModpackSelected != null) {
+                                tvModpackSelected.setVisibility(View.VISIBLE);
+                                tvModpackSelected.setText(getString(R.string.modpack_selected, hit.title));
+                            }
+                            closeRef[0].run();
+                        });
+                    });
+                });
+            }
+
+            @Override
+            public int getItemCount() {
+                boolean more = hits.size() < totalHits[0];
+                return hits.size() + (more ? 1 : 0);
+            }
+
+            @Override
+            public int getItemViewType(int position) {
+                return position >= hits.size() ? TYPE_FOOTER : TYPE_ITEM;
+            }
+        };
+        rv.setAdapter(adapter);
+
+        // --- Data loading (20 per page, offset = current hit count) ---
+        loadPageRef[0] = () -> {
+            if (selecting[0]) return;
+            tvStatus.setText(getString(R.string.modpack_loading_page));
+            eu.kodanetwork.mchost.util.ModrinthHelper.searchModpacks(query[0], hits.size(), new eu.kodanetwork.mchost.util.ModrinthHelper.ModpackSearchCallback() {
+                @Override
+                public void onResult(java.util.List<eu.kodanetwork.mchost.util.ModrinthHelper.ModpackHit> results, int total) {
+                    mainHandler.post(() -> {
+                        hits.addAll(results);
+                        totalHits[0] = total;
+                        adapter.notifyDataSetChanged();
+                        tvStatus.setText(hits.isEmpty() ? getString(R.string.modpack_none_found) : "");
+                    });
+                }
+
+                @Override
+                public void onError(String err) {
+                    mainHandler.post(() -> tvStatus.setText(getString(R.string.modpack_failed, err)));
+                }
+            });
+        };
+
+        // Fresh search resets the list
+        final Runnable runSearch = () -> {
+            query[0] = etQuery.getText().toString().trim();
+            hits.clear();
+            totalHits[0] = 0;
+            adapter.notifyDataSetChanged();
+            loadPageRef[0].run();
+        };
+        btnSearch.setOnClickListener(v -> runSearch.run());
+        etQuery.setOnEditorActionListener((v, actionId, event) -> {
+            if (actionId == android.view.inputmethod.EditorInfo.IME_ACTION_SEARCH) {
+                runSearch.run();
+                return true;
+            }
+            return false;
+        });
+
+        // --- Close (collapse back into the button) ---
+        closeRef[0] = () -> {
+            if (backCbRef[0] != null) backCbRef[0].setEnabled(false);
+            overlay.animate().scaleX(0.15f).scaleY(0.15f).alpha(0f).setDuration(280)
+                    .setInterpolator(new android.view.animation.AccelerateInterpolator())
+                    .withEndAction(() -> content.removeView(overlay))
+                    .start();
+        };
+        btnClose.setOnClickListener(v -> closeRef[0].run());
+
+        // Close on system back while the browser is open
+        backCbRef[0] = new androidx.activity.OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                closeRef[0].run();
+            }
+        };
+        getOnBackPressedDispatcher().addCallback(this, backCbRef[0]);
+
+        // --- Expand animation out of the Modpack button ---
+        int[] bl = new int[2];
+        int[] cl = new int[2];
+        btnModpack.getLocationOnScreen(bl);
+        content.getLocationOnScreen(cl);
+        overlay.setPivotX(bl[0] + btnModpack.getWidth() / 2f - cl[0]);
+        overlay.setPivotY(bl[1] + btnModpack.getHeight() / 2f - cl[1]);
+        overlay.setScaleX(0.15f);
+        overlay.setScaleY(0.15f);
+        overlay.setAlpha(0f);
+        overlay.animate().scaleX(1f).scaleY(1f).alpha(1f).setDuration(340)
+                .setInterpolator(new android.view.animation.DecelerateInterpolator(1.2f))
+                .start();
+
+        // Initial page: browse most popular packs
+        loadPageRef[0].run();
     }
 
     private void setVersionList(List<String> versions) {
@@ -1540,7 +1865,34 @@ public class CreateServerActivity extends AppCompatActivity {
                         }
                     }
                 }
-                
+
+                // Modpack install (Fabric + selected pack): mods + overrides before the server row exists
+                if (selectedModpack != null && type == ServerInstance.Type.FABRIC) {
+                    final String packTitle = selectedModpackTitle != null ? selectedModpackTitle : "Modpack";
+                    mainHandler.post(() -> {
+                        if (loadingText != null) loadingText.setText(getString(R.string.modpack_downloading, packTitle));
+                    });
+                    try {
+                        eu.kodanetwork.mchost.util.ModpackInstaller.installSync(
+                                selectedModpack.downloadUrl, selectedModpack.sha1, new File(dir),
+                                new eu.kodanetwork.mchost.util.ModpackInstaller.InstallListener() {
+                                    @Override public void onPhaseDownload() {}
+                                    @Override public void onDone() {}
+                                    @Override public void onError(String m) {}
+                                    @Override public void onPhaseFiles(int done, int total) {
+                                        mainHandler.post(() -> {
+                                            if (loadingText != null) {
+                                                loadingText.setText(getString(R.string.modpack_installing_files, done, total));
+                                            }
+                                        });
+                                    }
+                                });
+                    } catch (Exception mex) {
+                        throw new RuntimeException(getString(R.string.modpack_failed,
+                                mex.getMessage() == null ? "unknown" : mex.getMessage()));
+                    }
+                }
+
                 mainHandler.post(() -> {
                     ServerRepo.get(this).add(s);
                     // DnsLink creation runs asynchronously because we already secured the name availability check

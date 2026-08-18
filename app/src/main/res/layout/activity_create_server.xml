@@ -316,6 +316,28 @@
                         android:paddingBottom="4dp"
                         android:visibility="gone"/> <!-- Made visible in code if karolbrz11212@gmail.com -->
                 </RadioGroup>
+
+                <!-- MODPACK PICKER (Fabric only) -->
+                <LinearLayout android:id="@+id/layout_modpack_area"
+                    android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:orientation="vertical" android:layout_marginBottom="20dp"
+                    android:visibility="gone">
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btn_modpack"
+                        android:layout_width="match_parent" android:layout_height="56dp"
+                        style="@style/KodaButton"
+                        android:background="@drawable/btn_modpack_glow"
+                        android:backgroundTint="@null"
+                        android:text="@string/modpack_button"
+                        android:stateListAnimator="@null"/>
+                    <TextView android:id="@+id/tv_modpack_selected"
+                        android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:textColor="#FF8C38" android:textSize="12sp"
+                        android:fontFamily="@font/font_koda"
+                        android:layout_marginTop="8dp"
+                        android:visibility="gone"/>
+                </LinearLayout>
             </LinearLayout>
 
             <!-- AI CHAT SECTION -->
