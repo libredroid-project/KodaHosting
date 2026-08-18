@@ -1,0 +1,233 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="@drawable/bg_dialog_custom"
+    android:padding="24dp"
+    android:gravity="center">
+
+    <TextView
+        android:id="@+id/tv_dialog_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="#FF3333"
+        android:textSize="36sp"
+        android:textStyle="bold"
+        android:letterSpacing="0.1"
+        android:gravity="center" />
+
+    <TextView
+        android:id="@+id/tv_dialog_subtitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="#8A8A9A"
+        android:textSize="10sp"
+        android:textStyle="bold"
+        android:letterSpacing="0.05"
+        android:gravity="center"
+        android:layout_marginTop="8dp" />
+
+    <View
+        android:layout_width="40dp"
+        android:layout_height="2dp"
+        android:background="#FF6B00"
+        android:layout_marginTop="24dp"
+        android:layout_marginBottom="24dp" />
+
+    <TextView
+        android:id="@+id/tv_dialog_message"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textColor="#F0F0F0"
+        android:textSize="14sp"
+        android:gravity="center"
+        android:layout_marginBottom="20dp" />
+
+    <LinearLayout
+        android:id="@+id/layout_join_input_phase"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <FrameLayout
+            android:id="@+id/container_join_domain"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:layout_marginBottom="12dp"
+            android:background="@drawable/domain_switch_bg"
+            android:padding="4dp">
+
+            <View
+                android:id="@+id/pill_join_domain"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:background="@drawable/pill_bg" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="horizontal">
+
+                <FrameLayout
+                    android:id="@+id/wrapper_join_kodanetwork"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1">
+
+                    <TextView
+                        android:id="@+id/btn_join_kodanetwork"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:text="kodanetwork.eu"
+                        android:gravity="center"
+                        android:textSize="11sp"
+                        android:maxLines="1"
+                        android:ellipsize="end"
+                        android:textColor="#FFFFFF"
+                        android:fontFamily="@font/font_koda" />
+                </FrameLayout>
+
+                <FrameLayout
+                    android:id="@+id/wrapper_join_kodaserv"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1">
+
+                    <TextView
+                        android:id="@+id/btn_join_kodaserv"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:text="kodaserv.eu"
+                        android:gravity="center"
+                        android:textSize="11sp"
+                        android:maxLines="1"
+                        android:ellipsize="end"
+                        android:textColor="#888899"
+                        android:fontFamily="@font/font_koda" />
+                </FrameLayout>
+            </LinearLayout>
+        </FrameLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:orientation="horizontal"
+            android:background="@drawable/bg_input_field"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="24dp">
+
+            <EditText
+                android:id="@+id/et_dialog_input"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="@null"
+                android:hint="@string/praetor_hint_change_domain"
+                android:textColorHint="#555566"
+                android:textColor="#FFFFFF"
+                android:padding="16dp"
+                android:inputType="textNoSuggestions"
+                android:gravity="center_vertical|start"
+                android:textSize="16sp" />
+
+            <TextView
+                android:id="@+id/tv_dialog_suffix"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:gravity="center_vertical"
+                android:paddingEnd="16dp"
+                android:text=".kodanetwork.eu"
+                android:textColor="#8A8A9A"
+                android:textSize="14sp" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/layout_join_steps_phase"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:visibility="gone"
+        android:layout_marginBottom="24dp">
+
+        <LinearLayout android:id="@+id/step_row_1"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:orientation="horizontal" android:gravity="center_vertical"
+            android:padding="10dp">
+            <TextView android:id="@+id/step_icon_1"
+                android:layout_width="24dp" android:layout_height="24dp"
+                android:gravity="center" android:textSize="14sp"
+                android:textColor="#8A8A9A" android:text="•" />
+            <TextView android:id="@+id/step_text_1"
+                android:layout_width="0dp" android:layout_height="wrap_content"
+                android:layout_weight="1" android:paddingStart="12dp"
+                android:textColor="#8A8A9A" android:textSize="14sp" />
+        </LinearLayout>
+
+        <LinearLayout android:id="@+id/step_row_2"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:orientation="horizontal" android:gravity="center_vertical"
+            android:padding="10dp">
+            <TextView android:id="@+id/step_icon_2"
+                android:layout_width="24dp" android:layout_height="24dp"
+                android:gravity="center" android:textSize="14sp"
+                android:textColor="#555566" android:text="•" />
+            <TextView android:id="@+id/step_text_2"
+                android:layout_width="0dp" android:layout_height="wrap_content"
+                android:layout_weight="1" android:paddingStart="12dp"
+                android:textColor="#555566" android:textSize="14sp" />
+        </LinearLayout>
+
+        <LinearLayout android:id="@+id/step_row_3"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:orientation="horizontal" android:gravity="center_vertical"
+            android:padding="10dp">
+            <TextView android:id="@+id/step_icon_3"
+                android:layout_width="24dp" android:layout_height="24dp"
+                android:gravity="center" android:textSize="14sp"
+                android:textColor="#555566" android:text="•" />
+            <TextView android:id="@+id/step_text_3"
+                android:layout_width="0dp" android:layout_height="wrap_content"
+                android:layout_weight="1" android:paddingStart="12dp"
+                android:textColor="#555566" android:textSize="14sp" />
+        </LinearLayout>
+
+        <LinearLayout android:id="@+id/step_row_4"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:orientation="horizontal" android:gravity="center_vertical"
+            android:padding="10dp">
+            <TextView android:id="@+id/step_icon_4"
+                android:layout_width="24dp" android:layout_height="24dp"
+                android:gravity="center" android:textSize="14sp"
+                android:textColor="#555566" android:text="✓" />
+            <TextView android:id="@+id/step_text_4"
+                android:layout_width="0dp" android:layout_height="wrap_content"
+                android:layout_weight="1" android:paddingStart="12dp"
+                android:textColor="#555566" android:textSize="14sp" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/layout_join_buttons"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_dialog_confirm"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            style="@style/KodaButton"
+            android:stateListAnimator="@null"
+            android:layout_marginBottom="8dp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_dialog_cancel"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            style="@style/KodaButton.Outline"
+            android:text="@string/praetor_action_cancel"
+            android:stateListAnimator="@null" />
+    </LinearLayout>
+</LinearLayout>

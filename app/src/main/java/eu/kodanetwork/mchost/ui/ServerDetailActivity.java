@@ -1525,56 +1525,102 @@ public class ServerDetailActivity extends AppCompatActivity {
 
     private void handleDnsOccupied() {
         android.app.Dialog dialog = new android.app.Dialog(this);
-        dialog.setContentView(R.layout.dialog_praetor_input);
+        dialog.setContentView(R.layout.dialog_join_address);
         dialog.getWindow().setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT));
         dialog.getWindow().setLayout(android.view.ViewGroup.LayoutParams.MATCH_PARENT, android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
-        
-        String praetorHtml = "<font color=\"#555555\">P.R.</font><font color=\"#AAAAAA\">A</font><font color=\"#555555\">.</font><font color=\"#AAAAAA\">E</font><font color=\"#555555\">.</font><font color=\"#FFFFFF\">T</font><font color=\"#555555\">.</font><font color=\"#FFFFFF\">O</font><font color=\"#555555\">.</font><font color=\"#FFFFFF\">R.</font>";
+
+        String praetorHtml = "<font color=\"#555555\">P.R.</font><font color=\"#AAAAAA\">A</font><font color=\"#555555\">.</font><font color=\"#AAAAAA\">E</font><font color=\"#555555\">.</font><font color=\"#AAAAAA\">E</font><font color=\"#555555\">.</font><font color=\"#FFFFFF\">T</font><font color=\"#555555\">.</font><font color=\"#FFFFFF\">O</font><font color=\"#555555\">.</font><font color=\"#FFFFFF\">R.</font>";
         android.widget.TextView tvTitle = dialog.findViewById(R.id.tv_dialog_title);
         if (tvTitle != null) {
             tvTitle.setText(android.text.Html.fromHtml(praetorHtml, android.text.Html.FROM_HTML_MODE_LEGACY));
         }
-        
+
         ((android.widget.TextView) dialog.findViewById(R.id.tv_dialog_subtitle)).setText(R.string.praetor_subtitle_dns_conflict);
         ((android.widget.TextView) dialog.findViewById(R.id.tv_dialog_message)).setText(R.string.praetor_message_dns_conflict);
-        
+
         android.widget.EditText input = dialog.findViewById(R.id.et_dialog_input);
         input.setHint(R.string.praetor_hint_change_domain);
-        
-        android.view.View suffix = dialog.findViewById(R.id.tv_dialog_suffix);
-        if (suffix != null) {
-            suffix.setVisibility(android.view.View.VISIBLE);
-            if (suffix instanceof android.widget.TextView) {
-                ((android.widget.TextView) suffix).setText("." + server.getBaseDomain());
-            }
+
+        // No domain switch here — hide the toggle, keep the suffix static
+        android.view.View domainToggle = dialog.findViewById(R.id.container_join_domain);
+        if (domainToggle != null) domainToggle.setVisibility(android.view.View.GONE);
+        android.widget.TextView suffix = dialog.findViewById(R.id.tv_dialog_suffix);
+        if (suffix != null) suffix.setText("." + server.getBaseDomain());
+
+        final android.widget.TextView[] stepIcons = {
+                dialog.findViewById(R.id.step_icon_1), dialog.findViewById(R.id.step_icon_2),
+                dialog.findViewById(R.id.step_icon_3), dialog.findViewById(R.id.step_icon_4)};
+        final android.widget.TextView[] stepTexts = {
+                dialog.findViewById(R.id.step_text_1), dialog.findViewById(R.id.step_text_2),
+                dialog.findViewById(R.id.step_text_3), dialog.findViewById(R.id.step_text_4)};
+        final android.view.View inputPhase = dialog.findViewById(R.id.layout_join_input_phase);
+        final android.view.View stepsPhase = dialog.findViewById(R.id.layout_join_steps_phase);
+        final com.google.android.material.button.MaterialButton btnConfirm = dialog.findViewById(R.id.btn_dialog_confirm);
+        final com.google.android.material.button.MaterialButton btnCancel = dialog.findViewById(R.id.btn_dialog_cancel);
+
+        // Steps: 1) DB sync of new host, 2) wake server, 3) done
+        stepTexts[0].setText(getString(R.string.join_step_db));
+        stepTexts[1].setText(getString(R.string.sd_toast_server_woken));
+        stepTexts[2].setText(getString(R.string.join_step_done));
+        for (int i = 0; i < 4; i++) {
+            final int idx = i;
+            stepIcons[idx].setText("•");
+            stepIcons[idx].setTextColor(0xFF555566);
+            stepTexts[idx].setTextColor(0xFF555566);
         }
-        
-        dialog.findViewById(R.id.btn_dialog_cancel).setOnClickListener(view -> dialog.dismiss());
-        dialog.findViewById(R.id.btn_dialog_confirm).setOnClickListener(view -> {
+
+        btnCancel.setOnClickListener(view -> dialog.dismiss());
+        btnConfirm.setOnClickListener(view -> {
             String newSubdomain = input.getText().toString().trim().toLowerCase();
-            if (newSubdomain.matches("^[a-z0-9-]+$") && newSubdomain.length() >= 3) {
-                String oldSubdomain = server.getSubdomain();
-                String domain = newSubdomain + "." + server.getBaseDomain();
-                server.setSubdomain(newSubdomain);
-                server.setDomainLink(domain);
-                repo.update(server);
-                dialog.dismiss();
-                // Retry wake up, keep DB host in sync first
-                new Thread(() -> {
-                    patchServerHostInSupabase(oldSubdomain, newSubdomain, server.getBaseDomain());
-                    try {
-                        eu.kodanetwork.mchost.utils.HibernationManager.wakeUpServer(this, server, repo);
-                        runOnUiThread(() -> {
-                            updateDash();
-                            android.widget.Toast.makeText(this, getString(R.string.sd_toast_server_woken), android.widget.Toast.LENGTH_SHORT).show();
-                        });
-                    } catch (Exception ex2) {
-                        runOnUiThread(() -> android.widget.Toast.makeText(this, getString(R.string.sd_toast_error_prefix) + ex2.getMessage(), android.widget.Toast.LENGTH_LONG).show());
-                    }
-                }).start();
-            } else {
+            if (!newSubdomain.matches("^[a-z0-9-]+$") || newSubdomain.length() < 3) {
                 android.widget.Toast.makeText(this, getString(R.string.sd_toast_invalid_address), android.widget.Toast.LENGTH_SHORT).show();
+                return;
             }
+            String oldSubdomain = server.getSubdomain();
+            inputPhase.animate().alpha(0f).setDuration(150).withEndAction(() -> {
+                inputPhase.setVisibility(android.view.View.GONE);
+                stepsPhase.setAlpha(0f);
+                stepsPhase.setVisibility(android.view.View.VISIBLE);
+                stepsPhase.animate().alpha(1f).setDuration(200).start();
+            }).start();
+            btnConfirm.setVisibility(android.view.View.GONE);
+            btnCancel.setEnabled(false);
+
+            new Thread(() -> {
+                boolean dbPatched = false;
+                try {
+                    stepIcons[0].post(() -> { stepIcons[0].setTextColor(0xFFFF6B00); stepTexts[0].setTextColor(0xFFF0F0F0); });
+                    dbPatched = patchServerHostInSupabase(oldSubdomain, newSubdomain, server.getBaseDomain());
+                    if (!dbPatched) throw new IllegalStateException("DB sync failed");
+                    stepIcons[0].post(() -> { stepIcons[0].setText("✓"); stepIcons[0].setTextColor(0xFF00E676); });
+
+                    server.setSubdomain(newSubdomain);
+                    server.setDomainLink(newSubdomain + "." + server.getBaseDomain());
+                    repo.update(server);
+
+                    stepIcons[1].post(() -> { stepIcons[1].setTextColor(0xFFFF6B00); stepTexts[1].setTextColor(0xFFF0F0F0); });
+                    eu.kodanetwork.mchost.utils.HibernationManager.wakeUpServer(this, server, repo);
+                    stepIcons[1].post(() -> { stepIcons[1].setText("✓"); stepIcons[1].setTextColor(0xFF00E676); });
+
+                    stepIcons[2].post(() -> { stepIcons[2].setText("✓"); stepIcons[2].setTextColor(0xFF00E676); stepTexts[2].setTextColor(0xFFF0F0F0); });
+                    runOnUiThread(() -> {
+                        updateDash();
+                        android.widget.Toast.makeText(this, getString(R.string.sd_toast_server_woken), android.widget.Toast.LENGTH_SHORT).show();
+                    });
+                    new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(dialog::dismiss, 700);
+                } catch (Exception ex) {
+                    int failedIdx = dbPatched ? 1 : 0;
+                    final int fi = failedIdx;
+                    stepIcons[fi].post(() -> { stepIcons[fi].setText("✗"); stepIcons[fi].setTextColor(0xFFFF3344); stepTexts[fi].setTextColor(0xFFFF3344); });
+                    if (dbPatched) {
+                        stepTexts[fi].post(() -> stepTexts[fi].setText(getString(R.string.join_rollback)));
+                        try { patchServerHostInSupabase(newSubdomain, oldSubdomain, server.getBaseDomain()); } catch (Exception ignored) {}
+                    }
+                    String msg = ex.getMessage() == null ? "unknown" : ex.getMessage();
+                    stepTexts[fi].post(() -> stepTexts[fi].setText(getString(R.string.join_failed_rolled_back, 0, msg)));
+                    runOnUiThread(() -> btnCancel.setEnabled(true));
+                }
+            }).start();
         });
         dialog.show();
     }
@@ -3097,7 +3143,7 @@ public class ServerDetailActivity extends AppCompatActivity {
         }
 
         android.app.Dialog dialog = new android.app.Dialog(this);
-        dialog.setContentView(R.layout.dialog_praetor_input);
+        dialog.setContentView(R.layout.dialog_join_address);
         dialog.getWindow().setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT));
         dialog.getWindow().setLayout(android.view.ViewGroup.LayoutParams.MATCH_PARENT, android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
 
@@ -3107,83 +3153,205 @@ public class ServerDetailActivity extends AppCompatActivity {
         ((android.widget.TextView) dialog.findViewById(R.id.tv_dialog_message)).setText(R.string.praetor_message_change_domain);
 
         android.widget.EditText input = dialog.findViewById(R.id.et_dialog_input);
-        input.setHint(R.string.praetor_hint_change_domain);
         if (server.getSubdomain() != null) input.setText(server.getSubdomain());
 
-        // Suffix acts as toggle between the two base domains
+        // --- Base domain toggle (same sliding-pill style as the create screen) ---
         final String[] selectedDomain = {server.getBaseDomain()};
+        android.widget.TextView btnKn = dialog.findViewById(R.id.btn_join_kodanetwork);
+        android.widget.TextView btnKs = dialog.findViewById(R.id.btn_join_kodaserv);
+        android.view.View wrapKn = dialog.findViewById(R.id.wrapper_join_kodanetwork);
+        android.view.View wrapKs = dialog.findViewById(R.id.wrapper_join_kodaserv);
+        android.view.View pill = dialog.findViewById(R.id.pill_join_domain);
         android.widget.TextView suffix = dialog.findViewById(R.id.tv_dialog_suffix);
-        if (suffix != null) {
-            suffix.setVisibility(android.view.View.VISIBLE);
+
+        final Runnable[] updateDomainUi = {null};
+        updateDomainUi[0] = () -> {
+            boolean kn = "kodanetwork.eu".equals(selectedDomain[0]);
+            btnKn.setTextColor(kn ? 0xFFFFFFFF : 0xFF888899);
+            btnKs.setTextColor(kn ? 0xFF888899 : 0xFFFFFFFF);
             suffix.setText("." + selectedDomain[0]);
-            suffix.setTextColor(0xFFFF6B00);
-            suffix.setOnClickListener(v -> {
-                selectedDomain[0] = "kodanetwork.eu".equals(selectedDomain[0]) ? "kodaserv.eu" : "kodanetwork.eu";
-                suffix.setText("." + selectedDomain[0]);
+            android.view.View activeWrapper = kn ? wrapKn : wrapKs;
+            activeWrapper.post(() -> {
+                pill.animate()
+                        .translationX(activeWrapper.getX())
+                        .setDuration(200)
+                        .setInterpolator(new android.view.animation.DecelerateInterpolator())
+                        .start();
+                android.view.ViewGroup.LayoutParams params = pill.getLayoutParams();
+                params.width = activeWrapper.getWidth();
+                pill.requestLayout();
             });
-        }
+        };
+        android.view.View.OnClickListener domainListener = v -> {
+            eu.kodanetwork.mchost.util.HapticUtil.forceVibrate(this, 40);
+            selectedDomain[0] = v.getId() == R.id.wrapper_join_kodaserv || v.getId() == R.id.btn_join_kodaserv
+                    ? "kodaserv.eu" : "kodanetwork.eu";
+            updateDomainUi[0].run();
+        };
+        btnKn.setOnClickListener(domainListener);
+        btnKs.setOnClickListener(domainListener);
+        wrapKn.setOnClickListener(domainListener);
+        wrapKs.setOnClickListener(domainListener);
+        // Initial pill placement after layout
+        wrapKn.post(() -> {
+            android.view.View activeWrapper = "kodanetwork.eu".equals(selectedDomain[0]) ? wrapKn : wrapKs;
+            pill.setTranslationX(activeWrapper.getX());
+            android.view.ViewGroup.LayoutParams params = pill.getLayoutParams();
+            params.width = activeWrapper.getWidth();
+            pill.requestLayout();
+        });
 
-        dialog.findViewById(R.id.btn_dialog_cancel).setOnClickListener(view -> dialog.dismiss());
-        dialog.findViewById(R.id.btn_dialog_confirm).setOnClickListener(view -> {
-            String newSubdomain = input.getText().toString().trim().toLowerCase();
-            if (newSubdomain.matches("^[a-z0-9-]+$") && newSubdomain.length() >= 3) {
-                dialog.dismiss();
-                String newBaseDomain = selectedDomain[0];
-                io.execute(() -> {
-                    try {
-                        String oldSubdomain = server.getSubdomain();
-                        String oldBaseDomain = server.getBaseDomain();
-                        String domain = newSubdomain + "." + newBaseDomain;
-                        eu.kodanetwork.mchost.network.supabase.SupabaseFunctionsClient client =
-                                new eu.kodanetwork.mchost.network.supabase.SupabaseFunctionsClient(this);
+        // --- Step views ---
+        final android.widget.TextView[] stepIcons = {
+                dialog.findViewById(R.id.step_icon_1), dialog.findViewById(R.id.step_icon_2),
+                dialog.findViewById(R.id.step_icon_3), dialog.findViewById(R.id.step_icon_4)};
+        final android.widget.TextView[] stepTexts = {
+                dialog.findViewById(R.id.step_text_1), dialog.findViewById(R.id.step_text_2),
+                dialog.findViewById(R.id.step_text_3), dialog.findViewById(R.id.step_text_4)};
+        final android.view.View inputPhase = dialog.findViewById(R.id.layout_join_input_phase);
+        final android.view.View stepsPhase = dialog.findViewById(R.id.layout_join_steps_phase);
+        final com.google.android.material.button.MaterialButton btnConfirm = dialog.findViewById(R.id.btn_dialog_confirm);
+        final com.google.android.material.button.MaterialButton btnCancel = dialog.findViewById(R.id.btn_dialog_cancel);
 
-                        // Delete old record if it exists (old zone!)
-                        if (oldSubdomain != null && !oldSubdomain.isEmpty()) {
-                            try {
-                                client.deleteDnsLink("", oldSubdomain, oldBaseDomain);
-                            } catch (Exception ignored) {}
-                        }
-
-                        if (server.getPlayitAddress() != null && !server.getPlayitAddress().isEmpty()) {
-                            String[] parts = server.getPlayitAddress().split(":");
-                            String target = parts[0];
-                            int port = parts.length > 1 ? Integer.parseInt(parts[1]) : server.getPort();
-
-                            client.createDnsLink("", newSubdomain, newBaseDomain, target, port, "tcp");
-                            server.setDomainLink(domain + " -> " + server.getPlayitAddress());
-                        } else {
-                            server.setDomainLink("");
-                        }
-
-                        server.setSubdomain(newSubdomain);
-                        server.setBaseDomain(newBaseDomain);
-                        repo.update(server);
-
-                        // Keep Supabase in sync so status reports don't hit a missing row
-                        if (!patchServerHostInSupabase(oldSubdomain, newSubdomain, newBaseDomain)) {
-                            android.util.Log.w("ServerDetail", "Host patch failed for " + newSubdomain + " — retrying later");
-                        }
-
-                        eu.kodanetwork.mchost.App.getPrefs(this).edit().putLong("last_join_change_" + server.getId(), System.currentTimeMillis()).apply();
-                        runOnUiThread(() -> {
-                            if (server.getPlayitAddress() != null && !server.getPlayitAddress().isEmpty()) {
-                                tvDomainStatus.setText("Domain: " + server.getDomainLink());
-                            } else {
-                                tvDomainStatus.setText("Domain: " + domain + " (offline)");
-                            }
-                            updateJoinAddressDisplay();
-                            Toast.makeText(this, getString(R.string.sd_toast_subdomain_updated), Toast.LENGTH_SHORT).show();
-                        });
-                    } catch (Exception e) {
-                        runOnUiThread(() -> {
-                            tvDomainStatus.setText("Domain error: " + e.getMessage());
-                            Toast.makeText(this, getString(R.string.sd_toast_dns_failed) + e.getMessage(), Toast.LENGTH_LONG).show();
-                        });
-                    }
-                });
+        final int ST_ACTIVE = 0, ST_OK = 1, ST_FAIL = 2, ST_PENDING = 3;
+        //noinspection Convert2Lambda
+        final java.util.function.BiConsumer<Integer, Integer>[] setStep = new java.util.function.BiConsumer[1];
+        setStep[0] = (idx, state) -> runOnUiThread(() -> {
+            android.widget.TextView icon = stepIcons[idx];
+            android.widget.TextView text = stepTexts[idx];
+            if (state == ST_ACTIVE) {
+                icon.setText("•"); icon.setTextColor(0xFFFF6B00);
+                text.setTextColor(0xFFF0F0F0);
+            } else if (state == ST_OK) {
+                icon.setText("✓"); icon.setTextColor(0xFF00E676);
+                text.setTextColor(0xFFF0F0F0);
+                icon.setScaleX(0.3f); icon.setScaleY(0.3f);
+                icon.animate().scaleX(1f).scaleY(1f).setDuration(220)
+                        .setInterpolator(new android.view.animation.OvershootInterpolator()).start();
+            } else if (state == ST_FAIL) {
+                icon.setText("✗"); icon.setTextColor(0xFFFF3344);
+                text.setTextColor(0xFFFF3344);
             } else {
-                Toast.makeText(this, getString(R.string.sd_toast_invalid_address_length), Toast.LENGTH_SHORT).show();
+                icon.setText("•"); icon.setTextColor(0xFF555566);
+                text.setTextColor(0xFF555566);
             }
+        });
+
+        stepTexts[0].setText(getString(R.string.join_step_dns_delete));
+        stepTexts[1].setText(getString(R.string.join_step_dns_create));
+        stepTexts[2].setText(getString(R.string.join_step_db));
+        stepTexts[3].setText(getString(R.string.join_step_done));
+        for (int i = 1; i < 4; i++) setStep[0].accept(i, ST_PENDING);
+
+        dialog.setCancelable(true);
+        btnCancel.setOnClickListener(v -> dialog.dismiss());
+
+        btnConfirm.setOnClickListener(v -> {
+            String newSubdomain = input.getText().toString().trim().toLowerCase();
+            if (!newSubdomain.matches("^[a-z0-9-]+$") || newSubdomain.length() < 3) {
+                Toast.makeText(this, getString(R.string.sd_toast_invalid_address_length), Toast.LENGTH_SHORT).show();
+                return;
+            }
+            if (newSubdomain.equals(server.getSubdomain()) && selectedDomain[0].equals(server.getBaseDomain())) {
+                Toast.makeText(this, getString(R.string.sd_toast_invalid_address), Toast.LENGTH_SHORT).show();
+                return;
+            }
+            String newBaseDomain = selectedDomain[0];
+            // Switch to the steps phase with a small transition
+            inputPhase.animate().alpha(0f).setDuration(150).withEndAction(() -> {
+                inputPhase.setVisibility(android.view.View.GONE);
+                stepsPhase.setAlpha(0f);
+                stepsPhase.setVisibility(android.view.View.VISIBLE);
+                stepsPhase.animate().alpha(1f).setDuration(200).start();
+            }).start();
+            btnConfirm.setVisibility(android.view.View.GONE);
+            btnCancel.setEnabled(false);
+
+            io.execute(() -> {
+                String oldSubdomain = server.getSubdomain();
+                String oldBaseDomain = server.getBaseDomain();
+                boolean oldDnsDeleted = false;
+                boolean newDnsCreated = false;
+                String target = null;
+                int port = server.getPort();
+                if (server.getPlayitAddress() != null && !server.getPlayitAddress().isEmpty()) {
+                    String[] parts = server.getPlayitAddress().split(":");
+                    target = parts[0];
+                    if (parts.length > 1) {
+                        try { port = Integer.parseInt(parts[1]); } catch (Exception ignored) {}
+                    }
+                }
+                eu.kodanetwork.mchost.network.supabase.SupabaseFunctionsClient client =
+                        new eu.kodanetwork.mchost.network.supabase.SupabaseFunctionsClient(this);
+                final String finalTarget = target;
+                try {
+                    // Step 1: delete old DNS (old zone)
+                    setStep[0].accept(0, ST_ACTIVE);
+                    if (oldSubdomain != null && !oldSubdomain.isEmpty()) {
+                        client.deleteDnsLink("", oldSubdomain, oldBaseDomain);
+                    }
+                    oldDnsDeleted = true;
+                    setStep[0].accept(0, ST_OK);
+
+                    // Step 2: create new DNS (new zone) — only when a tunnel exists
+                    setStep[0].accept(1, ST_ACTIVE);
+                    if (target != null) {
+                        client.createDnsLink("", newSubdomain, newBaseDomain, target, port, "tcp");
+                        newDnsCreated = true;
+                    }
+                    setStep[0].accept(1, ST_OK);
+
+                    // Step 3: database sync
+                    setStep[0].accept(2, ST_ACTIVE);
+                    if (!patchServerHostInSupabase(oldSubdomain, newSubdomain, newBaseDomain)) {
+                        throw new IllegalStateException("DB sync failed");
+                    }
+                    setStep[0].accept(2, ST_OK);
+
+                    // All network steps done — now update local state
+                    String domain = newSubdomain + "." + newBaseDomain;
+                    if (target != null) {
+                        server.setDomainLink(domain + " -> " + server.getPlayitAddress());
+                    } else {
+                        server.setDomainLink("");
+                    }
+                    server.setSubdomain(newSubdomain);
+                    server.setBaseDomain(newBaseDomain);
+                    repo.update(server);
+                    eu.kodanetwork.mchost.App.getPrefs(this).edit()
+                            .putLong("last_join_change_" + server.getId(), System.currentTimeMillis()).apply();
+
+                    setStep[0].accept(3, ST_OK);
+                    runOnUiThread(() -> {
+                        if (finalTarget != null) {
+                            tvDomainStatus.setText("Domain: " + server.getDomainLink());
+                        } else {
+                            tvDomainStatus.setText("Domain: " + domain + " (offline)");
+                        }
+                        updateJoinAddressDisplay();
+                        Toast.makeText(this, getString(R.string.sd_toast_subdomain_updated), Toast.LENGTH_SHORT).show();
+                    });
+                    new android.os.Handler(android.os.Looper.getMainLooper())
+                            .postDelayed(dialog::dismiss, 900);
+                } catch (Exception e) {
+                    int failedIdx = !oldDnsDeleted ? 0 : (!newDnsCreated && target != null ? 1 : 2);
+                    setStep[0].accept(failedIdx, ST_FAIL);
+                    // Roll back everything that already succeeded, in reverse order
+                    runOnUiThread(() -> stepTexts[failedIdx].setText(getString(R.string.join_rollback)));
+                    try { if (newDnsCreated) client.deleteDnsLink("", newSubdomain, newBaseDomain); } catch (Exception ignored) {}
+                    try { if (oldDnsDeleted && target != null) client.createDnsLink("", oldSubdomain, oldBaseDomain, target, port, "tcp"); } catch (Exception ignored) {}
+                    String msg = e.getMessage() == null ? "unknown" : e.getMessage();
+                    java.util.regex.Matcher m = java.util.regex.Pattern.compile("HTTP (\\d{3})").matcher(msg);
+                    int code = m.find() ? Integer.parseInt(m.group(1)) : 0;
+                    String apiMsg = msg.contains(":") ? msg.substring(msg.indexOf(":") + 1).trim() : msg;
+                    int fCode = code;
+                    runOnUiThread(() -> {
+                        stepTexts[failedIdx].setText(getString(R.string.join_failed_rolled_back, fCode, apiMsg));
+                        btnCancel.setEnabled(true);
+                        tvDomainStatus.setText("Domain: " + server.getSubdomain() + "." + server.getBaseDomain());
+                    });
+                }
+            });
         });
         dialog.show();
     }
