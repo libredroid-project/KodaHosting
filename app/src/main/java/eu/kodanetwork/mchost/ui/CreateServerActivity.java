@@ -266,11 +266,18 @@ public class CreateServerActivity extends AppCompatActivity {
                     ? getString(R.string.java_runtime_auto, 25) : getString(R.string.java_runtime_manual, createJavaRuntime)));
             update[0].run();
             tvDevJava.setOnClickListener(v -> {
-                final int[] opts = {0, 21, 25};
-                String[] labels = {getString(R.string.java_runtime_auto, 25), getString(R.string.java_runtime_manual, 21), getString(R.string.java_runtime_manual, 25)};
+                final int[] opts = {0, 8, 17, 21, 25};
+                String[] labels = {
+                        getString(R.string.java_runtime_auto, 25),
+                        getString(R.string.java_runtime_manual, 8),
+                        getString(R.string.java_runtime_manual, 17),
+                        getString(R.string.java_runtime_manual, 21),
+                        getString(R.string.java_runtime_manual, 25)};
+                int cur = 0;
+                for (int i = 0; i < opts.length; i++) if (opts[i] == createJavaRuntime) cur = i;
                 new android.app.AlertDialog.Builder(this)
                         .setTitle(R.string.java_runtime_label)
-                        .setSingleChoiceItems(labels, java.util.Arrays.asList(0, 21, 25).indexOf(createJavaRuntime), (d, which) -> {
+                        .setSingleChoiceItems(labels, cur, (d, which) -> {
                             createJavaRuntime = opts[which];
                             update[0].run();
                             d.dismiss();

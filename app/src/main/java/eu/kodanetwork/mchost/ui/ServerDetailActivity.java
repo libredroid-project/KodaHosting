@@ -2329,24 +2329,20 @@ public class ServerDetailActivity extends AppCompatActivity {
         tvTitle.setPadding(0, 0, 0, pad);
         container.addView(tvTitle);
 
-        final int[] choices = {0, 21, 17, 25};
+        final int[] choices = {0, 8, 17, 21, 25};
         for (int choice : choices) {
             MaterialButton btn = new MaterialButton(this);
             String label;
             if (choice == 0) {
                 label = getString(R.string.java_runtime_auto, eu.kodanetwork.mchost.util.RuntimeManager.resolveAutoVersion(server));
-            } else if (choice == 17) {
-                label = getString(R.string.java_runtime_17_soon);
             } else {
                 label = getString(R.string.java_runtime_manual, choice);
             }
-            btn.setText(label);
             boolean selected = server.getJavaRuntime() == choice;
-            boolean available = choice != 17;
-            btn.setTextColor(selected ? 0xFF000000 : (available ? 0xFFF0F0F0 : 0xFF555566));
+            btn.setText(label);
+            btn.setTextColor(selected ? 0xFF000000 : 0xFFF0F0F0);
             btn.setBackgroundColor(selected ? 0xFFFF6B00 : 0xFF241C18);
             btn.setCornerRadius(12);
-            btn.setEnabled(available);
             LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
                     LinearLayout.LayoutParams.MATCH_PARENT, (int)(52 * getResources().getDisplayMetrics().density));
             lp.bottomMargin = (int)(8 * getResources().getDisplayMetrics().density);

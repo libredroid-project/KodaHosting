@@ -8,8 +8,6 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
 
 import eu.kodanetwork.mchost.model.ServerInstance;
 
@@ -17,12 +15,11 @@ import eu.kodanetwork.mchost.model.ServerInstance;
  * Per-server Java runtime resolution and on-demand provisioning.
  *
  * - Java 25 is bundled with the APK (assets/jre25-android-arm64.tar.xz) and extracted by
- *   StartOrchestrator to filesDir/jre25 — the proven default.
- * - Java 21 is downloaded on demand (Amethyst/Pojav ecosystem build: QuestCraft++
- *   android-openjdk-build-multiarch fork, aarch64 Android NDK build, verified ELF).
- *   Fabric servers default to 21 because many mods only run on it.
- * - Java 17 is reserved for a future release — the Pojav multiarch "arm64" jre17 build is
- *   a Mach-O/iOS binary and unusable on Android; a proper Android aarch64 build is needed.
+ *   StartOrchestrator to filesDir/jre25 — the proven default. The bundle is the AngelAuraMC
+ *   openjdk build family this manager downloads the other versions from.
+ * - Java 8/17/21 are downloaded on demand as android-arm64 tar.xz from
+ *   AngelAuraMC/angelauramc-openjdk-build (verified: ELF aarch64, /system/bin/linker64,
+ *   NDK r27d). Fabric servers default to 21 because many mods only run on it.
  */
 public class RuntimeManager {
 
@@ -30,9 +27,12 @@ public class RuntimeManager {
         void onProgress(int percent, String message);
     }
 
-    // Verified aarch64 Android build (ELF, NDK r25c, bin/java + lib/server/libjvm.so)
-    private static final String JRE21_URL =
-            "https://github.com/QuestCraftPlusPlus/android-openjdk-build-multiarch/releases/download/jre22-6.0.0/JRE-21.zip";
+    // Verified android-arm64 tar.xz builds from the AngelAuraMC openjdk repo
+    // (same build family as the bundled jre25 asset)
+    private static final java.util.Map<Integer, String> JRE_URLS = java.util.Map.of(
+            8,  "https://github.com/AngelAuraMC/angelauramc-openjdk-build/releases/download/download_jre8/jre8-android-arm64.tar.xz",
+            17, "https://github.com/AngelAuraMC/angelauramc-openjdk-build/releases/download/download_jre17/jre17-android-arm64.tar.xz",
+            21, "https://github.com/AngelAuraMC/angelauramc-openjdk-build/releases/download/download_jre21/jre21-android-arm64.tar.xz");
 
     private static final AtomicBoolean downloadLock = new AtomicBoolean(false);
 
@@ -63,7 +63,8 @@ public class RuntimeManager {
     public static boolean ensureRuntimeSync(Context ctx, int version, ProgressListener listener) {
         if (isRuntimeInstalled(ctx, version)) return true;
         if (version == 25) return false; // bundled only; StartOrchestrator handles it
-        if (version != 21) return false; // not provisionable yet
+        String url = JRE_URLS.get(version);
+        if (url == null) return false;
 
         if (!downloadLock.compareAndSet(false, true)) {
             // Another download is running; wait for it to finish
@@ -78,15 +79,15 @@ public class RuntimeManager {
             deleteRecursive(tmpDir);
             tmpDir.mkdirs();
 
-            File zipFile = new File(ctx.getCacheDir(), "jre" + version + ".zip");
+            File archive = new File(ctx.getCacheDir(), "jre" + version + ".tar.xz");
             try {
-                download(JRE21_URL, zipFile, listener);
-                unzipSafe(zipFile, tmpDir);
+                download(url, archive, listener);
+                extractTarXzSafe(archive, tmpDir);
             } finally {
-                zipFile.delete();
+                archive.delete();
             }
 
-            // The zip may extract flat (bin/, lib/) or nested in a single folder
+            // The archive may extract flat (./bin, ./lib) or nested in a single folder
             File contentDir = tmpDir;
             File[] children = tmpDir.listFiles();
             if (children != null && children.length == 1 && children[0].isDirectory()
@@ -140,15 +141,19 @@ public class RuntimeManager {
         }
     }
 
-    /** Zip extraction with canonical zip-slip protection. */
-    private static void unzipSafe(File zip, File destDir) throws Exception {
-        try (ZipInputStream zis = new ZipInputStream(new java.io.FileInputStream(zip))) {
-            ZipEntry entry;
+    /** tar.xz extraction with canonical zip-slip protection (same streams as StartOrchestrator). */
+    private static void extractTarXzSafe(File archive, File destDir) throws Exception {
+        try (java.io.FileInputStream fis = new java.io.FileInputStream(archive);
+             org.apache.commons.compress.compressors.xz.XZCompressorInputStream xzIn =
+                     new org.apache.commons.compress.compressors.xz.XZCompressorInputStream(fis);
+             org.apache.commons.compress.archivers.tar.TarArchiveInputStream tarIn =
+                     new org.apache.commons.compress.archivers.tar.TarArchiveInputStream(xzIn)) {
+            org.apache.commons.compress.archivers.tar.TarArchiveEntry entry;
             String canonicalDest = destDir.getCanonicalPath() + File.separator;
-            while ((entry = zis.getNextEntry()) != null) {
+            while ((entry = tarIn.getNextTarEntry()) != null) {
                 File newFile = new File(destDir, entry.getName());
                 if (!newFile.getCanonicalPath().startsWith(canonicalDest)) {
-                    throw new IllegalStateException("zip slip blocked: " + entry.getName());
+                    throw new IllegalStateException("archive slip blocked: " + entry.getName());
                 }
                 if (entry.isDirectory()) {
                     newFile.mkdirs();
@@ -157,10 +162,9 @@ public class RuntimeManager {
                     try (FileOutputStream fos = new FileOutputStream(newFile)) {
                         byte[] buf = new byte[16384];
                         int r;
-                        while ((r = zis.read(buf)) != -1) fos.write(buf, 0, r);
+                        while ((r = tarIn.read(buf)) != -1) fos.write(buf, 0, r);
                     }
                 }
-                zis.closeEntry();
             }
         }
     }
