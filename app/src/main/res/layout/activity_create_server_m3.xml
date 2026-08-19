@@ -171,6 +171,15 @@
                             android:textColor="?attr/colorPrimary"
                             android:textAppearance="?attr/textAppearanceBodyMedium"
                             android:visibility="gone"/>
+                        <!-- Dev only: Java runtime preselection -->
+                        <TextView android:id="@+id/tv_dev_java_runtime"
+                            android:layout_width="match_parent" android:layout_height="wrap_content"
+                            android:background="?attr/colorSurfaceContainerHighest"
+                            android:padding="12dp" android:layout_marginBottom="8dp"
+                            android:gravity="center"
+                            android:textColor="?attr/colorPrimary"
+                            android:textAppearance="?attr/textAppearanceLabelSmall"
+                            android:visibility="gone"/>
                         <LinearLayout android:id="@+id/layout_version_picker"
                             android:layout_width="match_parent" android:layout_height="52dp"
                             android:background="?attr/colorSurfaceContainerHighest"

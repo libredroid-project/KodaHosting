@@ -197,6 +197,15 @@
                     android:textColor="#FF8C38"
                     android:textSize="13sp" android:fontFamily="@font/font_koda"
                     android:visibility="gone"/>
+                <!-- Dev only: Java runtime preselection -->
+                <TextView android:id="@+id/tv_dev_java_runtime"
+                    android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:background="@drawable/input_field"
+                    android:padding="12dp" android:layout_marginBottom="20dp"
+                    android:gravity="center"
+                    android:textColor="#FF8C38"
+                    android:textSize="11sp" android:fontFamily="@font/font_koda"
+                    android:visibility="gone"/>
                 <LinearLayout android:id="@+id/layout_version_picker"
                     android:layout_width="match_parent" android:layout_height="52dp"
                     android:background="@drawable/input_field"

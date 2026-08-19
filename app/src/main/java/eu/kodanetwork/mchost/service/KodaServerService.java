@@ -1201,7 +1201,29 @@ public class KodaServerService extends Service {
                 return;
             }
 
-            String javaBinPath = eu.kodanetwork.mchost.util.JavaFinder.find(this);
+            // Per-server Java runtime: explicit setting wins, otherwise auto-resolved
+            // (Fabric -> 21 because many mods break on newer Java; everything else -> 25)
+            int javaVersion = srv.getJavaRuntime() != 0
+                    ? srv.getJavaRuntime()
+                    : eu.kodanetwork.mchost.util.RuntimeManager.resolveAutoVersion(srv);
+            String javaBinPath = null;
+            if (javaVersion != 25) {
+                if (!eu.kodanetwork.mchost.util.RuntimeManager.isRuntimeInstalled(this, javaVersion)) {
+                    log(srv.getId(), "  ⬇ " + getString(R.string.java_runtime_downloading, javaVersion, 0));
+                    boolean ok = eu.kodanetwork.mchost.util.RuntimeManager.ensureRuntimeSync(this, javaVersion,
+                            (pct, msg) -> log(srv.getId(), "  ⬇ " + getString(R.string.java_runtime_downloading, javaVersion, pct) + " " + msg));
+                    if (!ok) {
+                        log(srv.getId(), "  ✗ " + getString(R.string.java_runtime_dl_failed, javaVersion, "download failed"));
+                    }
+                }
+                javaBinPath = eu.kodanetwork.mchost.util.RuntimeManager.getJavaBin(this, javaVersion);
+                if (javaBinPath != null) {
+                    log(srv.getId(), "  ℹ Using Java " + javaVersion + " runtime");
+                }
+            }
+            if (javaBinPath == null) {
+                javaBinPath = eu.kodanetwork.mchost.util.JavaFinder.find(this);
+            }
             if (javaBinPath == null) {
                 log(srv.getId(), "  ✗ Failed to initialize native Java environment.");
                 setState(srv, ServerInstance.State.CRASHED);

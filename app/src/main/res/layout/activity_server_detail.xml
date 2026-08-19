@@ -600,7 +600,26 @@
                         android:layout_width="match_parent" android:layout_height="wrap_content"
                         android:textColor="#8A8A9A" android:textSize="12sp"
                         android:fontFamily="@font/font_koda" android:lineSpacingMultiplier="1.6"/>
-                        
+
+                    <LinearLayout android:id="@+id/layout_java_runtime"
+                        android:layout_width="match_parent" android:layout_height="48dp"
+                        android:orientation="horizontal" android:gravity="center_vertical"
+                        android:background="@drawable/input_field"
+                        android:paddingStart="16dp" android:paddingEnd="16dp"
+                        android:layout_marginTop="12dp"
+                        android:clickable="true" android:focusable="true">
+                        <TextView android:layout_width="0dp" android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="@string/java_runtime_label" android:textColor="#F0F0F0"
+                            android:textSize="13sp" android:fontFamily="@font/font_koda"/>
+                        <TextView android:id="@+id/tv_java_runtime"
+                            android:layout_width="wrap_content" android:layout_height="wrap_content"
+                            android:textColor="#FF8C38" android:textSize="13sp"
+                            android:fontFamily="@font/font_koda"/>
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                            android:text=" ▾" android:textColor="#FF6B00" android:textSize="13sp"/>
+                    </LinearLayout>
+
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/btn_settings_update"
                         style="@style/Widget.MaterialComponents.Button.OutlinedButton"

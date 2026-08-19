@@ -110,6 +110,7 @@ public class CreateServerActivity extends AppCompatActivity {
     private android.widget.RadioButton rbSetupModpack, rbSetupManual, rbSetupKoda, rbSetupAi;
     private TextView tvModpackSelected;
     private boolean modpackSheetOpen = false;
+    private int createJavaRuntime = 0; // 0 = Auto; dev-only preselection
 
     private int ramMB = 1024;
     private int selectedTypeIndex = 0;
@@ -255,6 +256,29 @@ public class CreateServerActivity extends AppCompatActivity {
         tvVersionSelected = findViewById(R.id.tv_version_selected);
         tvTypeUnsupported = findViewById(R.id.tv_type_unsupported);
         layoutVersionPickerRow = findViewById(R.id.layout_version_picker);
+        // Java runtime preselection — developer options only
+        TextView tvDevJava = findViewById(R.id.tv_dev_java_runtime);
+        if (tvDevJava != null && eu.kodanetwork.mchost.App.getPrefs(this).getBoolean("dev_mode_unlocked", false)) {
+            tvDevJava.setVisibility(View.VISIBLE);
+            final TextView tvDev = tvDevJava;
+            Runnable[] update = {null};
+            update[0] = () -> tvDev.setText("Java: " + (createJavaRuntime == 0
+                    ? getString(R.string.java_runtime_auto, 25) : getString(R.string.java_runtime_manual, createJavaRuntime)));
+            update[0].run();
+            tvDevJava.setOnClickListener(v -> {
+                final int[] opts = {0, 21, 25};
+                String[] labels = {getString(R.string.java_runtime_auto, 25), getString(R.string.java_runtime_manual, 21), getString(R.string.java_runtime_manual, 25)};
+                new android.app.AlertDialog.Builder(this)
+                        .setTitle(R.string.java_runtime_label)
+                        .setSingleChoiceItems(labels, java.util.Arrays.asList(0, 21, 25).indexOf(createJavaRuntime), (d, which) -> {
+                            createJavaRuntime = opts[which];
+                            update[0].run();
+                            d.dismiss();
+                        })
+                        .setNegativeButton(R.string.modpack_cancel, null)
+                        .show();
+            });
+        }
         // Setup version picker click
         View layoutVersionPicker = findViewById(R.id.layout_version_picker);
         if (layoutVersionPicker != null) layoutVersionPicker.setOnClickListener(v -> showVersionPicker());
@@ -1770,6 +1794,7 @@ public class CreateServerActivity extends AppCompatActivity {
             s.setAutoSetup(false);
             s.setModpackName(selectedModpackTitle != null ? selectedModpackTitle : "");
         }
+        s.setJavaRuntime(createJavaRuntime);
         if (checkedId == R.id.rb_setup_ai) {
             s.setThemeColor(aiSelectedTheme);
             s.setAiPrompt(aiSelectedPlugins.toString());

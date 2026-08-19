@@ -2301,6 +2301,72 @@ public class ServerDetailActivity extends AppCompatActivity {
 
     // ── Settings ──────────────────────────────────────────────────────────────
 
+    private void updateJavaRuntimeLabel(TextView tvJavaRuntime) {
+        if (tvJavaRuntime == null) return;
+        if (server.getJavaRuntime() == 0) {
+            int auto = eu.kodanetwork.mchost.util.RuntimeManager.resolveAutoVersion(server);
+            tvJavaRuntime.setText(getString(R.string.java_runtime_auto, auto));
+        } else {
+            tvJavaRuntime.setText(getString(R.string.java_runtime_manual, server.getJavaRuntime()));
+        }
+    }
+
+    private void showJavaRuntimePicker(TextView tvJavaRuntime) {
+        com.google.android.material.bottomsheet.BottomSheetDialog sheet =
+                new com.google.android.material.bottomsheet.BottomSheetDialog(this, R.style.KodaBottomSheetDialog);
+        LinearLayout container = new LinearLayout(this);
+        container.setOrientation(LinearLayout.VERTICAL);
+        container.setBackgroundColor(0xFF0A0807);
+        int pad = (int)(20 * getResources().getDisplayMetrics().density);
+        container.setPadding(pad, pad, pad, pad);
+
+        TextView tvTitle = new TextView(this);
+        tvTitle.setText(getString(R.string.java_runtime_label));
+        tvTitle.setTextColor(0xFFFF6B00);
+        tvTitle.setTextSize(13);
+        tvTitle.setTypeface(android.graphics.Typeface.DEFAULT_BOLD);
+        tvTitle.setLetterSpacing(0.12f);
+        tvTitle.setPadding(0, 0, 0, pad);
+        container.addView(tvTitle);
+
+        final int[] choices = {0, 21, 17, 25};
+        for (int choice : choices) {
+            MaterialButton btn = new MaterialButton(this);
+            String label;
+            if (choice == 0) {
+                label = getString(R.string.java_runtime_auto, eu.kodanetwork.mchost.util.RuntimeManager.resolveAutoVersion(server));
+            } else if (choice == 17) {
+                label = getString(R.string.java_runtime_17_soon);
+            } else {
+                label = getString(R.string.java_runtime_manual, choice);
+            }
+            btn.setText(label);
+            boolean selected = server.getJavaRuntime() == choice;
+            boolean available = choice != 17;
+            btn.setTextColor(selected ? 0xFF000000 : (available ? 0xFFF0F0F0 : 0xFF555566));
+            btn.setBackgroundColor(selected ? 0xFFFF6B00 : 0xFF241C18);
+            btn.setCornerRadius(12);
+            btn.setEnabled(available);
+            LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT, (int)(52 * getResources().getDisplayMetrics().density));
+            lp.bottomMargin = (int)(8 * getResources().getDisplayMetrics().density);
+            final int sel = choice;
+            btn.setOnClickListener(v -> {
+                server.setJavaRuntime(sel);
+                repo.update(server);
+                updateJavaRuntimeLabel(tvJavaRuntime);
+                Toast.makeText(this, getString(R.string.java_runtime_updated,
+                        sel == 0 ? getString(R.string.java_runtime_auto,
+                                eu.kodanetwork.mchost.util.RuntimeManager.resolveAutoVersion(server))
+                                : getString(R.string.java_runtime_manual, sel)), Toast.LENGTH_SHORT).show();
+                sheet.dismiss();
+            });
+            container.addView(btn, lp);
+        }
+        sheet.setContentView(container);
+        sheet.show();
+    }
+
     private void setupSettings() {
         String addressLabel = server.isDatabase() ? "Verbindungs-Adresse:" : "Beitritts-Adresse:";
         String addressValue = server.isDatabase() ? "127.0.0.1 (Lokal)" : server.getJoinAddress();
@@ -2318,6 +2384,15 @@ public class ServerDetailActivity extends AppCompatActivity {
             addressLabel + "\n" + addressValue + "\n\n" +
             "Dateipfad:\n" + server.getServerDir()
         );
+
+        // Java runtime selector (per server; Auto = Fabric 21 / sonst 25)
+        View javaRuntimeRow = findViewById(R.id.layout_java_runtime);
+        TextView tvJavaRuntime = findViewById(R.id.tv_java_runtime);
+        if (javaRuntimeRow != null && tvJavaRuntime != null) {
+            updateJavaRuntimeLabel(tvJavaRuntime);
+            javaRuntimeRow.setOnClickListener(v -> showJavaRuntimePicker(tvJavaRuntime));
+        }
+
         updateIntegrationStatus();
         
         // Server Icon
