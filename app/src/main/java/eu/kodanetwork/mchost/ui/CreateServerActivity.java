@@ -109,6 +109,7 @@ public class CreateServerActivity extends AppCompatActivity {
     private String selectedModpackTitle = null;
     private android.widget.RadioButton rbSetupModpack, rbSetupManual, rbSetupKoda, rbSetupAi;
     private TextView tvModpackSelected;
+    private boolean modpackSheetOpen = false;
 
     private int ramMB = 1024;
     private int selectedTypeIndex = 0;
@@ -260,6 +261,13 @@ public class CreateServerActivity extends AppCompatActivity {
         npServerType    = findViewById(R.id.np_server_type);
         tvModpackSelected = findViewById(R.id.tv_modpack_selected);
         rbSetupModpack = findViewById(R.id.rb_setup_modpack);
+        if (rbSetupModpack != null) {
+            // Re-tapping the (already checked) Modpack option reopens the picker
+            rbSetupModpack.setOnClickListener(v -> {
+                HapticUtil.forceVibrate(this, 60);
+                openModpackBrowser();
+            });
+        }
         rbSetupManual = findViewById(R.id.rb_setup_manual);
         rbSetupKoda = findViewById(R.id.rb_setup_koda);
         rbSetupAi = findViewById(R.id.rb_setup_ai);
@@ -793,6 +801,9 @@ public class CreateServerActivity extends AppCompatActivity {
     /** Modpack picker styled like the resource pack downloader (dialog_modrinth_search sheet). */
     private void openModpackBrowser() {
         if (selectedTypeIndex < 0 || TYPE_VALS[selectedTypeIndex] != ServerInstance.Type.FABRIC) return;
+        // Guard: never stack two sheets (rapid double-trigger looked like the sheet "reopening")
+        if (modpackSheetOpen) return;
+        modpackSheetOpen = true;
 
         com.google.android.material.bottomsheet.BottomSheetDialog sheet =
                 new com.google.android.material.bottomsheet.BottomSheetDialog(this, R.style.KodaBottomSheetDialog);
@@ -814,6 +825,7 @@ public class CreateServerActivity extends AppCompatActivity {
         final boolean[] filterToSelected = {false};
         final java.util.List<eu.kodanetwork.mchost.util.ModrinthHelper.ModpackHit> hits = new ArrayList<>();
         final int[] totalHits = {0};
+        final int[] fetched = {0};
         final boolean[] selecting = {false};
         final Runnable[] loadPageRef = new Runnable[1];
         final Runnable[] resetAndLoadRef = new Runnable[1];
@@ -830,8 +842,12 @@ public class CreateServerActivity extends AppCompatActivity {
                     more.setTextColor(0xFF000000);
                     more.setBackgroundColor(0xFFFF6B00);
                     more.setCornerRadius(12);
+                    more.setTextSize(13);
+                    more.setLetterSpacing(0.04f);
+                    more.setTypeface(androidx.core.content.res.ResourcesCompat.getFont(
+                            CreateServerActivity.this, R.font.font_koda), android.graphics.Typeface.BOLD);
                     more.setLayoutParams(new RecyclerView.LayoutParams(
-                            ViewGroup.LayoutParams.MATCH_PARENT, (int)(48 * getResources().getDisplayMetrics().density)));
+                            ViewGroup.LayoutParams.MATCH_PARENT, (int)(56 * getResources().getDisplayMetrics().density)));
                     return new RecyclerView.ViewHolder(more) {};
                 }
                 android.view.View row = getLayoutInflater().inflate(R.layout.item_modrinth_project, parent, false);
@@ -902,7 +918,7 @@ public class CreateServerActivity extends AppCompatActivity {
 
             @Override
             public int getItemCount() {
-                boolean more = hits.size() < totalHits[0];
+                boolean more = fetched[0] < totalHits[0];
                 return hits.size() + (more ? 1 : 0);
             }
 
@@ -918,12 +934,16 @@ public class CreateServerActivity extends AppCompatActivity {
             if (pb != null) pb.setVisibility(View.VISIBLE);
             String versionFilter = filterToSelected[0] ? filterVersion[0] : null;
             eu.kodanetwork.mchost.util.ModrinthHelper.searchModpacks(
-                    etQuery.getText().toString().trim(), versionFilter, hits.size(),
+                    etQuery.getText().toString().trim(), versionFilter, fetched[0],
                     new eu.kodanetwork.mchost.util.ModrinthHelper.ModpackSearchCallback() {
                         @Override
                         public void onResult(java.util.List<eu.kodanetwork.mchost.util.ModrinthHelper.ModpackHit> results, int total) {
                             mainHandler.post(() -> {
-                                hits.addAll(results);
+                                fetched[0] += results.size();
+                                // Only server-compatible packs (skip client-only ones)
+                                for (eu.kodanetwork.mchost.util.ModrinthHelper.ModpackHit h : results) {
+                                    if (!"unsupported".equals(h.serverSide)) hits.add(h);
+                                }
                                 totalHits[0] = total;
                                 adapter.notifyDataSetChanged();
                                 if (pb != null) pb.setVisibility(View.GONE);
@@ -947,6 +967,7 @@ public class CreateServerActivity extends AppCompatActivity {
         resetAndLoadRef[0] = () -> {
             hits.clear();
             totalHits[0] = 0;
+            fetched[0] = 0;
             adapter.notifyDataSetChanged();
             loadPageRef[0].run();
         };
@@ -996,6 +1017,7 @@ public class CreateServerActivity extends AppCompatActivity {
 
         // If the sheet closes without picking a pack, fall back to Standard
         sheet.setOnDismissListener(d -> {
+            modpackSheetOpen = false;
             if (selectedModpack == null && rgSetupType != null) {
                 rgSetupType.check(R.id.rb_setup_manual);
             }
@@ -1017,7 +1039,7 @@ public class CreateServerActivity extends AppCompatActivity {
             }
         });
 
-        // Edge-to-edge decor like the resource pack sheet (transparent nav bar)
+        // Edge-to-edge decor exactly like ServerDetailActivity.setupWindowDecor (transparent nav bar)
         android.view.Window win = sheet.getWindow();
         if (win != null) {
             win.addFlags(android.view.WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
@@ -1025,6 +1047,14 @@ public class CreateServerActivity extends AppCompatActivity {
                 win.setStatusBarColor(android.graphics.Color.TRANSPARENT);
                 win.setNavigationBarColor(android.graphics.Color.TRANSPARENT);
                 androidx.core.view.WindowCompat.setDecorFitsSystemWindows(win, false);
+                boolean isLight = eu.kodanetwork.mchost.util.ThemeHelper.isLightMode(this);
+                int uiFlags = android.view.View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                        | android.view.View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION;
+                if (isLight) {
+                    uiFlags |= android.view.View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
+                            | android.view.View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR;
+                }
+                win.getDecorView().setSystemUiVisibility(uiFlags);
                 if (android.os.Build.VERSION.SDK_INT >= 29) {
                     win.setNavigationBarContrastEnforced(false);
                 }

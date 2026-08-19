@@ -57,6 +57,7 @@ public class ModrinthHelper {
         public String author;
         public String iconUrl;
         public long downloads;
+        public String serverSide = "";
     }
 
     public static class MrpackInfo {
@@ -109,6 +110,7 @@ public class ModrinthHelper {
                         m.author = h.optString("author");
                         m.iconUrl = h.optString("icon_url");
                         m.downloads = h.optLong("downloads", 0);
+                        m.serverSide = h.optString("server_side", "");
                         res.add(m);
                     }
                     mainHandler.post(() -> cb.onResult(res, total));
