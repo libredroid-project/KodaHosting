@@ -606,9 +606,8 @@
                     <LinearLayout android:id="@+id/layout_java_runtime"
                         android:layout_width="match_parent" android:layout_height="48dp"
                         android:orientation="horizontal" android:gravity="center_vertical"
-                        android:background="?attr/colorSurfaceContainerHighest"
-                        android:paddingStart="16dp" android:paddingEnd="16dp"
-                        android:layout_marginTop="12dp"
+                        android:paddingStart="4dp" android:paddingEnd="4dp"
+                        android:layout_marginTop="4dp"
                         android:clickable="true" android:focusable="true">
                         <TextView android:layout_width="0dp" android:layout_height="wrap_content"
                             android:layout_weight="1"

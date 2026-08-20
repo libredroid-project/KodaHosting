@@ -868,15 +868,8 @@ public class CreateServerActivity extends AppCompatActivity {
             @Override
             public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
                 if (viewType == TYPE_FOOTER) {
-                    MaterialButton more = new MaterialButton(CreateServerActivity.this);
-                    more.setText(getString(R.string.modpack_load_more));
-                    more.setTextColor(0xFF000000);
-                    more.setBackgroundColor(0xFFFF6B00);
-                    more.setCornerRadius(12);
-                    more.setTextSize(13);
-                    more.setLetterSpacing(0.04f);
-                    more.setTypeface(androidx.core.content.res.ResourcesCompat.getFont(
-                            CreateServerActivity.this, R.font.font_koda), android.graphics.Typeface.BOLD);
+                    MaterialButton more = eu.kodanetwork.mchost.util.KodaButtons.primary(
+                            CreateServerActivity.this, getString(R.string.modpack_load_more));
                     more.setLayoutParams(new RecyclerView.LayoutParams(
                             ViewGroup.LayoutParams.MATCH_PARENT, (int)(56 * getResources().getDisplayMetrics().density)));
                     return new RecyclerView.ViewHolder(more) {};
@@ -1277,14 +1270,7 @@ public class CreateServerActivity extends AppCompatActivity {
         sheet.setContentView(container);
 
         // --- Confirm Button: number flies back and merges into the field ---
-        MaterialButton btnConfirm = new MaterialButton(this);
-        btnConfirm.setText(getString(R.string.version_picker_confirm));
-        btnConfirm.setTextColor(0xFF000000);
-        btnConfirm.setBackgroundColor(0xFFFF6B00);
-        btnConfirm.setCornerRadius((int)(12 * density));
-        btnConfirm.setTextSize(13);
-        btnConfirm.setTypeface(androidx.core.content.res.ResourcesCompat.getFont(this, R.font.font_koda), android.graphics.Typeface.BOLD);
-        btnConfirm.setLetterSpacing(0.04f);
+        MaterialButton btnConfirm = eu.kodanetwork.mchost.util.KodaButtons.primary(this, getString(R.string.version_picker_confirm));
         LinearLayout.LayoutParams btnLp = new LinearLayout.LayoutParams(
             LinearLayout.LayoutParams.MATCH_PARENT,
             (int)(56 * density));

@@ -276,6 +276,7 @@
     <string name="java_runtime_downloading">正在下载 Java %1$d 运行时（%2$d%%）</string>
     <string name="java_runtime_dl_failed">Java %1$d 运行时下载失败：%2$s</string>
     <string name="java_runtime_updated">Java 运行时已设为 %1$s</string>
+    <string name="java_runtime_restarting">正在使用 Java %1$d 重启服务器…</string>
     <string name="download_error">下载错误</string>
     <string name="error_loading">加载错误</string>
     <string name="no_compatible_version_found">未找到兼容版本。</string>

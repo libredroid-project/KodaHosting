@@ -244,6 +244,7 @@
     <string name="java_runtime_downloading">Downloading Java %1$d runtime (%2$d%%)</string>
     <string name="java_runtime_dl_failed">Failed to download Java %1$d runtime: %2$s</string>
     <string name="java_runtime_updated">Java runtime set to %1$s</string>
+    <string name="java_runtime_restarting">Server is restarting with Java %1$d…</string>
     <string name="download_error">Download Error</string>
     <string name="error_loading">Error loading</string>
     <string name="no_compatible_version_found">No compatible version found.</string>

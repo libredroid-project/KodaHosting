@@ -425,19 +425,36 @@ public class ServerDetailActivity extends AppCompatActivity {
         tvRamInfo.setText(server.getRamMB() + " MB RAM");
         tvVerInfo.setText(server.getType().name() + " " + server.getVersion());
 
-        // Java check — uses exec() to actually test java, runs in background
+        // Java check — shows the runtime this server will actually use, runs in background
         tvJavaInfo.setText("checking java…");
         tvJavaInfo.setTextColor(eu.kodanetwork.mchost.util.ThemeHelper.isLightMode(this) ? 0xFF555566 : Color.parseColor("#888888"));
         new Thread(() -> {
-            String javaPath = JavaFinder.find(this);
-            runOnUiThread(() -> {
+            int jv = server.getJavaRuntime() != 0
+                    ? server.getJavaRuntime()
+                    : eu.kodanetwork.mchost.util.RuntimeManager.resolveAutoVersion(server);
+            String text;
+            int color;
+            if (jv == 25) {
+                String javaPath = JavaFinder.find(this);
                 if (javaPath != null) {
-                    tvJavaInfo.setText("✓ " + JavaFinder.version(this));
-                    tvJavaInfo.setTextColor(Color.parseColor("#00E676"));
+                    text = "✓ " + JavaFinder.version(this);
+                    color = Color.parseColor("#00E676");
                 } else {
-                    tvJavaInfo.setText("◌ Java wird beim Start automatisch installiert (JDK 25)");
-                    tvJavaInfo.setTextColor(Color.parseColor("#FFCC00"));
+                    text = "◌ Java wird beim Start automatisch installiert (JDK 25)";
+                    color = Color.parseColor("#FFCC00");
                 }
+            } else if (eu.kodanetwork.mchost.util.RuntimeManager.isRuntimeInstalled(this, jv)) {
+                text = "✓ OpenJDK " + jv;
+                color = Color.parseColor("#00E676");
+            } else {
+                text = "⬇ OpenJDK " + jv + " wird beim Start geladen";
+                color = Color.parseColor("#FFCC00");
+            }
+            final String fText = text;
+            final int fColor = color;
+            runOnUiThread(() -> {
+                tvJavaInfo.setText(fText);
+                tvJavaInfo.setTextColor(fColor);
             });
         }).start();
     }
@@ -2331,7 +2348,6 @@ public class ServerDetailActivity extends AppCompatActivity {
 
         final int[] choices = {0, 8, 17, 21, 25};
         for (int choice : choices) {
-            MaterialButton btn = new MaterialButton(this);
             String label;
             if (choice == 0) {
                 label = getString(R.string.java_runtime_auto, eu.kodanetwork.mchost.util.RuntimeManager.resolveAutoVersion(server));
@@ -2339,10 +2355,9 @@ public class ServerDetailActivity extends AppCompatActivity {
                 label = getString(R.string.java_runtime_manual, choice);
             }
             boolean selected = server.getJavaRuntime() == choice;
-            btn.setText(label);
-            btn.setTextColor(selected ? 0xFF000000 : 0xFFF0F0F0);
-            btn.setBackgroundColor(selected ? 0xFFFF6B00 : 0xFF241C18);
-            btn.setCornerRadius(12);
+            MaterialButton btn = selected
+                    ? eu.kodanetwork.mchost.util.KodaButtons.primary(this, label)
+                    : eu.kodanetwork.mchost.util.KodaButtons.dark(this, label);
             LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
                     LinearLayout.LayoutParams.MATCH_PARENT, (int)(52 * getResources().getDisplayMetrics().density));
             lp.bottomMargin = (int)(8 * getResources().getDisplayMetrics().density);
@@ -2351,16 +2366,76 @@ public class ServerDetailActivity extends AppCompatActivity {
                 server.setJavaRuntime(sel);
                 repo.update(server);
                 updateJavaRuntimeLabel(tvJavaRuntime);
-                Toast.makeText(this, getString(R.string.java_runtime_updated,
-                        sel == 0 ? getString(R.string.java_runtime_auto,
-                                eu.kodanetwork.mchost.util.RuntimeManager.resolveAutoVersion(server))
-                                : getString(R.string.java_runtime_manual, sel)), Toast.LENGTH_SHORT).show();
                 sheet.dismiss();
+                applyJavaRuntimeChange();
             });
             container.addView(btn, lp);
         }
         sheet.setContentView(container);
         sheet.show();
+    }
+
+    /** Applies a runtime change: restarts a running server, pre-downloads the runtime otherwise. */
+    private void applyJavaRuntimeChange() {
+        int version = server.getJavaRuntime() != 0
+                ? server.getJavaRuntime()
+                : eu.kodanetwork.mchost.util.RuntimeManager.resolveAutoVersion(server);
+        boolean running = server.state == ServerInstance.State.ONLINE
+                || server.state == ServerInstance.State.STARTING
+                || server.state == ServerInstance.State.RESTARTING;
+        if (running) {
+            Toast.makeText(this, getString(R.string.java_runtime_restarting, version), Toast.LENGTH_SHORT).show();
+            Intent kill = new Intent(this, KodaServerService.class);
+            kill.setAction(KodaServerService.ACTION_KILL);
+            kill.putExtra(KodaServerService.EXTRA_ID, server.getId());
+            startService(kill);
+            new Thread(() -> {
+                int retries = 0;
+                ServerInstance s = server;
+                while (retries < 30) {
+                    try { Thread.sleep(500); } catch (InterruptedException ignored) {}
+                    s = repo.byId(server.getId());
+                    if (s == null) return;
+                    if (s.state == ServerInstance.State.OFFLINE || s.state == ServerInstance.State.CRASHED) break;
+                    retries++;
+                }
+                Intent start = new Intent(ServerDetailActivity.this, KodaServerService.class);
+                start.setAction(KodaServerService.ACTION_START);
+                start.putExtra("id", server.getId());
+                startService(start);
+                boolean ok = eu.kodanetwork.mchost.util.RuntimeManager.isRuntimeInstalled(this, version) || version == 25;
+                final int fV = version;
+                final boolean fOk = ok;
+                runOnUiThread(() -> {
+                    updateDash();
+                    if (fOk) {
+                        Toast.makeText(this, getString(R.string.java_runtime_updated,
+                                getString(R.string.java_runtime_manual, fV)), Toast.LENGTH_SHORT).show();
+                    } else {
+                        Toast.makeText(this, getString(R.string.java_runtime_dl_failed, fV, "not downloaded yet"), Toast.LENGTH_LONG).show();
+                    }
+                });
+            }).start();
+        } else if (version != 25 && !eu.kodanetwork.mchost.util.RuntimeManager.isRuntimeInstalled(this, version)) {
+            Toast.makeText(this, getString(R.string.java_runtime_downloading, version, 0), Toast.LENGTH_SHORT).show();
+            new Thread(() -> {
+                boolean ok = eu.kodanetwork.mchost.util.RuntimeManager.ensureRuntimeSync(this, version, null);
+                final int fV = version;
+                final boolean fOk = ok;
+                runOnUiThread(() -> {
+                    if (fOk) {
+                        Toast.makeText(this, getString(R.string.java_runtime_updated,
+                                getString(R.string.java_runtime_manual, fV)), Toast.LENGTH_SHORT).show();
+                    } else {
+                        Toast.makeText(this, getString(R.string.java_runtime_dl_failed, fV, "download failed"), Toast.LENGTH_LONG).show();
+                    }
+                    updateDash();
+                });
+            }).start();
+        } else {
+            Toast.makeText(this, getString(R.string.java_runtime_updated,
+                    getString(R.string.java_runtime_manual, version)), Toast.LENGTH_SHORT).show();
+        }
     }
 
     private void setupSettings() {

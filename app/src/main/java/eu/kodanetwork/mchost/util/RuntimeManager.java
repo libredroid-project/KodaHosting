@@ -27,12 +27,34 @@ public class RuntimeManager {
         void onProgress(int percent, String message);
     }
 
-    // Verified android-arm64 tar.xz builds from the AngelAuraMC openjdk repo
-    // (same build family as the bundled jre25 asset)
-    private static final java.util.Map<Integer, String> JRE_URLS = java.util.Map.of(
-            8,  "https://github.com/AngelAuraMC/angelauramc-openjdk-build/releases/download/download_jre8/jre8-android-arm64.tar.xz",
-            17, "https://github.com/AngelAuraMC/angelauramc-openjdk-build/releases/download/download_jre17/jre17-android-arm64.tar.xz",
-            21, "https://github.com/AngelAuraMC/angelauramc-openjdk-build/releases/download/download_jre21/jre21-android-arm64.tar.xz");
+    // Primary source: our own Supabase artifacts bucket (public). Fallback: AngelAuraMC
+    // GitHub releases. Both host the same android-arm64 tar.xz builds.
+    private static String runtimeUrl(int version) {
+        String supabase = eu.kodanetwork.mchost.security.PraetorSecurity.getSupabaseUrl()
+                + "/storage/v1/object/public/artifacts/openjdk" + version
+                + "/openjdk" + version + "-android-arm64.tar.xz";
+        if (urlExists(supabase)) return supabase;
+        switch (version) {
+            case 8:  return "https://github.com/AngelAuraMC/angelauramc-openjdk-build/releases/download/download_jre8/jre8-android-arm64.tar.xz";
+            case 17: return "https://github.com/AngelAuraMC/angelauramc-openjdk-build/releases/download/download_jre17/jre17-android-arm64.tar.xz";
+            case 21: return "https://github.com/AngelAuraMC/angelauramc-openjdk-build/releases/download/download_jre21/jre21-android-arm64.tar.xz";
+            default: return null;
+        }
+    }
+
+    private static boolean urlExists(String urlStr) {
+        try {
+            HttpURLConnection c = (HttpURLConnection) new URL(urlStr).openConnection();
+            c.setRequestMethod("HEAD");
+            c.setConnectTimeout(5000);
+            c.setReadTimeout(5000);
+            int code = c.getResponseCode();
+            c.disconnect();
+            return code >= 200 && code < 300;
+        } catch (Exception e) {
+            return false;
+        }
+    }
 
     private static final AtomicBoolean downloadLock = new AtomicBoolean(false);
 
@@ -63,7 +85,7 @@ public class RuntimeManager {
     public static boolean ensureRuntimeSync(Context ctx, int version, ProgressListener listener) {
         if (isRuntimeInstalled(ctx, version)) return true;
         if (version == 25) return false; // bundled only; StartOrchestrator handles it
-        String url = JRE_URLS.get(version);
+        String url = runtimeUrl(version);
         if (url == null) return false;
 
         if (!downloadLock.compareAndSet(false, true)) {

@@ -1209,19 +1209,22 @@ public class KodaServerService extends Service {
             String javaBinPath = null;
             if (javaVersion != 25) {
                 if (!eu.kodanetwork.mchost.util.RuntimeManager.isRuntimeInstalled(this, javaVersion)) {
-                    log(srv.getId(), "  ⬇ " + getString(R.string.java_runtime_downloading, javaVersion, 0));
+                    log(srv.getId(), "  ⬇ Lade Java-" + javaVersion + "-Runtime (~30 MB)...");
                     boolean ok = eu.kodanetwork.mchost.util.RuntimeManager.ensureRuntimeSync(this, javaVersion,
-                            (pct, msg) -> log(srv.getId(), "  ⬇ " + getString(R.string.java_runtime_downloading, javaVersion, pct) + " " + msg));
-                    if (!ok) {
-                        log(srv.getId(), "  ✗ " + getString(R.string.java_runtime_dl_failed, javaVersion, "download failed"));
+                            (pct, msg) -> log(srv.getId(), "  ⬇ Java " + javaVersion + ": " + pct + "% (" + msg + ")"));
+                    if (ok) {
+                        javaBinPath = eu.kodanetwork.mchost.util.RuntimeManager.getJavaBin(this, javaVersion);
                     }
-                }
-                javaBinPath = eu.kodanetwork.mchost.util.RuntimeManager.getJavaBin(this, javaVersion);
-                if (javaBinPath != null) {
-                    log(srv.getId(), "  ℹ Using Java " + javaVersion + " runtime");
+                } else {
+                    javaBinPath = eu.kodanetwork.mchost.util.RuntimeManager.getJavaBin(this, javaVersion);
                 }
             }
-            if (javaBinPath == null) {
+            if (javaBinPath != null) {
+                log(srv.getId(), "  ℹ Java-" + javaVersion + "-Runtime aktiv: " + javaBinPath);
+            } else {
+                if (javaVersion != 25) {
+                    log(srv.getId(), "  ⚠ Java " + javaVersion + " nicht verfügbar — Fallback auf Java 25");
+                }
                 javaBinPath = eu.kodanetwork.mchost.util.JavaFinder.find(this);
             }
             if (javaBinPath == null) {

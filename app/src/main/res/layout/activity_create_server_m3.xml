@@ -174,8 +174,7 @@
                         <!-- Dev only: Java runtime preselection -->
                         <TextView android:id="@+id/tv_dev_java_runtime"
                             android:layout_width="match_parent" android:layout_height="wrap_content"
-                            android:background="?attr/colorSurfaceContainerHighest"
-                            android:padding="12dp" android:layout_marginBottom="8dp"
+                            android:padding="4dp" android:layout_marginBottom="12dp"
                             android:gravity="center"
                             android:textColor="?attr/colorPrimary"
                             android:textAppearance="?attr/textAppearanceLabelSmall"

@@ -262,6 +262,7 @@
     <string name="java_runtime_downloading">Java-%1$d-Runtime wird geladen (%2$d%%)</string>
     <string name="java_runtime_dl_failed">Java-%1$d-Runtime konnte nicht geladen werden: %2$s</string>
     <string name="java_runtime_updated">Java-Runtime gesetzt auf %1$s</string>
+    <string name="java_runtime_restarting">Server wird mit Java %1$d neu gestartet…</string>
     <string name="download_error">Download-Fehler</string>
     <string name="error_loading">Fehler beim Laden</string>
     <string name="no_compatible_version_found">Keine kompatible Version gefunden.</string>

@@ -200,8 +200,7 @@
                 <!-- Dev only: Java runtime preselection -->
                 <TextView android:id="@+id/tv_dev_java_runtime"
                     android:layout_width="match_parent" android:layout_height="wrap_content"
-                    android:background="@drawable/input_field"
-                    android:padding="12dp" android:layout_marginBottom="20dp"
+                    android:padding="4dp" android:layout_marginBottom="12dp"
                     android:gravity="center"
                     android:textColor="#FF8C38"
                     android:textSize="11sp" android:fontFamily="@font/font_koda"
