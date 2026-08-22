@@ -1040,6 +1040,11 @@ public class KodaServerService extends Service {
                     java.io.FileOutputStream fos = new java.io.FileOutputStream(progArgsFile);
                     fos.write("--installServer\n".getBytes());
                     fos.close();
+                    
+                    java.io.FileOutputStream fosJvm = new java.io.FileOutputStream(jvmArgsFile, true);
+                    fosJvm.write("-Dsun.net.client.defaultReadTimeout=120000\n".getBytes());
+                    fosJvm.write("-Dsun.net.client.defaultConnectTimeout=30000\n".getBytes());
+                    fosJvm.close();
                 } catch (Exception e) {}
             }
             
