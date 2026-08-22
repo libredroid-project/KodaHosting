@@ -1327,7 +1327,23 @@ public class KodaServerService extends Service {
                         setState(srv, ServerInstance.State.CRASHED);
                     } else if (e instanceof android.os.DeadObjectException) {
                         // DeadObjectException without a detected crash pattern = normal stop
-                        setState(srv, ServerInstance.State.OFFLINE);
+                        if (installing) {
+                            log(id, "  ✓ Installation complete. Rebooting into server...");
+                            if (rt.frpcProc != null) {
+                                try { rt.frpcProc.destroyForcibly(); } catch (Exception ignored) {}
+                            }
+                            runtimes.remove(id);
+                            updateNotif();
+                            if (jvmConnRef[0] != null) {
+                                try { unbindService(jvmConnRef[0]); } catch (Exception ignored) {}
+                            }
+                            new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
+                                startEmbeddedJvmFlow(srv, jar, logFile);
+                            }, 2000);
+                            return;
+                        } else {
+                            setState(srv, ServerInstance.State.OFFLINE);
+                        }
                     } else {
                         setState(srv, ServerInstance.State.CRASHED);
                     }
