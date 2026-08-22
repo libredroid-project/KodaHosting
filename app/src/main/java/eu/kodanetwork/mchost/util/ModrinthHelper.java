@@ -72,12 +72,15 @@ public class ModrinthHelper {
         void onError(String err);
     }
 
-    /** Searches Fabric modpacks, 20 per page (offset = page*20). Empty query = browse by downloads. gameVersion null = all versions. */
-    public static void searchModpacks(String query, String gameVersion, int offset, ModpackSearchCallback cb) {
+    /** Searches modpacks by loader, 20 per page (offset = page*20). Empty query = browse by downloads. gameVersion null = all versions. */
+    public static void searchModpacks(String query, String gameVersion, String modloader, int offset, ModpackSearchCallback cb) {
         executor.submit(() -> {
             try {
                 StringBuilder url = new StringBuilder(API_BASE + "/search?limit=20&offset=" + Math.max(0, offset));
-                String facets = "[[\"project_type:modpack\"],[\"categories:fabric\"]";
+                String facets = "[[\"project_type:modpack\"]";
+                if (modloader != null && !modloader.isEmpty()) {
+                    facets += ",[\"categories:" + modloader + "\"]";
+                }
                 if (gameVersion != null && !gameVersion.trim().isEmpty()) {
                     facets += ",[\"versions:" + gameVersion.trim() + "\"]";
                 }

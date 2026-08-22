@@ -13,6 +13,9 @@
 #define LOGI(...) __android_log_print(ANDROID_LOG_INFO, LOG_TAG, __VA_ARGS__)
 #define LOGE(...) __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, __VA_ARGS__)
 
+#include <fstream>
+#include <sstream>
+
 typedef jint (*JNICreateJavaVM_t)(JavaVM **, void **, void *);
 
 static JavaVM* g_jvm = nullptr;
@@ -202,6 +205,29 @@ Java_eu_kodanetwork_mchost_service_IsolatedJvmService_startEmbeddedJvmNative(
         options[optCount++].optionString = (char*)"-Dusing.aikars.flags=https://mcflags.emc.gs";
         options[optCount++].optionString = (char*)"-Djava.awt.headless=true";
 
+        // Read extra JVM arguments from koda_jvm_args.txt
+        std::vector<std::string> extraJvmArgs;
+        std::string jvmArgsPath = std::string(work_dir) + "/koda_jvm_args.txt";
+        std::ifstream jvmArgsFile(jvmArgsPath);
+        if (jvmArgsFile.is_open()) {
+            std::string line;
+            while (std::getline(jvmArgsFile, line)) {
+                if (!line.empty() && line[0] != '#') {
+                    // Remove carriage return if present
+                    if (!line.empty() && line.back() == '\r') line.pop_back();
+                    extraJvmArgs.push_back(line);
+                }
+            }
+            jvmArgsFile.close();
+        }
+
+        // Add them to options array
+        for (const auto& arg : extraJvmArgs) {
+            if (optCount < 128) {
+                options[optCount++].optionString = (char*)arg.c_str();
+            }
+        }
+
         JavaVMInitArgs vm_args;
         vm_args.version = JNI_VERSION_1_6;
         vm_args.nOptions = optCount;
@@ -251,7 +277,29 @@ Java_eu_kodanetwork_mchost_service_IsolatedJvmService_startEmbeddedJvmNative(
     bool isFabric = strstr(main_class, "fabric") != nullptr || strstr(main_class, "Fabric") != nullptr;
     jclass stringClass = vmEnv->FindClass("java/lang/String");
     jobjectArray args;
-    if (isFabric) {
+    
+    // Read dynamic program args if available
+    std::vector<std::string> extraProgArgs;
+    std::string progArgsPath = std::string(work_dir) + "/koda_program_args.txt";
+    std::ifstream progArgsFile(progArgsPath);
+    if (progArgsFile.is_open()) {
+        std::string line;
+        while (std::getline(progArgsFile, line)) {
+            if (!line.empty()) {
+                if (!line.empty() && line.back() == '\r') line.pop_back();
+                extraProgArgs.push_back(line);
+            }
+        }
+        progArgsFile.close();
+    }
+    
+    if (!extraProgArgs.empty()) {
+        args = vmEnv->NewObjectArray(extraProgArgs.size(), stringClass, nullptr);
+        for (size_t i = 0; i < extraProgArgs.size(); i++) {
+            jstring arg = vmEnv->NewStringUTF(extraProgArgs[i].c_str());
+            vmEnv->SetObjectArrayElement(args, i, arg);
+        }
+    } else if (isFabric) {
         args = vmEnv->NewObjectArray(1, stringClass, nullptr);
         jstring arg1 = vmEnv->NewStringUTF("--nogui");
         vmEnv->SetObjectArrayElement(args, 0, arg1);

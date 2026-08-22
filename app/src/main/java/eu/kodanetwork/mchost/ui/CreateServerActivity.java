@@ -732,40 +732,34 @@ public class CreateServerActivity extends AppCompatActivity {
         // Show/hide Auto Design option depending on type
         ServerInstance.Type type = TYPE_VALS[idx];
         boolean supportsAutoDesign = AUTO_DESIGN_TYPES.contains(type);
-        boolean isFabric = type == ServerInstance.Type.FABRIC;
+        boolean isModpackSupported = type == ServerInstance.Type.FABRIC || type == ServerInstance.Type.FORGE || type == ServerInstance.Type.NEOFORGE;
         if (layoutSetupSection != null) {
             if (sourceUri != null) {
                 layoutSetupSection.setVisibility(View.GONE);
                 if (rgSetupType != null) rgSetupType.check(R.id.rb_setup_manual);
             } else {
-                layoutSetupSection.setVisibility(supportsAutoDesign || isFabric ? View.VISIBLE : View.GONE);
-                if (!supportsAutoDesign && !isFabric && rgSetupType != null) rgSetupType.check(R.id.rb_setup_manual);
+                layoutSetupSection.setVisibility(supportsAutoDesign || isModpackSupported ? View.VISIBLE : View.GONE);
+                if (!supportsAutoDesign && !isModpackSupported && rgSetupType != null) rgSetupType.check(R.id.rb_setup_manual);
             }
         }
-        // Fabric: setup card shows Standard + Modpack instead of the design radios
-        if (rbSetupKoda != null) rbSetupKoda.setVisibility(isFabric ? View.GONE : View.VISIBLE);
-        if (rbSetupAi != null) rbSetupAi.setVisibility(isFabric ? View.GONE : rbSetupAi.getVisibility());
-        if (rbSetupModpack != null) rbSetupModpack.setVisibility(isFabric ? View.VISIBLE : View.GONE);
+        // Modpack-supported servers show Standard + Modpack instead of the design radios
+        if (rbSetupKoda != null) rbSetupKoda.setVisibility(isModpackSupported ? View.GONE : View.VISIBLE);
+        if (rbSetupAi != null) rbSetupAi.setVisibility(isModpackSupported ? View.GONE : rbSetupAi.getVisibility());
+        if (rbSetupModpack != null) rbSetupModpack.setVisibility(isModpackSupported ? View.VISIBLE : View.GONE);
         if (rbSetupManual != null) {
-            rbSetupManual.setText(isFabric ? R.string.setup_standard : R.string.setup_manual);
+            rbSetupManual.setText(isModpackSupported ? R.string.setup_standard : R.string.setup_manual);
         }
-        if (isFabric && selectedModpack == null && rgSetupType != null) {
+        if (isModpackSupported && selectedModpack == null && rgSetupType != null) {
             rgSetupType.check(R.id.rb_setup_manual);
         }
         if (layoutThemeColor != null && !supportsAutoDesign) {
             layoutThemeColor.setVisibility(View.GONE);
         }
-        // Forge / NeoForge are not usable yet — show a notice instead of the version picker
-        boolean unsupported = type == ServerInstance.Type.FORGE || type == ServerInstance.Type.NEOFORGE;
+        // Forge / NeoForge are supported natively via embedded JVM Installer now.
+        boolean unsupported = false;
         if (tvTypeUnsupported != null) {
-            tvTypeUnsupported.setVisibility(unsupported ? View.VISIBLE : View.GONE);
-            tvTypeUnsupported.setText(type == ServerInstance.Type.FORGE
-                    ? R.string.forge_in_dev : R.string.neoforge_in_dev);
+            tvTypeUnsupported.setVisibility(View.GONE);
         }
-        if (layoutVersionPickerRow != null) {
-            layoutVersionPickerRow.setVisibility(unsupported ? View.GONE : View.VISIBLE);
-        }
-        if (unsupported && tvVersionLoading != null) tvVersionLoading.setVisibility(View.GONE);
         if (layoutVersionSection != null) layoutVersionSection.setVisibility(View.VISIBLE);
         loadVersionsForType(idx);
     }
@@ -837,7 +831,10 @@ public class CreateServerActivity extends AppCompatActivity {
     /** Fullscreen modpack browser that expands out of the Modpack button. */
     /** Modpack picker styled like the resource pack downloader (dialog_modrinth_search sheet). */
     private void openModpackBrowser() {
-        if (selectedTypeIndex < 0 || TYPE_VALS[selectedTypeIndex] != ServerInstance.Type.FABRIC) return;
+        if (selectedTypeIndex < 0) return;
+        ServerInstance.Type stype = TYPE_VALS[selectedTypeIndex];
+        if (stype != ServerInstance.Type.FABRIC && stype != ServerInstance.Type.FORGE && stype != ServerInstance.Type.NEOFORGE) return;
+        final String loaderName = stype == ServerInstance.Type.FABRIC ? "fabric" : (stype == ServerInstance.Type.FORGE ? "forge" : "neoforge");
         // Guard: never stack two sheets (rapid double-trigger looked like the sheet "reopening")
         if (modpackSheetOpen) return;
         modpackSheetOpen = true;
@@ -965,7 +962,7 @@ public class CreateServerActivity extends AppCompatActivity {
             if (pb != null) pb.setVisibility(View.VISIBLE);
             String versionFilter = filterToSelected[0] ? filterVersion[0] : null;
             eu.kodanetwork.mchost.util.ModrinthHelper.searchModpacks(
-                    etQuery.getText().toString().trim(), versionFilter, fetched[0],
+                    etQuery.getText().toString().trim(), versionFilter, loaderName, fetched[0],
                     new eu.kodanetwork.mchost.util.ModrinthHelper.ModpackSearchCallback() {
                         @Override
                         public void onResult(java.util.List<eu.kodanetwork.mchost.util.ModrinthHelper.ModpackHit> results, int total) {
@@ -1774,12 +1771,7 @@ public class CreateServerActivity extends AppCompatActivity {
         int port = 30000 + new java.util.Random().nextInt(10000);
         String version = selectedVersion != null && !selectedVersion.isEmpty() ? selectedVersion : "1.21.4";
         ServerInstance.Type type = TYPE_VALS[selectedTypeIndex];
-        // Safety net: Forge/NeoForge are still in development — block before anything is allocated
-        if (type == ServerInstance.Type.FORGE || type == ServerInstance.Type.NEOFORGE) {
-            Toast.makeText(this, getString(type == ServerInstance.Type.FORGE
-                    ? R.string.forge_in_dev : R.string.neoforge_in_dev), Toast.LENGTH_LONG).show();
-            return;
-        }
+        // Safety net: No longer block Forge/NeoForge, they are now supported!
         String id  = UUID.randomUUID().toString();
         boolean useNative = swUseNative.isChecked();
         String dir = useNative ? new File(getFilesDir(), "servers/" + id).getAbsolutePath() : android.os.Environment.getExternalStoragePublicDirectory(android.os.Environment.DIRECTORY_DOCUMENTS) + "/KodaNetwork/servers/" + id;
@@ -1791,7 +1783,7 @@ public class CreateServerActivity extends AppCompatActivity {
         s.setAutoSetup(checkedId == R.id.rb_setup_koda || checkedId == R.id.rb_setup_ai);
         // Modpack server: remember the pack, skip auto-design plugins; the fabric jar
         // download + start are triggered via the auto_setup extra below
-        boolean modpackServer = selectedModpack != null && type == ServerInstance.Type.FABRIC;
+        boolean modpackServer = selectedModpack != null && (type == ServerInstance.Type.FABRIC || type == ServerInstance.Type.FORGE || type == ServerInstance.Type.NEOFORGE);
         if (modpackServer) {
             s.setAutoSetup(false);
             s.setModpackName(selectedModpackTitle != null ? selectedModpackTitle : "");

@@ -1022,7 +1022,27 @@ public class KodaServerService extends Service {
                 return;
             }
 
+            File serverDir = logFile.getParentFile();
+            File jvmArgsFile = new File(serverDir, "koda_jvm_args.txt");
+            File progArgsFile = new File(serverDir, "koda_program_args.txt");
+            jvmArgsFile.delete();
+            progArgsFile.delete();
+
+            boolean isForgeFamily = srv.getType() == ServerInstance.Type.FORGE || srv.getType() == ServerInstance.Type.NEOFORGE;
+            boolean needsInstall = isForgeFamily && !new File(serverDir, "libraries").exists();
+            final boolean installing = needsInstall;
+
             String mainClassName = "org/bukkit/craftbukkit/Main";
+            
+            if (installing) {
+                log(id, "  ℹ Running headless installer for " + srv.getType().name() + "...");
+                try {
+                    java.io.FileOutputStream fos = new java.io.FileOutputStream(progArgsFile);
+                    fos.write("--installServer\n".getBytes());
+                    fos.close();
+                } catch (Exception e) {}
+            }
+            
             try {
                 java.util.jar.JarFile jarFile = new java.util.jar.JarFile(jar);
                 java.util.jar.Manifest manifest = jarFile.getManifest();
@@ -1037,6 +1057,75 @@ public class KodaServerService extends Service {
                 jarFile.close();
             } catch (Exception e) {
                 log(id, "  ⚠ Could not read jar manifest: " + e.getMessage());
+            }
+
+            if (isForgeFamily && !installing) {
+                // Find unix_args.txt
+                File libs = new File(serverDir, "libraries");
+                File[] search = null;
+                if (srv.getType() == ServerInstance.Type.FORGE) {
+                    File forgeDir = new File(libs, "net/minecraftforge/forge");
+                    if (forgeDir.exists()) search = forgeDir.listFiles();
+                } else if (srv.getType() == ServerInstance.Type.NEOFORGE) {
+                    File neoforgeDir = new File(libs, "net/neoforged/neoforge");
+                    if (neoforgeDir.exists()) search = neoforgeDir.listFiles();
+                }
+                
+                File unixArgs = null;
+                if (search != null) {
+                    for (File f : search) {
+                        if (f.isDirectory()) {
+                            File ua = new File(f, "unix_args.txt");
+                            if (ua.exists()) unixArgs = ua;
+                        }
+                    }
+                }
+                
+                if (unixArgs != null && unixArgs.exists()) {
+                    log(id, "  ℹ Parsing " + unixArgs.getName() + " for JNI args...");
+                    try {
+                        java.io.BufferedReader br = new java.io.BufferedReader(new java.io.FileReader(unixArgs));
+                        java.io.FileWriter jvmOut = new java.io.FileWriter(jvmArgsFile);
+                        java.io.FileWriter progOut = new java.io.FileWriter(progArgsFile);
+                        
+                        String line;
+                        boolean foundMain = false;
+                        while ((line = br.readLine()) != null) {
+                            line = line.trim();
+                            if (line.isEmpty()) continue;
+                            
+                            if (!foundMain) {
+                                if (line.equals("-p")) {
+                                    jvmOut.write("--module-path=" + br.readLine().trim() + "\n");
+                                } else if (line.equals("--add-modules") || line.equals("--add-opens") || line.equals("--add-exports")) {
+                                    jvmOut.write(line + "=" + br.readLine().trim() + "\n");
+                                } else if (line.equals("-cp") || line.equals("-classpath")) {
+                                    jvmOut.write("-Djava.class.path=" + br.readLine().trim() + "\n");
+                                } else if (!line.startsWith("-")) {
+                                    mainClassName = line.replace(".", "/");
+                                    foundMain = true;
+                                    log(id, "  ℹ Bootstrapper: " + mainClassName);
+                                } else {
+                                    // other jvm arg
+                                    jvmOut.write(line + "\n");
+                                }
+                            } else {
+                                // Program arg
+                                progOut.write(line + "\n");
+                            }
+                        }
+                        
+                        progOut.write("--nogui\n"); // Always append nogui
+                        
+                        br.close();
+                        jvmOut.close();
+                        progOut.close();
+                    } catch (Exception e) {
+                        log(id, "  ✗ Failed to parse unix_args: " + e.getMessage());
+                    }
+                } else {
+                    log(id, "  ⚠ Could not find unix_args.txt! Launch may fail.");
+                }
             }
 
             RT rt = new RT();
@@ -1165,6 +1254,14 @@ public class KodaServerService extends Service {
                     runtimes.remove(id);
                     updateNotif();
                     try { unbindService(jvmConn); } catch (Exception ignored) {}
+                    
+                    if (installing && result == 0) {
+                        log(id, "  ✓ Installation complete. Rebooting into server...");
+                        new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
+                            startEmbeddedJvmFlow(srv, jar, logFile);
+                        }, 2000);
+                        return;
+                    }
                     
                     if (result == -99 || result == -98 || (jvmSvc[0] == null)) {
                         String errMsg = "Isolated JVM process crashed unexpectedly";

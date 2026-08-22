@@ -151,7 +151,12 @@ public class JarDownloader {
         // This is a complex one, let's try a direct approach for common versions if possible.
         // For now, let's use the official maven metadata.
         String xml = fetch("https://maven.neoforged.net/releases/net/neoforged/neoforge/maven-metadata.xml");
-        Pattern p = Pattern.compile("<version>(" + mcVer.replace(".", "\\.") + "\\.[0-9]+)</version>");
+        
+        // NeoForge uses mapping: 1.21.1 -> 21.1, 1.20.4 -> 20.4
+        String[] parts = mcVer.split("\\.");
+        String neoPrefix = parts[1] + "." + (parts.length > 2 ? parts[2] : "0");
+        
+        Pattern p = Pattern.compile("<version>(" + neoPrefix.replace(".", "\\.") + "\\.[0-9]+(?:-beta)?)</version>");
         java.util.regex.Matcher m = p.matcher(xml);
         String latest = null;
         while (m.find()) latest = m.group(1); // Get the last one in the list (usually latest)
