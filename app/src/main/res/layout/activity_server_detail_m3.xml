@@ -285,6 +285,12 @@
                 android:visibility="gone"
                 android:layout_marginBottom="16dp"/>
 
+            <FrameLayout
+                android:id="@+id/layout_crash_banner"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:visibility="gone" />
+
             <!-- CONTROLS CARD -->
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/card_controls"

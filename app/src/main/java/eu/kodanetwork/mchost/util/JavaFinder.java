@@ -19,16 +19,15 @@ public class JavaFinder {
     private static String cachedPath = null;
     private static boolean checked   = false;
 
-    public static String find(Context ctx) {
-        if (checked && cachedPath != null && new File(cachedPath).exists()) return cachedPath;
+    public static String find(Context ctx, int javaVersion) {
+        if (checked && cachedPath != null && new File(cachedPath).exists() && cachedPath.contains("jre" + javaVersion)) return cachedPath;
         checked = true;
 
-        // Primary: JDK 25 extracted by StartOrchestrator
-        File jre25Bin = new File(ctx.getFilesDir(), "jre25/bin/java");
-        if (jre25Bin.exists()) {
-            jre25Bin.setExecutable(true, false);
-            cachedPath = jre25Bin.getAbsolutePath();
-            eu.kodanetwork.mchost.util.AppLogger.log(TAG, "[Native Setup] ✓ Java bereit: " + cachedPath);
+        File targetBin = new File(ctx.getFilesDir(), "jre" + javaVersion + "/bin/java");
+        if (targetBin.exists()) {
+            targetBin.setExecutable(true, false);
+            cachedPath = targetBin.getAbsolutePath();
+            eu.kodanetwork.mchost.util.AppLogger.log(TAG, "[Native Setup] ✓ Java " + javaVersion + " bereit: " + cachedPath);
             return cachedPath;
         }
 
@@ -160,6 +159,6 @@ public class JavaFinder {
 
     public static String version(Context ctx) { return "OpenJDK 25 (Native)"; }
     public static String getShellPrefix() { return ""; }
-    public static boolean available(Context ctx) { return find(ctx) != null; }
+    public static boolean available(Context ctx, int version) { return find(ctx, version) != null; }
     public static void clearCache() { checked = false; cachedPath = null; }
 }

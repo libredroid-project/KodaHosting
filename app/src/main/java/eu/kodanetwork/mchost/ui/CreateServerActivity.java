@@ -58,19 +58,12 @@ import eu.kodanetwork.mchost.util.HapticUtil;
 
 public class CreateServerActivity extends AppCompatActivity {
 
-    // Offline fallback for Fabric — the real list is fetched live from meta.fabricmc.net
-    private static final String[] FABRIC_VERSIONS  = {
-        "26.2","26.1",
-        "1.21.11","1.21.10","1.21.9","1.21.8","1.21.7","1.21.6","1.21.5",
-        "1.21.4","1.21.3","1.21.2","1.21.1","1.21",
-        "1.20.6","1.20.5","1.20.4","1.20.3","1.20.2","1.20.1","1.20",
-        "1.19.4","1.19.3","1.19.2","1.19.1","1.19",
-        "1.18.2","1.18.1","1.18",
-        "1.17.1","1.17",
-        "1.16.5","1.16.4","1.16.3","1.16.2","1.16.1","1.16"
-    };
-    private static final String[] VANILLA_VERSIONS = {"1.21.4","1.21.3","1.21.1","1.20.6","1.20.4","1.20.1","1.19.4","1.18.2","1.17.1","1.16.5"};
-    private static final String[] FORGE_VERSIONS   = {"1.21.1","1.20.1","1.19.2","1.18.2","1.16.5","1.12.2"};
+    private static final String[] VANILLA_VERSIONS = {"1.21.4","1.21.3","1.21.1","1.20.6","1.20.4","1.20.1","1.19.4","1.18.2","1.17.1","1.16.5","1.15.2","1.14.4","1.13.2","1.12.2","1.11.2","1.10.2","1.9.4","1.8.9"};
+    private static final String[] PAPER_VERSIONS   = {"1.21.4","1.21.3","1.21.1","1.20.6","1.20.4","1.20.1","1.19.4","1.18.2","1.17.1","1.16.5","1.15.2","1.14.4","1.13.2","1.12.2","1.11.2","1.10.2","1.9.4","1.8.9"};
+    private static final String[] PURPUR_VERSIONS  = {"1.21.4","1.21.3","1.21.1","1.20.6","1.20.4","1.20.1","1.19.4","1.18.2","1.17.1","1.16.5","1.15.2","1.14.4","1.8.9"};
+    private static final String[] FABRIC_VERSIONS  = {"1.21.4","1.21.3","1.21.1","1.20.6","1.20.4","1.20.1","1.19.4","1.18.2","1.17.1","1.16.5","1.15.2","1.14.4","1.8.9"};
+    private static final String[] FOLIA_VERSIONS   = {"1.21.4","1.21.1","1.20.6","1.20.4","1.19.4","1.18.2"};
+    private static final String[] FORGE_VERSIONS   = {"1.21.1","1.20.1","1.19.2","1.18.2","1.16.5","1.15.2","1.14.4","1.13.2","1.12.2","1.11.2","1.10.2","1.9.4","1.8.9"};
     private static final String[] NEOFORGE_VERSIONS= {"1.21.4","1.21.3","1.21.1","1.20.6","1.20.4","1.20.1"};
     private static final String[] VELOCITY_VERSIONS = {"3.4.0","3.3.0","3.2.0","3.1.2","3.1.1","3.1.0"};
 
@@ -111,6 +104,7 @@ public class CreateServerActivity extends AppCompatActivity {
     private TextView tvModpackSelected;
     private boolean modpackSheetOpen = false;
     private int createJavaRuntime = 0; // 0 = Auto; dev-only preselection
+    private Runnable updateDevJava;
 
     private int ramMB = 1024;
     private int selectedTypeIndex = 0;
@@ -261,14 +255,19 @@ public class CreateServerActivity extends AppCompatActivity {
         if (tvDevJava != null && eu.kodanetwork.mchost.App.getPrefs(this).getBoolean("dev_mode_unlocked", false)) {
             tvDevJava.setVisibility(View.VISIBLE);
             final TextView tvDev = tvDevJava;
-            Runnable[] update = {null};
-            update[0] = () -> tvDev.setText("Java: " + (createJavaRuntime == 0
-                    ? getString(R.string.java_runtime_auto, 25) : getString(R.string.java_runtime_manual, createJavaRuntime)));
-            update[0].run();
+            this.updateDevJava = () -> {
+                boolean isFabricType = TYPE_VALS[selectedTypeIndex] == eu.kodanetwork.mchost.model.ServerInstance.Type.FABRIC;
+                tvDev.setText("Java: " + (createJavaRuntime == 0
+                    ? getString(R.string.java_runtime_auto, eu.kodanetwork.mchost.util.RuntimeManager.resolveAutoVersion(selectedVersion, isFabricType)) 
+                    : getString(R.string.java_runtime_manual, createJavaRuntime)));
+            };
+            this.updateDevJava.run();
             tvDevJava.setOnClickListener(v -> {
+                boolean isFabricType = TYPE_VALS[selectedTypeIndex] == eu.kodanetwork.mchost.model.ServerInstance.Type.FABRIC;
+                final int autoVer = eu.kodanetwork.mchost.util.RuntimeManager.resolveAutoVersion(selectedVersion, isFabricType);
                 final int[] opts = {0, 8, 17, 21, 25};
                 String[] labels = {
-                        getString(R.string.java_runtime_auto, 25),
+                        getString(R.string.java_runtime_auto, autoVer),
                         getString(R.string.java_runtime_manual, 8),
                         getString(R.string.java_runtime_manual, 17),
                         getString(R.string.java_runtime_manual, 21),
@@ -279,7 +278,7 @@ public class CreateServerActivity extends AppCompatActivity {
                         .setTitle(R.string.java_runtime_label)
                         .setSingleChoiceItems(labels, cur, (d, which) -> {
                             createJavaRuntime = opts[which];
-                            update[0].run();
+                            if (this.updateDevJava != null) this.updateDevJava.run();
                             d.dismiss();
                         })
                         .setNegativeButton(R.string.modpack_cancel, null)
@@ -533,6 +532,7 @@ public class CreateServerActivity extends AppCompatActivity {
                                 if (ver.contains(fVersion)) {
                                     selectedVersion = ver;
                                     if (tvVersionSelected != null) tvVersionSelected.setText(ver);
+                                    if (updateDevJava != null) updateDevJava.run();
                                     break;
                                 }
                             }
@@ -613,6 +613,7 @@ public class CreateServerActivity extends AppCompatActivity {
                             if (ver.contains(fVersion)) {
                                 selectedVersion = ver;
                                 if (tvVersionSelected != null) tvVersionSelected.setText(ver);
+                                if (updateDevJava != null) updateDevJava.run();
                                 break;
                             }
                         }
@@ -733,8 +734,13 @@ public class CreateServerActivity extends AppCompatActivity {
         boolean supportsAutoDesign = AUTO_DESIGN_TYPES.contains(type);
         boolean isFabric = type == ServerInstance.Type.FABRIC;
         if (layoutSetupSection != null) {
-            layoutSetupSection.setVisibility(supportsAutoDesign || isFabric ? View.VISIBLE : View.GONE);
-            if (!supportsAutoDesign && !isFabric) rgSetupType.check(R.id.rb_setup_manual);
+            if (sourceUri != null) {
+                layoutSetupSection.setVisibility(View.GONE);
+                if (rgSetupType != null) rgSetupType.check(R.id.rb_setup_manual);
+            } else {
+                layoutSetupSection.setVisibility(supportsAutoDesign || isFabric ? View.VISIBLE : View.GONE);
+                if (!supportsAutoDesign && !isFabric && rgSetupType != null) rgSetupType.check(R.id.rb_setup_manual);
+            }
         }
         // Fabric: setup card shows Standard + Modpack instead of the design radios
         if (rbSetupKoda != null) rbSetupKoda.setVisibility(isFabric ? View.GONE : View.VISIBLE);
@@ -816,14 +822,14 @@ public class CreateServerActivity extends AppCompatActivity {
         return new ArrayList<>();
     }
 
-    /** 1.x counts from 1.16 upwards; the new year-based scheme (26.x, …) is always supported. */
+    /** 1.x counts from 1.8 upwards; the new year-based scheme (26.x, …) is always supported. */
     private boolean isFabricSupportedVersion(String v) {
         if (v == null || v.isEmpty()) return false;
         String[] parts = v.split("\\.");
         try {
             int major = Integer.parseInt(parts[0]);
             if (major > 1) return true;
-            if (major == 1 && parts.length >= 2) return Integer.parseInt(parts[1]) >= 16;
+            if (major == 1 && parts.length >= 2) return Integer.parseInt(parts[1]) >= 8;
         } catch (NumberFormatException ignored) {}
         return false;
     }
@@ -925,6 +931,7 @@ public class CreateServerActivity extends AppCompatActivity {
                                 filterVersion[0] = info.gameVersion;
                                 selectedVersion = info.gameVersion;
                                 if (tvVersionSelected != null) tvVersionSelected.setText(selectedVersion);
+                                if (updateDevJava != null) updateDevJava.run();
                                 Toast.makeText(CreateServerActivity.this,
                                         getString(R.string.modpack_version_applied, info.gameVersion),
                                         Toast.LENGTH_SHORT).show();
@@ -1095,6 +1102,7 @@ public class CreateServerActivity extends AppCompatActivity {
         if (!versions.isEmpty()) {
             selectedVersion = versions.get(0);
             if (tvVersionSelected != null) tvVersionSelected.setText(selectedVersion);
+            if (updateDevJava != null) updateDevJava.run();
         }
     }
 
@@ -1278,6 +1286,7 @@ public class CreateServerActivity extends AppCompatActivity {
         btnConfirm.setOnClickListener(v -> {
             selectedVersion = currentVersions.get(currentPos[0]);
             if (tvVersionSelected != null) tvVersionSelected.setText(selectedVersion);
+            if (updateDevJava != null) updateDevJava.run();
             sheet.dismiss();
         });
         container.addView(btnConfirm, btnLp);

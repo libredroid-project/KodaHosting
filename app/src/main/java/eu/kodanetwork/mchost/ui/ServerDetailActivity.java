@@ -426,8 +426,13 @@ public class ServerDetailActivity extends AppCompatActivity {
         tvVerInfo.setText(server.getType().name() + " " + server.getVersion());
 
         // Java check — shows the runtime this server will actually use, runs in background
+        updateJavaInfoDash();
+    }
+
+    private void updateJavaInfoDash() {
+        if (tvJavaInfo == null) return;
         tvJavaInfo.setText("checking java…");
-        tvJavaInfo.setTextColor(eu.kodanetwork.mchost.util.ThemeHelper.isLightMode(this) ? 0xFF555566 : Color.parseColor("#888888"));
+        tvJavaInfo.setTextColor(eu.kodanetwork.mchost.util.ThemeHelper.isLightMode(this) ? 0xFF555566 : android.graphics.Color.parseColor("#888888"));
         new Thread(() -> {
             int jv = server.getJavaRuntime() != 0
                     ? server.getJavaRuntime()
@@ -435,20 +440,20 @@ public class ServerDetailActivity extends AppCompatActivity {
             String text;
             int color;
             if (jv == 25) {
-                String javaPath = JavaFinder.find(this);
+                String javaPath = eu.kodanetwork.mchost.util.JavaFinder.find(this, 25);
                 if (javaPath != null) {
-                    text = "✓ " + JavaFinder.version(this);
-                    color = Color.parseColor("#00E676");
+                    text = "✓ " + eu.kodanetwork.mchost.util.JavaFinder.version(this);
+                    color = android.graphics.Color.parseColor("#00E676");
                 } else {
                     text = "◌ Java wird beim Start automatisch installiert (JDK 25)";
-                    color = Color.parseColor("#FFCC00");
+                    color = android.graphics.Color.parseColor("#FFCC00");
                 }
             } else if (eu.kodanetwork.mchost.util.RuntimeManager.isRuntimeInstalled(this, jv)) {
                 text = "✓ OpenJDK " + jv;
-                color = Color.parseColor("#00E676");
+                color = android.graphics.Color.parseColor("#00E676");
             } else {
                 text = "⬇ OpenJDK " + jv + " wird beim Start geladen";
-                color = Color.parseColor("#FFCC00");
+                color = android.graphics.Color.parseColor("#FFCC00");
             }
             final String fText = text;
             final int fColor = color;
@@ -1787,6 +1792,106 @@ public class ServerDetailActivity extends AppCompatActivity {
         if (st == ServerInstance.State.CRASHED || (st == ServerInstance.State.OFFLINE && !server.isAutoSetup())) {
             if (layoutFullLoading != null) layoutFullLoading.setVisibility(View.GONE);
         }
+
+        updateCrashBanner(st);
+    }
+
+    private void updateCrashBanner(ServerInstance.State st) {
+        android.widget.FrameLayout bannerContainer = findViewById(R.id.layout_crash_banner);
+        if (bannerContainer == null) return;
+
+        if (st != ServerInstance.State.CRASHED) {
+            bannerContainer.setVisibility(View.GONE);
+            bannerContainer.removeAllViews();
+            return;
+        }
+
+        if (bannerContainer.getChildCount() > 0) {
+            bannerContainer.setVisibility(View.VISIBLE);
+            return;
+        }
+
+        // Build the banner programmatically
+        LinearLayout banner = new LinearLayout(this);
+        banner.setOrientation(LinearLayout.VERTICAL);
+        banner.setPadding(dp(16), dp(16), dp(16), dp(16));
+        android.graphics.drawable.GradientDrawable bg = new android.graphics.drawable.GradientDrawable();
+        bg.setShape(android.graphics.drawable.GradientDrawable.RECTANGLE);
+        bg.setCornerRadius(dp(12));
+        bg.setColor(0xFF201015);
+        bg.setStroke(dp(1), 0xFF4A1520);
+        banner.setBackground(bg);
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+            android.view.ViewGroup.LayoutParams.MATCH_PARENT, android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
+        params.setMargins(dp(16), 0, dp(16), dp(16));
+        banner.setLayoutParams(params);
+
+        TextView title = new TextView(this);
+        title.setText("⚠  " + getString(R.string.crash_title));
+        title.setTextColor(0xFFFF4444);
+        title.setTextSize(14f);
+        title.setTypeface(androidx.core.content.res.ResourcesCompat.getFont(this, R.font.space_grotesk_bold));
+        title.setPadding(0, 0, 0, dp(8));
+        banner.addView(title);
+
+        TextView desc = new TextView(this);
+        desc.setText(server.crashReason != null ? server.crashReason : getString(R.string.crash_reason_unknown, server.crashExitCode));
+        desc.setTextColor(0xFFF0F0F0);
+        desc.setTextSize(12f);
+        desc.setPadding(0, 0, 0, dp(12));
+        banner.addView(desc);
+
+        LinearLayout btnLayout = new LinearLayout(this);
+        btnLayout.setOrientation(LinearLayout.HORIZONTAL);
+        btnLayout.setGravity(android.view.Gravity.END);
+        
+        com.google.android.material.button.MaterialButton btnDetails = eu.kodanetwork.mchost.util.KodaButtons.dark(this, "DETAILS");
+        LinearLayout.LayoutParams btnParams = new LinearLayout.LayoutParams(android.view.ViewGroup.LayoutParams.WRAP_CONTENT, dp(40));
+        btnParams.setMargins(0, 0, dp(8), 0);
+        btnDetails.setLayoutParams(btnParams);
+        btnDetails.setTextSize(11f);
+        btnDetails.setOnClickListener(v -> {
+            Intent alertIntent = new Intent(this, CrashAlertActivity.class);
+            alertIntent.putExtra("id", server.getId());
+            alertIntent.putExtra("name", server.getName());
+            alertIntent.putExtra("crashReason", server.crashReason);
+            alertIntent.putExtra("crashCategory", server.crashCategory);
+            alertIntent.putExtra("crashFix", server.crashFix);
+            alertIntent.putExtra("crashFixAction", server.crashFixAction);
+            alertIntent.putExtra("crashStackTrace", server.crashStackTrace);
+            alertIntent.putExtra("crashExitCode", server.crashExitCode);
+            alertIntent.putExtra("serverType", server.getType() != null ? server.getType().name() : "PAPER");
+            alertIntent.putExtra("serverVersion", server.getVersion());
+            alertIntent.putExtra("serverRam", server.getRamMB());
+            alertIntent.putExtra("serverPort", server.getPort());
+            alertIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+            startActivity(alertIntent);
+        });
+        btnLayout.addView(btnDetails);
+
+        if (server.crashFixAction != null) {
+            com.google.android.material.button.MaterialButton btnFix = eu.kodanetwork.mchost.util.KodaButtons.primary(this, "FIX");
+            btnFix.setLayoutParams(new LinearLayout.LayoutParams(android.view.ViewGroup.LayoutParams.WRAP_CONTENT, dp(40)));
+            btnFix.setTextSize(11f);
+            btnFix.setOnClickListener(v -> {
+                eu.kodanetwork.mchost.util.CrashFixer.FixResult result = eu.kodanetwork.mchost.util.CrashFixer.executeFix(this, server, server.crashFixAction);
+                if (result.success) {
+                    Toast.makeText(this, getString(R.string.crash_fix_success, result.message), Toast.LENGTH_LONG).show();
+                    bannerContainer.setVisibility(View.GONE);
+                } else {
+                    Toast.makeText(this, getString(R.string.crash_fix_failed, result.message), Toast.LENGTH_LONG).show();
+                }
+            });
+            btnLayout.addView(btnFix);
+        }
+        
+        banner.addView(btnLayout);
+        bannerContainer.addView(banner);
+        bannerContainer.setVisibility(View.VISIBLE);
+    }
+
+    private int dp(int dp) {
+        return (int)(dp * getResources().getDisplayMetrics().density);
     }
 
     // ── Console ───────────────────────────────────────────────────────────────
@@ -2358,6 +2463,22 @@ public class ServerDetailActivity extends AppCompatActivity {
             MaterialButton btn = selected
                     ? eu.kodanetwork.mchost.util.KodaButtons.primary(this, label)
                     : eu.kodanetwork.mchost.util.KodaButtons.dark(this, label);
+            
+            if (selected) {
+                android.graphics.drawable.GradientDrawable bg = (android.graphics.drawable.GradientDrawable) btn.getBackground();
+                bg.setStroke((int)(2 * getResources().getDisplayMetrics().density), android.graphics.Color.WHITE);
+                float[] hsv = new float[]{0, 1, 1};
+                android.animation.ValueAnimator anim = android.animation.ValueAnimator.ofFloat(0, 360);
+                anim.setDuration(2500);
+                anim.setRepeatCount(android.animation.ValueAnimator.INFINITE);
+                anim.addUpdateListener(a -> {
+                    hsv[0] = (float) a.getAnimatedValue();
+                    bg.setStroke((int)(2 * getResources().getDisplayMetrics().density), android.graphics.Color.HSVToColor(hsv));
+                    btn.invalidate();
+                });
+                anim.start();
+            }
+
             LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
                     LinearLayout.LayoutParams.MATCH_PARENT, (int)(52 * getResources().getDisplayMetrics().density));
             lp.bottomMargin = (int)(8 * getResources().getDisplayMetrics().density);
@@ -2403,35 +2524,18 @@ public class ServerDetailActivity extends AppCompatActivity {
                 start.setAction(KodaServerService.ACTION_START);
                 start.putExtra("id", server.getId());
                 startService(start);
-                boolean ok = eu.kodanetwork.mchost.util.RuntimeManager.isRuntimeInstalled(this, version) || version == 25;
-                final int fV = version;
-                final boolean fOk = ok;
+                
                 runOnUiThread(() -> {
                     updateDash();
-                    if (fOk) {
-                        Toast.makeText(this, getString(R.string.java_runtime_updated,
-                                getString(R.string.java_runtime_manual, fV)), Toast.LENGTH_SHORT).show();
-                    } else {
-                        Toast.makeText(this, getString(R.string.java_runtime_dl_failed, fV, "not downloaded yet"), Toast.LENGTH_LONG).show();
-                    }
+                    Toast.makeText(ServerDetailActivity.this, getString(R.string.java_runtime_updated,
+                            getString(R.string.java_runtime_manual, version)), Toast.LENGTH_SHORT).show();
                 });
             }).start();
         } else if (version != 25 && !eu.kodanetwork.mchost.util.RuntimeManager.isRuntimeInstalled(this, version)) {
-            Toast.makeText(this, getString(R.string.java_runtime_downloading, version, 0), Toast.LENGTH_SHORT).show();
-            new Thread(() -> {
-                boolean ok = eu.kodanetwork.mchost.util.RuntimeManager.ensureRuntimeSync(this, version, null);
-                final int fV = version;
-                final boolean fOk = ok;
-                runOnUiThread(() -> {
-                    if (fOk) {
-                        Toast.makeText(this, getString(R.string.java_runtime_updated,
-                                getString(R.string.java_runtime_manual, fV)), Toast.LENGTH_SHORT).show();
-                    } else {
-                        Toast.makeText(this, getString(R.string.java_runtime_dl_failed, fV, "download failed"), Toast.LENGTH_LONG).show();
-                    }
-                    updateDash();
-                });
-            }).start();
+            Intent w = new Intent(this, eu.kodanetwork.mchost.ui.DownloadJreActivity.class);
+            w.putExtra("VERSION", version);
+            startActivity(w);
+            updateDash();
         } else {
             Toast.makeText(this, getString(R.string.java_runtime_updated,
                     getString(R.string.java_runtime_manual, version)), Toast.LENGTH_SHORT).show();

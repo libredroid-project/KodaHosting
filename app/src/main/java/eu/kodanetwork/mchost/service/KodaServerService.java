@@ -929,7 +929,7 @@ public class KodaServerService extends Service {
     private void startEmbeddedJvmFlow(ServerInstance srv, File jar, File logFile) {
         new Thread(() -> {
             String id = srv.getId();
-            log(id, "  ℹ INITIATING EMBEDDED JNI DEPLOYMENT (JDK 21 NDK)...");
+            log(id, "  ℹ INITIATING EMBEDDED JNI DEPLOYMENT...");
             
             // Determine architecture
             String[] abis = android.os.Build.SUPPORTED_ABIS;
@@ -948,14 +948,33 @@ public class KodaServerService extends Service {
             
             File jvmDir;
             if (isArm64) {
-                // Real smartphones: Use the existing JDK 25 from StartOrchestrator!
-                jvmDir = new File(getFilesDir(), "jre25");
+                // Per-server Java runtime: explicit setting wins, otherwise auto-resolved
+                int javaVersion = srv.getJavaRuntime() != 0
+                        ? srv.getJavaRuntime()
+                        : eu.kodanetwork.mchost.util.RuntimeManager.resolveAutoVersion(srv);
+                
+                if (javaVersion != 25) {
+                    // Non-default Java version: ensure it's installed
+                    final int dlVer = javaVersion;
+                    if (!eu.kodanetwork.mchost.util.RuntimeManager.isRuntimeInstalled(this, javaVersion)) {
+                        log(id, "  ⬇ Downloading Java " + javaVersion + " runtime...");
+                        eu.kodanetwork.mchost.util.RuntimeManager.Result res = 
+                            eu.kodanetwork.mchost.util.RuntimeManager.ensureRuntimeSync(this, javaVersion,
+                                (pct, msg) -> log(id, "  ⬇ Java " + dlVer + ": " + pct + "% (" + msg + ")"));
+                        if (!res.success) {
+                            log(id, "  ⚠ Java " + javaVersion + " download failed: " + res.failReason + " — Fallback to Java 25");
+                            javaVersion = 25;
+                        }
+                    }
+                }
+                
+                jvmDir = new File(getFilesDir(), "jre" + javaVersion);
                 if (!jvmDir.exists()) {
-                    log(id, "  ✗ jre25 not found. Please restart app to let StartOrchestrator extract it.");
+                    log(id, "  ✗ jre" + javaVersion + " not found. Please restart app to extract it.");
                     setState(srv, ServerInstance.State.CRASHED);
                     return;
                 }
-                log(id, "  ✓ Using pre-existing JDK 25 (Amethyst NDK Build) for ARM64");
+                log(id, "  ✓ Using JDK " + javaVersion + " for ARM64");
             } else {
                 // x86_64 Emulator fallback
                 jvmDir = new File(getFilesDir(), "jre21-ndk-x86_64");
@@ -1147,16 +1166,40 @@ public class KodaServerService extends Service {
                     updateNotif();
                     try { unbindService(jvmConn); } catch (Exception ignored) {}
                     
-                    if (result == -99 || result == -98) {
+                    if (result == -99 || result == -98 || (jvmSvc[0] == null)) {
+                        String errMsg = "Isolated JVM process crashed unexpectedly";
                         try {
-                            String errMsg = jvmSvc[0].getInitError();
+                            if (jvmSvc[0] != null) errMsg = jvmSvc[0].getInitError();
                             log(id, "  ✗ NATIVE ERROR: " + errMsg);
                         } catch (Exception e) {
                             log(id, "  ✗ NATIVE ERROR: Code " + result);
                         }
+                        srv.crashExitCode = result;
+                        srv.crashCategory = "NATIVE_LIB";
+                        
+                        if (errMsg.contains("libjvm.so") || errMsg.contains("crashed")) {
+                            srv.crashReason = "Missing Java Library (libjvm.so)";
+                            srv.crashFixAction = "REDOWNLOAD_JRE";
+                            srv.crashFix = "The selected Java version is incomplete or unsupported. Try re-downloading it or use another Java version.";
+                        } else {
+                            srv.crashReason = "Native library error (code " + result + ")";
+                            srv.crashFixAction = "REDOWNLOAD_JRE";
+                            srv.crashFix = "Re-download Java Runtime";
+                        }
+                        
+                        srv.crashStackTrace = errMsg;
                         setState(srv, ServerInstance.State.CRASHED);
                     } else if (result != 0) {
                         log(id, "  ✗ NATIVE ERROR: Code " + result);
+                        srv.crashExitCode = result;
+                        eu.kodanetwork.mchost.util.CrashAnalyzer.Result cr = eu.kodanetwork.mchost.util.CrashAnalyzer.analyze(srv, result);
+                        if (cr != null) {
+                            srv.crashCategory = cr.category;
+                            srv.crashReason = cr.reason;
+                            srv.crashFix = cr.fixDescription;
+                            srv.crashFixAction = cr.fixAction;
+                            srv.crashStackTrace = cr.stackTrace;
+                        }
                         setState(srv, ServerInstance.State.CRASHED);
                     } else {
                         setState(srv, ServerInstance.State.OFFLINE);
@@ -1168,12 +1211,29 @@ public class KodaServerService extends Service {
                     updateNotif();
                 }
             } catch (Exception e) {
-                if (e instanceof android.os.DeadObjectException) {
-                    log(id, "  ℹ JVM Prozess regulär beendet.");
-                    setState(srv, ServerInstance.State.OFFLINE);
+                // If server was being stopped or is already offline, this is NOT a crash.
+                // stopServer() kills the JVM process which causes the blocking startJvm()
+                // call to throw DeadObjectException — that's expected behavior.
+                if (srv.state == ServerInstance.State.STOPPING || srv.state == ServerInstance.State.OFFLINE) {
+                    log(id, "  ℹ JVM Prozess normal beendet (Server wurde gestoppt).");
+                    // Don't change state — stopServer() already set it to OFFLINE
                 } else {
-                    log(id, "  ✗ JVM Fehler: " + (e.getMessage() != null ? e.getMessage() : e.getClass().getSimpleName()));
-                    setState(srv, ServerInstance.State.CRASHED);
+                    log(id, "  ℹ JVM Prozess beendet/abgestürzt: " + (e.getMessage() != null ? e.getMessage() : e.getClass().getSimpleName()));
+                    eu.kodanetwork.mchost.util.CrashAnalyzer.Result cr = eu.kodanetwork.mchost.util.CrashAnalyzer.analyze(srv, -1);
+                    if (cr != null && cr.isCrash) {
+                        srv.crashExitCode = -1;
+                        srv.crashCategory = cr.category;
+                        srv.crashReason = cr.reason;
+                        srv.crashFix = cr.fixDescription;
+                        srv.crashFixAction = cr.fixAction;
+                        srv.crashStackTrace = cr.stackTrace;
+                        setState(srv, ServerInstance.State.CRASHED);
+                    } else if (e instanceof android.os.DeadObjectException) {
+                        // DeadObjectException without a detected crash pattern = normal stop
+                        setState(srv, ServerInstance.State.OFFLINE);
+                    } else {
+                        setState(srv, ServerInstance.State.CRASHED);
+                    }
                 }
                 if (rt.frpcProc != null) {
                     try { rt.frpcProc.destroyForcibly(); } catch (Exception ignored) {}
@@ -1210,10 +1270,12 @@ public class KodaServerService extends Service {
             if (javaVersion != 25) {
                 if (!eu.kodanetwork.mchost.util.RuntimeManager.isRuntimeInstalled(this, javaVersion)) {
                     log(srv.getId(), "  ⬇ Lade Java-" + javaVersion + "-Runtime (~30 MB)...");
-                    boolean ok = eu.kodanetwork.mchost.util.RuntimeManager.ensureRuntimeSync(this, javaVersion,
+                    eu.kodanetwork.mchost.util.RuntimeManager.Result res = eu.kodanetwork.mchost.util.RuntimeManager.ensureRuntimeSync(this, javaVersion,
                             (pct, msg) -> log(srv.getId(), "  ⬇ Java " + javaVersion + ": " + pct + "% (" + msg + ")"));
-                    if (ok) {
+                    if (res.success) {
                         javaBinPath = eu.kodanetwork.mchost.util.RuntimeManager.getJavaBin(this, javaVersion);
+                    } else {
+                        log(srv.getId(), "  ✗ Java Download Error: " + res.failReason);
                     }
                 } else {
                     javaBinPath = eu.kodanetwork.mchost.util.RuntimeManager.getJavaBin(this, javaVersion);
@@ -1225,7 +1287,7 @@ public class KodaServerService extends Service {
                 if (javaVersion != 25) {
                     log(srv.getId(), "  ⚠ Java " + javaVersion + " nicht verfügbar — Fallback auf Java 25");
                 }
-                javaBinPath = eu.kodanetwork.mchost.util.JavaFinder.find(this);
+                javaBinPath = eu.kodanetwork.mchost.util.JavaFinder.find(this, 25);
             }
             if (javaBinPath == null) {
                 log(srv.getId(), "  ✗ Failed to initialize native Java environment.");
@@ -1364,6 +1426,15 @@ public class KodaServerService extends Service {
                 updateNotif();
                 if (srv.state != ServerInstance.State.STOPPING && srv.state != ServerInstance.State.OFFLINE) {
                     if (exitCode != 0) {
+                        srv.crashExitCode = exitCode;
+                        eu.kodanetwork.mchost.util.CrashAnalyzer.Result cr = eu.kodanetwork.mchost.util.CrashAnalyzer.analyze(srv, exitCode);
+                        if (cr != null) {
+                            srv.crashCategory = cr.category;
+                            srv.crashReason = cr.reason;
+                            srv.crashFix = cr.fixDescription;
+                            srv.crashFixAction = cr.fixAction;
+                            srv.crashStackTrace = cr.stackTrace;
+                        }
                         setState(srv, ServerInstance.State.CRASHED);
                     } else {
                         setState(srv, ServerInstance.State.OFFLINE);

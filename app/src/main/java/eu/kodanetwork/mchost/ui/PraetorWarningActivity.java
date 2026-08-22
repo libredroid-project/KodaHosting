@@ -17,6 +17,12 @@ import android.widget.EditText;
 
 public class PraetorWarningActivity extends Activity {
 
+    private static java.util.concurrent.CountDownLatch jreFallbackLatch;
+    
+    public static void setJreFallbackLatch(java.util.concurrent.CountDownLatch latch) {
+        jreFallbackLatch = latch;
+    }
+
     public static final String EXTRA_REASON = "extra_reason";
     public static final String EXTRA_ACTION = "extra_action";
 
@@ -40,6 +46,8 @@ public class PraetorWarningActivity extends Activity {
             showFolderBlockUI();
         } else if ("resource_pack_upload".equals(praetorMode)) {
             showResourcePackUploadUI();
+        } else if ("JRE_FALLBACK".equals(getIntent().getStringExtra(EXTRA_ACTION))) {
+            showJreFallbackUI(reason);
         } else if (reason != null) {
             showRamNetworkUI(reason, getIntent().getStringExtra(EXTRA_ACTION));
         } else {
@@ -266,6 +274,31 @@ public class PraetorWarningActivity extends Activity {
                 btnAction.setTextColor(0xFF000000);
             }
         }.start();
+    }
+    
+    private void showJreFallbackUI(String reason) {
+        TextView tvTitle = findViewById(R.id.tv_praetor_title);
+        String praetorHtml = "<font color=\"#555555\">P.R.</font><font color=\"#AAAAAA\">A</font><font color=\"#555555\">.</font><font color=\"#AAAAAA\">E</font><font color=\"#555555\">.</font><font color=\"#FFFFFF\">T</font><font color=\"#555555\">.</font><font color=\"#FFFFFF\">O</font><font color=\"#555555\">.</font><font color=\"#FFFFFF\">R.</font>";
+        tvTitle.setText(android.text.Html.fromHtml(praetorHtml, android.text.Html.FROM_HTML_MODE_LEGACY));
+        
+        TextView tvReason = findViewById(R.id.tv_praetor_reason);
+        tvReason.setText(reason);
+            
+        btnAction = findViewById(R.id.btn_praetor_action);
+        btnAction.setText(getString(R.string.praetor_action_understood));
+        
+        View layoutRamButtons = findViewById(R.id.layout_ram_buttons);
+        layoutRamButtons.setVisibility(View.GONE);
+        findViewById(R.id.btn_praetor_cancel).setVisibility(View.GONE);
+        
+        btnAction.setOnClickListener(v -> {
+            HapticUtil.forceVibrate(this, 80);
+            if (jreFallbackLatch != null) {
+                jreFallbackLatch.countDown();
+                jreFallbackLatch = null;
+            }
+            finish();
+        });
     }
 
     @Override

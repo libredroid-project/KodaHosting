@@ -174,6 +174,7 @@ Java_eu_kodanetwork_mchost_service_IsolatedJvmService_startEmbeddedJvmNative(
         options[optCount++].optionString = jnaNoUnpack;
         options[optCount++].optionString = jlineFalse;
         options[optCount++].optionString = ansiTrue;
+        options[optCount++].optionString = (char*)"-Xss2M";
         
         options[optCount].optionString = (char*)"exit";
         options[optCount].extraInfo = (void*) jvm_exit_hook;

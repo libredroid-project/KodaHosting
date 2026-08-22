@@ -13,8 +13,8 @@ android {
         applicationId "eu.kodanetwork.mchost"
         minSdk 26
         targetSdk 36
-        versionCode 8502
-        versionName "v1.8502"
+        versionCode 8505
+        versionName "v0.127alpha"
         ndkVersion "27.0.12077973"
         ndk {
             // Nur arm64 paketieren; alle Termux-Binaries/MariaDB/Redis sind arm64-only

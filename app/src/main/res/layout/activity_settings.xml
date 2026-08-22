@@ -27,7 +27,7 @@
         <View android:layout_width="0dp" android:layout_height="0dp" android:layout_weight="1"/>
         <TextView android:id="@+id/tv_settings_version"
             android:layout_width="wrap_content" android:layout_height="wrap_content"
-            android:text="v1.8502" android:textColor="#888899"
+            android:text="v0.127alpha" android:textColor="#888899"
             android:textSize="11sp" android:fontFamily="@font/font_koda"/>
     </LinearLayout>
     
@@ -602,7 +602,7 @@
 
                     <TextView android:id="@+id/tv_app_version_card"
                         android:layout_width="wrap_content" android:layout_height="wrap_content"
-                        android:text="v1.8502" android:textColor="#FFFFFF"
+                        android:text="v0.127alpha" android:textColor="#FFFFFF"
                         android:textSize="18sp" android:fontFamily="@font/font_koda"
                         android:layout_marginBottom="4dp"/>
 

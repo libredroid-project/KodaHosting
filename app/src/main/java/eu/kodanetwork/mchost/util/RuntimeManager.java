@@ -27,41 +27,46 @@ public class RuntimeManager {
         void onProgress(int percent, String message);
     }
 
-    // Primary source: our own Supabase artifacts bucket (public). Fallback: AngelAuraMC
-    // GitHub releases. Both host the same android-arm64 tar.xz builds.
-    private static String runtimeUrl(int version) {
-        String supabase = eu.kodanetwork.mchost.security.PraetorSecurity.getSupabaseUrl()
-                + "/storage/v1/object/public/artifacts/openjdk" + version
-                + "/openjdk" + version + "-android-arm64.tar.xz";
-        if (urlExists(supabase)) return supabase;
-        switch (version) {
-            case 8:  return "https://github.com/AngelAuraMC/angelauramc-openjdk-build/releases/download/download_jre8/jre8-android-arm64.tar.xz";
-            case 17: return "https://github.com/AngelAuraMC/angelauramc-openjdk-build/releases/download/download_jre17/jre17-android-arm64.tar.xz";
-            case 21: return "https://github.com/AngelAuraMC/angelauramc-openjdk-build/releases/download/download_jre21/jre21-android-arm64.tar.xz";
-            default: return null;
+    // Primary source: our own Supabase artifacts bucket (public).
+    public static class Result {
+        public final boolean success;
+        public final String failReason;
+        public Result(boolean success, String failReason) {
+            this.success = success;
+            this.failReason = failReason;
         }
+        public static Result ok() { return new Result(true, null); }
+        public static Result fail(String reason) { return new Result(false, reason); }
+    }
+    private static String runtimeUrl(int version) {
+        return eu.kodanetwork.mchost.security.PraetorSecurity.getSupabaseUrl()
+                + "/storage/v1/object/public/artifacts/jre" + version + "-android-arm64.tar.xz";
     }
 
-    private static boolean urlExists(String urlStr) {
-        try {
-            HttpURLConnection c = (HttpURLConnection) new URL(urlStr).openConnection();
-            c.setRequestMethod("HEAD");
-            c.setConnectTimeout(5000);
-            c.setReadTimeout(5000);
-            int code = c.getResponseCode();
-            c.disconnect();
-            return code >= 200 && code < 300;
-        } catch (Exception e) {
-            return false;
-        }
-    }
 
     private static final AtomicBoolean downloadLock = new AtomicBoolean(false);
 
-    /** Auto-pick: Fabric must run on Java 21 (mods break on 25), everything else uses 25. */
+    /** Auto-pick based on Minecraft version and Server Type */
     public static int resolveAutoVersion(ServerInstance srv) {
-        if (srv.getType() == ServerInstance.Type.FABRIC) return 21;
-        return 25;
+        return resolveAutoVersion(srv.getVersion(), srv.getType() == ServerInstance.Type.FABRIC);
+    }
+    
+    public static int resolveAutoVersion(String ver, boolean isFabric) {
+        if (ver == null || !ver.startsWith("1.")) return isFabric ? 21 : 25;
+        try {
+            String[] parts = ver.split("\\.");
+            int minor = Integer.parseInt(parts[1]);
+            int patch = parts.length > 2 ? Integer.parseInt(parts[2]) : 0;
+            
+            if (minor >= 22) return 25;
+            if (minor == 21 && patch >= 11) return 25; // >= 1.21.11 uses 25
+            if (minor == 21) return 21;
+            if (minor == 20 && patch >= 5) return 21;
+            if (minor >= 17) return 17; // 1.17 to 1.20.4
+            if (minor <= 16) return 8;  // 1.16.5 and below
+        } catch (Exception ignored) {}
+        
+        return isFabric ? 21 : 25;
     }
 
     public static boolean isRuntimeInstalled(Context ctx, int version) {
@@ -80,20 +85,20 @@ public class RuntimeManager {
 
     /**
      * Ensures the runtime is installed; downloads + extracts it on first use.
-     * Blocking — call off the main thread. Returns true when the runtime is ready.
+     * Blocking — call off the main thread. Returns Result when the runtime is ready.
      */
-    public static boolean ensureRuntimeSync(Context ctx, int version, ProgressListener listener) {
-        if (isRuntimeInstalled(ctx, version)) return true;
-        if (version == 25) return false; // bundled only; StartOrchestrator handles it
+    public static Result ensureRuntimeSync(Context ctx, int version, ProgressListener listener) {
+        if (isRuntimeInstalled(ctx, version)) return Result.ok();
+        if (version == 25) return Result.ok(); // bundled only; StartOrchestrator handles it
         String url = runtimeUrl(version);
-        if (url == null) return false;
+        if (url == null) return Result.fail(ctx.getString(eu.kodanetwork.mchost.R.string.praetor_jre_reason_unknown));
 
         if (!downloadLock.compareAndSet(false, true)) {
             // Another download is running; wait for it to finish
             while (downloadLock.get()) {
-                try { Thread.sleep(300); } catch (InterruptedException e) { return false; }
+                try { Thread.sleep(300); } catch (InterruptedException e) { return Result.fail(ctx.getString(eu.kodanetwork.mchost.R.string.praetor_jre_reason_unknown)); }
             }
-            return isRuntimeInstalled(ctx, version);
+            return isRuntimeInstalled(ctx, version) ? Result.ok() : Result.fail(ctx.getString(eu.kodanetwork.mchost.R.string.praetor_jre_reason_install_failed));
         }
         try {
             File targetDir = new File(ctx.getFilesDir(), "jre" + version);
@@ -126,10 +131,17 @@ public class RuntimeManager {
             }
             deleteRecursive(tmpDir);
             makeExecutableRecursive(targetDir);
-            return true;
+            return Result.ok();
+        } catch (java.net.UnknownHostException | java.net.ConnectException e) {
+            android.util.Log.e("RuntimeManager", "jre" + version + " network failed", e);
+            return Result.fail(ctx.getString(eu.kodanetwork.mchost.R.string.praetor_jre_reason_download_unreachable));
         } catch (Exception e) {
             android.util.Log.e("RuntimeManager", "jre" + version + " provisioning failed", e);
-            return false;
+            String msg = e.getMessage() != null ? e.getMessage() : "Unknown error";
+            if (msg.contains("archive has no bin/java")) {
+                return Result.fail(ctx.getString(eu.kodanetwork.mchost.R.string.praetor_jre_reason_archive_corrupt));
+            }
+            return Result.fail(ctx.getString(eu.kodanetwork.mchost.R.string.praetor_jre_reason_download_failed, msg));
         } finally {
             downloadLock.set(false);
         }
@@ -163,7 +175,7 @@ public class RuntimeManager {
         }
     }
 
-    /** tar.xz extraction with canonical zip-slip protection (same streams as StartOrchestrator). */
+    /** tar.xz extraction with canonical zip-slip protection and symlink support. */
     private static void extractTarXzSafe(File archive, File destDir) throws Exception {
         try (java.io.FileInputStream fis = new java.io.FileInputStream(archive);
              org.apache.commons.compress.compressors.xz.XZCompressorInputStream xzIn =
@@ -171,17 +183,32 @@ public class RuntimeManager {
              org.apache.commons.compress.archivers.tar.TarArchiveInputStream tarIn =
                      new org.apache.commons.compress.archivers.tar.TarArchiveInputStream(xzIn)) {
             org.apache.commons.compress.archivers.tar.TarArchiveEntry entry;
-            String canonicalDest = destDir.getCanonicalPath() + File.separator;
+            String canonicalDest = destDir.getCanonicalPath();
+            if (!canonicalDest.endsWith(File.separator)) canonicalDest += File.separator;
+
             while ((entry = tarIn.getNextTarEntry()) != null) {
                 File newFile = new File(destDir, entry.getName());
-                if (!newFile.getCanonicalPath().startsWith(canonicalDest)) {
+                String canonicalNewFile = newFile.getCanonicalPath();
+                if (!canonicalNewFile.startsWith(canonicalDest) && !canonicalNewFile.equals(destDir.getCanonicalPath())) {
                     throw new IllegalStateException("archive slip blocked: " + entry.getName());
                 }
                 if (entry.isDirectory()) {
                     newFile.mkdirs();
+                } else if (entry.isSymbolicLink()) {
+                    newFile.getParentFile().mkdirs();
+                    try {
+                        java.nio.file.Path link = newFile.toPath();
+                        java.nio.file.Path target = java.nio.file.Paths.get(entry.getLinkName());
+                        if (java.nio.file.Files.exists(link, java.nio.file.LinkOption.NOFOLLOW_LINKS)) {
+                            java.nio.file.Files.delete(link);
+                        }
+                        java.nio.file.Files.createSymbolicLink(link, target);
+                    } catch (Exception e) {
+                        android.util.Log.e("RuntimeManager", "Symlink failed: " + e.getMessage());
+                    }
                 } else {
                     newFile.getParentFile().mkdirs();
-                    try (FileOutputStream fos = new FileOutputStream(newFile)) {
+                    try (java.io.FileOutputStream fos = new java.io.FileOutputStream(newFile)) {
                         byte[] buf = new byte[16384];
                         int r;
                         while ((r = tarIn.read(buf)) != -1) fos.write(buf, 0, r);

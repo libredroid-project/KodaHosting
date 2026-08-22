@@ -36,6 +36,15 @@ public class ServerInstance {
     public transient int ramUsageMB = 0;
     public transient float currentTps = 20.0f;
     public transient java.util.List<String> onlinePlayerNames = new java.util.ArrayList<>();
+
+    // Crash diagnostics (transient — not saved to JSON)
+    public transient String  crashReason    = null;   // Human-readable cause
+    public transient String  crashCategory  = null;   // Category key: OOM, EULA, MOD_CRASH, etc.
+    public transient int     crashExitCode  = 0;      // Process exit code
+    public transient long    crashTime      = 0;      // System.currentTimeMillis() of crash
+    public transient String  crashFix       = null;   // Fix description if known
+    public transient String  crashFixAction = null;   // Internal fix action key
+    public transient String  crashStackTrace = null;  // Relevant stacktrace lines
     public java.util.List<String> knownPlayers = new java.util.ArrayList<>();
 
     private String    playitAddress = "";

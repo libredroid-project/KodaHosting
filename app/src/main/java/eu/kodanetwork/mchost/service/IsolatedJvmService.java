@@ -57,7 +57,23 @@ public class IsolatedJvmService extends Service {
                 }
                 // Process can now be killed via System.exit() normally by Minecraft.
                 // We no longer intercept it because intercepting it causes zombie processes.
-                return startEmbeddedJvmNative(libJvmPath, jarPath, ramMb, mainClass, workDir);
+                
+                // Samsung / Android 14 devices have strict default thread stack limits (Binder threads are 1MB).
+                // Fabric's BundlerClassPathCapture requires heavy ASM parsing which causes native stack overflows.
+                // By starting the JNI VM in a dedicated thread with 8MB stack, we avoid DeadObjectException crashes.
+                final int[] exitCode = new int[]{-1};
+                Thread jvmThread = new Thread(null, () -> {
+                    exitCode[0] = startEmbeddedJvmNative(libJvmPath, jarPath, ramMb, mainClass, workDir);
+                }, "EmbeddedJVM_Main", 8 * 1024 * 1024); // 8MB Stack Size
+                
+                jvmThread.start();
+                try {
+                    jvmThread.join();
+                } catch (InterruptedException e) {
+                    Log.e(TAG, "JVM Main thread interrupted", e);
+                }
+                
+                return exitCode[0];
             } catch (Throwable t) {
                 Log.e(TAG, "Crash during startJvm", t);
                 return -98;

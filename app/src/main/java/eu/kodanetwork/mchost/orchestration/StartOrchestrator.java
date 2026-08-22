@@ -142,6 +142,27 @@ public class StartOrchestrator {
                 logStatic("Java binary already exists, skipping extraction");
                 logStatic("Java binary size: " + javaBin.length() + ", executable: " + javaBin.canExecute());
             }
+            
+            // Download all other Java runtimes (8, 17, 21) so they're ready when needed
+            int[] additionalVersions = {8, 17, 21};
+            for (int ver : additionalVersions) {
+                if (!eu.kodanetwork.mchost.util.RuntimeManager.isRuntimeInstalled(context, ver)) {
+                    logStatic("Downloading Java " + ver + " runtime...");
+                    if (callback != null) callback.onStep(Step.JAVA_DOWNLOAD, "Downloading Java " + ver + "...");
+                    eu.kodanetwork.mchost.util.RuntimeManager.Result res = 
+                        eu.kodanetwork.mchost.util.RuntimeManager.ensureRuntimeSync(context, ver,
+                            (pct, msg) -> {
+                                if (callback != null) callback.onStep(Step.JAVA_DOWNLOAD, "Java " + ver + ": " + pct + "% (" + msg + ")");
+                            });
+                    if (res.success) {
+                        logStatic("Java " + ver + " installed successfully");
+                    } else {
+                        logStatic("Java " + ver + " download failed: " + res.failReason + " (will retry on-demand)");
+                    }
+                } else {
+                    logStatic("Java " + ver + " already installed, skipping");
+                }
+            }
         } catch (java.io.FileNotFoundException e) {
             logStatic("CRITICAL: Asset file not found! " + e.getMessage());
             logStatic("Make sure jre25-android-arm64.tar.xz is in app/src/main/assets/");

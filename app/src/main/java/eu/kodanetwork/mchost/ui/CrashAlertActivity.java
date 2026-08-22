@@ -1,43 +1,42 @@
 package eu.kodanetwork.mchost.ui;
 
+import android.animation.ArgbEvaluator;
+import android.animation.ObjectAnimator;
+import android.animation.ValueAnimator;
 import android.app.Activity;
-import android.content.Context;
-import android.media.AudioManager;
-import android.media.AudioTrack;
-import android.media.AudioFormat;
-import android.os.Build;
+import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.Typeface;
+import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.view.WindowManager;
-import android.widget.Button;
-import android.widget.FrameLayout;
-import android.widget.LinearLayout;
-import android.widget.ScrollView;
-import android.widget.TextView;
-import android.graphics.Color;
-import android.graphics.Typeface;
-import eu.kodanetwork.mchost.R;
+import android.text.Html;
 import android.view.Gravity;
-import android.animation.ObjectAnimator;
-import android.animation.ArgbEvaluator;
-import android.animation.ValueAnimator;
-import android.content.Intent;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
+import android.view.View;
+import android.view.ViewGroup;
+import android.view.WindowManager;
+import android.widget.*;
+
+import eu.kodanetwork.mchost.R;
 import eu.kodanetwork.mchost.model.ServerInstance;
 import eu.kodanetwork.mchost.model.ServerRepo;
 import eu.kodanetwork.mchost.service.KodaServerService;
+import eu.kodanetwork.mchost.util.CrashFixer;
+import eu.kodanetwork.mchost.util.HapticUtil;
 
-public class CrashAlertActivity extends Activity {
-    private AudioTrack audioTrack;
-    private volatile boolean playing = true;
+import java.io.*;
+import java.util.LinkedList;
+
+/**
+ * Full-screen PRAETOR-style crash alert with cause analysis, fix button, and crash log.
+ * Replaces the old alarm-based CrashAlertActivity.
+ */
+public class CrashAlertActivity extends androidx.appcompat.app.AppCompatActivity {
     private ObjectAnimator anim;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        eu.kodanetwork.mchost.util.Material3ThemeHelper.applyTheme(this);
         super.onCreate(savedInstanceState);
         getWindow().addFlags(
             WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON |
@@ -46,238 +45,393 @@ public class CrashAlertActivity extends Activity {
             WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON
         );
 
-        String id   = getIntent().getStringExtra("id");
-        String name = getIntent().getStringExtra("name");
-        ServerInstance srv = ServerRepo.get(this).byId(id);
+        // ── Extract intent data ──────────────────────────────────────────────
+        String id            = getIntent().getStringExtra("id");
+        String name          = getIntent().getStringExtra("name");
+        String crashReason   = getIntent().getStringExtra("crashReason");
+        String crashCategory = getIntent().getStringExtra("crashCategory");
+        String crashFix      = getIntent().getStringExtra("crashFix");
+        String crashFixAction= getIntent().getStringExtra("crashFixAction");
+        String crashStack    = getIntent().getStringExtra("crashStackTrace");
+        int    crashExitCode = getIntent().getIntExtra("crashExitCode", 0);
+        String serverType    = getIntent().getStringExtra("serverType");
+        String serverVersion = getIntent().getStringExtra("serverVersion");
+        int    serverRam     = getIntent().getIntExtra("serverRam", 0);
+        int    serverPort    = getIntent().getIntExtra("serverPort", 0);
+        ServerInstance srv   = ServerRepo.get(this).byId(id);
+        
+        if (srv != null) {
+            if (crashReason == null) crashReason = srv.crashReason;
+            if (crashCategory == null) crashCategory = srv.crashCategory;
+            if (crashFix == null) crashFix = srv.crashFix;
+            if (crashFixAction == null) crashFixAction = srv.crashFixAction;
+            if (crashStack == null) crashStack = srv.crashStackTrace;
+            if (crashExitCode == 0) crashExitCode = srv.crashExitCode;
+            if (serverType == null) serverType = srv.getType().name();
+            if (serverVersion == null) serverVersion = srv.getVersion();
+            if (serverRam == 0) serverRam = srv.getRamMB();
+            if (serverPort == 0) serverPort = srv.getPort();
+        }
 
-        // ── Root ──────────────────────────────────────────────────────────────
+        // ── Vibration feedback (no alarm sound) ──────────────────────────────
+        HapticUtil.forceVibrate(this, 200);
+        new Handler(Looper.getMainLooper()).postDelayed(() -> HapticUtil.forceVibrate(this, 300), 300);
+        new Handler(Looper.getMainLooper()).postDelayed(() -> HapticUtil.forceVibrate(this, 150), 700);
+
+        Typeface kodaFont = androidx.core.content.res.ResourcesCompat.getFont(this, R.font.font_koda);
+        Typeface kodaBold = androidx.core.content.res.ResourcesCompat.getFont(this, R.font.space_grotesk_bold);
+
+        // ── Root layout ──────────────────────────────────────────────────────
+        getWindow().getDecorView().setBackgroundColor(0xFF0F0808); // Dark reddish black background
+        ScrollView scroll = new ScrollView(this);
+        scroll.setBackgroundColor(0xFF0F0808);
+        scroll.setFillViewport(true);
+
         LinearLayout root = new LinearLayout(this);
         root.setOrientation(LinearLayout.VERTICAL);
-        root.setBackgroundColor(0xFF0A0008);
-        root.setFitsSystemWindows(true);
+        root.setGravity(Gravity.CENTER_HORIZONTAL);
+        root.setPadding(dp(28), dp(40), dp(28), dp(40));
 
-        // ── Header bar ────────────────────────────────────────────────────────
-        LinearLayout header = new LinearLayout(this);
-        header.setOrientation(LinearLayout.VERTICAL);
-        header.setGravity(Gravity.CENTER);
-        header.setPadding(48, 60, 48, 36);
-        header.setBackgroundColor(0xFF110008);
+        // Use root directly instead of card
+        LinearLayout card = root;
 
-        // Pulsing red accent line at top
-        android.view.View accentLine = new android.view.View(this);
-        LinearLayout.LayoutParams lineParams = new LinearLayout.LayoutParams(
-            LinearLayout.LayoutParams.MATCH_PARENT, dpToPx(3));
-        accentLine.setLayoutParams(lineParams);
-        accentLine.setBackgroundColor(0xFFCC0033);
-        root.addView(accentLine);
+        // ── P.R.A.E.T.O.R. title ────────────────────────────────────────────
+        TextView tvPraetor = new TextView(this);
+        String praetorHtml = "<font color=\"#555555\">P.R.</font><font color=\"#AAAAAA\">A</font><font color=\"#555555\">.</font><font color=\"#AAAAAA\">E</font><font color=\"#555555\">.</font><font color=\"#FFFFFF\">T</font><font color=\"#555555\">.</font><font color=\"#FFFFFF\">O</font><font color=\"#555555\">.</font><font color=\"#FFFFFF\">R.</font>";
+        tvPraetor.setText(Html.fromHtml(praetorHtml, Html.FROM_HTML_MODE_LEGACY));
+        tvPraetor.setTextSize(32f);
+        tvPraetor.setTypeface(kodaBold != null ? kodaBold : Typeface.DEFAULT_BOLD);
+        tvPraetor.setLetterSpacing(0.1f);
+        tvPraetor.setGravity(Gravity.CENTER);
+        card.addView(tvPraetor);
 
-        // Warning icon
+        // ── Subtitle ─────────────────────────────────────────────────────────
+        TextView tvSubtitle = new TextView(this);
+        tvSubtitle.setText(getString(R.string.crash_subtitle));
+        tvSubtitle.setTextColor(0xFF8A8A9A);
+        tvSubtitle.setTextSize(9f);
+        tvSubtitle.setTypeface(kodaFont != null ? kodaFont : Typeface.DEFAULT_BOLD, Typeface.BOLD);
+        tvSubtitle.setLetterSpacing(0.05f);
+        tvSubtitle.setGravity(Gravity.CENTER);
+        tvSubtitle.setPadding(0, dp(6), 0, 0);
+        card.addView(tvSubtitle);
+
+        // ── Orange divider ───────────────────────────────────────────────────
+        View divider = new View(this);
+        LinearLayout.LayoutParams divParams = new LinearLayout.LayoutParams(dp(40), dp(2));
+        divParams.setMargins(0, dp(20), 0, dp(20));
+        divParams.gravity = Gravity.CENTER;
+        divider.setLayoutParams(divParams);
+        divider.setBackgroundColor(0xFFFF6B00);
+        card.addView(divider);
+
+        // ── Warning icon (pulsing) ───────────────────────────────────────────
         TextView tvIcon = new TextView(this);
         tvIcon.setText("⚠");
-        tvIcon.setTextSize(48f);
+        tvIcon.setTextSize(44f);
         tvIcon.setGravity(Gravity.CENTER);
-        tvIcon.setTextColor(0xFFCC0033);
-        header.addView(tvIcon);
+        tvIcon.setTextColor(0xFFFF3333);
+        card.addView(tvIcon);
+        tvIcon.startAnimation(new android.view.animation.AlphaAnimation(1.0f, 0.0f) {{
+            setDuration(300);
+            setRepeatMode(android.view.animation.Animation.REVERSE);
+            setRepeatCount(5);
+        }});
 
-        // Title
+        // ── CRASH title ──────────────────────────────────────────────────────
         TextView tvTitle = new TextView(this);
-        tvTitle.setText(eu.kodanetwork.mchost.util.LocaleHelper.t(this,
-            "SERVER CRASH", "SERVER ABGESTÜRZT"));
+        tvTitle.setText(getString(R.string.crash_title));
         tvTitle.setTextColor(0xFFFF3355);
-        tvTitle.setTextSize(26f);
-        Typeface kodaBold = androidx.core.content.res.ResourcesCompat.getFont(this, R.font.space_grotesk_bold);
+        tvTitle.setTextSize(24f);
         tvTitle.setTypeface(kodaBold != null ? kodaBold : Typeface.DEFAULT_BOLD);
         tvTitle.setGravity(Gravity.CENTER);
-        tvTitle.setLetterSpacing(0.08f);
-        tvTitle.setPadding(0, 12, 0, 0);
-        header.addView(tvTitle);
+        tvTitle.setLetterSpacing(0.06f);
+        tvTitle.setPadding(0, dp(8), 0, 0);
+        card.addView(tvTitle);
 
-        // Server name chip
-        LinearLayout chip = new LinearLayout(this);
-        chip.setOrientation(LinearLayout.HORIZONTAL);
-        chip.setGravity(Gravity.CENTER);
-        chip.setPadding(0, 16, 0, 0);
-        TextView tvNameLabel = new TextView(this);
-        tvNameLabel.setText(eu.kodanetwork.mchost.util.LocaleHelper.t(this, "Server: ", "Server: "));
-        tvNameLabel.setTextColor(0xFF888899);
-        tvNameLabel.setTextSize(13f);
-        chip.addView(tvNameLabel);
-        TextView tvName = new TextView(this);
-        tvName.setText(name != null ? name : "Unknown");
-        tvName.setTextColor(0xFFF0F0F0);
-        tvName.setTextSize(13f);
-        tvName.setTypeface(Typeface.DEFAULT_BOLD);
-        chip.addView(tvName);
-        header.addView(chip);
+        // ── Server info chip ─────────────────────────────────────────────────
+        String typeDisplay = serverType != null ? serverType : "Unknown";
+        String verDisplay = serverVersion != null ? serverVersion : "";
+        TextView tvServerInfo = new TextView(this);
+        tvServerInfo.setText(getString(R.string.crash_server_info, name != null ? name : "Unknown", typeDisplay, verDisplay));
+        tvServerInfo.setTextColor(0xFF888899);
+        tvServerInfo.setTextSize(12f);
+        tvServerInfo.setGravity(Gravity.CENTER);
+        tvServerInfo.setPadding(0, dp(6), 0, 0);
+        card.addView(tvServerInfo);
 
-        root.addView(header);
+        // ── Exit code badge ──────────────────────────────────────────────────
+        if (crashExitCode != 0) {
+            TextView tvExitCode = new TextView(this);
+            tvExitCode.setText(getString(R.string.crash_exit_code, crashExitCode));
+            tvExitCode.setTextColor(0xFFFF6B00);
+            tvExitCode.setTextSize(10f);
+            tvExitCode.setTypeface(Typeface.MONOSPACE, Typeface.BOLD);
+            tvExitCode.setGravity(Gravity.CENTER);
+            tvExitCode.setLetterSpacing(0.08f);
+            tvExitCode.setPadding(0, dp(6), 0, 0);
+            card.addView(tvExitCode);
+        }
 
-        // Divider
-        android.view.View divider = new android.view.View(this);
-        divider.setLayoutParams(new LinearLayout.LayoutParams(
-            LinearLayout.LayoutParams.MATCH_PARENT, dpToPx(1)));
-        divider.setBackgroundColor(0xFF330011);
-        root.addView(divider);
+        // ══════════════════════════════════════════════════════════════════════
+        //  CAUSE CARD
+        // ══════════════════════════════════════════════════════════════════════
+        if (crashCategory != null || crashReason != null) {
+            LinearLayout causeCard = new LinearLayout(this);
+            causeCard.setOrientation(LinearLayout.VERTICAL);
+            causeCard.setPadding(dp(16), dp(14), dp(16), dp(14));
+            LinearLayout.LayoutParams causeParams = new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+            causeParams.setMargins(0, dp(20), 0, 0);
+            causeCard.setLayoutParams(causeParams);
 
-        // ── Log section label ─────────────────────────────────────────────────
+            // Cause label
+            TextView tvCauseLabel = new TextView(this);
+            tvCauseLabel.setText(getString(R.string.crash_cause_label).toUpperCase());
+            tvCauseLabel.setTextColor(0xFFFF5555);
+            tvCauseLabel.setTextSize(10f);
+            tvCauseLabel.setTypeface(kodaFont, Typeface.BOLD);
+            tvCauseLabel.setLetterSpacing(0.15f);
+            causeCard.addView(tvCauseLabel);
+
+            // Category name (big)
+            String categoryDisplay = getCategoryDisplayName(crashCategory);
+            TextView tvCategory = new TextView(this);
+            tvCategory.setText(categoryDisplay);
+            tvCategory.setTextColor(0xFFF0F0F0);
+            tvCategory.setTextSize(18f);
+            tvCategory.setTypeface(kodaBold != null ? kodaBold : Typeface.DEFAULT_BOLD);
+            tvCategory.setPadding(0, dp(8), 0, 0);
+            causeCard.addView(tvCategory);
+
+            // Reason explanation
+            if (crashReason != null) {
+                String reasonDisplay = getReasonDisplayText(crashCategory, crashReason, serverRam, serverPort, crashExitCode);
+                TextView tvReason = new TextView(this);
+                tvReason.setText(reasonDisplay);
+                tvReason.setTextColor(0xFFAAAAAA);
+                tvReason.setTextSize(13f);
+                tvReason.setLineSpacing(4f, 1f);
+                tvReason.setPadding(0, dp(8), 0, 0);
+                causeCard.addView(tvReason);
+            }
+
+            // ── Fix Button ───────────────────────────────────────────────────
+            if (crashFixAction != null && crashFix != null) {
+                com.google.android.material.button.MaterialButton btnFix = new com.google.android.material.button.MaterialButton(this);
+                btnFix.setText(getString(R.string.crash_btn_fix, crashFix));
+                btnFix.setTextColor(0xFFFFFFFF);
+                btnFix.setBackgroundTintList(android.content.res.ColorStateList.valueOf(0xFFFF3B30));
+                btnFix.setCornerRadius(dp(8));
+                btnFix.setTypeface(kodaBold != null ? kodaBold : Typeface.DEFAULT_BOLD);
+                
+                LinearLayout.LayoutParams fixParams = new LinearLayout.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT, dp(48));
+                fixParams.setMargins(0, dp(14), 0, 0);
+                btnFix.setLayoutParams(fixParams);
+                btnFix.setTextSize(12f);
+                final String fixActionFinal = crashFixAction;
+                btnFix.setOnClickListener(v -> {
+                    HapticUtil.forceVibrate(this, 80);
+                    if (srv != null) {
+                        CrashFixer.FixResult result = CrashFixer.executeFix(this, srv, fixActionFinal);
+                        if (result.success) {
+                            Toast.makeText(this, getString(R.string.crash_fix_success, result.message), Toast.LENGTH_LONG).show();
+                            btnFix.setEnabled(false);
+                            btnFix.setText(result.message.toUpperCase());
+                            btnFix.setTextColor(0xFF00E676);
+                            btnFix.setBackgroundTintList(android.content.res.ColorStateList.valueOf(0xFF0A2E15));
+                            new Handler(Looper.getMainLooper()).postDelayed(() -> finish(), 1200);
+                        } else {
+                            Toast.makeText(this, getString(R.string.crash_fix_failed, result.message), Toast.LENGTH_LONG).show();
+                        }
+                    }
+                });
+                causeCard.addView(btnFix);
+            }
+
+            card.addView(causeCard);
+        }
+
+        // ══════════════════════════════════════════════════════════════════════
+        //  CRASH LOG (collapsible)
+        // ══════════════════════════════════════════════════════════════════════
         TextView tvLogLabel = new TextView(this);
-        tvLogLabel.setText(eu.kodanetwork.mchost.util.LocaleHelper.t(this,
-            "CRASH LOG  (last 50 lines)", "ABSTURZPROTOKOLL  (letzte 50 Zeilen)"));
-        tvLogLabel.setTextColor(0xFF555566);
+        tvLogLabel.setText(getString(R.string.crash_log_label).toUpperCase() + " (TAP TO TOGGLE)");
+        tvLogLabel.setTextColor(0xFF777788);
         tvLogLabel.setTextSize(10f);
-        tvLogLabel.setTypeface(Typeface.DEFAULT_BOLD);
-        tvLogLabel.setLetterSpacing(0.1f);
-        tvLogLabel.setPadding(dpToPx(20), dpToPx(14), dpToPx(20), dpToPx(8));
-        root.addView(tvLogLabel);
+        tvLogLabel.setTypeface(kodaFont, Typeface.BOLD);
+        tvLogLabel.setLetterSpacing(0.08f);
+        tvLogLabel.setPadding(0, dp(20), 0, dp(8));
+        card.addView(tvLogLabel);
 
-        // ── Log scroll area ───────────────────────────────────────────────────
         ScrollView scrollLog = new ScrollView(this);
         scrollLog.setBackgroundColor(0xFF06060C);
+        GradientDrawable logBg = new GradientDrawable();
+        logBg.setCornerRadius(dp(8));
+        logBg.setColor(0xFF06060C);
+        scrollLog.setBackground(logBg);
         LinearLayout.LayoutParams scrollParams = new LinearLayout.LayoutParams(
-            LinearLayout.LayoutParams.MATCH_PARENT, 0, 1.0f);
-        scrollParams.setMargins(dpToPx(16), 0, dpToPx(16), dpToPx(16));
+            ViewGroup.LayoutParams.MATCH_PARENT, dp(200));
+        scrollParams.setMargins(0, 0, 0, 0);
         scrollLog.setLayoutParams(scrollParams);
 
         TextView tvLog = new TextView(this);
         tvLog.setTextColor(0xFFAAAAAA);
-        tvLog.setTextSize(10.5f);
+        tvLog.setTextSize(9.5f);
         tvLog.setTypeface(Typeface.MONOSPACE);
-        tvLog.setLineSpacing(4f, 1f);
-        tvLog.setPadding(dpToPx(14), dpToPx(14), dpToPx(14), dpToPx(14));
-        tvLog.setText(getLastLogs(srv));
+        tvLog.setLineSpacing(3f, 1f);
+        tvLog.setPadding(dp(10), dp(10), dp(10), dp(10));
+        // Prefer stack trace if available, otherwise read log file
+        if (crashStack != null && !crashStack.isEmpty()) {
+            tvLog.setText(crashStack);
+        } else {
+            tvLog.setText(getLastLogs(srv));
+        }
         scrollLog.addView(tvLog);
 
-        // Scroll to bottom after layout
-        scrollLog.post(() -> scrollLog.fullScroll(android.view.View.FOCUS_DOWN));
-        root.addView(scrollLog);
+        // Toggle expand/collapse on label click
+        tvLogLabel.setOnClickListener(v -> {
+            if (scrollLog.getVisibility() == View.VISIBLE) {
+                scrollLog.setVisibility(View.GONE);
+            } else {
+                scrollLog.setVisibility(View.VISIBLE);
+                scrollLog.post(() -> scrollLog.fullScroll(View.FOCUS_DOWN));
+            }
+        });
+        card.addView(scrollLog);
+        scrollLog.post(() -> scrollLog.fullScroll(View.FOCUS_DOWN));
 
-        // ── Buttons ───────────────────────────────────────────────────────────
+        // ══════════════════════════════════════════════════════════════════════
+        //  BUTTONS
+        // ══════════════════════════════════════════════════════════════════════
         LinearLayout btnBar = new LinearLayout(this);
         btnBar.setOrientation(LinearLayout.HORIZONTAL);
         btnBar.setGravity(Gravity.CENTER);
-        btnBar.setPadding(dpToPx(20), 0, dpToPx(20), dpToPx(32));
-        btnBar.setBackgroundColor(0xFF0A0008);
+        LinearLayout.LayoutParams btnBarParams = new LinearLayout.LayoutParams(
+            ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        btnBarParams.setMargins(0, dp(20), 0, 0);
+        btnBar.setLayoutParams(btnBarParams);
 
-        Button btnDismiss = new Button(this);
-        btnDismiss.setText(eu.kodanetwork.mchost.util.LocaleHelper.t(this, "DISMISS", "SCHLIESSEN"));
-        btnDismiss.setBackgroundColor(0xFF1E1E28);
-        btnDismiss.setTextColor(0xFF888899);
-        btnDismiss.setTypeface(Typeface.DEFAULT_BOLD);
-        btnDismiss.setTextSize(12f);
-        btnDismiss.setStateListAnimator(null);
-        LinearLayout.LayoutParams dismissParams = new LinearLayout.LayoutParams(
-            0, dpToPx(52), 1.0f);
-        dismissParams.setMargins(0, 0, dpToPx(10), 0);
+        // Dismiss button
+        com.google.android.material.button.MaterialButton btnDismiss = new com.google.android.material.button.MaterialButton(this);
+        btnDismiss.setText(getString(R.string.crash_btn_dismiss));
+        btnDismiss.setTextColor(0xFFBBBBBB);
+        btnDismiss.setBackgroundTintList(android.content.res.ColorStateList.valueOf(0xFF2A2A33));
+        btnDismiss.setCornerRadius(dp(8));
+        btnDismiss.setTypeface(kodaBold != null ? kodaBold : Typeface.DEFAULT_BOLD);
+        LinearLayout.LayoutParams dismissParams = new LinearLayout.LayoutParams(0, dp(48), 1.0f);
+        dismissParams.setMargins(0, 0, dp(8), 0);
         btnDismiss.setLayoutParams(dismissParams);
-        btnDismiss.setOnClickListener(v -> finish());
-        btnBar.addView(btnDismiss);
-
-        Button btnRestart = new Button(this);
-        btnRestart.setText(eu.kodanetwork.mchost.util.LocaleHelper.t(this, "RESTART", "NEUSTART"));
-        btnRestart.setBackgroundColor(0xFFCC0033);
-        btnRestart.setTextColor(Color.WHITE);
-        btnRestart.setTypeface(Typeface.DEFAULT_BOLD);
-        btnRestart.setTextSize(12f);
-        btnRestart.setStateListAnimator(null);
-        LinearLayout.LayoutParams restartParams = new LinearLayout.LayoutParams(
-            0, dpToPx(52), 1.0f);
-        restartParams.setMargins(dpToPx(10), 0, 0, 0);
-        btnRestart.setLayoutParams(restartParams);
-        btnRestart.setOnClickListener(v -> {
-            Intent si = new Intent(this, KodaServerService.class);
-            si.setAction(KodaServerService.ACTION_START);
-            si.putExtra(KodaServerService.EXTRA_ID, id);
-            startService(si);
+        btnDismiss.setOnClickListener(v -> {
+            HapticUtil.forceVibrate(this, 40);
             finish();
         });
-        btnBar.addView(btnRestart);
+        btnBar.addView(btnDismiss);
+        
+        // Full Logs button
+        com.google.android.material.button.MaterialButton btnFullLogs = new com.google.android.material.button.MaterialButton(this);
+        btnFullLogs.setText("FULL LOGS");
+        btnFullLogs.setTextColor(0xFFFFFFFF);
+        btnFullLogs.setBackgroundTintList(android.content.res.ColorStateList.valueOf(0xFF333344));
+        btnFullLogs.setCornerRadius(dp(8));
+        btnFullLogs.setTypeface(kodaBold != null ? kodaBold : Typeface.DEFAULT_BOLD);
+        LinearLayout.LayoutParams fullLogsParams = new LinearLayout.LayoutParams(0, dp(48), 1.0f);
+        fullLogsParams.setMargins(dp(8), 0, 0, 0);
+        btnFullLogs.setLayoutParams(fullLogsParams);
+        btnFullLogs.setOnClickListener(v -> {
+            HapticUtil.forceVibrate(this, 40);
+            if (srv != null) {
+                Intent logIntent = new Intent(this, eu.kodanetwork.mchost.ui.FileEditorActivity.class);
+                logIntent.putExtra("filePath", srv.getServerDir() + "/logs/latest.log");
+                logIntent.putExtra("title", "Server Logs");
+                logIntent.putExtra("readOnly", true);
+                startActivity(logIntent);
+            }
+        });
+        btnBar.addView(btnFullLogs);
 
-        root.addView(btnBar);
+        card.addView(btnBar);
 
-        setContentView(root);
+        // root.addView(card); // removed because root IS card
+        scroll.addView(root);
+        setContentView(scroll);
 
-        // Subtle pulse animation on header background only
-        anim = ObjectAnimator.ofInt(header, "backgroundColor",
-            0xFF110008, 0xFF1F000F);
-        anim.setDuration(900);
+        // ── Subtle pulse on the background ──────────────────────────────────
+        anim = ObjectAnimator.ofInt(getWindow().getDecorView(), "backgroundColor", 0xFF0F0808, 0xFF1A0A0A);
+        anim.setDuration(1200);
         anim.setEvaluator(new ArgbEvaluator());
         anim.setRepeatMode(ValueAnimator.REVERSE);
         anim.setRepeatCount(ValueAnimator.INFINITE);
         anim.start();
 
-        // Play alarm sound only if device is not in silent/DND mode
-        if (shouldPlaySound()) {
-            playCustomAlarm();
-        }
-
-        // Auto-dismiss after 60 seconds
-        new Handler(Looper.getMainLooper()).postDelayed(this::finish, 60000);
+        // Auto-dismiss after 2 minutes
+        new Handler(Looper.getMainLooper()).postDelayed(this::finish, 120000);
     }
 
-    /** Returns true only if device is in a normal/ring audio mode (not silent or vibrate). */
-    private boolean shouldPlaySound() {
-        AudioManager am = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
-        if (am == null) return false;
-
-        int ringerMode = am.getRingerMode();
-        if (ringerMode == AudioManager.RINGER_MODE_SILENT ||
-            ringerMode == AudioManager.RINGER_MODE_VIBRATE) {
-            return false;
+    /** Resolve crash category key to localized display name. */
+    private String getCategoryDisplayName(String category) {
+        if (category == null) return getString(R.string.crash_category_unknown);
+        switch (category) {
+            case "EULA":           return getString(R.string.crash_category_eula);
+            case "OOM":            return getString(R.string.crash_category_oom);
+            case "PORT":           return getString(R.string.crash_category_port);
+            case "MOD_CRASH":      return getString(R.string.crash_category_mod_crash);
+            case "MISSING_JAR":    return getString(R.string.crash_category_missing_jar);
+            case "JAVA_VERSION":   return getString(R.string.crash_category_java_version);
+            case "PERMISSION":     return getString(R.string.crash_category_permission);
+            case "STACK_OVERFLOW": return getString(R.string.crash_category_stack_overflow);
+            case "WORLD_CORRUPT":  return getString(R.string.crash_category_world_corrupt);
+            case "CONFIG_INVALID": return getString(R.string.crash_category_config_invalid);
+            case "OS_KILLED":      return getString(R.string.crash_category_os_killed);
+            case "NATIVE_LIB":     return getString(R.string.crash_category_native_lib);
+            default:               return getString(R.string.crash_category_unknown);
         }
-
-        // Also check Do Not Disturb on API 23+
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            android.app.NotificationManager nm =
-                (android.app.NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-            if (nm != null) {
-                int filter = nm.getCurrentInterruptionFilter();
-                if (filter == android.app.NotificationManager.INTERRUPTION_FILTER_NONE ||
-                    filter == android.app.NotificationManager.INTERRUPTION_FILTER_ALARMS) {
-                    return false;
-                }
-            }
-        }
-        return true;
     }
 
-    /**
-     * Reads the last 50 lines from server log.
-     * Tries server.log first, then logs/latest.log (Minecraft standard).
-     */
+    /** Get a rich localized reason text using string resources with parameters. */
+    private String getReasonDisplayText(String category, String rawReason, int ram, int port, int exitCode) {
+        if (category == null) return rawReason != null ? rawReason : "";
+        switch (category) {
+            case "EULA":           return getString(R.string.crash_reason_eula);
+            case "OOM":            return getString(R.string.crash_reason_oom, ram);
+            case "PORT":           return getString(R.string.crash_reason_port, port);
+            case "MOD_CRASH":      return getString(R.string.crash_reason_mod_crash);
+            case "MISSING_JAR":    return getString(R.string.crash_reason_missing_jar);
+            case "JAVA_VERSION":   return getString(R.string.crash_reason_java_version);
+            case "PERMISSION":     return getString(R.string.crash_reason_permission);
+            case "STACK_OVERFLOW": return getString(R.string.crash_reason_stack_overflow);
+            case "WORLD_CORRUPT":  return getString(R.string.crash_reason_world_corrupt);
+            case "CONFIG_INVALID": return getString(R.string.crash_reason_config_invalid);
+            case "OS_KILLED":      return getString(R.string.crash_reason_os_killed);
+            case "NATIVE_LIB":     return getString(R.string.crash_reason_native_lib);
+            case "UNKNOWN":
+                if (exitCode != 0) return getString(R.string.crash_reason_unknown, exitCode);
+                return getString(R.string.crash_reason_startup_exit);
+            default: return rawReason != null ? rawReason : "";
+        }
+    }
+
+    /** Read last 50 lines from server log. */
     private String getLastLogs(ServerInstance srv) {
-        if (srv == null) return "Unknown server.";
-
+        if (srv == null) return getString(R.string.crash_log_unavailable);
         File serverDir = new File(srv.getServerDir());
-        // Possible log locations in priority order
         File[] candidates = {
             new File(serverDir, "server.log"),
             new File(serverDir, "logs/latest.log"),
-            new File(serverDir, "logs/latest.log.gz"),
         };
-
         File logFile = null;
         for (File f : candidates) {
-            if (f.exists() && f.length() > 0) {
-                logFile = f;
-                break;
-            }
+            if (f.exists() && f.length() > 0) { logFile = f; break; }
         }
-
-        if (logFile == null) {
-            // Log not ready yet - show info from service memory
-            return eu.kodanetwork.mchost.util.LocaleHelper.t(this,
-                "Log file not available yet.\n\nThe server may have crashed immediately on startup.\n\nCheck the console tab for details.",
-                "Logdatei noch nicht verfügbar.\n\nDer Server ist möglicherweise sofort beim Start abgestürzt.\n\nPrüfe die Konsole für Details.");
-        }
+        if (logFile == null) return getString(R.string.crash_log_unavailable);
 
         StringBuilder sb = new StringBuilder();
         try (BufferedReader br = new BufferedReader(new FileReader(logFile))) {
-            java.util.LinkedList<String> lines = new java.util.LinkedList<>();
+            LinkedList<String> lines = new LinkedList<>();
             String line;
             while ((line = br.readLine()) != null) {
-                // Strip ANSI escape codes
-                line = line.replaceAll("(?:\\x1B|\\u001B)\\[[;\\d]*[a-zA-Z]", "");
-                // Skip empty lines from ANSI stripping
+                line = line.replaceAll("(?:\\\\x1B|\\\\u001B)\\[[;\\\\d]*[a-zA-Z]", "");
                 if (line.trim().isEmpty()) continue;
                 lines.add(line);
                 if (lines.size() > 50) lines.removeFirst();
@@ -286,64 +440,16 @@ public class CrashAlertActivity extends Activity {
         } catch (Exception e) {
             return "Failed to read log: " + e.getMessage();
         }
-
         String result = sb.toString().trim();
-        return result.isEmpty()
-            ? eu.kodanetwork.mchost.util.LocaleHelper.t(this, "(log is empty)", "(Log ist leer)")
-            : result;
+        return result.isEmpty() ? getString(R.string.crash_log_empty) : result;
     }
 
-    private void playCustomAlarm() {
-        int sampleRate = 44100;
-        int bufferSize = AudioTrack.getMinBufferSize(
-            sampleRate, AudioFormat.CHANNEL_OUT_MONO, AudioFormat.ENCODING_PCM_16BIT);
-
-        audioTrack = new AudioTrack(
-            AudioManager.STREAM_ALARM, sampleRate,
-            AudioFormat.CHANNEL_OUT_MONO, AudioFormat.ENCODING_PCM_16BIT,
-            bufferSize, AudioTrack.MODE_STREAM);
-
-        // Set volume to 70% of max alarm volume, not full blast
-        AudioManager am = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
-        if (am != null) {
-            int max = am.getStreamMaxVolume(AudioManager.STREAM_ALARM);
-            am.setStreamVolume(AudioManager.STREAM_ALARM, (int)(max * 0.7f), 0);
-        }
-
-        audioTrack.play();
-
-        new Thread(() -> {
-            short[] buf = new short[bufferSize];
-            double phase = 0;
-            double freq = 600;
-            boolean rising = true;
-            while (playing) {
-                for (int i = 0; i < bufferSize; i++) {
-                    buf[i] = (short)(Math.sin(phase) * Short.MAX_VALUE * 0.6); // 60% amplitude
-                    phase += 2 * Math.PI * freq / sampleRate;
-                    if (rising) {
-                        freq += 0.15;
-                        if (freq > 1100) rising = false;
-                    } else {
-                        freq -= 0.15;
-                        if (freq < 600) rising = true;
-                    }
-                }
-                try { audioTrack.write(buf, 0, bufferSize); } catch (Exception ignored) {}
-            }
-        }).start();
-    }
-
-    private int dpToPx(int dp) {
+    private int dp(int dp) {
         return (int)(dp * getResources().getDisplayMetrics().density);
     }
 
     @Override
     protected void onDestroy() {
-        playing = false;
-        if (audioTrack != null) {
-            try { audioTrack.stop(); audioTrack.release(); } catch (Exception ignored) {}
-        }
         if (anim != null) anim.cancel();
         super.onDestroy();
     }

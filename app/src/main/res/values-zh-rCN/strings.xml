@@ -271,6 +271,15 @@
     <string name="modpack_filter_all">所有版本</string>
     <string name="java_runtime_label">Java 运行时</string>
     <string name="java_runtime_auto">自动（Java %1$d）</string>
+
+    <!-- JRE Fallback PRAETOR -->
+    <string name="praetor_subtitle_jre_fallback">JAVA 运行时回退</string>
+    <string name="praetor_reason_jre_fallback">无法加载 Java %1$d。\n\n原因：%2$s\n\n服务器将改用 Java 25 启动。这可能会导致与需要 Java %1$d 的旧版 Minecraft 或模组不兼容。</string>
+    <string name="praetor_jre_reason_unknown">未知错误</string>
+    <string name="praetor_jre_reason_download_unreachable">下载服务器无法访问</string>
+    <string name="praetor_jre_reason_download_failed">下载失败：%1$s</string>
+    <string name="praetor_jre_reason_archive_corrupt">存档损坏：未找到 Java 二进制文件</string>
+    <string name="praetor_jre_reason_install_failed">安装失败</string>
     <string name="java_runtime_manual">Java %1$d</string>
     <string name="java_runtime_17_soon">Java 17（即将推出）</string>
     <string name="java_runtime_downloading">正在下载 Java %1$d 运行时（%2$d%%）</string>

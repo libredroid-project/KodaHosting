@@ -239,6 +239,16 @@
     <string name="modpack_filter_all">All versions</string>
     <string name="java_runtime_label">Java-Runtime</string>
     <string name="java_runtime_auto">Auto (Java %1$d)</string>
+
+    <!-- JRE Fallback PRAETOR -->
+    <string name="praetor_subtitle_jre_fallback">JAVA RUNTIME FALLBACK</string>
+    <string name="praetor_reason_jre_fallback">Java %1$d could not be loaded.\n\nReason: %2$s\n\nThe server will start with Java 25 instead. This may cause compatibility issues with older Minecraft versions or mods that require Java %1$d.</string>
+    <string name="praetor_jre_reason_unknown">Unknown error</string>
+    <string name="praetor_jre_reason_download_unreachable">Download server not reachable</string>
+    <string name="praetor_jre_reason_download_failed">Download failed: %1$s</string>
+    <string name="praetor_jre_reason_archive_corrupt">Archive corrupted: Java binary not found</string>
+    <string name="praetor_jre_reason_install_failed">Installation failed</string>
+
     <string name="java_runtime_manual">Java %1$d</string>
     <string name="java_runtime_17_soon">Java 17 (coming soon)</string>
     <string name="java_runtime_downloading">Downloading Java %1$d runtime (%2$d%%)</string>
@@ -465,4 +475,49 @@
     <string name="sd_props_use_manual">Use manual values</string>
     <string name="sd_props_use_app">Use app values</string>
     <string name="sd_props_port_ip_managed">server-port and server-ip are managed by the app and cannot be changed. Your edit was reverted.</string>
+
+    <!-- Crash Detection / PRAETOR Crash Screen -->
+    <string name="crash_title">SERVER CRASH</string>
+    <string name="crash_subtitle">CRASH ANALYSIS &amp; DIAGNOSTICS</string>
+    <string name="crash_server_info">%1$s · %2$s %3$s</string>
+    <string name="crash_time_ago">%1$s ago</string>
+    <string name="crash_time_seconds">%1$d seconds</string>
+    <string name="crash_time_minutes">%1$d minutes</string>
+    <string name="crash_exit_code">EXIT CODE %1$d</string>
+    <string name="crash_cause_label">CAUSE</string>
+    <string name="crash_log_label">CRASH LOG (last 50 lines)</string>
+    <string name="crash_log_empty">(Log is empty)</string>
+    <string name="crash_log_unavailable">Log file not available yet.\n\nThe server may have crashed immediately on startup.\n\nCheck the console tab for details.</string>
+    <string name="crash_btn_dismiss">DISMISS</string>
+    <string name="crash_btn_fix">FIX: %1$s</string>
+    <string name="crash_fix_success">✓ Fix applied: %1$s\n\nYou can now manually restart the server.</string>
+    <string name="crash_fix_failed">✗ Fix failed: %1$s</string>
+    <string name="crash_category_eula">EULA Not Accepted</string>
+    <string name="crash_category_oom">Out of Memory</string>
+    <string name="crash_category_port">Port Conflict</string>
+    <string name="crash_category_mod_crash">Mod Compatibility Error</string>
+    <string name="crash_category_missing_jar">Server JAR Missing</string>
+    <string name="crash_category_java_version">Wrong Java Version</string>
+    <string name="crash_category_permission">Permission Denied</string>
+    <string name="crash_category_stack_overflow">Stack Overflow</string>
+    <string name="crash_category_world_corrupt">World Data Corrupted</string>
+    <string name="crash_category_config_invalid">Invalid Configuration</string>
+    <string name="crash_category_os_killed">Process Killed by Android</string>
+    <string name="crash_category_native_lib">Native Library Missing</string>
+    <string name="crash_category_unknown">Unknown Crash</string>
+    <string name="crash_reason_eula">The server requires you to accept the Minecraft EULA before starting.</string>
+    <string name="crash_reason_oom">The server ran out of memory. Currently assigned: %1$d MB RAM.</string>
+    <string name="crash_reason_port">Another process is already using port %1$d.</string>
+    <string name="crash_reason_mod_crash">A mod or plugin caused an incompatibility error. Check the crash log for the affected mod.</string>
+    <string name="crash_reason_missing_jar">The server JAR file is missing or corrupted.</string>
+    <string name="crash_reason_java_version">The server was compiled for a different Java version than the one currently selected.</string>
+    <string name="crash_reason_permission">The server cannot access required files due to permission errors.</string>
+    <string name="crash_reason_stack_overflow">An infinite loop in a mod or plugin caused a stack overflow.</string>
+    <string name="crash_reason_world_corrupt">One or more world files are corrupted. A backup restore may be needed.</string>
+    <string name="crash_reason_config_invalid">The server.properties file contains invalid values.</string>
+    <string name="crash_reason_os_killed">Android terminated the server process (OOM Killer / Phantom Process Limiter).</string>
+    <string name="crash_reason_native_lib">A required native library (libjvm.so) is missing or corrupted.</string>
+    <string name="crash_reason_unknown">The server exited unexpectedly (exit code %1$d).</string>
+    <string name="crash_reason_startup_exit">The server exited before finishing startup.</string>
+
 </resources>
