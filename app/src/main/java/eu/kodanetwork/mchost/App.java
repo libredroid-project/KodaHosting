@@ -130,7 +130,7 @@ public class App extends Application implements Application.ActivityLifecycleCal
             androidx.appcompat.app.AppCompatDelegate.setApplicationLocales(androidx.core.os.LocaleListCompat.getEmptyLocaleList());
             return;
         }
-        androidx.core.os.LocaleListCompat appLocale = androidx.core.os.LocaleListCompat.create(new java.util.Locale(languageCode));
+        androidx.core.os.LocaleListCompat appLocale = androidx.core.os.LocaleListCompat.forLanguageTags(languageCode);
         androidx.appcompat.app.AppCompatDelegate.setApplicationLocales(appLocale);
     }
 

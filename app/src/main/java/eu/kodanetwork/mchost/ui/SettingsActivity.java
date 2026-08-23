@@ -1616,8 +1616,8 @@ public class SettingsActivity extends Activity {
         TextView btnSelector = findViewById(R.id.btn_lang_selector);
         if (btnSelector == null) return;
         
-        String[] displayLangs = {getString(R.string.system_default), "English", "Deutsch", "简体中文"};
-        final String[] codes = {"system", "en", "de", "zh"};
+        String[] displayLangs = {getString(R.string.system_default), "English", "English (Slang)", "Deutsch", "简体中文"};
+        final String[] codes = {"system", "en", "en-IE", "de", "zh"};
         
         String currentLang = prefs.getString("language", "system");
         for (int i=0; i<codes.length; i++) {
