@@ -149,12 +149,18 @@ public class SettingsActivity extends Activity {
         Button btnExportLogs = findViewById(R.id.btn_dev_export_logs);
         Button btnClearCache = findViewById(R.id.btn_dev_clear_cache);
         Button btnForceCrash = findViewById(R.id.btn_dev_force_crash);
+        Button btnResetOnboarding = findViewById(R.id.btn_dev_reset_onboarding);
+        Button btnNukeServers = findViewById(R.id.btn_dev_nuke_servers);
+        Button btnWipeJvms = findViewById(R.id.btn_dev_wipe_jvms);
+        Button btnHwStats = findViewById(R.id.btn_dev_hw_stats);
+        Button btnStrictMode = findViewById(R.id.btn_dev_strict_mode);
 
         if (btnExportLogs != null) {
             btnExportLogs.setOnClickListener(v -> {
                 eu.kodanetwork.mchost.util.HapticUtil.forceVibrate(this, 30);
                 try {
-                    java.io.File logFile = new java.io.File(getExternalFilesDir(null), "logcat_export.txt");
+                    java.io.File downloadsDir = android.os.Environment.getExternalStoragePublicDirectory(android.os.Environment.DIRECTORY_DOWNLOADS);
+                    java.io.File logFile = new java.io.File(downloadsDir, "kodahosting_logcat_" + System.currentTimeMillis() + ".txt");
                     Process process = Runtime.getRuntime().exec("logcat -d");
                     java.io.InputStream is = process.getInputStream();
                     java.io.FileOutputStream fos = new java.io.FileOutputStream(logFile);
@@ -186,6 +192,84 @@ public class SettingsActivity extends Activity {
                 } catch (Exception e) {
                     Toast.makeText(this, "Failed to clear cache", Toast.LENGTH_SHORT).show();
                 }
+            });
+        }
+
+        if (btnResetOnboarding != null) {
+            btnResetOnboarding.setOnClickListener(v -> {
+                eu.kodanetwork.mchost.util.HapticUtil.forceVibrate(this, 50);
+                prefs.edit().putBoolean("onboarding_complete", false).putBoolean("eula_accepted", false).apply();
+                Toast.makeText(this, "Onboarding and EULA reset. Restart app to see.", Toast.LENGTH_LONG).show();
+            });
+        }
+
+        if (btnNukeServers != null) {
+            btnNukeServers.setOnClickListener(v -> {
+                eu.kodanetwork.mchost.util.HapticUtil.forceVibrate(this, 80);
+                try {
+                    java.io.File serversDir = new java.io.File(getFilesDir(), "servers");
+                    if (serversDir.exists() && serversDir.isDirectory()) {
+                        Runtime.getRuntime().exec("rm -rf " + serversDir.getAbsolutePath());
+                        Toast.makeText(this, "All servers nuked!", Toast.LENGTH_SHORT).show();
+                    } else {
+                        Toast.makeText(this, "No servers directory found.", Toast.LENGTH_SHORT).show();
+                    }
+                } catch (Exception e) {
+                    Toast.makeText(this, "Failed to nuke: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                }
+            });
+        }
+
+        if (btnWipeJvms != null) {
+            btnWipeJvms.setOnClickListener(v -> {
+                eu.kodanetwork.mchost.util.HapticUtil.forceVibrate(this, 80);
+                try {
+                    java.io.File jvmDir = new java.io.File(getFilesDir(), "runtimes");
+                    if (jvmDir.exists() && jvmDir.isDirectory()) {
+                        Runtime.getRuntime().exec("rm -rf " + jvmDir.getAbsolutePath());
+                        Toast.makeText(this, "JVM Runtimes wiped! Will redownload on next start.", Toast.LENGTH_SHORT).show();
+                    } else {
+                        Toast.makeText(this, "No JVM directory found.", Toast.LENGTH_SHORT).show();
+                    }
+                } catch (Exception e) {
+                    Toast.makeText(this, "Failed to wipe JVMs: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                }
+            });
+        }
+
+        if (btnHwStats != null) {
+            btnHwStats.setOnClickListener(v -> {
+                eu.kodanetwork.mchost.util.HapticUtil.forceVibrate(this, 30);
+                android.app.ActivityManager actManager = (android.app.ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+                android.app.ActivityManager.MemoryInfo memInfo = new android.app.ActivityManager.MemoryInfo();
+                actManager.getMemoryInfo(memInfo);
+                long totalRam = memInfo.totalMem / (1024 * 1024);
+                long availRam = memInfo.availMem / (1024 * 1024);
+                String arch = System.getProperty("os.arch");
+                long maxHeap = Runtime.getRuntime().maxMemory() / (1024 * 1024);
+                
+                String stats = "Hardware Stats:\nArch: " + arch + "\nTotal RAM: " + totalRam + " MB\nAvailable RAM: " + availRam + " MB\nMax Dalvik Heap: " + maxHeap + " MB";
+                new androidx.appcompat.app.AlertDialog.Builder(this)
+                        .setTitle("System Diagnostics")
+                        .setMessage(stats)
+                        .setPositiveButton("OK", null)
+                        .show();
+            });
+        }
+
+        if (btnStrictMode != null) {
+            btnStrictMode.setOnClickListener(v -> {
+                eu.kodanetwork.mchost.util.HapticUtil.forceVibrate(this, 30);
+                android.os.StrictMode.setThreadPolicy(new android.os.StrictMode.ThreadPolicy.Builder()
+                        .detectAll()
+                        .penaltyLog()
+                        .penaltyFlashScreen()
+                        .build());
+                android.os.StrictMode.setVmPolicy(new android.os.StrictMode.VmPolicy.Builder()
+                        .detectAll()
+                        .penaltyLog()
+                        .build());
+                Toast.makeText(this, "StrictMode Enabled! (Check Logcat & Screen flashes on I/O)", Toast.LENGTH_LONG).show();
             });
         }
 

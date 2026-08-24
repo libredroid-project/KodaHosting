@@ -649,13 +649,43 @@
 
                     <Button android:id="@+id/btn_dev_export_logs"
                         android:layout_width="match_parent" android:layout_height="48dp"
-                        android:text="Export Logcat" android:textColor="#FFFFFF"
+                        android:text="Export Logcat (Downloads)" android:textColor="#FFFFFF"
                         android:backgroundTint="#332A24" android:layout_marginBottom="8dp"
                         app:cornerRadius="8dp" android:textAllCaps="false"/>
 
                     <Button android:id="@+id/btn_dev_clear_cache"
                         android:layout_width="match_parent" android:layout_height="48dp"
                         android:text="Clear App Cache" android:textColor="#FFFFFF"
+                        android:backgroundTint="#332A24" android:layout_marginBottom="8dp"
+                        app:cornerRadius="8dp" android:textAllCaps="false"/>
+
+                    <Button android:id="@+id/btn_dev_reset_onboarding"
+                        android:layout_width="match_parent" android:layout_height="48dp"
+                        android:text="Reset First-Run (Onboarding)" android:textColor="#FFFFFF"
+                        android:backgroundTint="#332A24" android:layout_marginBottom="8dp"
+                        app:cornerRadius="8dp" android:textAllCaps="false"/>
+
+                    <Button android:id="@+id/btn_dev_nuke_servers"
+                        android:layout_width="match_parent" android:layout_height="48dp"
+                        android:text="Nuke All Servers (Delete Data)" android:textColor="#FF4444"
+                        android:backgroundTint="#331A1A" android:layout_marginBottom="8dp"
+                        app:cornerRadius="8dp" android:textAllCaps="false"/>
+
+                    <Button android:id="@+id/btn_dev_wipe_jvms"
+                        android:layout_width="match_parent" android:layout_height="48dp"
+                        android:text="Delete JVM Runtimes (Force redownload)" android:textColor="#FF4444"
+                        android:backgroundTint="#331A1A" android:layout_marginBottom="8dp"
+                        app:cornerRadius="8dp" android:textAllCaps="false"/>
+
+                    <Button android:id="@+id/btn_dev_hw_stats"
+                        android:layout_width="match_parent" android:layout_height="48dp"
+                        android:text="Show Hardware / Memory Stats" android:textColor="#FFFFFF"
+                        android:backgroundTint="#332A24" android:layout_marginBottom="8dp"
+                        app:cornerRadius="8dp" android:textAllCaps="false"/>
+
+                    <Button android:id="@+id/btn_dev_strict_mode"
+                        android:layout_width="match_parent" android:layout_height="48dp"
+                        android:text="Toggle StrictMode (Thread Checks)" android:textColor="#FFFFFF"
                         android:backgroundTint="#332A24" android:layout_marginBottom="8dp"
                         app:cornerRadius="8dp" android:textAllCaps="false"/>
 
