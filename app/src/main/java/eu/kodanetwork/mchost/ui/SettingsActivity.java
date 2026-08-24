@@ -145,6 +145,57 @@ public class SettingsActivity extends Activity {
             Toast.makeText(this, "LiquidGlass Mode requires app restart.", Toast.LENGTH_SHORT).show();
         });
 
+        // Practical Developer Tools
+        Button btnExportLogs = findViewById(R.id.btn_dev_export_logs);
+        Button btnClearCache = findViewById(R.id.btn_dev_clear_cache);
+        Button btnForceCrash = findViewById(R.id.btn_dev_force_crash);
+
+        if (btnExportLogs != null) {
+            btnExportLogs.setOnClickListener(v -> {
+                eu.kodanetwork.mchost.util.HapticUtil.forceVibrate(this, 30);
+                try {
+                    java.io.File logFile = new java.io.File(getExternalFilesDir(null), "logcat_export.txt");
+                    Process process = Runtime.getRuntime().exec("logcat -d");
+                    java.io.InputStream is = process.getInputStream();
+                    java.io.FileOutputStream fos = new java.io.FileOutputStream(logFile);
+                    byte[] buffer = new byte[8192];
+                    int len;
+                    while ((len = is.read(buffer)) > 0) {
+                        fos.write(buffer, 0, len);
+                    }
+                    fos.close();
+                    is.close();
+                    Toast.makeText(this, "Logs exported to:\n" + logFile.getAbsolutePath(), Toast.LENGTH_LONG).show();
+                } catch (Exception e) {
+                    Toast.makeText(this, "Log export failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                }
+            });
+        }
+
+        if (btnClearCache != null) {
+            btnClearCache.setOnClickListener(v -> {
+                eu.kodanetwork.mchost.util.HapticUtil.forceVibrate(this, 50);
+                try {
+                    java.io.File cacheDir = getCacheDir();
+                    if (cacheDir != null && cacheDir.isDirectory()) {
+                        for (java.io.File file : cacheDir.listFiles()) {
+                            file.delete();
+                        }
+                    }
+                    Toast.makeText(this, "App Cache cleared successfully.", Toast.LENGTH_SHORT).show();
+                } catch (Exception e) {
+                    Toast.makeText(this, "Failed to clear cache", Toast.LENGTH_SHORT).show();
+                }
+            });
+        }
+
+        if (btnForceCrash != null) {
+            btnForceCrash.setOnClickListener(v -> {
+                eu.kodanetwork.mchost.util.HapticUtil.forceVibrate(this, 100);
+                throw new RuntimeException("Force crash via Developer Options (Testing CrashFixer)");
+            });
+        }
+
         cardAppInfo.setOnClickListener(v -> {
             long now = System.currentTimeMillis();
             if (now - lastDevClickTime > 500) {

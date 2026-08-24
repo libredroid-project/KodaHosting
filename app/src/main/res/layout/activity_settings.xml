@@ -638,6 +638,33 @@
                         app:trackTint="@color/dev_purple"
                         android:layout_marginBottom="8dp"/>
 
+                    <!-- ─── Practical Developer Tools ─── -->
+                    <View android:layout_width="match_parent" android:layout_height="1dp"
+                        android:background="#332A24" android:layout_marginTop="8dp" android:layout_marginBottom="12dp"/>
+
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:text="PRACTICAL TOOLS" android:textColor="@color/dev_purple"
+                        android:textSize="11sp" android:fontFamily="@font/font_koda"
+                        android:letterSpacing="0.1" android:layout_marginBottom="12dp"/>
+
+                    <Button android:id="@+id/btn_dev_export_logs"
+                        android:layout_width="match_parent" android:layout_height="48dp"
+                        android:text="Export Logcat" android:textColor="#FFFFFF"
+                        android:backgroundTint="#332A24" android:layout_marginBottom="8dp"
+                        app:cornerRadius="8dp" android:textAllCaps="false"/>
+
+                    <Button android:id="@+id/btn_dev_clear_cache"
+                        android:layout_width="match_parent" android:layout_height="48dp"
+                        android:text="Clear App Cache" android:textColor="#FFFFFF"
+                        android:backgroundTint="#332A24" android:layout_marginBottom="8dp"
+                        app:cornerRadius="8dp" android:textAllCaps="false"/>
+
+                    <Button android:id="@+id/btn_dev_force_crash"
+                        android:layout_width="match_parent" android:layout_height="48dp"
+                        android:text="Force Crash (Test Fixer)" android:textColor="#FF4444"
+                        android:backgroundTint="#331A1A" android:layout_marginBottom="8dp"
+                        app:cornerRadius="8dp" android:textAllCaps="false"/>
+
                     <!-- ─── Material Design 3 ─── -->
                     <View android:layout_width="match_parent" android:layout_height="1dp"
                         android:background="#332A24" android:layout_marginTop="8dp" android:layout_marginBottom="12dp"/>
