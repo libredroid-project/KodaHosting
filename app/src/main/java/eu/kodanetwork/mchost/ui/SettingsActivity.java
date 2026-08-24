@@ -240,20 +240,7 @@ public class SettingsActivity extends Activity {
         if (btnHwStats != null) {
             btnHwStats.setOnClickListener(v -> {
                 eu.kodanetwork.mchost.util.HapticUtil.forceVibrate(this, 30);
-                android.app.ActivityManager actManager = (android.app.ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
-                android.app.ActivityManager.MemoryInfo memInfo = new android.app.ActivityManager.MemoryInfo();
-                actManager.getMemoryInfo(memInfo);
-                long totalRam = memInfo.totalMem / (1024 * 1024);
-                long availRam = memInfo.availMem / (1024 * 1024);
-                String arch = System.getProperty("os.arch");
-                long maxHeap = Runtime.getRuntime().maxMemory() / (1024 * 1024);
-                
-                String stats = "Hardware Stats:\nArch: " + arch + "\nTotal RAM: " + totalRam + " MB\nAvailable RAM: " + availRam + " MB\nMax Dalvik Heap: " + maxHeap + " MB";
-                new androidx.appcompat.app.AlertDialog.Builder(this)
-                        .setTitle("System Diagnostics")
-                        .setMessage(stats)
-                        .setPositiveButton("OK", null)
-                        .show();
+                eu.kodanetwork.mchost.util.DevOverlayManager.getInstance().toggle(this);
             });
         }
 

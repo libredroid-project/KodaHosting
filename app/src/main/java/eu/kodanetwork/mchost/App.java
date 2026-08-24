@@ -91,6 +91,7 @@ public class App extends Application implements Application.ActivityLifecycleCal
         applyLanguage(this, prefs.getString("language", "system"));
         
         registerActivityLifecycleCallbacks(this);
+        eu.kodanetwork.mchost.util.DevOverlayManager.getInstance().init(this);
 
         androidx.lifecycle.ProcessLifecycleOwner.get().getLifecycle().addObserver(new androidx.lifecycle.DefaultLifecycleObserver() {
             @Override
