@@ -3489,6 +3489,13 @@ public class KodaServerService extends Service {
 
     @Override
     public void onDestroy() {
+        // Shut the schedulers down FIRST — otherwise their tasks keep the
+        // service alive past the FGS stop timeout and Android kills the app
+        // (ForegroundServiceDidNotStopInTimeException)
+        if (scheduler != null) scheduler.shutdownNow();
+        try {
+            stopForeground(android.app.Service.STOP_FOREGROUND_REMOVE);
+        } catch (Exception ignored) {}
         for (RT rt : runtimes.values()) {
             if (rt.proc != null) rt.proc.destroyForcibly();
             if (rt.frpcProc != null) rt.frpcProc.destroyForcibly();

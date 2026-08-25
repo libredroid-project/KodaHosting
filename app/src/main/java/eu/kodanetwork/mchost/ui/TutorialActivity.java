@@ -34,7 +34,6 @@ public class TutorialActivity extends Activity {
     private final Handler handler = new Handler(Looper.getMainLooper());
     private FrameLayout root;
     private FrameLayout centerStage;
-    private LottieAnimationView bgLottie;
     private LottieAnimationView actLottie;
     private LinearLayout cardHost;
     private TextView cursor;
@@ -48,11 +47,10 @@ public class TutorialActivity extends Activity {
         root.setBackgroundColor(0xFF0A0807);
         setContentView(root);
 
-        bgLottie = new LottieAnimationView(this);
-        bgLottie.setAnimation(R.raw.tut_bg);
-        bgLottie.loop(true);
-        bgLottie.setScaleType(LottieAnimationView.ScaleType.CENTER_CROP);
-        root.addView(bgLottie, new FrameLayout.LayoutParams(
+        // The real AFK screensaver background the app uses (floating Koda squares)
+        eu.kodanetwork.mchost.ui.FloatingSquaresView bg =
+                new eu.kodanetwork.mchost.ui.FloatingSquaresView(this);
+        root.addView(bg, new FrameLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
 
         centerStage = new FrameLayout(this);
@@ -259,7 +257,7 @@ public class TutorialActivity extends Activity {
                         cursor.animate().alpha(0f).setDuration(250).start();
                         closeBtn.animate().alpha(0f).setDuration(250).start();
                         playOnce(R.raw.tut_box_fall, () -> {
-                            bgLottie.animate().alpha(0f).setDuration(500).withEndAction(() -> finishTutorial(false)).start();
+                            root.animate().alpha(0f).setDuration(500).withEndAction(() -> finishTutorial(false)).start();
                         });
                     }, 700);
                 })
