@@ -29,11 +29,12 @@ public class TutorialCoach {
     private static final Handler handler = new Handler(Looper.getMainLooper());
 
     public static void maybeStartTutorial(Activity activity) {
-        if (!App.getPrefs(activity).getBoolean("tutorial_completed_v2", false)) {
-            android.content.Intent intent = new android.content.Intent(activity, eu.kodanetwork.mchost.ui.TutorialActivity.class);
-            intent.addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK);
-            activity.startActivity(intent);
-        }
+        if (App.getPrefs(activity).getBoolean("tutorial_completed_v2", false)) return;
+        if (App.getPrefs(activity).getBoolean("tutorial_started", false)) return; // already ran once
+        App.getPrefs(activity).edit().putBoolean("tutorial_started", true).apply();
+        android.content.Intent intent = new android.content.Intent(activity, eu.kodanetwork.mchost.ui.TutorialActivity.class);
+        intent.addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK);
+        activity.startActivity(intent);
     }
 
     /** Phase 1: cursor hovers over NEW SERVER; user taps the real button to continue. */
@@ -57,9 +58,31 @@ public class TutorialCoach {
                 false);
     }
 
-    /** Phase 2: cursor walks through the tabs, one typed card per tab with NEXT. */
-    public static void maybeStartTabTour(Activity activity, TabLayout tabs) {
+    /** Phase 2: cursor walks through the tabs — WAITS until the freshly created
+     *  server finished its setup (jar download, INSTALLING/SETTING_UP states). */
+    public static void maybeStartTabTour(Activity activity, TabLayout tabs,
+                                         eu.kodanetwork.mchost.model.ServerRepo repo, String serverId) {
         if (App.getPrefs(activity).getInt("tutorial_phase", 0) != 2 || tabs == null) return;
+        final android.os.Handler h = new android.os.Handler(android.os.Looper.getMainLooper());
+        final int[] waited = {0};
+        Runnable[] poll = new Runnable[1];
+        poll[0] = () -> {
+            if (activity.isFinishing() || activity.isDestroyed()) return;
+            eu.kodanetwork.mchost.model.ServerInstance s = repo.byId(serverId);
+            boolean busy = s != null && (s.state == eu.kodanetwork.mchost.model.ServerInstance.State.INSTALLING
+                    || s.state == eu.kodanetwork.mchost.model.ServerInstance.State.SETTING_UP
+                    || s.state == eu.kodanetwork.mchost.model.ServerInstance.State.STARTING);
+            if (busy && waited[0] < 450) { // up to 15 minutes
+                waited[0] += 2;
+                h.postDelayed(poll[0], 2000);
+            } else if (App.getPrefs(activity).getInt("tutorial_phase", 0) == 2) {
+                startTabTourNow(activity, tabs);
+            }
+        };
+        poll[0].run();
+    }
+
+    private static void startTabTourNow(Activity activity, TabLayout tabs) {
         App.getPrefs(activity).edit().putInt("tutorial_phase", 0).apply();
 
         ViewGroup content = (ViewGroup) activity.findViewById(android.R.id.content);

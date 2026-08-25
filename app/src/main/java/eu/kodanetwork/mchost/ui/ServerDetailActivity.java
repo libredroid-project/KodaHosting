@@ -560,8 +560,9 @@ public class ServerDetailActivity extends AppCompatActivity {
             tabs.addTab(tabs.newTab().setText(pluginTabName));
         }
         tabs.addTab(tabs.newTab().setText(R.string.tab_settings));
-        // In-app coach phase 2: walk through the tabs after the first server was created
-        eu.kodanetwork.mchost.util.TutorialCoach.maybeStartTabTour(this, tabs);
+        // In-app coach phase 2: walk through the tabs once the freshly created
+        // server finished its setup (waits through INSTALLING/SETTING_UP)
+        eu.kodanetwork.mchost.util.TutorialCoach.maybeStartTabTour(this, tabs, repo, server.getId());
         tabs.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override public void onTabSelected(TabLayout.Tab t) {
                 if (t.getPosition() == 1 && server != null && server.state == ServerInstance.State.OFFLINE) {

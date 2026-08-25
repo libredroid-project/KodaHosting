@@ -393,8 +393,9 @@ public class TutorialActivity extends Activity {
         tvBody.setTextSize(14);
         tvBody.setLineSpacing(4, 1.1f);
         tvBody.setTag("tw_body");
+        // weight=1 pushes the button to the very bottom of the letter
         card.addView(tvBody, new LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+                ViewGroup.LayoutParams.MATCH_PARENT, 0, 1f));
 
         Button btn = eu.kodanetwork.mchost.util.KodaButtons.primary(this, buttonLabel);
         btn.setTag("tw_btn");
@@ -498,5 +499,12 @@ public class TutorialActivity extends Activity {
     @Override
     public void onBackPressed() {
         // Tutorial can only be left via skip
+    }
+
+    @Override
+    protected void onUserLeaveHint() {
+        // Leaving via home/recents counts as a skip — otherwise the cinema
+        // would restart from scratch on every app re-entry
+        finishTutorial(true);
     }
 }

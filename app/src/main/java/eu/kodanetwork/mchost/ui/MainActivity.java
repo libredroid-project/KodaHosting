@@ -179,7 +179,9 @@ public class MainActivity extends AppCompatActivity {
         } else {
             setContentView(R.layout.activity_main);
         }
-        
+
+        showWelcomeSplash();
+
         eu.kodanetwork.mchost.orchestration.DatabaseOrchestrator.ensureDatabasesExtracted(this);
 
         eu.kodanetwork.mchost.util.NetworkMonitorManager.init(this);
@@ -771,5 +773,72 @@ public class MainActivity extends AppCompatActivity {
             repo.removeListener(this::refresh);
             if (bound) unbindService(conn);
         } catch (Exception ignored) {}
+    }
+
+    // ── Welcome splash: covers startup for ~3s every launch ────────────────
+
+    private android.widget.FrameLayout splashOverlay;
+
+    private void showWelcomeSplash() {
+        if (splashOverlay != null) return;
+        android.view.ViewGroup content = findViewById(android.R.id.content);
+        android.widget.FrameLayout overlay = new android.widget.FrameLayout(this);
+        overlay.setBackgroundColor(0xFF000000);
+        float d = getResources().getDisplayMetrics().density;
+
+        overlay.addView(new eu.kodanetwork.mchost.ui.FloatingSquaresView(this), new android.widget.FrameLayout.LayoutParams(
+                android.view.ViewGroup.LayoutParams.MATCH_PARENT, android.view.ViewGroup.LayoutParams.MATCH_PARENT));
+
+        android.widget.LinearLayout center = new android.widget.LinearLayout(this);
+        center.setOrientation(android.widget.LinearLayout.VERTICAL);
+        center.setGravity(android.view.Gravity.CENTER);
+        android.widget.FrameLayout.LayoutParams cLp = new android.widget.FrameLayout.LayoutParams(
+                android.view.ViewGroup.LayoutParams.MATCH_PARENT, android.view.ViewGroup.LayoutParams.MATCH_PARENT);
+        overlay.addView(center, cLp);
+
+        android.widget.TextView logo = new android.widget.TextView(this);
+        logo.setText("KodaHosting");
+        logo.setTextColor(0xFFFF6B00);
+        logo.setTextSize(30);
+        logo.setLetterSpacing(0.06f);
+        logo.setTypeface(androidx.core.content.res.ResourcesCompat.getFont(this, eu.kodanetwork.mchost.R.font.font_koda), android.graphics.Typeface.BOLD);
+        center.addView(logo);
+
+        com.airbnb.lottie.LottieAnimationView boot = new com.airbnb.lottie.LottieAnimationView(this);
+        android.widget.LinearLayout.LayoutParams bLp = new android.widget.LinearLayout.LayoutParams(
+                (int)(180 * d), (int)(64 * d));
+        bLp.topMargin = (int)(28 * d);
+        boot.setLayoutParams(bLp);
+        com.airbnb.lottie.LottieCompositionFactory.fromRawResSync(this, eu.kodanetwork.mchost.R.raw.koda_boot, null);
+        boot.setAnimation(eu.kodanetwork.mchost.R.raw.koda_boot);
+        boot.loop(true);
+        boot.playAnimation();
+        center.addView(boot);
+
+        android.widget.TextView version = new android.widget.TextView(this);
+        version.setText("v" + eu.kodanetwork.mchost.BuildConfig.VERSION_NAME);
+        version.setTextColor(0xFF555566);
+        version.setTextSize(12);
+        android.widget.FrameLayout.LayoutParams vLp = new android.widget.FrameLayout.LayoutParams(
+                android.view.ViewGroup.LayoutParams.WRAP_CONTENT, android.view.ViewGroup.LayoutParams.WRAP_CONTENT,
+                android.view.Gravity.CENTER_HORIZONTAL | android.view.Gravity.BOTTOM);
+        vLp.bottomMargin = (int)(36 * d);
+        overlay.addView(version, vLp);
+
+        content.addView(overlay, new android.view.ViewGroup.LayoutParams(
+                android.view.ViewGroup.LayoutParams.MATCH_PARENT, android.view.ViewGroup.LayoutParams.MATCH_PARENT));
+        splashOverlay = overlay;
+
+        // minimum 3 seconds, then fade out
+        new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
+            if (splashOverlay == null) return;
+            splashOverlay.animate().alpha(0f).setDuration(400)
+                    .withEndAction(() -> {
+                        if (splashOverlay != null) {
+                            content.removeView(splashOverlay);
+                            splashOverlay = null;
+                        }
+                    }).start();
+        }, 3000);
     }
 }
