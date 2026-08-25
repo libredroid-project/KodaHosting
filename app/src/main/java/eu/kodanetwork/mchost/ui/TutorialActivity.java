@@ -17,8 +17,6 @@ import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
-import com.airbnb.lottie.LottieAnimationView;
-
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
@@ -28,25 +26,24 @@ import eu.kodanetwork.mchost.R;
 import eu.kodanetwork.mchost.util.HapticUtil;
 
 /**
- * Cinematic first-open tutorial. The crate is built from native views so the
- * lid is a real flap hinged at the box edge that opens in ONE direction
- * (rotationX), and the messages fly out of the crate as letters that grow
- * and type their text live.
+ * Cinematic first-open tutorial. ONE crate object: it tumbles in from the top,
+ * lands with a squash, opens its lid in one direction, and every message
+ * (welcome + ToS) is pulled out of it as a letter that types its text live.
+ * The crate sits in the LOWER third so the letters hover above it.
  */
 public class TutorialActivity extends Activity {
 
     private final Handler handler = new Handler(Looper.getMainLooper());
     private FrameLayout root;
     private FrameLayout centerStage;
-    private LottieAnimationView actLottie;
     private LinearLayout cardHost;
     private TextView cursor;
     private boolean finished = false;
 
-    // Native crate: body + single lid hinged at the top back edge
     private FrameLayout crate;
     private View crateBody;
     private View crateLid;
+    private View crateTape;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,11 +67,6 @@ public class TutorialActivity extends Activity {
         centerStage = new FrameLayout(this);
         centerStage.setClipChildren(false);
         root.addView(centerStage, new FrameLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-
-        actLottie = new LottieAnimationView(this);
-        actLottie.setScaleType(LottieAnimationView.ScaleType.CENTER_CROP);
-        centerStage.addView(actLottie, new FrameLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
 
         cardHost = new LinearLayout(this);
@@ -106,44 +98,58 @@ public class TutorialActivity extends Activity {
         startHum();
     }
 
-    // ── native crate ────────────────────────────────────────────────────────
+    // ── the crate: solid cardboard, tape stripe, one-way hinged lid ─────────
 
     private int dp(float v) { return (int)(v * getResources().getDisplayMetrics().density); }
 
     private void buildCrate() {
         crate = new FrameLayout(this);
-        int size = dp(130);
+        int size = dp(132);
+        // crate lives in the lower third of the screen
         FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(size, size, Gravity.CENTER);
+        lp.topMargin = (int)(getResources().getDisplayMetrics().heightPixels * 0.16f);
         crate.setLayoutParams(lp);
         crate.setAlpha(0f);
 
         // lid: flap above the body, hinged at its bottom edge, opens backwards
         crateLid = new View(this);
-        android.graphics.drawable.GradientDrawable lidBg = new android.graphics.drawable.GradientDrawable();
-        lidBg.setColor(0xFF2A211A);
-        lidBg.setCornerRadius(dp(6));
-        lidBg.setStroke(dp(3), 0xFFFF6B00);
-        crateLid.setBackground(lidBg);
-        FrameLayout.LayoutParams lidLp = new FrameLayout.LayoutParams(size, dp(34), Gravity.TOP);
+        crateLid.setBackground(cardboard(true));
+        FrameLayout.LayoutParams lidLp = new FrameLayout.LayoutParams(size, dp(36), Gravity.TOP);
         crate.addView(crateLid, lidLp);
-        crateLid.setPivotY(dp(34)); // hinge at the bottom edge of the lid
+        crateLid.setPivotY(dp(36));
         crateLid.setRotationX(0f);
-        crateLid.setCameraDistance(dp(1200)); // keeps the 3D flip readable
+        crateLid.setCameraDistance(dp(1400));
 
-        // body below the lid
+        // solid body below the lid
         crateBody = new View(this);
-        android.graphics.drawable.GradientDrawable bodyBg = new android.graphics.drawable.GradientDrawable();
-        bodyBg.setColor(0xFF1D1712);
-        bodyBg.setCornerRadius(dp(8));
-        bodyBg.setStroke(dp(4), 0xFFFF6B00);
-        crateBody.setBackground(bodyBg);
+        crateBody.setBackground(cardboard(false));
         FrameLayout.LayoutParams bodyLp = new FrameLayout.LayoutParams(size, size - dp(30), Gravity.BOTTOM);
         crate.addView(crateBody, bodyLp);
+
+        // packing tape stripe across the front
+        crateTape = new View(this);
+        android.graphics.drawable.GradientDrawable tape = new android.graphics.drawable.GradientDrawable();
+        tape.setColor(0xCCFF8C38);
+        tape.setCornerRadius(dp(2));
+        crateTape.setBackground(tape);
+        FrameLayout.LayoutParams tapeLp = new FrameLayout.LayoutParams(size, dp(14), Gravity.CENTER_VERTICAL);
+        crate.addView(crateTape, tapeLp);
 
         centerStage.addView(crate);
     }
 
+    /** Solid cardboard look: filled brown surface with darker edges + orange rim. */
+    private android.graphics.drawable.GradientDrawable cardboard(boolean isLid) {
+        android.graphics.drawable.GradientDrawable g = new android.graphics.drawable.GradientDrawable(
+                android.graphics.drawable.GradientDrawable.Orientation.TOP_BOTTOM,
+                isLid ? new int[]{0xFF3A2C20, 0xFF241A12} : new int[]{0xFF33261B, 0xFF1D140D});
+        g.setCornerRadius(dp(isLid ? 5 : 8));
+        g.setStroke(dp(2), 0x88FF6B00);
+        return g;
+    }
+
     private void openLid(Runnable onDone) {
+        crateTape.animate().alpha(0f).setDuration(200).start();
         crateLid.animate().rotationX(-115f).setDuration(500)
                 .setInterpolator(new OvershootInterpolator(1.1f))
                 .withEndAction(onDone).start();
@@ -152,7 +158,10 @@ public class TutorialActivity extends Activity {
     private void closeLid(Runnable onDone) {
         crateLid.animate().rotationX(0f).setDuration(380)
                 .setInterpolator(new DecelerateInterpolator())
-                .withEndAction(onDone).start();
+                .withEndAction(() -> {
+                    crateTape.animate().alpha(1f).setDuration(200).start();
+                    if (onDone != null) onDone.run();
+                }).start();
     }
 
     // ── acts ────────────────────────────────────────────────────────────────
@@ -167,37 +176,41 @@ public class TutorialActivity extends Activity {
                 HapticUtil.forceVibrate(this, 40);
                 handler.postDelayed(tick[0], delays[i[0]++]);
             } else {
-                startBlockIn();
+                crateFallsIn();
             }
         };
         handler.post(tick[0]);
     }
 
-    private void startBlockIn() {
-        actLottie.setAnimation(R.raw.tut_block);
-        actLottie.setProgress(0f);
-        actLottie.addAnimatorListener(new android.animation.AnimatorListenerAdapter() {
-            boolean done = false;
-            @Override public void onAnimationEnd(android.animation.Animator a) {
-                if (done || finished) return;
-                done = true;
-                HapticUtil.forceVibrate(TutorialActivity.this, 250);
-                actLottie.setAlpha(0f);
-                crate.setAlpha(1f);
-                crate.setScaleX(0.9f); crate.setScaleY(0.9f);
-                crate.animate().scaleX(1f).scaleY(1f).setDuration(150).start();
-                handler.postDelayed(() -> openLid(() -> {
-                    HapticUtil.forceVibrate(TutorialActivity.this, 80);
-                    startWelcome();
-                }), 200);
-            }
-        });
-        actLottie.playAnimation();
+    /** The crate itself tumbles in from the top and lands with a squash. */
+    private void crateFallsIn() {
+        float h = getResources().getDisplayMetrics().heightPixels;
+        crate.setAlpha(1f);
+        crate.setScaleX(0.5f);
+        crate.setScaleY(0.5f);
+        crate.setRotation(540f);
+        crate.setTranslationY(-h * 0.55f);
+
+        crate.animate()
+                .translationY(0f).rotation(0f).scaleX(1f).scaleY(1f)
+                .setDuration(900)
+                .setInterpolator(new AccelerateInterpolator(1.15f))
+                .withEndAction(() -> {
+                    HapticUtil.forceVibrate(this, 250); // the thud
+                    // landing squash
+                    crate.animate().scaleX(1.1f).scaleY(0.86f).setDuration(90)
+                            .withEndAction(() -> crate.animate().scaleX(1f).scaleY(1f)
+                                    .setDuration(140).withEndAction(() ->
+                                            handler.postDelayed(() -> openLid(() -> {
+                                                HapticUtil.forceVibrate(this, 80);
+                                                startWelcome();
+                                            }), 220)).start()).start();
+                }).start();
     }
 
     private void startWelcome() {
         final LinearLayout[] cardRef = new LinearLayout[1];
-        LinearLayout card = makePraetorCard(
+        LinearLayout card = makeLetterCard(
                 getString(R.string.tutorial_welcome_title),
                 getString(R.string.tutorial_welcome_body),
                 getString(R.string.tutorial_ack),
@@ -210,7 +223,6 @@ public class TutorialActivity extends Activity {
     }
 
     private void startElevator() {
-        // vibrations accelerate again while the elevator rises
         int[] delays = {500, 400, 320, 250, 190, 140, 100, 80, 60, 50};
         final int[] i = {0};
         Runnable[] tick = new Runnable[1];
@@ -223,7 +235,6 @@ public class TutorialActivity extends Activity {
         };
         handler.post(tick[0]);
 
-        // platform rises with the crate from below
         View platform = new View(this);
         android.graphics.drawable.GradientDrawable platBg = new android.graphics.drawable.GradientDrawable();
         platBg.setColor(0x668A8A9A);
@@ -231,21 +242,22 @@ public class TutorialActivity extends Activity {
         platBg.setStroke(dp(2), 0xFFFF6B00);
         platform.setBackground(platBg);
         FrameLayout.LayoutParams pLp = new FrameLayout.LayoutParams(dp(180), dp(14), Gravity.CENTER);
+        pLp.topMargin = (int)(getResources().getDisplayMetrics().heightPixels * 0.16f) + dp(74);
         root.addView(platform, pLp);
 
+        float h = getResources().getDisplayMetrics().heightPixels;
+        float crateRestY = 0f; // crate rests at its layout position
+        float startY = h * 0.45f; // rise from near the bottom
         crate.setAlpha(1f);
-        float crateY = crate.getTranslationY();
-        float startY = root.getHeight() * 0.9f - root.getHeight() / 2f;
         crate.setTranslationY(startY);
-        platform.setTranslationY(startY + dp(80));
+        platform.setTranslationY(startY + dp(90));
         platform.setAlpha(0f);
 
-        crate.animate().translationY(crateY - dp(60)).setDuration(1600)
+        crate.animate().translationY(crateRestY).setDuration(1600)
                 .setInterpolator(new DecelerateInterpolator(1.2f)).start();
-        platform.animate().alpha(1f).translationY(crateY + dp(10)).setDuration(1600)
+        platform.animate().alpha(1f).translationY(0f).setDuration(1600)
                 .setInterpolator(new DecelerateInterpolator(1.2f))
                 .withEndAction(() -> {
-                    // one-shot guard: the ToS must only ever appear once
                     if (!tosShown) {
                         tosShown = true;
                         HapticUtil.forceVibrate(this, 120);
@@ -339,7 +351,7 @@ public class TutorialActivity extends Activity {
                 .start();
     }
 
-    // ── praetor card with typewriter ────────────────────────────────────────
+    // ── letter cards ────────────────────────────────────────────────────────
 
     private void applyPraetorHeader(LinearLayout card, String title, String subtitle) {
         TextView tvTitle = new TextView(this);
@@ -365,7 +377,7 @@ public class TutorialActivity extends Activity {
         card.addView(divider, new LinearLayout.LayoutParams(dp(40), 2));
     }
 
-    private LinearLayout makePraetorCard(String title, String body, String buttonLabel, Runnable onAck) {
+    private LinearLayout makeLetterCard(String title, String body, String buttonLabel, Runnable onAck) {
         LinearLayout card = new LinearLayout(this);
         card.setOrientation(LinearLayout.VERTICAL);
         card.setPadding(48, 32, 48, 32);
@@ -392,31 +404,29 @@ public class TutorialActivity extends Activity {
         card.addView(btn, bLp);
         btn.setOnClickListener(v -> onAck.run());
 
-        // body + button stay hidden until the typewriter finishes
         tvBody.setText("");
         btn.setAlpha(0f);
         card.setTag(R.id.tw_text, body);
-
         return card;
     }
 
-    // ── movement: letters fly out of the crate and grow ────────────────────
+    // ── letters come OUT of the crate and hover above it ───────────────────
 
     private void flyOutOfCrate(LinearLayout card) {
-        int cardHeight = (int)(getResources().getDisplayMetrics().heightPixels * 0.5f);
+        int cardHeight = (int)(getResources().getDisplayMetrics().heightPixels * 0.46f);
         FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(
                 (int)(getResources().getDisplayMetrics().widthPixels * 0.84f),
                 cardHeight, Gravity.CENTER);
+        // bottom of the letter overlaps the crate opening slightly; crate top
+        // sits ~16%+66dp below center, so the letter center lands here:
+        lp.bottomMargin = (int)(getResources().getDisplayMetrics().heightPixels * 0.16f) + dp(70);
         card.setLayoutParams(lp);
         cardHost.addView(card);
-        // letter rises OUT of the crate: starts small at the crate opening and is
-        // pulled up so it hovers above the crate (crate stays visible below)
         card.setAlpha(0f);
         card.setScaleX(0.25f);
         card.setScaleY(0.25f);
-        card.setTranslationY(0f);
-        float endY = -(cardHeight / 2f) - dp(60);
-        card.animate().alpha(1f).scaleX(1f).scaleY(1f).translationY(endY)
+        card.setTranslationY(dp(110)); // starts down at the crate
+        card.animate().alpha(1f).scaleX(1f).scaleY(1f).translationY(0f)
                 .setDuration(650)
                 .setInterpolator(new DecelerateInterpolator(1.1f))
                 .withEndAction(() -> {
@@ -432,7 +442,7 @@ public class TutorialActivity extends Activity {
     }
 
     private void flyIntoCrate(LinearLayout card, Runnable onDone) {
-        card.animate().alpha(0f).scaleX(0.22f).scaleY(0.22f).translationY(0f)
+        card.animate().alpha(0f).scaleX(0.25f).scaleY(0.25f).translationY(dp(110))
                 .setDuration(400).setInterpolator(new AccelerateInterpolator())
                 .withEndAction(() -> {
                     cardHost.removeView(card);
@@ -441,7 +451,8 @@ public class TutorialActivity extends Activity {
     }
 
     private void dropCrate(Runnable onDone) {
-        crate.animate().translationY(root.getHeight() * 0.8f).rotation(18f).alpha(0f)
+        crate.animate().translationY(getResources().getDisplayMetrics().heightPixels * 0.6f)
+                .rotation(16f).alpha(0f)
                 .setDuration(700).setInterpolator(new AccelerateInterpolator())
                 .withEndAction(onDone).start();
     }

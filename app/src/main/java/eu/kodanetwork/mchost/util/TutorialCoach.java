@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.os.Handler;
 import android.os.Looper;
 import android.view.Gravity;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.DecelerateInterpolator;
@@ -11,17 +12,17 @@ import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.airbnb.lottie.LottieAnimationView;
 import com.google.android.material.tabs.TabLayout;
 
 import eu.kodanetwork.mchost.App;
 import eu.kodanetwork.mchost.R;
 
 /**
- * In-app tutorial coach: an animated mouse cursor points at a target, a
- * P.R.A.E.T.O.R.-styled text card pops up next to it and types its text
- * live; tapping anywhere continues to the next step.
- * Phases (pref tutorial_phase): 1 = await first server, 2 = tab tour, 0 = off.
+ * In-app tutorial coach: an orange mouse cursor points at the target and a
+ * freely DRAGGABLE P.R.A.E.T.O.R.-styled card types its text live. The
+ * overlay itself is pass-through (no dimming) so the real buttons stay
+ * tappable; the NEW SERVER step advances when the user actually taps the
+ * button, the tab tour has a NEXT button on the card.
  */
 public class TutorialCoach {
 
@@ -35,7 +36,7 @@ public class TutorialCoach {
         }
     }
 
-    /** Phase 1: cursor hovers over NEW SERVER, card types the explanation. */
+    /** Phase 1: cursor hovers over NEW SERVER; user taps the real button to continue. */
     public static void maybeShowNewServerHint(Activity activity, View fabAdd) {
         if (App.getPrefs(activity).getInt("tutorial_phase", 0) != 1 || fabAdd == null) return;
         App.getPrefs(activity).edit().putInt("tutorial_phase", 2).apply();
@@ -50,12 +51,13 @@ public class TutorialCoach {
         float cx = loc[0] - cLoc[0] + fabAdd.getWidth() / 2f;
         float cy = loc[1] - cLoc[1] + fabAdd.getHeight() / 2f;
 
-        ui.show(cx, cy,
+        ui.showAt(cx, cy,
                 activity.getString(R.string.tutorial_hint_new_server_title),
-                activity.getString(R.string.tutorial_hint_new_server_body));
+                activity.getString(R.string.tutorial_hint_new_server_body),
+                false);
     }
 
-    /** Phase 2: cursor walks through the tabs, one typed card per tab. */
+    /** Phase 2: cursor walks through the tabs, one typed card per tab with NEXT. */
     public static void maybeStartTabTour(Activity activity, TabLayout tabs) {
         if (App.getPrefs(activity).getInt("tutorial_phase", 0) != 2 || tabs == null) return;
         App.getPrefs(activity).edit().putInt("tutorial_phase", 0).apply();
@@ -79,7 +81,8 @@ public class TutorialCoach {
                     float cx = loc[0] - cLoc[0] + tabView.getWidth() / 2f;
                     float cy = loc[1] - cLoc[1] + tabView.getHeight() / 2f;
                     CharSequence t = tab.getText() != null ? tab.getText() : "";
-                    ui.show(cx, cy, t.toString(), activity.getString(explanationFor(t.toString().toLowerCase())));
+                    ui.showAt(cx, cy, t.toString(),
+                            activity.getString(explanationFor(t.toString().toLowerCase())), true);
                 } else {
                     advance[0].run();
                 }
@@ -91,7 +94,6 @@ public class TutorialCoach {
         advance[0].run();
     }
 
-    /** Tab labels are localized — map them to the matching explanation by keyword. */
     private static int explanationFor(String tabText) {
         if (tabText.contains("dash") || tabText.contains("bersicht") || tabText.contains("仪表"))
             return R.string.tutorial_tab_dashboard;
@@ -104,12 +106,12 @@ public class TutorialCoach {
         return R.string.tutorial_tab_settings;
     }
 
-    // ── CoachUi: dim, cursor, typed praetor card, tap-to-continue ───────────
+    // ── CoachUi: pass-through overlay, cursor, draggable typed card ─────────
 
     private static class CoachUi {
         private final Activity activity;
         private final ViewGroup content;
-        private final FrameLayout overlay;
+        private final FrameLayout overlay; // NOT clickable: real buttons stay tappable
         private final TextView cursor;
         private final LinearLayout card;
         private final TextView cardTitle;
@@ -121,13 +123,15 @@ public class TutorialCoach {
             this.content = content;
 
             overlay = new FrameLayout(activity);
-            overlay.setBackgroundColor(0x99000000);
+            overlay.setClickable(false);
+            overlay.setFocusable(false);
 
             cursor = new TextView(activity);
             cursor.setText("➢");
             cursor.setTextSize(26);
             cursor.setTextColor(0xFFFF6B00);
-            cursor.setRotation(-35f); // pointing up-right like a mouse cursor
+            cursor.setRotation(-35f);
+            cursor.setClickable(false);
             overlay.addView(cursor, new FrameLayout.LayoutParams(
                     ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
 
@@ -136,10 +140,11 @@ public class TutorialCoach {
             card.setPadding(40, 28, 40, 28);
             card.setBackgroundResource(eu.kodanetwork.mchost.R.drawable.bg_dialog_custom);
             FrameLayout.LayoutParams cardLp = new FrameLayout.LayoutParams(
-                    (int)(activity.getResources().getDisplayMetrics().widthPixels * 0.8f),
+                    (int)(activity.getResources().getDisplayMetrics().widthPixels * 0.78f),
                     ViewGroup.LayoutParams.WRAP_CONTENT, Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM);
-            cardLp.bottomMargin = (int)(90 * activity.getResources().getDisplayMetrics().density);
-            overlay.addView(card, cardLp);
+            cardLp.bottomMargin = (int)(110 * activity.getResources().getDisplayMetrics().density);
+            card.setLayoutParams(cardLp);
+            makeDraggable(card);
 
             cardTitle = new TextView(activity);
             cardTitle.setTextColor(0xFF3333);
@@ -155,26 +160,45 @@ public class TutorialCoach {
             cardBody.setLineSpacing(4, 1.1f);
             card.addView(cardBody);
 
-            TextView tapHint = new TextView(activity);
-            tapHint.setText("▽");
-            tapHint.setTextColor(0xFF8A8A9A);
-            tapHint.setTextSize(12);
-            tapHint.setGravity(Gravity.CENTER);
-            tapHint.setPadding(0, 14, 0, 0);
-            card.addView(tapHint);
+            overlay.addView(card);
 
             content.addView(overlay, new ViewGroup.LayoutParams(
                     ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+        }
 
-            overlay.setOnClickListener(v -> {
-                if (onAdvance != null) onAdvance.run();
+        /** The card can be moved anywhere with a finger. */
+        private void makeDraggable(View v) {
+            v.setOnTouchListener(new View.OnTouchListener() {
+                float downX, downY, startX, startY;
+                boolean moved;
+                @Override
+                public boolean onTouch(View view, MotionEvent e) {
+                    switch (e.getActionMasked()) {
+                        case MotionEvent.ACTION_DOWN:
+                            downX = e.getRawX(); downY = e.getRawY();
+                            startX = view.getTranslationX(); startY = view.getTranslationY();
+                            moved = false;
+                            return true;
+                        case MotionEvent.ACTION_MOVE:
+                            float dx = e.getRawX() - downX, dy = e.getRawY() - downY;
+                            if (Math.abs(dx) > 8 || Math.abs(dy) > 8) moved = true;
+                            view.setTranslationX(startX + dx);
+                            view.setTranslationY(startY + dy);
+                            return true;
+                        default:
+                            return false;
+                    }
+                }
             });
         }
 
         void setOnAdvance(Runnable r) { this.onAdvance = r; }
 
-        void show(float targetX, float targetY, String title, String body) {
-            // cursor pulses on the target
+        void showAt(float targetX, float targetY, String title, String body, boolean withNext) {
+            // remove previous NEXT button, keep title/body
+            View oldNext = card.findViewWithTag("coach_next");
+            if (oldNext != null) card.removeView(oldNext);
+
             cursor.setAlpha(1f);
             cursor.setTranslationX(targetX + 26);
             cursor.setTranslationY(targetY - 18);
@@ -184,29 +208,35 @@ public class TutorialCoach {
                             .translationX(targetX + 26).translationY(targetY - 18)
                             .setDuration(600).start()).start();
 
-            // card slides up and types its text live
             card.setAlpha(0f);
             card.setTranslationY(60);
             card.animate().alpha(1f).translationY(0).setDuration(300).start();
             cardTitle.setText(title);
             typewrite(cardBody, body);
+
+            if (withNext) {
+                com.google.android.material.button.MaterialButton next =
+                        KodaButtons.primary(activity, activity.getString(R.string.tutorial_next));
+                next.setTag("coach_next");
+                LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+                        ViewGroup.LayoutParams.MATCH_PARENT, (int)(46 * activity.getResources().getDisplayMetrics().density));
+                lp.topMargin = (int)(16 * activity.getResources().getDisplayMetrics().density);
+                card.addView(next, lp);
+                next.setOnClickListener(v -> { if (onAdvance != null) onAdvance.run(); });
+            }
         }
 
         void showFinale() {
             overlay.removeAllViews();
 
-            LottieAnimationView confetti = new LottieAnimationView(activity);
-            confetti.setAnimation(eu.kodanetwork.mchost.R.raw.tut_confetti);
-            overlay.addView(confetti, new FrameLayout.LayoutParams(
-                    ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-            confetti.playAnimation();
+            LottieAnimationViewShim.show(activity, overlay);
 
             LinearLayout done = new LinearLayout(activity);
             done.setOrientation(LinearLayout.VERTICAL);
             done.setPadding(40, 32, 40, 32);
             done.setBackgroundResource(eu.kodanetwork.mchost.R.drawable.bg_dialog_custom);
             FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(
-                    (int)(activity.getResources().getDisplayMetrics().widthPixels * 0.84f),
+                    (int)(activity.getResources().getDisplayMetrics().widthPixels * 0.8f),
                     ViewGroup.LayoutParams.WRAP_CONTENT, Gravity.CENTER);
             overlay.addView(done, lp);
 
@@ -236,6 +266,17 @@ public class TutorialCoach {
                 }
             };
             handler.post(tick[0]);
+        }
+    }
+
+    /** Small shim so the confetti import stays local. */
+    private static class LottieAnimationViewShim {
+        static void show(Activity activity, FrameLayout overlay) {
+            com.airbnb.lottie.LottieAnimationView confetti = new com.airbnb.lottie.LottieAnimationView(activity);
+            confetti.setAnimation(eu.kodanetwork.mchost.R.raw.tut_confetti);
+            overlay.addView(confetti, new FrameLayout.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+            confetti.playAnimation();
         }
     }
 }
