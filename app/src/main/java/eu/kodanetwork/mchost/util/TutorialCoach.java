@@ -1,9 +1,12 @@
 package eu.kodanetwork.mchost.util;
 
 import android.app.Activity;
+import android.os.Handler;
+import android.os.Looper;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.DecelerateInterpolator;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -15,11 +18,14 @@ import eu.kodanetwork.mchost.App;
 import eu.kodanetwork.mchost.R;
 
 /**
- * In-app tutorial coach: after the cinematic TutorialActivity it guides the
- * user through creating the first server and the server-manager tabs.
+ * In-app tutorial coach: an animated mouse cursor points at a target, a
+ * P.R.A.E.T.O.R.-styled text card pops up next to it and types its text
+ * live; tapping anywhere continues to the next step.
  * Phases (pref tutorial_phase): 1 = await first server, 2 = tab tour, 0 = off.
  */
 public class TutorialCoach {
+
+    private static final Handler handler = new Handler(Looper.getMainLooper());
 
     public static void maybeStartTutorial(Activity activity) {
         if (!App.getPrefs(activity).getBoolean("tutorial_completed_v2", false)) {
@@ -29,103 +35,60 @@ public class TutorialCoach {
         }
     }
 
-    /** Phase 1: pulse a highlight ring over the NEW SERVER button and explain it. */
+    /** Phase 1: cursor hovers over NEW SERVER, card types the explanation. */
     public static void maybeShowNewServerHint(Activity activity, View fabAdd) {
         if (App.getPrefs(activity).getInt("tutorial_phase", 0) != 1 || fabAdd == null) return;
         App.getPrefs(activity).edit().putInt("tutorial_phase", 2).apply();
 
         ViewGroup content = (ViewGroup) activity.findViewById(android.R.id.content);
+        CoachUi ui = new CoachUi(activity, content);
+
         int[] loc = new int[2];
         fabAdd.getLocationInWindow(loc);
         int[] cLoc = new int[2];
         content.getLocationInWindow(cLoc);
+        float cx = loc[0] - cLoc[0] + fabAdd.getWidth() / 2f;
+        float cy = loc[1] - cLoc[1] + fabAdd.getHeight() / 2f;
 
-        float d = activity.getResources().getDisplayMetrics().density;
-        FrameLayout overlay = new FrameLayout(activity);
-        overlay.setBackgroundColor(0x99000000);
-        content.addView(overlay, new ViewGroup.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-
-        // Highlight ring around the button
-        TextView ring = new TextView(activity);
-        android.graphics.drawable.GradientDrawable ringBg = new android.graphics.drawable.GradientDrawable();
-        ringBg.setColor(0x00000000);
-        ringBg.setCornerRadius(16 * d);
-        ringBg.setStroke(4, 0xFFFF6B00);
-        ring.setBackground(ringBg);
-        FrameLayout.LayoutParams ringLp = new FrameLayout.LayoutParams(
-                fabAdd.getWidth() + (int)(24 * d), fabAdd.getHeight() + (int)(24 * d));
-        ringLp.leftMargin = loc[0] - cLoc[0] - (int)(12 * d);
-        ringLp.topMargin = loc[1] - cLoc[1] - (int)(12 * d);
-        overlay.addView(ring, ringLp);
-        ring.animate().scaleX(1.06f).scaleY(1.06f).setDuration(600)
-                .withEndAction(() -> ring.animate().scaleX(1f).scaleY(1f).setDuration(600).start()).start();
-
-        // Explanation card
-        LinearLayout card = buildCard(activity,
+        ui.show(cx, cy,
                 activity.getString(R.string.tutorial_hint_new_server_title),
                 activity.getString(R.string.tutorial_hint_new_server_body));
-        FrameLayout.LayoutParams cardLp = new FrameLayout.LayoutParams(
-                (int)(activity.getResources().getDisplayMetrics().widthPixels * 0.82f),
-                ViewGroup.LayoutParams.WRAP_CONTENT, Gravity.CENTER);
-        overlay.addView(card, cardLp);
-
-        // Tap anywhere on the overlay dismisses it (the user then taps the real button)
-        overlay.setOnClickListener(v -> overlay.animate().alpha(0f).setDuration(200)
-                .withEndAction(() -> content.removeView(overlay)).start());
     }
 
-    /** Phase 2: walk through the server-manager tabs with one explanation per tab. */
+    /** Phase 2: cursor walks through the tabs, one typed card per tab. */
     public static void maybeStartTabTour(Activity activity, TabLayout tabs) {
         if (App.getPrefs(activity).getInt("tutorial_phase", 0) != 2 || tabs == null) return;
         App.getPrefs(activity).edit().putInt("tutorial_phase", 0).apply();
 
         ViewGroup content = (ViewGroup) activity.findViewById(android.R.id.content);
-        FrameLayout overlay = new FrameLayout(activity);
-        overlay.setBackgroundColor(0x99000000);
-        content.addView(overlay, new ViewGroup.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+        CoachUi ui = new CoachUi(activity, content);
 
-        final int[] explanations = {
-                R.string.tutorial_tab_dashboard, R.string.tutorial_tab_console,
-                R.string.tutorial_tab_files, R.string.tutorial_tab_plugins, R.string.tutorial_tab_settings};
-        final int[] current = {0};
-
-        LinearLayout card = buildCard(activity, "", activity.getString(explanations[0]));
-        FrameLayout.LayoutParams cardLp = new FrameLayout.LayoutParams(
-                (int)(activity.getResources().getDisplayMetrics().widthPixels * 0.85f),
-                ViewGroup.LayoutParams.WRAP_CONTENT, Gravity.CENTER);
-        overlay.addView(card, cardLp);
-
-        TextView btnNext = card.findViewWithTag("coach_next");
-        btnNext.setOnClickListener(v -> {
+        final int[] current = {-1};
+        Runnable[] advance = new Runnable[1];
+        advance[0] = () -> {
             current[0]++;
             if (current[0] < tabs.getTabCount()) {
                 TabLayout.Tab tab = tabs.getTabAt(current[0]);
                 if (tab != null) tab.select();
-                CharSequence t = tab != null && tab.getText() != null ? tab.getText().toString().toLowerCase() : "";
-                ((TextView) card.findViewWithTag("coach_body")).setText(activity.getString(explanationFor(t.toString())));
+                View tabView = tab != null ? tab.view : null;
+                if (tabView != null) {
+                    int[] loc = new int[2];
+                    tabView.getLocationInWindow(loc);
+                    int[] cLoc = new int[2];
+                    content.getLocationInWindow(cLoc);
+                    float cx = loc[0] - cLoc[0] + tabView.getWidth() / 2f;
+                    float cy = loc[1] - cLoc[1] + tabView.getHeight() / 2f;
+                    CharSequence t = tab.getText() != null ? tab.getText() : "";
+                    ui.show(cx, cy, t.toString(), activity.getString(explanationFor(t.toString().toLowerCase())));
+                } else {
+                    advance[0].run();
+                }
             } else {
-                // Finale: confetti + done card
-                overlay.removeAllViews();
-                LottieAnimationView confetti = new LottieAnimationView(activity);
-                confetti.setAnimation(R.raw.tut_confetti);
-                overlay.addView(confetti, new FrameLayout.LayoutParams(
-                        ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-                confetti.playAnimation();
-                LinearLayout done = buildCard(activity,
-                        activity.getString(R.string.tutorial_done_title),
-                        activity.getString(R.string.tutorial_done_body));
-                overlay.addView(done, cardLp);
-                android.os.Handler h = new android.os.Handler(android.os.Looper.getMainLooper());
-                h.postDelayed(() -> overlay.animate().alpha(0f).setDuration(400)
-                        .withEndAction(() -> content.removeView(overlay)).start(), 5200);
+                ui.showFinale();
             }
-        });
-
-        // Open the first tab so the tour matches what the user sees
-        TabLayout.Tab first = tabs.getTabAt(0);
-        if (first != null) first.select();
+        };
+        ui.setOnAdvance(advance[0]);
+        advance[0].run();
     }
 
     /** Tab labels are localized — map them to the matching explanation by keyword. */
@@ -141,44 +104,138 @@ public class TutorialCoach {
         return R.string.tutorial_tab_settings;
     }
 
-    private static LinearLayout buildCard(Activity activity, String title, String body) {
-        LinearLayout card = new LinearLayout(activity);
-        card.setOrientation(LinearLayout.VERTICAL);
-        card.setPadding((int)(28 * activity.getResources().getDisplayMetrics().density),
-                (int)(22 * activity.getResources().getDisplayMetrics().density),
-                (int)(28 * activity.getResources().getDisplayMetrics().density),
-                (int)(22 * activity.getResources().getDisplayMetrics().density));
-        android.graphics.drawable.GradientDrawable bg = new android.graphics.drawable.GradientDrawable();
-        bg.setColor(0xF20E0E14);
-        bg.setCornerRadius(16 * activity.getResources().getDisplayMetrics().density);
-        bg.setStroke(2, 0x66FF6B00);
-        card.setBackground(bg);
+    // ── CoachUi: dim, cursor, typed praetor card, tap-to-continue ───────────
 
-        if (title != null && !title.isEmpty()) {
-            TextView tvTitle = new TextView(activity);
-            tvTitle.setText(title);
-            tvTitle.setTextColor(0xFFFF6B00);
-            tvTitle.setTextSize(16);
-            tvTitle.setTypeface(android.graphics.Typeface.DEFAULT_BOLD);
-            tvTitle.setPadding(0, 0, 0, 10);
-            card.addView(tvTitle);
+    private static class CoachUi {
+        private final Activity activity;
+        private final ViewGroup content;
+        private final FrameLayout overlay;
+        private final TextView cursor;
+        private final LinearLayout card;
+        private final TextView cardTitle;
+        private final TextView cardBody;
+        private Runnable onAdvance;
+
+        CoachUi(Activity activity, ViewGroup content) {
+            this.activity = activity;
+            this.content = content;
+
+            overlay = new FrameLayout(activity);
+            overlay.setBackgroundColor(0x99000000);
+
+            cursor = new TextView(activity);
+            cursor.setText("➢");
+            cursor.setTextSize(26);
+            cursor.setTextColor(0xFFFF6B00);
+            cursor.setRotation(-35f); // pointing up-right like a mouse cursor
+            overlay.addView(cursor, new FrameLayout.LayoutParams(
+                    ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+
+            card = new LinearLayout(activity);
+            card.setOrientation(LinearLayout.VERTICAL);
+            card.setPadding(40, 28, 40, 28);
+            card.setBackgroundResource(eu.kodanetwork.mchost.R.drawable.bg_dialog_custom);
+            FrameLayout.LayoutParams cardLp = new FrameLayout.LayoutParams(
+                    (int)(activity.getResources().getDisplayMetrics().widthPixels * 0.8f),
+                    ViewGroup.LayoutParams.WRAP_CONTENT, Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM);
+            cardLp.bottomMargin = (int)(90 * activity.getResources().getDisplayMetrics().density);
+            overlay.addView(card, cardLp);
+
+            cardTitle = new TextView(activity);
+            cardTitle.setTextColor(0xFF3333);
+            cardTitle.setTextSize(18);
+            cardTitle.setTypeface(android.graphics.Typeface.DEFAULT_BOLD);
+            cardTitle.setLetterSpacing(0.06f);
+            cardTitle.setPadding(0, 0, 0, 6);
+            card.addView(cardTitle);
+
+            cardBody = new TextView(activity);
+            cardBody.setTextColor(0xFFF0F0F0);
+            cardBody.setTextSize(13);
+            cardBody.setLineSpacing(4, 1.1f);
+            card.addView(cardBody);
+
+            TextView tapHint = new TextView(activity);
+            tapHint.setText("▽");
+            tapHint.setTextColor(0xFF8A8A9A);
+            tapHint.setTextSize(12);
+            tapHint.setGravity(Gravity.CENTER);
+            tapHint.setPadding(0, 14, 0, 0);
+            card.addView(tapHint);
+
+            content.addView(overlay, new ViewGroup.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+
+            overlay.setOnClickListener(v -> {
+                if (onAdvance != null) onAdvance.run();
+            });
         }
 
-        TextView tvBody = new TextView(activity);
-        tvBody.setTag("coach_body");
-        tvBody.setText(body);
-        tvBody.setTextColor(0xFFF0F0F0);
-        tvBody.setTextSize(13);
-        tvBody.setLineSpacing(4, 1.1f);
-        card.addView(tvBody);
+        void setOnAdvance(Runnable r) { this.onAdvance = r; }
 
-        com.google.android.material.button.MaterialButton next =
-                KodaButtons.primary(activity, activity.getString(R.string.tutorial_next));
-        next.setTag("coach_next");
-        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT, (int)(48 * activity.getResources().getDisplayMetrics().density));
-        lp.topMargin = (int)(18 * activity.getResources().getDisplayMetrics().density);
-        card.addView(next, lp);
-        return card;
+        void show(float targetX, float targetY, String title, String body) {
+            // cursor pulses on the target
+            cursor.setAlpha(1f);
+            cursor.setTranslationX(targetX + 26);
+            cursor.setTranslationY(targetY - 18);
+            cursor.animate().translationX(targetX + 34).translationY(targetY - 26)
+                    .setDuration(600).setInterpolator(new DecelerateInterpolator())
+                    .withEndAction(() -> cursor.animate()
+                            .translationX(targetX + 26).translationY(targetY - 18)
+                            .setDuration(600).start()).start();
+
+            // card slides up and types its text live
+            card.setAlpha(0f);
+            card.setTranslationY(60);
+            card.animate().alpha(1f).translationY(0).setDuration(300).start();
+            cardTitle.setText(title);
+            typewrite(cardBody, body);
+        }
+
+        void showFinale() {
+            overlay.removeAllViews();
+
+            LottieAnimationView confetti = new LottieAnimationView(activity);
+            confetti.setAnimation(eu.kodanetwork.mchost.R.raw.tut_confetti);
+            overlay.addView(confetti, new FrameLayout.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+            confetti.playAnimation();
+
+            LinearLayout done = new LinearLayout(activity);
+            done.setOrientation(LinearLayout.VERTICAL);
+            done.setPadding(40, 32, 40, 32);
+            done.setBackgroundResource(eu.kodanetwork.mchost.R.drawable.bg_dialog_custom);
+            FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(
+                    (int)(activity.getResources().getDisplayMetrics().widthPixels * 0.84f),
+                    ViewGroup.LayoutParams.WRAP_CONTENT, Gravity.CENTER);
+            overlay.addView(done, lp);
+
+            TextView t = new TextView(activity);
+            t.setText(activity.getString(R.string.tutorial_done_title));
+            t.setTextColor(0xFF3333);
+            t.setTextSize(20);
+            t.setTypeface(android.graphics.Typeface.DEFAULT_BOLD);
+            done.addView(t);
+            TextView b = new TextView(activity);
+            b.setTextColor(0xFFF0F0F0);
+            b.setTextSize(13);
+            done.addView(b);
+            typewrite(b, activity.getString(R.string.tutorial_done_body));
+
+            handler.postDelayed(() -> overlay.animate().alpha(0f).setDuration(400)
+                    .withEndAction(() -> content.removeView(overlay)).start(), 6000);
+        }
+
+        private void typewrite(TextView tv, String text) {
+            final int[] i = {0};
+            Runnable[] tick = new Runnable[1];
+            tick[0] = () -> {
+                if (i[0] <= text.length()) {
+                    tv.setText(text.substring(0, i[0]++));
+                    handler.postDelayed(tick[0], 20);
+                }
+            };
+            handler.post(tick[0]);
+        }
     }
 }

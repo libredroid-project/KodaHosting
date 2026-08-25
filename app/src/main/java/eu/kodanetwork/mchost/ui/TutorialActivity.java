@@ -5,7 +5,11 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.view.Gravity;
+import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.AccelerateInterpolator;
+import android.view.animation.DecelerateInterpolator;
+import android.view.animation.OvershootInterpolator;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.FrameLayout;
@@ -24,11 +28,10 @@ import eu.kodanetwork.mchost.R;
 import eu.kodanetwork.mchost.util.HapticUtil;
 
 /**
- * Cinematic first-open tutorial:
- * humming vibrations -> spinning block lands -> opens as a package ->
- * P.R.A.E.T.O.R.-styled welcome message flies out -> message returns,
- * package closes and falls -> elevator raises the ToS package which opens
- * like a crate -> ToS confirmation -> mouse-cursor finale -> in-app coach.
+ * Cinematic first-open tutorial. The crate is built from native views so the
+ * lid is a real flap hinged at the box edge that opens in ONE direction
+ * (rotationX), and the messages fly out of the crate as letters that grow
+ * and type their text live.
  */
 public class TutorialActivity extends Activity {
 
@@ -39,6 +42,11 @@ public class TutorialActivity extends Activity {
     private LinearLayout cardHost;
     private TextView cursor;
     private boolean finished = false;
+
+    // Native crate: body + single lid hinged at the top back edge
+    private FrameLayout crate;
+    private View crateBody;
+    private View crateLid;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,12 +64,11 @@ public class TutorialActivity extends Activity {
         root.setBackgroundColor(0xFF000000);
         setContentView(root);
 
-        // The real AFK screensaver background (floating Koda squares on black)
-        FloatingSquaresView bg = new FloatingSquaresView(this);
-        root.addView(bg, new FrameLayout.LayoutParams(
+        root.addView(new FloatingSquaresView(this), new FrameLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
 
         centerStage = new FrameLayout(this);
+        centerStage.setClipChildren(false);
         root.addView(centerStage, new FrameLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
 
@@ -95,10 +102,60 @@ public class TutorialActivity extends Activity {
         root.addView(cursor, new FrameLayout.LayoutParams(
                 ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, Gravity.CENTER));
 
+        buildCrate();
         startHum();
     }
 
-    // ── Act 1: accelerating hum ────────────────────────────────────────────
+    // ── native crate ────────────────────────────────────────────────────────
+
+    private int dp(float v) { return (int)(v * getResources().getDisplayMetrics().density); }
+
+    private void buildCrate() {
+        crate = new FrameLayout(this);
+        int size = dp(130);
+        FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(size, size, Gravity.CENTER);
+        crate.setLayoutParams(lp);
+        crate.setAlpha(0f);
+
+        // lid: flap above the body, hinged at its bottom edge, opens backwards
+        crateLid = new View(this);
+        android.graphics.drawable.GradientDrawable lidBg = new android.graphics.drawable.GradientDrawable();
+        lidBg.setColor(0xFF2A211A);
+        lidBg.setCornerRadius(dp(6));
+        lidBg.setStroke(dp(3), 0xFFFF6B00);
+        crateLid.setBackground(lidBg);
+        FrameLayout.LayoutParams lidLp = new FrameLayout.LayoutParams(size, dp(34), Gravity.TOP);
+        crate.addView(crateLid, lidLp);
+        crateLid.setPivotY(dp(34)); // hinge at the bottom edge of the lid
+        crateLid.setRotationX(0f);
+        crateLid.setCameraDistance(dp(1200)); // keeps the 3D flip readable
+
+        // body below the lid
+        crateBody = new View(this);
+        android.graphics.drawable.GradientDrawable bodyBg = new android.graphics.drawable.GradientDrawable();
+        bodyBg.setColor(0xFF1D1712);
+        bodyBg.setCornerRadius(dp(8));
+        bodyBg.setStroke(dp(4), 0xFFFF6B00);
+        crateBody.setBackground(bodyBg);
+        FrameLayout.LayoutParams bodyLp = new FrameLayout.LayoutParams(size, size - dp(30), Gravity.BOTTOM);
+        crate.addView(crateBody, bodyLp);
+
+        centerStage.addView(crate);
+    }
+
+    private void openLid(Runnable onDone) {
+        crateLid.animate().rotationX(-115f).setDuration(500)
+                .setInterpolator(new OvershootInterpolator(1.1f))
+                .withEndAction(onDone).start();
+    }
+
+    private void closeLid(Runnable onDone) {
+        crateLid.animate().rotationX(0f).setDuration(380)
+                .setInterpolator(new DecelerateInterpolator())
+                .withEndAction(onDone).start();
+    }
+
+    // ── acts ────────────────────────────────────────────────────────────────
 
     private void startHum() {
         int[] delays = {700, 600, 500, 420, 340, 270, 210, 160, 120, 90, 70, 60};
@@ -116,19 +173,27 @@ public class TutorialActivity extends Activity {
         handler.post(tick[0]);
     }
 
-    // ── Act 2: block lands and opens as a package ──────────────────────────
-
     private void startBlockIn() {
-        playOnce(R.raw.tut_block, () -> {
-            HapticUtil.forceVibrate(this, 250); // the thud
-            playOnce(R.raw.tut_box_open, () -> {
-                HapticUtil.forceVibrate(this, 80);
-                startWelcome();
-            });
+        actLottie.setAnimation(R.raw.tut_block);
+        actLottie.setProgress(0f);
+        actLottie.addAnimatorListener(new android.animation.AnimatorListenerAdapter() {
+            boolean done = false;
+            @Override public void onAnimationEnd(android.animation.Animator a) {
+                if (done || finished) return;
+                done = true;
+                HapticUtil.forceVibrate(TutorialActivity.this, 250);
+                actLottie.setAlpha(0f);
+                crate.setAlpha(1f);
+                crate.setScaleX(0.9f); crate.setScaleY(0.9f);
+                crate.animate().scaleX(1f).scaleY(1f).setDuration(150).start();
+                handler.postDelayed(() -> openLid(() -> {
+                    HapticUtil.forceVibrate(TutorialActivity.this, 80);
+                    startWelcome();
+                }), 200);
+            }
         });
+        actLottie.playAnimation();
     }
-
-    // ── Act 3: welcome message flies out of the package ────────────────────
 
     private void startWelcome() {
         final LinearLayout[] cardRef = new LinearLayout[1];
@@ -136,26 +201,16 @@ public class TutorialActivity extends Activity {
                 getString(R.string.tutorial_welcome_title),
                 getString(R.string.tutorial_welcome_body),
                 getString(R.string.tutorial_ack),
-                () -> {
-                    flyOut(cardRef[0], () -> {
-                        // message returns into the package, lid closes, small buzz
-                        playOnce(R.raw.tut_box_close, () -> {
-                            HapticUtil.forceVibrate(this, 80);
-                            startBoxFall();
-                        });
-                    });
-                });
+                () -> flyIntoCrate(cardRef[0], () -> closeLid(() -> {
+                    HapticUtil.forceVibrate(this, 80);
+                    dropCrate(this::startElevator);
+                })));
         cardRef[0] = card;
-        flyIn(card);
-    }
-
-    // ── Act 4: package falls, elevator raises the ToS package ──────────────
-
-    private void startBoxFall() {
-        playOnce(R.raw.tut_box_fall, this::startElevator);
+        flyOutOfCrate(card);
     }
 
     private void startElevator() {
+        // vibrations accelerate again while the elevator rises
         int[] delays = {500, 400, 320, 250, 190, 140, 100, 80, 60, 50};
         final int[] i = {0};
         Runnable[] tick = new Runnable[1];
@@ -168,19 +223,38 @@ public class TutorialActivity extends Activity {
         };
         handler.post(tick[0]);
 
-        actLottie.setAnimation(R.raw.tut_elevator);
-        actLottie.setProgress(0f);
-        actLottie.addAnimatorUpdateListener(a -> {
-            // the crate flaps open at ~71% of the rise
-            if (a.getAnimatedFraction() >= 0.72f && cardHost.getChildCount() == 0) {
-                HapticUtil.forceVibrate(this, 120);
-                startTos();
-            }
-        });
-        actLottie.playAnimation();
+        // platform rises with the crate from below
+        View platform = new View(this);
+        android.graphics.drawable.GradientDrawable platBg = new android.graphics.drawable.GradientDrawable();
+        platBg.setColor(0x668A8A9A);
+        platBg.setCornerRadius(dp(8));
+        platBg.setStroke(dp(2), 0xFFFF6B00);
+        platform.setBackground(platBg);
+        FrameLayout.LayoutParams pLp = new FrameLayout.LayoutParams(dp(180), dp(14), Gravity.CENTER);
+        root.addView(platform, pLp);
+
+        crate.setAlpha(1f);
+        float crateY = crate.getTranslationY();
+        float startY = root.getHeight() * 0.9f - root.getHeight() / 2f;
+        crate.setTranslationY(startY);
+        platform.setTranslationY(startY + dp(80));
+        platform.setAlpha(0f);
+
+        crate.animate().translationY(crateY - dp(60)).setDuration(1600)
+                .setInterpolator(new DecelerateInterpolator(1.2f)).start();
+        platform.animate().alpha(1f).translationY(crateY + dp(10)).setDuration(1600)
+                .setInterpolator(new DecelerateInterpolator(1.2f))
+                .withEndAction(() -> {
+                    // one-shot guard: the ToS must only ever appear once
+                    if (!tosShown) {
+                        tosShown = true;
+                        HapticUtil.forceVibrate(this, 120);
+                        openLid(this::startTos);
+                    }
+                }).start();
     }
 
-    // ── Act 5: ToS confirmation on the package ─────────────────────────────
+    private boolean tosShown = false;
 
     private void startTos() {
         LinearLayout card = new LinearLayout(this);
@@ -212,7 +286,7 @@ public class TutorialActivity extends Activity {
         confirm.setEnabled(false);
         confirm.setAlpha(0.4f);
         LinearLayout.LayoutParams cLp = new LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT, (int)(52 * getResources().getDisplayMetrics().density));
+                ViewGroup.LayoutParams.MATCH_PARENT, dp(52));
         cLp.topMargin = 16;
         card.addView(confirm, cLp);
 
@@ -226,32 +300,30 @@ public class TutorialActivity extends Activity {
                     .putBoolean("tos_accepted_v3", true)
                     .putLong("accepted_tos_version_ts", System.currentTimeMillis())
                     .apply();
-            flyOut(card, () -> playOnce(R.raw.tut_box_close, this::startCursorFinale));
+            flyIntoCrate(card, () -> closeLid(this::startCursorFinale));
         });
 
-        flyIn(card);
+        flyOutOfCrate(card);
     }
-
-    // ── Act 6: cursor finale ───────────────────────────────────────────────
 
     private void startCursorFinale() {
         HapticUtil.forceVibrate(this, 80);
         Button closeBtn = eu.kodanetwork.mchost.util.KodaButtons.primary(this, getString(R.string.tutorial_tos_close));
         FrameLayout.LayoutParams bLp = new FrameLayout.LayoutParams(
                 ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM);
-        bLp.bottomMargin = (int)(80 * getResources().getDisplayMetrics().density);
+        bLp.bottomMargin = dp(80);
         root.addView(closeBtn, bLp);
         closeBtn.setAlpha(0f);
         closeBtn.animate().alpha(1f).setDuration(300).start();
 
         cursor.setAlpha(1f);
-        float targetX = root.getWidth() / 2f - 60;
-        float targetY = root.getHeight() - bLp.bottomMargin - 40;
+        float targetX = root.getWidth() / 2f - dp(50);
+        float targetY = root.getHeight() - bLp.bottomMargin - dp(40);
         cursor.animate()
-                .translationX(targetX - root.getWidth() / 2f + 60)
+                .translationX(targetX - root.getWidth() / 2f + dp(50))
                 .translationY(targetY - root.getHeight() / 2f)
                 .setDuration(1400)
-                .setInterpolator(new android.view.animation.DecelerateInterpolator())
+                .setInterpolator(new DecelerateInterpolator())
                 .withEndAction(() -> {
                     HapticUtil.forceVibrate(this, 60);
                     closeBtn.animate().scaleX(0.92f).scaleY(0.92f).setDuration(90)
@@ -260,17 +332,15 @@ public class TutorialActivity extends Activity {
                     handler.postDelayed(() -> {
                         cursor.animate().alpha(0f).setDuration(250).start();
                         closeBtn.animate().alpha(0f).setDuration(250).start();
-                        playOnce(R.raw.tut_box_fall, () ->
-                                root.animate().alpha(0f).setDuration(500)
-                                        .withEndAction(() -> finishTutorial(false)).start());
+                        dropCrate(() -> root.animate().alpha(0f).setDuration(500)
+                                .withEndAction(() -> finishTutorial(false)).start());
                     }, 700);
                 })
                 .start();
     }
 
-    // ── P.R.A.E.T.O.R.-styled card building ────────────────────────────────
+    // ── praetor card with typewriter ────────────────────────────────────────
 
-    /** Header: title in the red P.R.A.E.T.O.R. style + gray subtitle + orange divider. */
     private void applyPraetorHeader(LinearLayout card, String title, String subtitle) {
         TextView tvTitle = new TextView(this);
         tvTitle.setText(title);
@@ -292,8 +362,7 @@ public class TutorialActivity extends Activity {
 
         android.view.View divider = new android.view.View(this);
         divider.setBackgroundColor(0xFFFF6B00);
-        card.addView(divider, new LinearLayout.LayoutParams(
-                (int)(40 * getResources().getDisplayMetrics().density), 2));
+        card.addView(divider, new LinearLayout.LayoutParams(dp(40), 2));
     }
 
     private LinearLayout makePraetorCard(String title, String body, String buttonLabel, Runnable onAck) {
@@ -308,58 +377,82 @@ public class TutorialActivity extends Activity {
         card.addView(spacer, new LinearLayout.LayoutParams(1, 20));
 
         TextView tvBody = new TextView(this);
-        tvBody.setText(body);
         tvBody.setTextColor(0xFFF0F0F0);
         tvBody.setTextSize(14);
         tvBody.setLineSpacing(4, 1.1f);
+        tvBody.setTag("tw_body");
         card.addView(tvBody, new LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
 
         Button btn = eu.kodanetwork.mchost.util.KodaButtons.primary(this, buttonLabel);
+        btn.setTag("tw_btn");
         LinearLayout.LayoutParams bLp = new LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT, (int)(52 * getResources().getDisplayMetrics().density));
+                ViewGroup.LayoutParams.MATCH_PARENT, dp(52));
         bLp.topMargin = 24;
         card.addView(btn, bLp);
         btn.setOnClickListener(v -> onAck.run());
 
+        // body + button stay hidden until the typewriter finishes
+        tvBody.setText("");
+        btn.setAlpha(0f);
+        card.setTag(R.id.tw_text, body);
+
         return card;
     }
 
-    // ── helpers ─────────────────────────────────────────────────────────────
+    // ── movement: letters fly out of the crate and grow ────────────────────
 
-    private void playOnce(int rawRes, Runnable onEnd) {
-        cardHost.removeAllViews();
-        actLottie.setAnimation(rawRes);
-        actLottie.setProgress(0f);
-        actLottie.addAnimatorListener(new android.animation.AnimatorListenerAdapter() {
-            boolean done = false;
-            @Override
-            public void onAnimationEnd(android.animation.Animator a) {
-                if (!done) { done = true; onEnd.run(); }
-            }
-        });
-        actLottie.playAnimation();
-    }
-
-    private void flyIn(LinearLayout card) {
+    private void flyOutOfCrate(LinearLayout card) {
         FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(
                 (int)(getResources().getDisplayMetrics().widthPixels * 0.84f),
                 (int)(getResources().getDisplayMetrics().heightPixels * 0.5f), Gravity.CENTER);
         card.setLayoutParams(lp);
         cardHost.addView(card);
         card.setAlpha(0f);
-        card.setTranslationY(-100 * getResources().getDisplayMetrics().density);
-        card.animate().alpha(1f).translationY(0f).setDuration(450)
-                .setInterpolator(new android.view.animation.DecelerateInterpolator()).start();
+        card.setScaleX(0.22f);
+        card.setScaleY(0.22f);
+        card.setTranslationY(0f);
+        card.animate().alpha(1f).scaleX(1f).scaleY(1f).translationY(-dp(40))
+                .setDuration(600)
+                .setInterpolator(new DecelerateInterpolator(1.1f))
+                .withEndAction(() -> {
+                    TextView body = (TextView) card.findViewWithTag("tw_body");
+                    Button btn = (Button) card.findViewWithTag("tw_btn");
+                    String text = (String) card.getTag(R.id.tw_text);
+                    typewrite(body, text != null ? text : "", () -> {
+                        if (btn != null) btn.animate().alpha(1f).setDuration(250).start();
+                    });
+                }).start();
     }
 
-    private void flyOut(LinearLayout card, Runnable onDone) {
-        card.animate().alpha(0f).translationY(-100 * getResources().getDisplayMetrics().density)
-                .setDuration(350).setInterpolator(new android.view.animation.AccelerateInterpolator())
+    private void flyIntoCrate(LinearLayout card, Runnable onDone) {
+        card.animate().alpha(0f).scaleX(0.22f).scaleY(0.22f).translationY(0f)
+                .setDuration(400).setInterpolator(new AccelerateInterpolator())
                 .withEndAction(() -> {
                     cardHost.removeView(card);
                     onDone.run();
                 }).start();
+    }
+
+    private void dropCrate(Runnable onDone) {
+        crate.animate().translationY(root.getHeight() * 0.8f).rotation(18f).alpha(0f)
+                .setDuration(700).setInterpolator(new AccelerateInterpolator())
+                .withEndAction(onDone).start();
+    }
+
+    private void typewrite(TextView tv, String text, Runnable onDone) {
+        final int[] i = {0};
+        Runnable[] tick = new Runnable[1];
+        tick[0] = () -> {
+            if (finished) return;
+            if (i[0] <= text.length()) {
+                tv.setText(text.substring(0, i[0]++));
+                handler.postDelayed(tick[0], 22);
+            } else if (onDone != null) {
+                onDone.run();
+            }
+        };
+        handler.post(tick[0]);
     }
 
     private String readAssetText(String path) {
@@ -374,7 +467,6 @@ public class TutorialActivity extends Activity {
         }
     }
 
-    /** @param skipped true when the user aborted — coach phases are skipped then */
     private void finishTutorial(boolean skipped) {
         if (finished) return;
         finished = true;
@@ -388,6 +480,6 @@ public class TutorialActivity extends Activity {
 
     @Override
     public void onBackPressed() {
-        // Tutorial can only be left via skip; blocks accidental aborts mid-cinema
+        // Tutorial can only be left via skip
     }
 }

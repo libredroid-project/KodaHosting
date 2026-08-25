@@ -2,4 +2,6 @@
 <resources>
     <!-- Tag used to track if a view has already been styled by ThemeHelper -->
     <item name="tag_themed" type="id" />
+    <!-- Stash for the typewriter text on tutorial cards -->
+    <item name="tw_text" type="id" />
 </resources>
