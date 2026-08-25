@@ -478,6 +478,9 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        // Coach phase 1 fires here — the tutorial may have finished while
+        // MainActivity was paused behind it
+        eu.kodanetwork.mchost.util.TutorialCoach.maybeShowNewServerHint(this, findViewById(R.id.fab_add));
         android.content.SharedPreferences prefs = eu.kodanetwork.mchost.App.getPrefs(this);
         String currentTheme = prefs.getString("app_theme", "modern");
         String currentMode = prefs.getString("theme_mode", "dark");

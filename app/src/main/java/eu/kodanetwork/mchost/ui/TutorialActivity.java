@@ -25,9 +25,10 @@ import eu.kodanetwork.mchost.util.HapticUtil;
 
 /**
  * Cinematic first-open tutorial:
- * humming vibrations -> spinning block flies in -> opens as a box -> welcome
- * message -> box closes and falls -> elevator raises a second box -> ToS
- * confirmation -> mouse-cursor finale -> hands over to the in-app coach.
+ * humming vibrations -> spinning block lands -> opens as a package ->
+ * P.R.A.E.T.O.R.-styled welcome message flies out -> message returns,
+ * package closes and falls -> elevator raises the ToS package which opens
+ * like a crate -> ToS confirmation -> mouse-cursor finale -> in-app coach.
  */
 public class TutorialActivity extends Activity {
 
@@ -43,8 +44,6 @@ public class TutorialActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // Immersive fullscreen like the screensaver (theme stays MaterialComponents
-        // so MaterialButton works)
         getWindow().getDecorView().setSystemUiVisibility(
                 android.view.View.SYSTEM_UI_FLAG_FULLSCREEN
                 | android.view.View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
@@ -54,12 +53,11 @@ public class TutorialActivity extends Activity {
                 | android.view.View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
 
         root = new FrameLayout(this);
-        root.setBackgroundColor(0xFF0A0807);
+        root.setBackgroundColor(0xFF000000);
         setContentView(root);
 
-        // The real AFK screensaver background the app uses (floating Koda squares)
-        eu.kodanetwork.mchost.ui.FloatingSquaresView bg =
-                new eu.kodanetwork.mchost.ui.FloatingSquaresView(this);
+        // The real AFK screensaver background (floating Koda squares on black)
+        FloatingSquaresView bg = new FloatingSquaresView(this);
         root.addView(bg, new FrameLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
 
@@ -78,7 +76,6 @@ public class TutorialActivity extends Activity {
         centerStage.addView(cardHost, new FrameLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
 
-        // Skip button — always available
         TextView btnSkip = new TextView(this);
         btnSkip.setText(getString(R.string.tutorial_skip));
         btnSkip.setTextColor(0xFF8A8A9A);
@@ -90,7 +87,6 @@ public class TutorialActivity extends Activity {
         skipLp.topMargin = 48;
         root.addView(btnSkip, skipLp);
 
-        // Mouse cursor for the finale (hidden until needed)
         cursor = new TextView(this);
         cursor.setText("➢");
         cursor.setTextSize(28);
@@ -120,34 +116,40 @@ public class TutorialActivity extends Activity {
         handler.post(tick[0]);
     }
 
-    // ── Act 2: spinning block lands ────────────────────────────────────────
+    // ── Act 2: block lands and opens as a package ──────────────────────────
 
     private void startBlockIn() {
         playOnce(R.raw.tut_block, () -> {
             HapticUtil.forceVibrate(this, 250); // the thud
-            handler.postDelayed(this::startWelcome, 250);
+            playOnce(R.raw.tut_box_open, () -> {
+                HapticUtil.forceVibrate(this, 80);
+                startWelcome();
+            });
         });
     }
 
-    // ── Act 3: welcome message out of the box ──────────────────────────────
+    // ── Act 3: welcome message flies out of the package ────────────────────
 
     private void startWelcome() {
         final LinearLayout[] cardRef = new LinearLayout[1];
-        LinearLayout card = makeCard(
+        LinearLayout card = makePraetorCard(
                 getString(R.string.tutorial_welcome_title),
                 getString(R.string.tutorial_welcome_body),
                 getString(R.string.tutorial_ack),
                 () -> {
                     flyOut(cardRef[0], () -> {
-                        HapticUtil.forceVibrate(this, 80);
-                        startBoxFall();
+                        // message returns into the package, lid closes, small buzz
+                        playOnce(R.raw.tut_box_close, () -> {
+                            HapticUtil.forceVibrate(this, 80);
+                            startBoxFall();
+                        });
                     });
                 });
         cardRef[0] = card;
         flyIn(card);
     }
 
-    // ── Act 4: box falls, elevator rises the ToS box ───────────────────────
+    // ── Act 4: package falls, elevator raises the ToS package ──────────────
 
     private void startBoxFall() {
         playOnce(R.raw.tut_box_fall, this::startElevator);
@@ -169,7 +171,8 @@ public class TutorialActivity extends Activity {
         actLottie.setAnimation(R.raw.tut_elevator);
         actLottie.setProgress(0f);
         actLottie.addAnimatorUpdateListener(a -> {
-            if (a.getAnimatedFraction() >= 0.62f && cardHost.getChildCount() == 0) {
+            // the crate flaps open at ~71% of the rise
+            if (a.getAnimatedFraction() >= 0.72f && cardHost.getChildCount() == 0) {
                 HapticUtil.forceVibrate(this, 120);
                 startTos();
             }
@@ -177,22 +180,15 @@ public class TutorialActivity extends Activity {
         actLottie.playAnimation();
     }
 
-    // ── Act 5: ToS confirmation on the box ─────────────────────────────────
+    // ── Act 5: ToS confirmation on the package ─────────────────────────────
 
     private void startTos() {
         LinearLayout card = new LinearLayout(this);
         card.setOrientation(LinearLayout.VERTICAL);
-        card.setBackgroundColor(0xF20A0807);
-        card.setPadding(40, 32, 40, 32);
-        GradientDrawableCard(card);
+        card.setPadding(48, 32, 48, 32);
+        card.setBackgroundResource(R.drawable.bg_dialog_custom);
 
-        TextView title = new TextView(this);
-        title.setText(getString(R.string.tutorial_tos_title));
-        title.setTextColor(0xFFFF6B00);
-        title.setTextSize(16);
-        title.setTypeface(android.graphics.Typeface.DEFAULT_BOLD);
-        title.setPadding(0, 0, 0, 16);
-        card.addView(title);
+        applyPraetorHeader(card, getString(R.string.tutorial_tos_title), "TERMS OF SERVICE");
 
         ScrollView scroll = new ScrollView(this);
         TextView tosText = new TextView(this);
@@ -201,9 +197,8 @@ public class TutorialActivity extends Activity {
         tosText.setTextSize(11);
         tosText.setLineSpacing(4, 1f);
         scroll.addView(tosText);
-        LinearLayout.LayoutParams scLp = new LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT, 0, 1f);
-        card.addView(scroll, scLp);
+        card.addView(scroll, new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, 0, 1f));
 
         CheckBox cb = new CheckBox(this);
         cb.setText(getString(R.string.tutorial_tos_confirm));
@@ -231,13 +226,13 @@ public class TutorialActivity extends Activity {
                     .putBoolean("tos_accepted_v3", true)
                     .putLong("accepted_tos_version_ts", System.currentTimeMillis())
                     .apply();
-            flyOut(card, this::startCursorFinale);
+            flyOut(card, () -> playOnce(R.raw.tut_box_close, this::startCursorFinale));
         });
 
         flyIn(card);
     }
 
-    // ── Act 6: cursor finale — box closes and the app takes over ───────────
+    // ── Act 6: cursor finale ───────────────────────────────────────────────
 
     private void startCursorFinale() {
         HapticUtil.forceVibrate(this, 80);
@@ -249,7 +244,6 @@ public class TutorialActivity extends Activity {
         closeBtn.setAlpha(0f);
         closeBtn.animate().alpha(1f).setDuration(300).start();
 
-        // Cursor travels from center to the close button and "clicks" it
         cursor.setAlpha(1f);
         float targetX = root.getWidth() / 2f - 60;
         float targetY = root.getHeight() - bLp.bottomMargin - 40;
@@ -266,12 +260,69 @@ public class TutorialActivity extends Activity {
                     handler.postDelayed(() -> {
                         cursor.animate().alpha(0f).setDuration(250).start();
                         closeBtn.animate().alpha(0f).setDuration(250).start();
-                        playOnce(R.raw.tut_box_fall, () -> {
-                            root.animate().alpha(0f).setDuration(500).withEndAction(() -> finishTutorial(false)).start();
-                        });
+                        playOnce(R.raw.tut_box_fall, () ->
+                                root.animate().alpha(0f).setDuration(500)
+                                        .withEndAction(() -> finishTutorial(false)).start());
                     }, 700);
                 })
                 .start();
+    }
+
+    // ── P.R.A.E.T.O.R.-styled card building ────────────────────────────────
+
+    /** Header: title in the red P.R.A.E.T.O.R. style + gray subtitle + orange divider. */
+    private void applyPraetorHeader(LinearLayout card, String title, String subtitle) {
+        TextView tvTitle = new TextView(this);
+        tvTitle.setText(title);
+        tvTitle.setTextColor(0xFF3333);
+        tvTitle.setTextSize(24);
+        tvTitle.setTypeface(android.graphics.Typeface.DEFAULT_BOLD);
+        tvTitle.setLetterSpacing(0.08f);
+        tvTitle.setPadding(0, 0, 0, 8);
+        card.addView(tvTitle);
+
+        TextView tvSub = new TextView(this);
+        tvSub.setText(subtitle);
+        tvSub.setTextColor(0xFF8A8A9A);
+        tvSub.setTextSize(10);
+        tvSub.setTypeface(android.graphics.Typeface.DEFAULT_BOLD);
+        tvSub.setLetterSpacing(0.05f);
+        tvSub.setPadding(0, 0, 0, 20);
+        card.addView(tvSub);
+
+        android.view.View divider = new android.view.View(this);
+        divider.setBackgroundColor(0xFFFF6B00);
+        card.addView(divider, new LinearLayout.LayoutParams(
+                (int)(40 * getResources().getDisplayMetrics().density), 2));
+    }
+
+    private LinearLayout makePraetorCard(String title, String body, String buttonLabel, Runnable onAck) {
+        LinearLayout card = new LinearLayout(this);
+        card.setOrientation(LinearLayout.VERTICAL);
+        card.setPadding(48, 32, 48, 32);
+        card.setBackgroundResource(R.drawable.bg_dialog_custom);
+
+        applyPraetorHeader(card, title, "KODAHOSTING");
+
+        android.view.View spacer = new android.view.View(this);
+        card.addView(spacer, new LinearLayout.LayoutParams(1, 20));
+
+        TextView tvBody = new TextView(this);
+        tvBody.setText(body);
+        tvBody.setTextColor(0xFFF0F0F0);
+        tvBody.setTextSize(14);
+        tvBody.setLineSpacing(4, 1.1f);
+        card.addView(tvBody, new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+
+        Button btn = eu.kodanetwork.mchost.util.KodaButtons.primary(this, buttonLabel);
+        LinearLayout.LayoutParams bLp = new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, (int)(52 * getResources().getDisplayMetrics().density));
+        bLp.topMargin = 24;
+        card.addView(btn, bLp);
+        btn.setOnClickListener(v -> onAck.run());
+
+        return card;
     }
 
     // ── helpers ─────────────────────────────────────────────────────────────
@@ -290,61 +341,20 @@ public class TutorialActivity extends Activity {
         actLottie.playAnimation();
     }
 
-    private LinearLayout makeCard(String title, String body, String buttonLabel, Runnable onAck) {
-        LinearLayout card = new LinearLayout(this);
-        card.setOrientation(LinearLayout.VERTICAL);
-        card.setBackgroundColor(0xF20A0807);
-        card.setPadding(40, 32, 40, 32);
-        GradientDrawableCard(card);
-
-        TextView tvTitle = new TextView(this);
-        tvTitle.setText(title);
-        tvTitle.setTextColor(0xFFFF6B00);
-        tvTitle.setTextSize(16);
-        tvTitle.setTypeface(android.graphics.Typeface.DEFAULT_BOLD);
-        tvTitle.setPadding(0, 0, 0, 12);
-        card.addView(tvTitle);
-
-        TextView tvBody = new TextView(this);
-        tvBody.setText(body);
-        tvBody.setTextColor(0xFFF0F0F0);
-        tvBody.setTextSize(13);
-        tvBody.setLineSpacing(4, 1.1f);
-        card.addView(tvBody, new LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
-
-        Button btn = eu.kodanetwork.mchost.util.KodaButtons.primary(this, buttonLabel);
-        LinearLayout.LayoutParams bLp = new LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT, (int)(52 * getResources().getDisplayMetrics().density));
-        bLp.topMargin = 24;
-        card.addView(btn, bLp);
-        btn.setOnClickListener(v -> onAck.run());
-
-        return card;
-    }
-
-    private void GradientDrawableCard(LinearLayout card) {
-        android.graphics.drawable.GradientDrawable bg = new android.graphics.drawable.GradientDrawable();
-        bg.setColor(0xF20E0E14);
-        bg.setCornerRadius(16 * getResources().getDisplayMetrics().density);
-        bg.setStroke(2, 0x66FF6B00);
-        card.setBackground(bg);
-    }
-
     private void flyIn(LinearLayout card) {
         FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(
-                (int)(getResources().getDisplayMetrics().widthPixels * 0.82f),
+                (int)(getResources().getDisplayMetrics().widthPixels * 0.84f),
                 (int)(getResources().getDisplayMetrics().heightPixels * 0.5f), Gravity.CENTER);
         card.setLayoutParams(lp);
         cardHost.addView(card);
         card.setAlpha(0f);
-        card.setTranslationY(-120 * getResources().getDisplayMetrics().density);
+        card.setTranslationY(-100 * getResources().getDisplayMetrics().density);
         card.animate().alpha(1f).translationY(0f).setDuration(450)
                 .setInterpolator(new android.view.animation.DecelerateInterpolator()).start();
     }
 
     private void flyOut(LinearLayout card, Runnable onDone) {
-        card.animate().alpha(0f).translationY(-120 * getResources().getDisplayMetrics().density)
+        card.animate().alpha(0f).translationY(-100 * getResources().getDisplayMetrics().density)
                 .setDuration(350).setInterpolator(new android.view.animation.AccelerateInterpolator())
                 .withEndAction(() -> {
                     cardHost.removeView(card);
