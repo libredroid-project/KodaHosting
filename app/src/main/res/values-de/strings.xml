@@ -542,4 +542,22 @@
     <string name="crash_reason_unknown">Der Server wurde unerwartet beendet (Exit-Code %1$d).</string>
     <string name="crash_reason_startup_exit">Der Server wurde beendet, bevor der Start abgeschlossen war.</string>
 
+    <string name="tutorial_skip">Tutorial überspringen</string>
+    <string name="tutorial_welcome_title">Willkommen bei KodaHosting!</string>
+    <string name="tutorial_welcome_body">Hoste deinen eigenen Minecraft-Server direkt auf deinem Handy — komplett kostenlos. Kein PC, kein VPS, keine monatliche Rechnung. Server erstellen, Mods installieren und alles hier verwalten.</string>
+    <string name="tutorial_ack">Los geht\'s</string>
+    <string name="tutorial_tos_title">Nutzungsbedingungen</string>
+    <string name="tutorial_tos_confirm">Ich habe die Nutzungsbedingungen gelesen und akzeptiere sie</string>
+    <string name="tutorial_tos_accept">Akzeptieren &amp; weiter</string>
+    <string name="tutorial_tos_close">Schließen</string>
+    <string name="tutorial_hint_new_server_title">Erstelle deinen ersten Server</string>
+    <string name="tutorial_hint_new_server_body">Tippe auf diesen Button, um einen neuen Server einzurichten — Typ, Version, RAM und deine Join-Adresse.</string>
+    <string name="tutorial_tab_dashboard">Das Dashboard zeigt Status, RAM, Spieler und Schnellaktionen für deinen Server.</string>
+    <string name="tutorial_tab_console">Die Konsole zeigt den Live-Output des Servers und lässt dich Befehle ausführen.</string>
+    <string name="tutorial_tab_files">Verwalte die Server-Dateien: Configs, Welten und Ordner — direkt hier bearbeitbar.</string>
+    <string name="tutorial_tab_plugins">Installiere und verwalte Plugins und Mods von Modrinth mit einem Tipp.</string>
+    <string name="tutorial_tab_settings">Alle Servereinstellungen: Gameplay, Addons, Java-Runtime und Server-Info.</string>
+    <string name="tutorial_done_title">Du bist startklar!</string>
+    <string name="tutorial_done_body">Dein erster Server ist bereit. Viel Spaß beim Hosten — du kannst das Tutorial jederzeit in den Einstellungen neu starten.</string>
+    <string name="tutorial_next">Weiter</string>
 </resources>

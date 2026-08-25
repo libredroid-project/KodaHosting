@@ -218,6 +218,8 @@ public class MainActivity extends AppCompatActivity {
                     eu.kodanetwork.mchost.util.HapticUtil.forceVibrate(this, 80);
                     startActivity(new Intent(this, CreateServerActivity.class));
                 });
+                // In-app coach phase 1: explain the NEW SERVER button on first launch
+                eu.kodanetwork.mchost.util.TutorialCoach.maybeShowNewServerHint(this, fab);
             }
 
             View fabDb = findViewById(R.id.fab_add_db);
@@ -294,6 +296,9 @@ public class MainActivity extends AppCompatActivity {
 
             ThemeHelper.apply(this);
             eu.kodanetwork.mchost.util.HapticUtil.applyHaptics(this);
+            // First app open: cinematic tutorial takes over (includes the ToS step);
+            // the plain ToS dialog below stays as fallback for skipped tutorials
+            eu.kodanetwork.mchost.util.TutorialCoach.maybeStartTutorial(this);
             checkToS(0);
             Log.d(TAG, "MainActivity created");
         } catch (Exception e) {

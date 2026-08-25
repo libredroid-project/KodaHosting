@@ -512,4 +512,22 @@
     <string name="sd_props_use_manual">使用手动值</string>
     <string name="sd_props_use_app">使用应用值</string>
     <string name="sd_props_port_ip_managed">server-port 和 server-ip 由应用管理，无法修改，你的更改已被还原。</string>
+    <string name="tutorial_skip">跳过教程</string>
+    <string name="tutorial_welcome_title">欢迎使用 KodaHosting！</string>
+    <string name="tutorial_welcome_body">直接在手机上托管你自己的 Minecraft 服务器——完全免费。无需电脑、无需 VPS、无需月费。创建服务器、安装模组，一切都在这里管理。</string>
+    <string name="tutorial_ack">开始吧</string>
+    <string name="tutorial_tos_title">服务条款</string>
+    <string name="tutorial_tos_confirm">我已阅读并接受服务条款</string>
+    <string name="tutorial_tos_accept">接受并继续</string>
+    <string name="tutorial_tos_close">关闭</string>
+    <string name="tutorial_hint_new_server_title">创建你的第一个服务器</string>
+    <string name="tutorial_hint_new_server_body">点击此按钮创建新服务器——选择类型、版本、内存和你的加入地址。</string>
+    <string name="tutorial_tab_dashboard">仪表盘显示服务器状态、内存、玩家和快捷操作。</string>
+    <string name="tutorial_tab_console">控制台实时显示服务器输出，并可以执行命令。</string>
+    <string name="tutorial_tab_files">管理服务器文件：配置、存档和文件夹——直接在这里编辑。</string>
+    <string name="tutorial_tab_plugins">一键从 Modrinth 安装和管理插件与模组。</string>
+    <string name="tutorial_tab_settings">所有服务器设置：游戏玩法、附加功能、Java 运行时和服务器信息。</string>
+    <string name="tutorial_done_title">一切就绪！</string>
+    <string name="tutorial_done_body">你的第一个服务器已准备就绪。祝您托管愉快——你可以随时在设置中重新查看教程。</string>
+    <string name="tutorial_next">下一步</string>
 </resources>

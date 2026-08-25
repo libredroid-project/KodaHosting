@@ -523,4 +523,22 @@
     <string name="crash_reason_unknown">The server exited unexpectedly (exit code %1$d).</string>
     <string name="crash_reason_startup_exit">The server exited before finishing startup.</string>
 
+    <string name="tutorial_skip">Skip tutorial</string>
+    <string name="tutorial_welcome_title">Welcome to KodaHosting!</string>
+    <string name="tutorial_welcome_body">Host your own Minecraft server directly on your phone — for free. No PC, no VPS, no monthly bill. Create a server, add mods and manage everything right here.</string>
+    <string name="tutorial_ack">Let\'s go</string>
+    <string name="tutorial_tos_title">Terms of Service</string>
+    <string name="tutorial_tos_confirm">I have read and accept the Terms of Service</string>
+    <string name="tutorial_tos_accept">Accept &amp; continue</string>
+    <string name="tutorial_tos_close">Close</string>
+    <string name="tutorial_hint_new_server_title">Create your first server</string>
+    <string name="tutorial_hint_new_server_body">Tap this button to set up a new server — choose type, version, RAM and your join address.</string>
+    <string name="tutorial_tab_dashboard">Dashboard shows status, RAM, players and quick actions for your server.</string>
+    <string name="tutorial_tab_console">The console streams live server output and lets you run commands.</string>
+    <string name="tutorial_tab_files">Manage the server files: configs, worlds and folders — edit them right here.</string>
+    <string name="tutorial_tab_plugins">Install and manage plugins and mods from Modrinth in one tap.</string>
+    <string name="tutorial_tab_settings">All server settings: gameplay, addons, Java runtime and server info.</string>
+    <string name="tutorial_done_title">You\'re all set!</string>
+    <string name="tutorial_done_body">Your first server is ready. Have fun hosting — you can restart this tutorial anytime in Settings.</string>
+    <string name="tutorial_next">Next</string>
 </resources>
