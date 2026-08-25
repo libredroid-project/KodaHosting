@@ -403,25 +403,31 @@ public class TutorialActivity extends Activity {
     // ── movement: letters fly out of the crate and grow ────────────────────
 
     private void flyOutOfCrate(LinearLayout card) {
+        int cardHeight = (int)(getResources().getDisplayMetrics().heightPixels * 0.5f);
         FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(
                 (int)(getResources().getDisplayMetrics().widthPixels * 0.84f),
-                (int)(getResources().getDisplayMetrics().heightPixels * 0.5f), Gravity.CENTER);
+                cardHeight, Gravity.CENTER);
         card.setLayoutParams(lp);
         cardHost.addView(card);
+        // letter rises OUT of the crate: starts small at the crate opening and is
+        // pulled up so it hovers above the crate (crate stays visible below)
         card.setAlpha(0f);
-        card.setScaleX(0.22f);
-        card.setScaleY(0.22f);
+        card.setScaleX(0.25f);
+        card.setScaleY(0.25f);
         card.setTranslationY(0f);
-        card.animate().alpha(1f).scaleX(1f).scaleY(1f).translationY(-dp(40))
-                .setDuration(600)
+        float endY = -(cardHeight / 2f) - dp(60);
+        card.animate().alpha(1f).scaleX(1f).scaleY(1f).translationY(endY)
+                .setDuration(650)
                 .setInterpolator(new DecelerateInterpolator(1.1f))
                 .withEndAction(() -> {
                     TextView body = (TextView) card.findViewWithTag("tw_body");
                     Button btn = (Button) card.findViewWithTag("tw_btn");
                     String text = (String) card.getTag(R.id.tw_text);
-                    typewrite(body, text != null ? text : "", () -> {
-                        if (btn != null) btn.animate().alpha(1f).setDuration(250).start();
-                    });
+                    if (body != null && text != null) {
+                        typewrite(body, text, () -> {
+                            if (btn != null) btn.animate().alpha(1f).setDuration(250).start();
+                        });
+                    }
                 }).start();
     }
 
