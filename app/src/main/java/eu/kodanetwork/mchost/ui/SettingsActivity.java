@@ -40,20 +40,6 @@ public class SettingsActivity extends Activity {
             startActivity(new android.content.Intent(this, LicensesActivity.class));
         });
 
-        // Replay the first-open tutorial on demand
-        View cardTutorial = findViewById(R.id.card_legal);
-        if (cardTutorial != null) {
-            cardTutorial.setOnLongClickListener(v -> {
-                eu.kodanetwork.mchost.App.getPrefs(this).edit()
-                        .putBoolean("tutorial_completed_v2", false)
-                        .putInt("tutorial_phase", 0)
-                        .apply();
-                android.widget.Toast.makeText(this,
-                        getString(eu.kodanetwork.mchost.R.string.tutorial_replay_hint),
-                        android.widget.Toast.LENGTH_SHORT).show();
-                return true;
-            });
-        }
 
         if (isCyber) {
             findViewById(android.R.id.content).getRootView().setBackgroundResource(R.drawable.bg_cyber_grid);
@@ -213,8 +199,13 @@ public class SettingsActivity extends Activity {
         if (btnResetOnboarding != null) {
             btnResetOnboarding.setOnClickListener(v -> {
                 eu.kodanetwork.mchost.util.HapticUtil.forceVibrate(this, 50);
-                prefs.edit().putBoolean("onboarding_complete", false).putBoolean("eula_accepted", false).apply();
-                Toast.makeText(this, "Onboarding and EULA reset. Restart app to see.", Toast.LENGTH_LONG).show();
+                prefs.edit()
+                        .putBoolean("onboarding_complete", false)
+                        .putBoolean("eula_accepted", false)
+                        .putBoolean("tutorial_completed_v2", false)
+                        .putInt("tutorial_phase", 0)
+                        .apply();
+                Toast.makeText(this, getString(eu.kodanetwork.mchost.R.string.tutorial_replay_hint), Toast.LENGTH_LONG).show();
             });
         }
 
