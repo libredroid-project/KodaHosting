@@ -51,6 +51,9 @@ public class PlayerStatsParser {
     }
 
     public static String getUuidFromName(File serverDir, String playerName) {
+        java.util.List<String> candidates = new java.util.ArrayList<>();
+
+        // 1. usercache.json — robust against malformed entries
         File cacheFile = new File(serverDir, "usercache.json");
         if (cacheFile.exists()) {
             try {
@@ -58,20 +61,23 @@ public class PlayerStatsParser {
                 try (FileInputStream fis = new FileInputStream(cacheFile)) {
                     fis.read(bytes);
                 }
-                String jsonStr = new String(bytes, StandardCharsets.UTF_8);
-                JSONArray arr = new JSONArray(jsonStr);
+                JSONArray arr = new JSONArray(new String(bytes, StandardCharsets.UTF_8));
                 for (int i = 0; i < arr.length(); i++) {
-                    JSONObject obj = arr.getJSONObject(i);
-                    if (obj.getString("name").equalsIgnoreCase(playerName)) {
-                        return obj.getString("uuid");
+                    JSONObject obj = arr.optJSONObject(i);
+                    if (obj == null) continue;
+                    String name = obj.optString("name", "").trim();
+                    String uuid = obj.optString("uuid", "").trim();
+                    if (!name.isEmpty() && !uuid.isEmpty() && name.equalsIgnoreCase(playerName)) {
+                        candidates.add(uuid);
                     }
                 }
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }
-        
-        String onlineUuid = null;
+
+        // 2. Online UUID via Mojang (offline-mode servers store the offline UUID,
+        //    so this is only a candidate — the file check below picks the right one)
         try {
             java.net.URL url = new java.net.URL("https://api.mojang.com/users/profiles/minecraft/" + playerName);
             java.net.HttpURLConnection conn = (java.net.HttpURLConnection) url.openConnection();
@@ -84,21 +90,23 @@ public class PlayerStatsParser {
                 in.close();
                 org.json.JSONObject obj = new org.json.JSONObject(json);
                 String id = obj.getString("id");
-                onlineUuid = id.replaceFirst("(\\w{8})(\\w{4})(\\w{4})(\\w{4})(\\w{12})", "$1-$2-$3-$4-$5");
+                candidates.add(id.replaceFirst("(\\w{8})(\\w{4})(\\w{4})(\\w{4})(\\w{12})", "$1-$2-$3-$4-$5"));
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
 
-        String offlineUuid = java.util.UUID.nameUUIDFromBytes(("OfflinePlayer:" + playerName).getBytes(StandardCharsets.UTF_8)).toString();
-        
-        if (onlineUuid != null) {
-            if (getPlayerDataFile(serverDir, onlineUuid).exists() || getStatsFile(serverDir, onlineUuid).exists()) {
-                return onlineUuid;
+        // 3. Deterministic offline UUID
+        candidates.add(java.util.UUID.nameUUIDFromBytes(
+                ("OfflinePlayer:" + playerName).getBytes(StandardCharsets.UTF_8)).toString());
+
+        // Prefer whichever candidate actually has playerdata or stats files
+        for (String uuid : candidates) {
+            if (getPlayerDataFile(serverDir, uuid).exists() || getStatsFile(serverDir, uuid).exists()) {
+                return uuid;
             }
         }
-        
-        return offlineUuid;
+        return candidates.get(candidates.size() - 1);
     }
 
 

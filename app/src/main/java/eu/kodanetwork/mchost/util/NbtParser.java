@@ -25,15 +25,26 @@ public class NbtParser {
     }
 
     public static Map<String, Object> parsePlayerDat(File file) {
+        // Vanilla writes gzipped NBT; tolerate uncompressed files as fallback
         try (DataInputStream in = new DataInputStream(new GZIPInputStream(new FileInputStream(file)))) {
-            byte rootType = in.readByte();
-            if (rootType == 0) return null;
-            String rootName = readString(in);
-            return (Map<String, Object>) readTagValue(in, rootType);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
+            return readRoot(in);
+        } catch (Exception gzipFailure) {
+            try (DataInputStream in = new DataInputStream(new FileInputStream(file))) {
+                return readRoot(in);
+            } catch (Exception plainFailure) {
+                eu.kodanetwork.mchost.util.AppLogger.log("KodaHosting",
+                        "[PlayerManager] playerdata parse failed for " + file.getName()
+                                + ": " + gzipFailure.getMessage() + " / " + plainFailure.getMessage());
+                return null;
+            }
         }
+    }
+
+    private static Map<String, Object> readRoot(DataInputStream in) throws IOException {
+        byte rootType = in.readByte();
+        if (rootType == 0) return null;
+        readString(in); // root name (usually empty)
+        return (Map<String, Object>) readTagValue(in, rootType);
     }
 
     private static Object readTagValue(DataInputStream in, byte type) throws IOException {

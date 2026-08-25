@@ -765,7 +765,17 @@ public class ServerDetailActivity extends AppCompatActivity {
             android.widget.Toast.makeText(this, getString(R.string.pm_kicked_toast, player), android.widget.Toast.LENGTH_SHORT).show();
         });
 
+        // Shared ban state — the refresh loop flips the button between Ban and Pardon
+        final boolean[] bannedState = { false };
         btnBan.setOnClickListener(v -> {
+            if (bannedState[0]) {
+                sendCmd("pardon " + player);
+                android.widget.Toast.makeText(this, getString(R.string.pm_pardoned_toast, player), android.widget.Toast.LENGTH_SHORT).show();
+                bannedState[0] = false;
+                btnBan.setText(getString(R.string.pm_ban));
+                btnBan.setBackgroundColor(0xFFAA00FF);
+                return;
+            }
             android.app.Dialog banDialog = new android.app.Dialog(this);
             banDialog.requestWindowFeature(android.view.Window.FEATURE_NO_TITLE);
             banDialog.setContentView(R.layout.dialog_praetor_delete);
@@ -832,6 +842,7 @@ public class ServerDetailActivity extends AppCompatActivity {
             java.io.File serverDir = new java.io.File(server.getServerDir());
             final boolean[] statsAnimated = {false};
             final boolean[] invAnimated = {false};
+            long lastFlush = 0;
             while (sheet.isShowing()) {
                 boolean hasInternet = eu.kodanetwork.mchost.util.NetworkMonitorManager.isInternetAvailable(ServerDetailActivity.this);
                 String uuid = null;
@@ -919,6 +930,14 @@ public class ServerDetailActivity extends AppCompatActivity {
                         });
                     }
 
+                    // Ban/Pardon toggle — banned-players.json is the source of truth
+                    boolean nowBanned = isPlayerBanned(serverDir, player);
+                    if (nowBanned != bannedState[0]) {
+                        bannedState[0] = nowBanned;
+                        btnBan.setText(getString(nowBanned ? R.string.pm_pardon : R.string.pm_ban));
+                        btnBan.setBackgroundColor(nowBanned ? 0xFF00A854 : 0xFFAA00FF);
+                    }
+
                     // Inventory — rebuild the grid whenever it is incomplete; a
                     // crashed build can otherwise leave a single slot behind
                     android.widget.GridLayout gridMain = view.findViewById(R.id.grid_inventory_main);
@@ -958,11 +977,40 @@ public class ServerDetailActivity extends AppCompatActivity {
                     }
                 });
 
+                // Without KodaTransfer (e.g. Fabric servers) vanilla only writes
+                // playerdata/stats on save or quit — flush periodically while the
+                // player is online and data is still missing
+                if (isOnline && (dat == null || !statsAvailable)
+                        && System.currentTimeMillis() - lastFlush > 12000) {
+                    lastFlush = System.currentTimeMillis();
+                    runOnUiThread(() -> {
+                        if (sheet.isShowing()) sendCmd("save-all");
+                    });
+                }
+
                 try { Thread.sleep(2000); } catch (Exception ignored) {}
             }
         }).start();
-        
+
         sheet.show();
+    }
+
+    /** True when the player has an entry in banned-players.json. */
+    private boolean isPlayerBanned(java.io.File serverDir, String playerName) {
+        try {
+            java.io.File f = new java.io.File(serverDir, "banned-players.json");
+            if (!f.exists()) return false;
+            byte[] bytes = new byte[(int) f.length()];
+            try (java.io.FileInputStream fis = new java.io.FileInputStream(f)) {
+                fis.read(bytes);
+            }
+            org.json.JSONArray arr = new org.json.JSONArray(new String(bytes, java.nio.charset.StandardCharsets.UTF_8));
+            for (int i = 0; i < arr.length(); i++) {
+                org.json.JSONObject o = arr.optJSONObject(i);
+                if (o != null && o.optString("name", "").equalsIgnoreCase(playerName)) return true;
+            }
+        } catch (Exception ignored) {}
+        return false;
     }
     
     private boolean isOperator(java.io.File serverDir, String playerName) {
