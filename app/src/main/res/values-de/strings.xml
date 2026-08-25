@@ -560,4 +560,4 @@
     <string name="tutorial_done_title">Du bist startklar!</string>
     <string name="tutorial_done_body">Dein erster Server ist bereit. Viel Spaß beim Hosten — du kannst das Tutorial jederzeit in den Einstellungen neu starten.</string>
     <string name="tutorial_next">Weiter</string>
-</resources>
+    <string name="tutorial_replay_hint">Tutorial startet beim nächsten App-Start</string>\n</resources>

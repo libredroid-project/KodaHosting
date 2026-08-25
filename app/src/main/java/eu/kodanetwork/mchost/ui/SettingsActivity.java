@@ -40,6 +40,21 @@ public class SettingsActivity extends Activity {
             startActivity(new android.content.Intent(this, LicensesActivity.class));
         });
 
+        // Replay the first-open tutorial on demand
+        View cardTutorial = findViewById(R.id.card_legal);
+        if (cardTutorial != null) {
+            cardTutorial.setOnLongClickListener(v -> {
+                eu.kodanetwork.mchost.App.getPrefs(this).edit()
+                        .putBoolean("tutorial_completed_v2", false)
+                        .putInt("tutorial_phase", 0)
+                        .apply();
+                android.widget.Toast.makeText(this,
+                        getString(eu.kodanetwork.mchost.R.string.tutorial_replay_hint),
+                        android.widget.Toast.LENGTH_SHORT).show();
+                return true;
+            });
+        }
+
         if (isCyber) {
             findViewById(android.R.id.content).getRootView().setBackgroundResource(R.drawable.bg_cyber_grid);
         }

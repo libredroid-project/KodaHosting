@@ -541,4 +541,4 @@
     <string name="tutorial_done_title">You\'re all set!</string>
     <string name="tutorial_done_body">Your first server is ready. Have fun hosting — you can restart this tutorial anytime in Settings.</string>
     <string name="tutorial_next">Next</string>
-</resources>
+    <string name="tutorial_replay_hint">Tutorial will start on next app launch</string>\n</resources>
