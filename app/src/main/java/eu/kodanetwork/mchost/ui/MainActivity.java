@@ -778,9 +778,12 @@ public class MainActivity extends AppCompatActivity {
     // ── Welcome splash: covers startup for ~3s every launch ────────────────
 
     private android.widget.FrameLayout splashOverlay;
+    // once per app process: returning from settings must not replay the splash
+    private static boolean splashShownThisProcess = false;
 
     private void showWelcomeSplash() {
-        if (splashOverlay != null) return;
+        if (splashOverlay != null || splashShownThisProcess) return;
+        splashShownThisProcess = true;
         android.view.ViewGroup content = findViewById(android.R.id.content);
         float d = getResources().getDisplayMetrics().density;
         android.widget.FrameLayout overlay = new android.widget.FrameLayout(this);
@@ -802,6 +805,15 @@ public class MainActivity extends AppCompatActivity {
         logo.setLayoutParams(lLp);
         logo.setAlpha(0f);
         logo.animate().alpha(1f).setDuration(400).start();
+        // gentle breathing pulse so the logo feels alive
+        final Runnable[] pulse = new Runnable[1];
+        pulse[0] = () -> {
+            if (splashOverlay == null) return;
+            logo.animate().scaleX(1.05f).scaleY(1.05f).setDuration(900)
+                    .withEndAction(() -> logo.animate().scaleX(1f).scaleY(1f)
+                            .setDuration(900).withEndAction(pulse[0]).start()).start();
+        };
+        logo.postDelayed(pulse[0], 600);
         center.addView(logo);
 
         // KodaHosting types itself live in the same pixel font as the corner title
@@ -827,6 +839,31 @@ public class MainActivity extends AppCompatActivity {
         boot.playAnimation();
         center.addView(boot);
 
+        // thin orange progress line that fills over the splash duration
+        android.widget.FrameLayout track = new android.widget.FrameLayout(this);
+        android.widget.LinearLayout.LayoutParams trLp = new android.widget.LinearLayout.LayoutParams(
+                (int)(150 * d), (int)(3 * d));
+        trLp.topMargin = (int)(10 * d);
+        track.setLayoutParams(trLp);
+        track.setBackgroundColor(0x33FF6B00);
+        android.view.View fill = new android.view.View(this);
+        fill.setBackgroundColor(0xFFFF6B00);
+        android.widget.FrameLayout.LayoutParams fLp = new android.widget.FrameLayout.LayoutParams(0,
+                android.view.ViewGroup.LayoutParams.MATCH_PARENT);
+        fill.setLayoutParams(fLp);
+        track.addView(fill);
+        center.addView(track);
+        android.animation.ValueAnimator fillAnim = android.animation.ValueAnimator.ofInt(0, (int)(150 * d));
+        fillAnim.setDuration(2700);
+        fillAnim.setInterpolator(new android.view.animation.LinearInterpolator());
+        fillAnim.setStartDelay(150);
+        fillAnim.addUpdateListener(a -> {
+            android.widget.FrameLayout.LayoutParams lp2 = (android.widget.FrameLayout.LayoutParams) fill.getLayoutParams();
+            lp2.width = (int) a.getAnimatedValue();
+            fill.setLayoutParams(lp2);
+        });
+        fillAnim.start();
+
         // version + source, small and gray at the bottom
         android.widget.LinearLayout bottom = new android.widget.LinearLayout(this);
         bottom.setOrientation(android.widget.LinearLayout.VERTICAL);
@@ -837,7 +874,10 @@ public class MainActivity extends AppCompatActivity {
         btLp.bottomMargin = (int)(32 * d);
         overlay.addView(bottom, btLp);
         android.widget.TextView version = new android.widget.TextView(this);
-        version.setText("v" + eu.kodanetwork.mchost.BuildConfig.VERSION_NAME);
+        String vname = eu.kodanetwork.mchost.BuildConfig.VERSION_NAME;
+        if (vname == null || vname.isEmpty()) vname = eu.kodanetwork.mchost.BuildConfig.VERSION_NAME;
+        if (vname != null && !vname.startsWith("v")) vname = "v" + vname;
+        version.setText(vname);
         version.setTextColor(0xFF8A8A9A);
         version.setTextSize(12);
         bottom.addView(version);
@@ -869,6 +909,21 @@ public class MainActivity extends AppCompatActivity {
             }
         };
         h.postDelayed(tick[0], 350);
+        // terminal-style blinking cursor while (and after) typing
+        final Runnable[] blink = new Runnable[1];
+        blink[0] = () -> {
+            if (splashOverlay == null) return;
+            CharSequence cur = typed.getText();
+            boolean hasCursor = cur != null && cur.toString().endsWith("▌");
+            String base = hasCursor && cur.length() > 0
+                    ? cur.toString().substring(0, cur.length() - 1)
+                    : (cur == null ? "" : cur.toString());
+            if (base.length() <= word.length()) {
+                typed.setText(base + (hasCursor ? "" : "▌"));
+            }
+            h.postDelayed(blink[0], 420);
+        };
+        h.postDelayed(blink[0], 350);
 
         // fade out after 3s: the typed word glides perfectly into the corner
         // where the app's real KodaHosting title lives, then everything fades
