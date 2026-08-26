@@ -782,63 +782,153 @@ public class MainActivity extends AppCompatActivity {
     private void showWelcomeSplash() {
         if (splashOverlay != null) return;
         android.view.ViewGroup content = findViewById(android.R.id.content);
-        android.widget.FrameLayout overlay = new android.widget.FrameLayout(this);
-        overlay.setBackgroundColor(0xFF000000);
         float d = getResources().getDisplayMetrics().density;
+        android.widget.FrameLayout overlay = new android.widget.FrameLayout(this);
+        overlay.setBackgroundColor(0xFF0A0807); // the app's warm dark background
 
-        overlay.addView(new eu.kodanetwork.mchost.ui.FloatingSquaresView(this), new android.widget.FrameLayout.LayoutParams(
-                android.view.ViewGroup.LayoutParams.MATCH_PARENT, android.view.ViewGroup.LayoutParams.MATCH_PARENT));
-
+        // Logo at the top of the center column
         android.widget.LinearLayout center = new android.widget.LinearLayout(this);
         center.setOrientation(android.widget.LinearLayout.VERTICAL);
-        center.setGravity(android.view.Gravity.CENTER);
+        center.setGravity(android.view.Gravity.CENTER_HORIZONTAL);
         android.widget.FrameLayout.LayoutParams cLp = new android.widget.FrameLayout.LayoutParams(
                 android.view.ViewGroup.LayoutParams.MATCH_PARENT, android.view.ViewGroup.LayoutParams.MATCH_PARENT);
+        cLp.topMargin = (int)(getResources().getDisplayMetrics().heightPixels * 0.22f);
         overlay.addView(center, cLp);
 
-        android.widget.TextView logo = new android.widget.TextView(this);
-        logo.setText("KodaHosting");
-        logo.setTextColor(0xFFFF6B00);
-        logo.setTextSize(30);
-        logo.setLetterSpacing(0.06f);
-        logo.setTypeface(androidx.core.content.res.ResourcesCompat.getFont(this, eu.kodanetwork.mchost.R.font.font_koda), android.graphics.Typeface.BOLD);
+        android.widget.ImageView logo = new android.widget.ImageView(this);
+        logo.setImageResource(eu.kodanetwork.mchost.R.mipmap.ic_launcher);
+        android.widget.LinearLayout.LayoutParams lLp = new android.widget.LinearLayout.LayoutParams(
+                (int)(96 * d), (int)(96 * d));
+        logo.setLayoutParams(lLp);
+        logo.setAlpha(0f);
+        logo.animate().alpha(1f).setDuration(400).start();
         center.addView(logo);
 
+        // KodaHosting types itself live in the same pixel font as the corner title
+        android.widget.TextView typed = new android.widget.TextView(this);
+        typed.setTextColor(0xFFFF8C00);
+        typed.setTextSize(24);
+        typed.setTypeface(androidx.core.content.res.ResourcesCompat.getFont(this, eu.kodanetwork.mchost.R.font.press_start_2p));
+        typed.setLetterSpacing(0.02f);
+        android.widget.LinearLayout.LayoutParams tLp = new android.widget.LinearLayout.LayoutParams(
+                android.view.ViewGroup.LayoutParams.WRAP_CONTENT, android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
+        tLp.topMargin = (int)(26 * d);
+        typed.setLayoutParams(tLp);
+        center.addView(typed);
+
+        // three pulsing Koda dots
         com.airbnb.lottie.LottieAnimationView boot = new com.airbnb.lottie.LottieAnimationView(this);
         android.widget.LinearLayout.LayoutParams bLp = new android.widget.LinearLayout.LayoutParams(
-                (int)(180 * d), (int)(64 * d));
-        bLp.topMargin = (int)(28 * d);
+                (int)(150 * d), (int)(52 * d));
+        bLp.topMargin = (int)(22 * d);
         boot.setLayoutParams(bLp);
-        com.airbnb.lottie.LottieCompositionFactory.fromRawResSync(this, eu.kodanetwork.mchost.R.raw.koda_boot, null);
         boot.setAnimation(eu.kodanetwork.mchost.R.raw.koda_boot);
         boot.loop(true);
         boot.playAnimation();
         center.addView(boot);
 
+        // version + source, small and gray at the bottom
+        android.widget.LinearLayout bottom = new android.widget.LinearLayout(this);
+        bottom.setOrientation(android.widget.LinearLayout.VERTICAL);
+        bottom.setGravity(android.view.Gravity.CENTER);
+        android.widget.FrameLayout.LayoutParams btLp = new android.widget.FrameLayout.LayoutParams(
+                android.view.ViewGroup.LayoutParams.MATCH_PARENT, android.view.ViewGroup.LayoutParams.WRAP_CONTENT,
+                android.view.Gravity.BOTTOM);
+        btLp.bottomMargin = (int)(32 * d);
+        overlay.addView(bottom, btLp);
         android.widget.TextView version = new android.widget.TextView(this);
         version.setText("v" + eu.kodanetwork.mchost.BuildConfig.VERSION_NAME);
-        version.setTextColor(0xFF555566);
+        version.setTextColor(0xFF8A8A9A);
         version.setTextSize(12);
-        android.widget.FrameLayout.LayoutParams vLp = new android.widget.FrameLayout.LayoutParams(
-                android.view.ViewGroup.LayoutParams.WRAP_CONTENT, android.view.ViewGroup.LayoutParams.WRAP_CONTENT,
-                android.view.Gravity.CENTER_HORIZONTAL | android.view.Gravity.BOTTOM);
-        vLp.bottomMargin = (int)(36 * d);
-        overlay.addView(version, vLp);
+        bottom.addView(version);
+        android.widget.TextView source = new android.widget.TextView(this);
+        source.setText("kodanetwork.eu");
+        source.setTextColor(0xFF555566);
+        source.setTextSize(10);
+        android.widget.LinearLayout.LayoutParams sLp = new android.widget.LinearLayout.LayoutParams(
+                android.view.ViewGroup.LayoutParams.WRAP_CONTENT, android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
+        sLp.topMargin = (int)(4 * d);
+        bottom.addView(source, sLp);
 
         content.addView(overlay, new android.view.ViewGroup.LayoutParams(
                 android.view.ViewGroup.LayoutParams.MATCH_PARENT, android.view.ViewGroup.LayoutParams.MATCH_PARENT));
         splashOverlay = overlay;
 
-        // minimum 3 seconds, then fade out
-        new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
+        // type "KodaHosting" live, ~90ms per character
+        final String word = "KodaHosting";
+        final int[] i = {0};
+        final android.os.Handler h = new android.os.Handler(android.os.Looper.getMainLooper());
+        final Runnable[] tick = new Runnable[1];
+        tick[0] = new Runnable() {
+            @Override public void run() {
+                if (splashOverlay == null) return;
+                if (i[0] <= word.length()) {
+                    typed.setText(word.substring(0, i[0]++));
+                    h.postDelayed(tick[0], 90);
+                }
+            }
+        };
+        h.postDelayed(tick[0], 350);
+
+        // fade out after 3s: the typed word glides perfectly into the corner
+        // where the app's real KodaHosting title lives, then everything fades
+        h.postDelayed(() -> {
             if (splashOverlay == null) return;
-            splashOverlay.animate().alpha(0f).setDuration(400)
-                    .withEndAction(() -> {
-                        if (splashOverlay != null) {
-                            content.removeView(splashOverlay);
-                            splashOverlay = null;
-                        }
-                    }).start();
+            TextView title = findTitleView();
+            if (title != null) {
+                int[] tLoc = new int[2];
+                int[] sLoc = new int[2];
+                title.getLocationOnScreen(tLoc);
+                typed.getLocationOnScreen(sLoc);
+                float dx = (tLoc[0]) - sLoc[0];
+                float dy = (tLoc[1] + title.getHeight() / 2f) - (sLoc[1] + typed.getHeight() / 2f);
+                overlay.setBackgroundColor(0x000A0807);
+                logo.animate().alpha(0f).setDuration(350).start();
+                boot.animate().alpha(0f).setDuration(350).start();
+                bottom.animate().alpha(0f).setDuration(300).start();
+                typed.animate()
+                        .translationX(dx).translationY(dy)
+                        .scaleX(0.5f).scaleY(0.5f)
+                        .setDuration(500)
+                        .setInterpolator(new android.view.animation.DecelerateInterpolator(1.4f))
+                        .withEndAction(() -> {
+                            if (splashOverlay != null) {
+                                content.removeView(splashOverlay);
+                                splashOverlay = null;
+                            }
+                        }).start();
+            } else {
+                overlay.animate().alpha(0f).setDuration(400)
+                        .withEndAction(() -> {
+                            if (splashOverlay != null) {
+                                content.removeView(splashOverlay);
+                                splashOverlay = null;
+                            }
+                        }).start();
+            }
         }, 3000);
+    }
+
+    /** The app title is the borderless TextView showing app_name at the top left. */
+    private TextView findTitleView() {
+        return findTitleViewTraverse(findViewById(android.R.id.content));
+    }
+
+    private TextView findTitleViewTraverse(android.view.View v) {
+        if (v instanceof TextView) {
+            TextView tv = (TextView) v;
+            CharSequence t = tv.getText();
+            if (t != null && t.toString().equals(getString(eu.kodanetwork.mchost.R.string.app_name))) {
+                return tv;
+            }
+        }
+        if (v instanceof android.view.ViewGroup) {
+            android.view.ViewGroup g = (android.view.ViewGroup) v;
+            for (int i = 0; i < g.getChildCount(); i++) {
+                TextView r = findTitleViewTraverse(g.getChildAt(i));
+                if (r != null) return r;
+            }
+        }
+        return null;
     }
 }
