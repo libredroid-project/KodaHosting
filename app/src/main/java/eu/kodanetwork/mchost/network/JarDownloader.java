@@ -91,6 +91,13 @@ public class JarDownloader {
             case VELOCITY:
                 post(cb,2,context.getString(R.string.dl_checking_api, "Velocity"));
                 return velocity(srv.getVersion(), cb);
+            case PUMPKIN:
+                // native binary, no jar to download
+                post(cb,2,"Pumpkin (native binary)");
+                new File(srv.getServerDir()).mkdirs();
+                File marker = new File(srv.getServerDir(), "pumpkin.marker");
+                if (!marker.exists()) marker.createNewFile();
+                return marker.getAbsolutePath();
             default:
                 main.post(() -> cb.onError(context.getString(R.string.dl_manual_required, srv.getType().name(), srv.getServerDir())));
                 return null;

@@ -32,11 +32,11 @@ public class ThemeHelper {
     // ─── Light Mode Colors ───────────────────────────────────────
     private static final int LIGHT_BG       = 0xFFFFFFFF; // Pure white background
     private static final int LIGHT_SURFACE  = 0xFFFFFFFF;
-    private static final int LIGHT_CELL     = 0xFFF1F1F4; // neutral light gray for cards/boxes
+    private static final int LIGHT_CELL     = 0xFFFAFAFA; // near-white cards on the white background
     private static final int LIGHT_TEXT     = 0xFF111111;
     private static final int LIGHT_TEXT_SEC = 0xFF555555;
     private static final int LIGHT_HEADER   = 0xFFFFFFFF;
-    private static final int LIGHT_STATUS   = 0xFFF1F1F4; // neutral light gray under the status bar
+    private static final int LIGHT_STATUS   = 0xFFFAFAFA; // near-white under the status bar
 
     // ─── Dark Mode Colors ────────────────────────────────────────
     private static final int DARK_BG        = 0xFF0A0807;
@@ -316,6 +316,18 @@ public class ThemeHelper {
         try {
             boolean isButton = (v instanceof Button || v instanceof MaterialButton || v.getClass().getSimpleName().contains("Button"))
                                && !(v instanceof android.widget.CompoundButton);
+
+            // TabLayout: in light mode use a soft gray indicator and dark tab
+            // text instead of the orange selection line
+            if (v instanceof com.google.android.material.tabs.TabLayout) {
+                com.google.android.material.tabs.TabLayout tl = (com.google.android.material.tabs.TabLayout) v;
+                if (lightMode) {
+                    tl.setSelectedTabIndicatorColor(0xFFE2E2E8);
+                    tl.setTabTextColors(0xFF555555, 0xFF111111);
+                    tl.setBackgroundColor(0xFFFAFAFA);
+                }
+                return;
+            }
             boolean isSwitch = v instanceof android.widget.Switch || v instanceof androidx.appcompat.widget.SwitchCompat;
 
             // ═══════════════════════════════════════════════════════

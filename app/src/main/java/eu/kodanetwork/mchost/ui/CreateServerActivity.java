@@ -66,13 +66,15 @@ public class CreateServerActivity extends AppCompatActivity {
     private static final String[] FORGE_VERSIONS   = {"1.21.1","1.20.1","1.19.2","1.18.2","1.16.5","1.15.2","1.14.4","1.13.2","1.12.2","1.11.2","1.10.2","1.9.4","1.8.9"};
     private static final String[] NEOFORGE_VERSIONS= {"1.21.4","1.21.3","1.21.1","1.20.6","1.20.4","1.20.1"};
     private static final String[] VELOCITY_VERSIONS = {"3.4.0","3.3.0","3.2.0","3.1.2","3.1.1","3.1.0"};
+    // PumpkinMC (Rust) — binary version, no jar download needed
+    private static final String[] PUMPKIN_VERSIONS = {"0.1.0"};
 
     private static final int[] RAM_STEPS = {512, 768, 1024, 1536, 2048, 3072, 4096, 6144, 8192};
-    private static final String[] TYPE_NAMES = {"Paper", "Purpur", "Folia", "Forge", "Fabric", "Vanilla", "NeoForge", "Velocity"};
+    private static final String[] TYPE_NAMES = {"Paper", "Purpur", "Folia", "Forge", "Fabric", "Vanilla", "NeoForge", "Velocity", "Pumpkin"};
     private static final ServerInstance.Type[] TYPE_VALS = {
         ServerInstance.Type.PAPER, ServerInstance.Type.PURPUR, ServerInstance.Type.FOLIA,
         ServerInstance.Type.FORGE, ServerInstance.Type.FABRIC, ServerInstance.Type.VANILLA,
-        ServerInstance.Type.NEOFORGE, ServerInstance.Type.VELOCITY
+        ServerInstance.Type.NEOFORGE, ServerInstance.Type.VELOCITY, ServerInstance.Type.PUMPKIN
     };
     // Types that support Auto Design / KodaHosting Setup
     private static final java.util.Set<ServerInstance.Type> AUTO_DESIGN_TYPES = new java.util.HashSet<>(java.util.Arrays.asList(
@@ -793,6 +795,7 @@ public class CreateServerActivity extends AppCompatActivity {
             if (type == ServerInstance.Type.NEOFORGE) versions = listOf(NEOFORGE_VERSIONS);
             else if (type == ServerInstance.Type.FORGE) versions = listOf(FORGE_VERSIONS);
             else if (type == ServerInstance.Type.VELOCITY) versions = listOf(VELOCITY_VERSIONS);
+            else if (type == ServerInstance.Type.PUMPKIN) versions = listOf(PUMPKIN_VERSIONS);
             else versions = listOf(VANILLA_VERSIONS);
             if (tvVersionLoading != null) tvVersionLoading.setVisibility(View.GONE);
             setVersionList(versions);

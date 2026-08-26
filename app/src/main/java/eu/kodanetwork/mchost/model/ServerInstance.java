@@ -6,7 +6,7 @@ import org.json.JSONObject;
 
 public class ServerInstance {
 
-    public enum Type       { PAPER, PURPUR, FORGE, FABRIC, VANILLA, NEOFORGE, VELOCITY, FOLIA, MARIADB, REDIS, MONGODB, POSTGRESQL }
+    public enum Type       { PAPER, PURPUR, FORGE, FABRIC, VANILLA, NEOFORGE, VELOCITY, FOLIA, MARIADB, REDIS, MONGODB, POSTGRESQL, PUMPKIN }
     public enum State      { OFFLINE, STARTING, ONLINE, STOPPING, CRASHED, INSTALLING, RESTARTING, SETTING_UP, HIBERNATED }
     public enum Gamemode    { survival, creative, adventure, spectator }
     public enum Difficulty  { peaceful, easy, normal, hard }

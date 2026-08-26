@@ -581,7 +581,13 @@ public class KodaServerService extends Service {
             startDatabaseFlow(srv);
             return;
         }
-        
+
+        // PumpkinMC: native Rust binary, no Java jar involved
+        if (srv.getType() == ServerInstance.Type.PUMPKIN) {
+            startPumpkin(srv);
+            return;
+        }
+
         srv.startTime = System.currentTimeMillis();
         setState(srv, srv.isAutoSetup() ? ServerInstance.State.SETTING_UP : ServerInstance.State.STARTING);
         log(id, "  🍊 Launching " + srv.getName() + "...");
@@ -3515,5 +3521,73 @@ public class KodaServerService extends Service {
             }
         }
         fileOrDirectory.delete();
+    }
+
+    // ── PumpkinMC (native Rust binary) ──────────────────────────────────────
+
+    private void startPumpkin(ServerInstance srv) {
+        String id = srv.getId();
+        srv.startTime = System.currentTimeMillis();
+        setState(srv, ServerInstance.State.STARTING);
+        log(id, "  🎃 Pumpkin " + srv.getVersion() + " (Rust, native)...");
+
+        exec.submit(() -> {
+            if (!eu.kodanetwork.mchost.util.PumpkinRuntime.isInstalled(this)) {
+                log(id, "  ⬇ Lade Pumpkin-Binary (~10 MB)...");
+                boolean ok = eu.kodanetwork.mchost.util.PumpkinRuntime.ensureBinarySync(this,
+                        (pct, msg) -> log(id, "  ⬇ Pumpkin: " + pct + "% (" + msg + ")"));
+                if (!ok) {
+                    log(id, "  ✗ Pumpkin-Binary nicht verfuegbar. Bitte erneut versuchen.");
+                    setState(srv, ServerInstance.State.CRASHED);
+                    return;
+                }
+            }
+
+            File binary = eu.kodanetwork.mchost.util.PumpkinRuntime.getBinaryFile(this);
+            File dir = new File(srv.getServerDir());
+            if (!dir.exists()) dir.mkdirs();
+
+            try {
+                java.io.File logFile = new java.io.File(dir, "pumpkin.log");
+                RT rt = new RT();
+                rt.isNative = true;
+
+                ProcessBuilder pb = new ProcessBuilder(binary.getAbsolutePath());
+                pb.directory(dir);
+                pb.redirectErrorStream(true);
+                Process proc = pb.start();
+                rt.proc = proc;
+                rt.stdin = new java.io.PrintStream(proc.getOutputStream(), true);
+                rt.logs.add("🎃 Pumpkin started");
+
+                runtimes.put(id, rt);
+
+                // log reader thread -> console
+                Thread reader = new Thread(() -> {
+                    try (java.io.BufferedReader br = new java.io.BufferedReader(
+                            new java.io.InputStreamReader(proc.getInputStream()))) {
+                        String line;
+                        while ((line = br.readLine()) != null) {
+                            final String l = line;
+                            mainHandler.post(() -> log(id, l));
+                        }
+                    } catch (Exception ignored) {}
+                    mainHandler.post(() -> {
+                        runtimes.remove(id);
+                        setState(srv, ServerInstance.State.OFFLINE);
+                        log(id, "  ⏹ Pumpkin exited.");
+                    });
+                });
+                reader.setDaemon(true);
+                reader.start();
+                rt.loggerThread = reader;
+
+                setState(srv, ServerInstance.State.ONLINE);
+                log(id, "  ✓ Pumpkin online. Console: 'help' fuer Befehle.");
+            } catch (Exception e) {
+                log(id, "  ✗ Pumpkin start failed: " + e.getMessage());
+                setState(srv, ServerInstance.State.CRASHED);
+            }
+        });
     }
 }

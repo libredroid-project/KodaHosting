@@ -797,6 +797,18 @@ public class MainActivity extends AppCompatActivity {
                 android.view.ViewGroup.LayoutParams.MATCH_PARENT, android.view.ViewGroup.LayoutParams.MATCH_PARENT));
 
         // ── left block at VERTICAL CENTER: logo + typed title ──
+        // soft radial scrim so logo/text are gently separated from the squares
+        android.view.View scrim = new android.view.View(this);
+        android.graphics.drawable.GradientDrawable scrimBg = new android.graphics.drawable.GradientDrawable();
+        scrimBg.setOrientation(android.graphics.drawable.GradientDrawable.Orientation.BL_TR);
+        scrimBg.setGradientType(android.graphics.drawable.GradientDrawable.RADIAL_GRADIENT);
+        scrimBg.setColors(new int[]{0x88000000, 0x22000000, 0x00000000});
+        scrim.setBackground(scrimBg);
+        android.widget.FrameLayout.LayoutParams scrimLp = new android.widget.FrameLayout.LayoutParams(
+                (int)(420 * d), (int)(420 * d), android.view.Gravity.START | android.view.Gravity.CENTER_VERTICAL);
+        scrimLp.leftMargin = (int)(-90 * d);
+        overlay.addView(scrim, scrimLp);
+
         android.widget.LinearLayout topLeft = new android.widget.LinearLayout(this);
         topLeft.setOrientation(android.widget.LinearLayout.VERTICAL);
         topLeft.setGravity(android.view.Gravity.START);
