@@ -4423,6 +4423,8 @@ public class ServerDetailActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        // Re-theme dynamically built dashboard/tab content for light mode
+        eu.kodanetwork.mchost.util.ThemeHelper.reapply(this);
         if (tvJoinAddr != null && server != null) {
             updateJoinAddressDisplay();
         }

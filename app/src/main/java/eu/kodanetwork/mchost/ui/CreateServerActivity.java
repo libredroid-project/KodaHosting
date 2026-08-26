@@ -2033,6 +2033,8 @@ public class CreateServerActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        // Re-theme for light mode (form is static XML but pickers are dynamic)
+        eu.kodanetwork.mchost.util.ThemeHelper.reapply(this);
         android.content.SharedPreferences prefs = eu.kodanetwork.mchost.App.getPrefs(this);
         String currentTheme = prefs.getString("app_theme", "modern");
         String currentMode = prefs.getString("theme_mode", "dark");

@@ -77,6 +77,28 @@ public class ThemeHelper {
         apply(activity, null);
     }
 
+    /**
+     * Re-runs theming including views that were created after the initial pass
+     * (adapter rows, dashboards, programmatic sheets). Clears the STYLED tags
+     * first so the BFS actually visits every view again — this is what makes
+     * light mode work outside Settings, where content is mostly static XML.
+     */
+    public static void reapply(Activity activity) {
+        View root = activity.findViewById(android.R.id.content);
+        if (root != null) clearStyledTags(root);
+        apply(activity);
+    }
+
+    private static void clearStyledTags(View v) {
+        if ("STYLED".equals(v.getTag(R.id.tag_themed))) {
+            v.setTag(R.id.tag_themed, null);
+        }
+        if (v instanceof ViewGroup) {
+            ViewGroup g = (ViewGroup) v;
+            for (int i = 0; i < g.getChildCount(); i++) clearStyledTags(g.getChildAt(i));
+        }
+    }
+
     public static void apply(android.app.Dialog dialog) {
         if (dialog == null || !dialog.isShowing()) return;
         // M3 Theme delegation
@@ -544,4 +566,4 @@ public class ThemeHelper {
         int b = color & 0xFF;
         return (int)(0.299 * r + 0.587 * g + 0.114 * b);
     }
-}
+}
