@@ -32,11 +32,11 @@ public class ThemeHelper {
     // ─── Light Mode Colors ───────────────────────────────────────
     private static final int LIGHT_BG       = 0xFFFFFFFF; // Pure white background
     private static final int LIGHT_SURFACE  = 0xFFFFFFFF;
-    private static final int LIGHT_CELL     = 0xFFF5E1F2; // Stronger pink/lila tone inside boxes
+    private static final int LIGHT_CELL     = 0xFFF1F1F4; // neutral light gray for cards/boxes
     private static final int LIGHT_TEXT     = 0xFF111111;
     private static final int LIGHT_TEXT_SEC = 0xFF555555;
     private static final int LIGHT_HEADER   = 0xFFFFFFFF;
-    private static final int LIGHT_STATUS   = 0xFFF5E1F2; // Match LIGHT_CELL to flow seamlessly under status bar
+    private static final int LIGHT_STATUS   = 0xFFF1F1F4; // neutral light gray under the status bar
 
     // ─── Dark Mode Colors ────────────────────────────────────────
     private static final int DARK_BG        = 0xFF0A0807;

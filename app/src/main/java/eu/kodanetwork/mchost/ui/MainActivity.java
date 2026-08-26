@@ -313,6 +313,7 @@ public class MainActivity extends AppCompatActivity {
         if (!prefs.getBoolean("tos_accepted_v3", false) || (newTs > 0 && newTs > prefs.getLong("accepted_tos_version_ts", 0))) {
             android.app.Dialog dialog = new android.app.Dialog(this, android.R.style.Theme_Black_NoTitleBar_Fullscreen);
             dialog.setContentView(R.layout.dialog_tos);
+        eu.kodanetwork.mchost.util.DialogLandFix.apply(dialog);
             dialog.setCancelable(false);
 
             dialog.findViewById(R.id.btn_accept_tos).setOnClickListener(v -> {
@@ -790,18 +791,20 @@ public class MainActivity extends AppCompatActivity {
         android.view.ViewGroup content = findViewById(android.R.id.content);
         float d = getResources().getDisplayMetrics().density;
         android.widget.FrameLayout overlay = new android.widget.FrameLayout(this);
-        overlay.setBackgroundColor(0xFF0A0807);
+        overlay.setBackgroundColor(0xFF000000);
+        // the real AFK screensaver background (floating Koda squares)
+        overlay.addView(new eu.kodanetwork.mchost.ui.FloatingSquaresView(this), new android.widget.FrameLayout.LayoutParams(
+                android.view.ViewGroup.LayoutParams.MATCH_PARENT, android.view.ViewGroup.LayoutParams.MATCH_PARENT));
 
-        // ── top-left block: logo + typed title (left-aligned, landscape-safe) ──
+        // ── left block at VERTICAL CENTER: logo + typed title ──
         android.widget.LinearLayout topLeft = new android.widget.LinearLayout(this);
         topLeft.setOrientation(android.widget.LinearLayout.VERTICAL);
         topLeft.setGravity(android.view.Gravity.START);
         android.widget.FrameLayout.LayoutParams tlLp = new android.widget.FrameLayout.LayoutParams(
                 android.view.ViewGroup.LayoutParams.WRAP_CONTENT, android.view.ViewGroup.LayoutParams.WRAP_CONTENT,
-                android.view.Gravity.TOP | android.view.Gravity.START);
+                android.view.Gravity.START | android.view.Gravity.CENTER_VERTICAL);
         tlLp.leftMargin = (int)(40 * d);
-        tlLp.topMargin = (int)(getResources().getDisplayMetrics().heightPixels > getResources().getDisplayMetrics().widthPixels
-                ? 0.26f : 0.18f) * getResources().getDisplayMetrics().heightPixels;
+        tlLp.rightMargin = (int)(40 * d);
         overlay.addView(topLeft, tlLp);
 
         android.widget.ImageView logo = new android.widget.ImageView(this);

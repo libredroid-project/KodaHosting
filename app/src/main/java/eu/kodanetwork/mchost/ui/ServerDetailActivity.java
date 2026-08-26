@@ -782,6 +782,7 @@ public class ServerDetailActivity extends AppCompatActivity {
             android.app.Dialog banDialog = new android.app.Dialog(this);
             banDialog.requestWindowFeature(android.view.Window.FEATURE_NO_TITLE);
             banDialog.setContentView(R.layout.dialog_praetor_delete);
+        eu.kodanetwork.mchost.util.DialogLandFix.apply(banDialog);
             if (banDialog.getWindow() != null) {
                 banDialog.getWindow().setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT));
                 banDialog.getWindow().setLayout(android.view.ViewGroup.LayoutParams.MATCH_PARENT, android.view.ViewGroup.LayoutParams.MATCH_PARENT);
@@ -1599,6 +1600,7 @@ public class ServerDetailActivity extends AppCompatActivity {
     private void handleDnsOccupied() {
         android.app.Dialog dialog = new android.app.Dialog(this);
         dialog.setContentView(R.layout.dialog_join_address);
+        eu.kodanetwork.mchost.util.DialogLandFix.apply(dialog);
         dialog.getWindow().setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT));
         dialog.getWindow().setLayout(android.view.ViewGroup.LayoutParams.MATCH_PARENT, android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
 
@@ -1769,6 +1771,7 @@ public class ServerDetailActivity extends AppCompatActivity {
                     
                     android.app.Dialog dialog = new android.app.Dialog(this);
                     dialog.setContentView(R.layout.dialog_praetor_input);
+        eu.kodanetwork.mchost.util.DialogLandFix.apply(dialog);
                     dialog.getWindow().setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT));
                     dialog.getWindow().setLayout(android.view.ViewGroup.LayoutParams.MATCH_PARENT, android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
                     
@@ -2413,6 +2416,7 @@ public class ServerDetailActivity extends AppCompatActivity {
         android.app.Dialog dialog = new android.app.Dialog(this);
         dialog.requestWindowFeature(android.view.Window.FEATURE_NO_TITLE);
         dialog.setContentView(R.layout.dialog_praetor_input);
+        eu.kodanetwork.mchost.util.DialogLandFix.apply(dialog);
         if (dialog.getWindow() != null) {
             dialog.getWindow().setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT));
             dialog.getWindow().setLayout(android.view.ViewGroup.LayoutParams.MATCH_PARENT, android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
@@ -2984,6 +2988,7 @@ public class ServerDetailActivity extends AppCompatActivity {
             android.app.Dialog dialog = new android.app.Dialog(this);
             dialog.requestWindowFeature(android.view.Window.FEATURE_NO_TITLE);
             dialog.setContentView(R.layout.dialog_praetor_delete);
+        eu.kodanetwork.mchost.util.DialogLandFix.apply(dialog);
             dialog.setCancelable(false);
             if (dialog.getWindow() != null) {
                 dialog.getWindow().setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT));
@@ -3450,6 +3455,7 @@ public class ServerDetailActivity extends AppCompatActivity {
 
         android.app.Dialog dialog = new android.app.Dialog(this);
         dialog.setContentView(R.layout.dialog_join_address);
+        eu.kodanetwork.mchost.util.DialogLandFix.apply(dialog);
         dialog.getWindow().setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT));
         dialog.getWindow().setLayout(android.view.ViewGroup.LayoutParams.MATCH_PARENT, android.view.ViewGroup.LayoutParams.MATCH_PARENT);
 
@@ -4093,6 +4099,7 @@ public class ServerDetailActivity extends AppCompatActivity {
         android.app.Dialog driftDialog = new android.app.Dialog(this);
         driftDialog.requestWindowFeature(android.view.Window.FEATURE_NO_TITLE);
         driftDialog.setContentView(R.layout.dialog_praetor_delete);
+        eu.kodanetwork.mchost.util.DialogLandFix.apply(driftDialog);
         if (driftDialog.getWindow() != null) {
             driftDialog.getWindow().setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT));
             driftDialog.getWindow().setLayout(android.view.ViewGroup.LayoutParams.MATCH_PARENT, android.view.ViewGroup.LayoutParams.MATCH_PARENT);
@@ -4772,6 +4779,7 @@ public class ServerDetailActivity extends AppCompatActivity {
         if (!eu.kodanetwork.mchost.security.PraetorSystem.checkNetwork(this)) return;
         android.app.Dialog dialog = new android.app.Dialog(this);
         dialog.setContentView(R.layout.dialog_praetor_input);
+        eu.kodanetwork.mchost.util.DialogLandFix.apply(dialog);
         dialog.getWindow().setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT));
         dialog.getWindow().setLayout(android.view.ViewGroup.LayoutParams.MATCH_PARENT, android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
         
