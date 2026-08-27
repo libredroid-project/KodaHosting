@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="@drawable/bg_dialog_custom"
+        android:padding="16dp"
+        android:layout_gravity="center"
+        android:gravity="center">
+
+        <TextView
+            android:id="@+id/tv_dialog_title"
+            android:maxLines="1"
+            app:autoSizeTextType="uniform"
+            app:autoSizeMinTextSize="14sp"
+            app:autoSizeMaxTextSize="36sp"
+            app:autoSizeStepGranularity="2sp"
+            android:layout_width="match_parent"
+            android:paddingEnd="8dp"
+            android:paddingStart="8dp"
+            android:gravity="center"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/space_grotesk_bold"
+            app:fontFamily="@font/space_grotesk_bold"
+            android:textColor="#F0F0F0"
+            android:textSize="36sp"
+            android:layout_marginBottom="8dp" />
+
+        <TextView
+            android:id="@+id/tv_dialog_subtitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/space_grotesk_regular"
+            app:fontFamily="@font/space_grotesk_regular"
+            android:textColor="#FF3333"
+            android:textSize="14sp"
+            android:letterSpacing="0.1"
+            android:layout_marginBottom="16dp" />
+
+        <TextView
+            android:id="@+id/tv_dialog_message"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/space_grotesk_regular"
+            app:fontFamily="@font/space_grotesk_regular"
+            android:textColor="#F0F0F0"
+            android:textSize="14sp"
+            android:gravity="center"
+            android:layout_marginBottom="24dp" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_open_kofi"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                style="@style/KodaButton"
+                android:stateListAnimator="@null"
+                android:layout_marginBottom="8dp"
+                android:text="Open Ko-fi" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_dialog_cancel"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                style="@style/KodaButton.Outline"
+                android:text="@string/praetor_action_cancel"
+                android:stateListAnimator="@null" />
+        </LinearLayout>
+    </LinearLayout>
+
+</FrameLayout>

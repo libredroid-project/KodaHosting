@@ -1,31 +1,49 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp">
+
+<LinearLayout
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
     android:background="@drawable/bg_dialog_custom"
-    android:layout_margin="16dp"
-    android:padding="24dp"
+    android:padding="16dp"
+    android:layout_gravity="center"
     android:gravity="center">
 
     <TextView
         android:id="@+id/tv_dialog_title"
-        android:layout_width="wrap_content"
+        android:maxLines="1"
+        app:autoSizeTextType="uniform"
+        app:autoSizeMinTextSize="14sp"
+        app:autoSizeMaxTextSize="36sp"
+        app:autoSizeStepGranularity="2sp"
+        android:layout_width="match_parent"
+        android:paddingEnd="8dp"
+        android:paddingStart="8dp"
+        android:gravity="center"
+        android:fontFamily="@font/space_grotesk_bold"
+        app:fontFamily="@font/space_grotesk_bold"
         android:layout_height="wrap_content"
         android:textColor="#FF3333"
         android:textSize="36sp"
         android:textStyle="bold"
-        android:letterSpacing="0.1"
-        android:gravity="center" />
+        
+         />
 
     <TextView
         android:id="@+id/tv_dialog_subtitle"
         android:layout_width="wrap_content"
+        android:fontFamily="@font/space_grotesk_regular"
+        app:fontFamily="@font/space_grotesk_regular"
         android:layout_height="wrap_content"
         android:textColor="#8A8A9A"
         android:textSize="10sp"
         android:textStyle="bold"
-        android:letterSpacing="0.05"
+        
         android:gravity="center"
         android:layout_marginTop="8dp" />
 
@@ -39,6 +57,8 @@
     <TextView
         android:id="@+id/tv_dialog_message"
         android:layout_width="match_parent"
+        android:fontFamily="@font/space_grotesk_regular"
+        app:fontFamily="@font/space_grotesk_regular"
         android:layout_height="wrap_content"
         android:textColor="#F0F0F0"
         android:textSize="14sp"
@@ -221,7 +241,8 @@
             android:layout_height="56dp"
             style="@style/KodaButton"
             android:stateListAnimator="@null"
-            android:layout_marginBottom="8dp" />
+            android:layout_marginBottom="8dp"
+            android:text="Continue" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_dialog_cancel"
@@ -232,3 +253,5 @@
             android:stateListAnimator="@null" />
     </LinearLayout>
 </LinearLayout>
+
+</FrameLayout>

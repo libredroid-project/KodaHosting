@@ -43,11 +43,11 @@ public class ServerCardAdapter extends RecyclerView.Adapter<ServerCardAdapter.VH
 
     class VH extends RecyclerView.ViewHolder {
         TextView name, badge, type, ver, ram, addr, players;
-        View dot;
+        View dot, leftPanel;
         android.widget.ProgressBar pbRam;
         com.google.android.material.button.MaterialButton btnAction;
         android.widget.ImageView ivServerIcon;
-        TextView tvBattery;
+        TextView tvBattery, tvUptime;
 
         VH(View v) {
             super(v);
@@ -63,6 +63,27 @@ public class ServerCardAdapter extends RecyclerView.Adapter<ServerCardAdapter.VH
             btnAction = v.findViewById(R.id.btn_action);
             ivServerIcon = v.findViewById(R.id.iv_server_icon);
             tvBattery = v.findViewById(R.id.tv_battery);
+            leftPanel = v.findViewById(R.id.left_panel);
+            tvUptime = v.findViewById(R.id.tv_uptime);
+        }
+
+        private void tintLeftPanel(int statusColor) {
+            if (leftPanel == null) return;
+            int r = (statusColor >> 16) & 0xFF;
+            int g = (statusColor >> 8) & 0xFF;
+            int b = statusColor & 0xFF;
+            int darkColor = android.graphics.Color.rgb(r / 5, g / 5, b / 5);
+            leftPanel.setBackgroundColor(darkColor);
+        }
+
+        private void bindUptime(ServerInstance s) {
+            if (tvUptime == null) return;
+            tvUptime.setText(s.getFormattedUptime());
+            if (s.state == ServerInstance.State.ONLINE && s.startTime > 0) {
+                tvUptime.setTextColor(0xFFAAFFAA); // light green
+            } else {
+                tvUptime.setTextColor(0xFFF0F0F0); // white-ish, just like the dashboard
+            }
         }
 
         void bind(ServerInstance s) {
@@ -154,11 +175,12 @@ public class ServerCardAdapter extends RecyclerView.Adapter<ServerCardAdapter.VH
                     case STARTING: label=ctx.getString(R.string.status_starting); dotDrw=R.drawable.dot_warn; textCol=0xFFFFCC00; break;
                     case STOPPING: label=ctx.getString(R.string.status_stopping); dotDrw=R.drawable.dot_warn; textCol=0xFFFF8800; break;
                     case CRASHED: label=ctx.getString(R.string.status_crashed); dotDrw=R.drawable.dot_err; textCol=0xFFFF3333; break;
-                    default: label=ctx.getString(R.string.status_offline); dotDrw=R.drawable.dot_offline; textCol=0xFF8A8A9A; break;
+                    default: label=ctx.getString(R.string.status_offline); dotDrw=R.drawable.dot_offline; textCol=0xFF5C6BC0; break; // Indigo for offline
                 }
                 badge.setText(label);
                 badge.setTextColor(textCol);
                 dot.setBackground(ctx.getDrawable(dotDrw));
+                tintLeftPanel(textCol);
 
                 // Start/Stop button
                 if (btnAction != null) {
@@ -168,8 +190,8 @@ public class ServerCardAdapter extends RecyclerView.Adapter<ServerCardAdapter.VH
                         btnAction.setTextColor(0xFF111111);
                     } else {
                         btnAction.setText(ctx.getString(R.string.start));
-                        btnAction.setBackgroundTintList(android.content.res.ColorStateList.valueOf(0xFF2B221E));
-                        btnAction.setTextColor(0xFFF0F0F0);
+                        btnAction.setBackgroundTintList(android.content.res.ColorStateList.valueOf(0xFFFF6B00));
+                        btnAction.setTextColor(0xFF111111);
                     }
                     btnAction.setOnClickListener(v -> {
                         eu.kodanetwork.mchost.util.HapticUtil.forceVibrate(v.getContext(), 50);
@@ -203,6 +225,7 @@ public class ServerCardAdapter extends RecyclerView.Adapter<ServerCardAdapter.VH
                     }
                 }
                 eu.kodanetwork.mchost.util.ThemeHelper.applyToView(itemView, isLight, themeColor, isCyber);
+                bindUptime(s);
                 return; // Done for databases
             }
 
@@ -295,10 +318,11 @@ public class ServerCardAdapter extends RecyclerView.Adapter<ServerCardAdapter.VH
                 case CRASHED: label=ctx.getString(R.string.status_crashed); dotDrw=R.drawable.dot_err; textCol=0xFFFF3333; break;
                 case INSTALLING: label=ctx.getString(R.string.status_installing); dotDrw=R.drawable.dot_warn; textCol=0xFF2277FF; break;
                 case HIBERNATED: label=ctx.getString(R.string.hibernate); dotDrw=R.drawable.dot_offline; textCol=0xFF44AAFF; break;
-                default: label=ctx.getString(R.string.status_offline); dotDrw=R.drawable.dot_offline; textCol=0xFF8A8A9A; break; // dim gray for offline
+                default: label=ctx.getString(R.string.status_offline); dotDrw=R.drawable.dot_offline; textCol=0xFF5C6BC0; break; // Indigo for offline
             }
             badge.setText(label);
             badge.setTextColor(textCol);
+            tintLeftPanel(textCol);
             
             String verText = s.getType().name();
             if (!s.isDatabase()) {
@@ -314,16 +338,16 @@ public class ServerCardAdapter extends RecyclerView.Adapter<ServerCardAdapter.VH
             if (btnAction != null) {
                 if (st == ServerInstance.State.HIBERNATED) {
                     btnAction.setText(ctx.getString(R.string.wake_up));
-                    btnAction.setBackgroundTintList(android.content.res.ColorStateList.valueOf(0xFF2B221E));
-                    btnAction.setTextColor(0xFF44AAFF);
+                    btnAction.setBackgroundTintList(android.content.res.ColorStateList.valueOf(0xFFFF6B00));
+                    btnAction.setTextColor(0xFF111111);
                 } else if (st == ServerInstance.State.ONLINE || st == ServerInstance.State.STARTING) {
                     btnAction.setText(ctx.getString(R.string.stop));
                     btnAction.setBackgroundTintList(android.content.res.ColorStateList.valueOf(0xFFFF5252));
                     btnAction.setTextColor(0xFF111111);
                 } else {
                     btnAction.setText(ctx.getString(R.string.start));
-                    btnAction.setBackgroundTintList(android.content.res.ColorStateList.valueOf(0xFF2B221E));
-                    btnAction.setTextColor(0xFFF0F0F0);
+                    btnAction.setBackgroundTintList(android.content.res.ColorStateList.valueOf(0xFFFF6B00));
+                    btnAction.setTextColor(0xFF111111);
                 }
                 btnAction.setOnClickListener(v -> {
                     eu.kodanetwork.mchost.util.HapticUtil.forceVibrate(v.getContext(), 50);
@@ -359,11 +383,12 @@ public class ServerCardAdapter extends RecyclerView.Adapter<ServerCardAdapter.VH
             
             itemView.setOnClickListener(cardClick);
             if (eu.kodanetwork.mchost.util.Material3ThemeHelper.isM3Enabled(ctx)) {
-                eu.kodanetwork.mchost.util.M3AnimationHelper.applySpringTouch(itemView);
                 if (btnAction != null) {
                     eu.kodanetwork.mchost.util.M3AnimationHelper.applySpringTouch(btnAction);
                 }
             }
+
+            bindUptime(s);
 
             // Apply theme LAST so that dynamic colors on btnAction are properly styled for light mode
             eu.kodanetwork.mchost.util.ThemeHelper.applyToView(itemView, isLight, themeColor, isCyber);

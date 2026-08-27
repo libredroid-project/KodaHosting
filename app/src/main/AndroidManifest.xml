@@ -39,6 +39,7 @@
         android:largeHeap="true">
 
         <activity android:name=".ui.SettingsActivity" />
+        <activity android:name=".ui.AppLicenseActivity" />
         <activity android:name=".ui.PraetorConfirmActivity" 
             android:theme="@style/Theme.KodaNetwork.Translucent"
             />

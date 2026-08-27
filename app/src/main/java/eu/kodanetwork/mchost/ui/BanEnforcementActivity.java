@@ -38,7 +38,7 @@ public class BanEnforcementActivity extends Activity {
         TextView header = new TextView(this);
         header.setText("=== P.R.A.E.T.O.R ENFORCEMENT ACTION ===");
         header.setTextColor(0xFFFF3333); // Scary Red
-        Typeface kodaMonoBold = androidx.core.content.res.ResourcesCompat.getFont(this, R.font.jetbrains_mono_bold);
+        Typeface kodaMonoBold = androidx.core.content.res.ResourcesCompat.getFont(this, R.font.space_grotesk_bold);
         header.setTypeface(kodaMonoBold != null ? kodaMonoBold : Typeface.MONOSPACE, Typeface.BOLD);
         header.setTextSize(20);
         header.setGravity(android.view.Gravity.CENTER);
@@ -64,7 +64,7 @@ public class BanEnforcementActivity extends Activity {
         TextView msg = new TextView(this);
         msg.setText("Your access to KodaSMP has been terminated.\nAll assets have been seized.\n\n[ DISCONNECTING... ]");
         msg.setTextColor(0xFFCCCCCC);
-        Typeface kodaMono = androidx.core.content.res.ResourcesCompat.getFont(this, R.font.font_koda_mono);
+        Typeface kodaMono = androidx.core.content.res.ResourcesCompat.getFont(this, R.font.space_grotesk_regular);
         msg.setTypeface(kodaMono != null ? kodaMono : Typeface.MONOSPACE);
         msg.setTextSize(14);
         msg.setGravity(android.view.Gravity.CENTER);
@@ -97,7 +97,7 @@ public class BanEnforcementActivity extends Activity {
         TextView k = new TextView(this);
         k.setText(key + ": ");
         k.setTextColor(0xFF555555);
-        Typeface kodaMono = androidx.core.content.res.ResourcesCompat.getFont(this, R.font.font_koda_mono);
+        Typeface kodaMono = androidx.core.content.res.ResourcesCompat.getFont(this, R.font.space_grotesk_regular);
         k.setTypeface(kodaMono != null ? kodaMono : Typeface.MONOSPACE);
         k.setTextSize(12);
         l.addView(k);
@@ -105,7 +105,7 @@ public class BanEnforcementActivity extends Activity {
         TextView v = new TextView(this);
         v.setText(val);
         v.setTextColor(valCol);
-        Typeface kodaMonoBold = androidx.core.content.res.ResourcesCompat.getFont(this, R.font.jetbrains_mono_bold);
+        Typeface kodaMonoBold = androidx.core.content.res.ResourcesCompat.getFont(this, R.font.space_grotesk_bold);
         v.setTypeface(kodaMonoBold != null ? kodaMonoBold : Typeface.MONOSPACE, Typeface.BOLD);
         v.setTextSize(12);
         l.addView(v);

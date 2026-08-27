@@ -1,0 +1,378 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#0A0807">
+
+    <!-- Header -->
+    <com.google.android.material.appbar.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#15110F"
+        app:elevation="4dp">
+
+        <com.google.android.material.appbar.CollapsingToolbarLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_scrollFlags="scroll|enterAlways|snap">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:padding="16dp"
+                android:gravity="center_vertical">
+
+        <ImageButton
+            android:id="@+id/btn_back"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@drawable/ic_back_custom"
+            app:tint="#FFFFFF"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:text="App License"
+            android:textColor="#FFFFFF"
+            android:textSize="22sp"
+            android:fontFamily="@font/font_koda"
+            android:textStyle="bold"/>
+                </LinearLayout>
+        </com.google.android.material.appbar.CollapsingToolbarLayout>
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior"
+        android:clipToPadding="false"
+        android:paddingBottom="40dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <!-- Intro Card -->
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="24dp"
+                app:cardBackgroundColor="#1A1513"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="0dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="20dp">
+                    
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Choose Your License"
+                        android:textColor="#FF6B00"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        android:fontFamily="@font/font_koda"
+                        android:layout_marginBottom="8dp"/>
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/license_overview"
+                        android:fontFamily="@font/noto_sans"
+                        android:textColor="#DDDDDD"
+                        android:textSize="14sp"
+                        android:lineSpacingExtra="6dp"/>
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- GPL Card -->
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                app:cardBackgroundColor="#241C18"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="0dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="20dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="GNU General Public License v3"
+                        android:textColor="#FFFFFF"
+                        android:textSize="18sp"
+                        android:textStyle="bold"
+                        android:fontFamily="@font/font_koda"
+                        android:layout_marginBottom="12dp"/>
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/license_gpl"
+                        android:fontFamily="@font/noto_sans"
+                        android:textColor="#AAAAAA"
+                        android:textSize="13sp"
+                        android:lineSpacingExtra="4dp"
+                        android:autoLink="web|email"
+                        android:textColorLink="#FF6B00"/>
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- LOPL Card -->
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                app:cardBackgroundColor="#1A1F2B"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="0dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="20dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Libre Open Project License"
+                        android:textColor="#4CA1AF"
+                        android:textSize="18sp"
+                        android:textStyle="bold"
+                        android:fontFamily="@font/font_koda"
+                        android:layout_marginBottom="12dp"/>
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/license_lopl"
+                        android:fontFamily="@font/noto_sans"
+                        android:textColor="#AAAAAA"
+                        android:textSize="13sp"
+                        android:lineSpacingExtra="4dp"
+                        android:autoLink="web|email"
+                        android:textColorLink="#4CA1AF"/>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_marginTop="16dp">
+                        
+                        <Button
+                            android:id="@+id/btn_lopl_preview"
+                            android:layout_width="0dp"
+                            android:layout_weight="1"
+                            android:layout_height="wrap_content"
+                            android:text="Preview PDF"
+                            android:backgroundTint="#4CA1AF"
+                            android:textColor="#FFFFFF"
+                            android:layout_marginEnd="8dp"
+                            android:fontFamily="@font/font_koda" />
+                            
+                        <Button
+                            android:id="@+id/btn_lopl_download"
+                            android:layout_width="0dp"
+                            android:layout_weight="1"
+                            android:layout_height="wrap_content"
+                            android:text="Download PDF"
+                            android:backgroundTint="#2C3E50"
+                            android:textColor="#FFFFFF"
+                            android:layout_marginStart="8dp"
+                            android:fontFamily="@font/font_koda" />
+                    </LinearLayout>
+
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- Commercial Card -->
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="24dp"
+                app:cardBackgroundColor="#2A1B1F"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="0dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="20dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Commercial License"
+                        android:textColor="#F45C43"
+                        android:textSize="18sp"
+                        android:textStyle="bold"
+                        android:fontFamily="@font/font_koda"
+                        android:layout_marginBottom="12dp"/>
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/license_commercial"
+                        android:fontFamily="@font/noto_sans"
+                        android:textColor="#AAAAAA"
+                        android:textSize="13sp"
+                        android:lineSpacingExtra="4dp"
+                        android:autoLink="web|email"
+                        android:textColorLink="#F45C43"/>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_marginTop="16dp">
+                        
+                        <Button
+                            android:id="@+id/btn_comm_preview"
+                            android:layout_width="0dp"
+                            android:layout_weight="1"
+                            android:layout_height="wrap_content"
+                            android:text="Preview PDF"
+                            android:backgroundTint="#F45C43"
+                            android:textColor="#FFFFFF"
+                            android:layout_marginEnd="8dp"
+                            android:fontFamily="@font/font_koda" />
+                            
+                        <Button
+                            android:id="@+id/btn_comm_download"
+                            android:layout_width="0dp"
+                            android:layout_weight="1"
+                            android:layout_height="wrap_content"
+                            android:text="Download PDF"
+                            android:backgroundTint="#2C3E50"
+                            android:textColor="#FFFFFF"
+                            android:layout_marginStart="8dp"
+                            android:fontFamily="@font/font_koda" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_marginTop="8dp">
+
+                        <Button
+                            android:id="@+id/btn_comm_info_preview"
+                            android:layout_width="0dp"
+                            android:layout_weight="1"
+                            android:layout_height="wrap_content"
+                            android:text="Preview Info"
+                            android:backgroundTint="#8E44AD"
+                            android:textColor="#FFFFFF"
+                            android:layout_marginEnd="8dp"
+                            android:fontFamily="@font/font_koda" />
+
+                        <Button
+                            android:id="@+id/btn_comm_info_download"
+                            android:layout_width="0dp"
+                            android:layout_weight="1"
+                            android:layout_height="wrap_content"
+                            android:text="Download Info"
+                            android:backgroundTint="#2C3E50"
+                            android:textColor="#FFFFFF"
+                            android:layout_marginStart="8dp"
+                            android:fontFamily="@font/font_koda" />
+                    </LinearLayout>
+
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- Guide Card -->
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                app:cardBackgroundColor="#1A1513"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="0dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="20dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Which License?"
+                        android:textColor="#FFFFFF"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        android:fontFamily="@font/font_koda"
+                        android:layout_marginBottom="12dp"/>
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/license_which"
+                        android:textColor="#AAAAAA"
+                        android:textSize="13sp"
+                        android:lineSpacingExtra="4dp"/>
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/license_source"
+                android:textColor="#888899"
+                android:textSize="12sp"
+                android:lineSpacingExtra="4dp"
+                android:autoLink="web|email"
+                android:textColorLink="#FF6B00"
+                android:paddingBottom="16dp" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/license_donate"
+                android:textColor="#888899"
+                android:textSize="12sp"
+                android:lineSpacingExtra="4dp"
+                android:autoLink="web|email"
+                android:textColorLink="#FF6B00"
+                android:paddingBottom="16dp" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/license_disclaimer"
+                android:textColor="#888899"
+                android:textSize="12sp"
+                android:lineSpacingExtra="4dp"
+                android:paddingBottom="16dp" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/license_contact"
+                android:textColor="#888899"
+                android:textSize="12sp"
+                android:lineSpacingExtra="4dp"
+                android:autoLink="web|email"
+                android:textColorLink="#FF6B00" />
+
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

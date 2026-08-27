@@ -21,8 +21,8 @@
     <string name="players">players</string>
     <string name="start">START</string>
     <string name="stop">STOP</string>
-<string name="minecraft_account">MINECRAFT ACCOUNT</string>
-<string name="select_language">SELECT LANGUAGE</string><string name="link_minecraft_instructions">Link your Minecraft account to enable /join</string><string name="not_linked">Not linked</string><string name="link_steps">1. Click \'Link Account\'\n2. Join lobby.kodanetwork.eu (or .kodaserv.eu)\n3. Type /link &lt;code&gt;</string><string name="link_new_account">Link New Account</string><string name="appearance">APPEARANCE</string><string name="theme_mode">Theme Mode</string>    <string name="theme_dark">Dark</string>
+    <string name="minecraft_account">MINECRAFT ACCOUNT</string>
+    <string name="select_language">SELECT LANGUAGE</string><string name="link_minecraft_instructions">Link your Minecraft account to enable /join</string><string name="not_linked">Not linked</string><string name="link_steps">1. Click \'Link Account\'\n2. Join lobby.kodanetwork.eu (or .kodaserv.eu)\n3. Type /link &lt;code&gt;</string><string name="link_new_account">Link New Account</string><string name="appearance">APPEARANCE</string><string name="theme_mode">Theme Mode</string>    <string name="theme_dark">Dark</string>
     <string name="theme_light">Light</string>
     <string name="theme_light_purple">Light Custom</string>
     <string name="theme_auto">Auto</string><string name="haptic_feedback">Haptic Feedback</string><string name="on">ON</string><string name="off">OFF</string><string name="screensaver">SCREENSAVER</string><string name="style">Style</string><string name="squares">Squares</string><string name="black">Black</string><string name="afk_timeout">AFK Timeout</string><string name="min_1">1 Min</string><string name="min_2">2 Min</string><string name="min_5">5 Min</string><string name="network_security">NETWORK &amp; SECURITY</string><string name="network_alarm_off">Network Alarm: OFF</string><string name="lobby_remote_on">Lobby Remote: ON</string><string name="beta_jni_off">Beta: JNI Embedded JVM: OFF</string><string name="twofa_disabled">2FA Status: Disabled</string><string name="enable_2fa">Enable 2FA</string><string name="set_2fa_password">Set 2FA Password</string><string name="biometrics">BIOMETRICS</string><string name="enable_biometric">Enable Biometric Unlock</string><string name="bio_resume">On App Resume / Screen Unlock</string><string name="bio_cold_start">On App Cold Start</string><string name="bio_server_click">Before Opening a Server</string><string name="bio_create_server">Before Creating a Server</string><string name="account">ACCOUNT</string><string name="loading">Loading...</string>
@@ -240,7 +240,7 @@
     <string name="java_runtime_label">Java-Runtime</string>
     <string name="java_runtime_auto">Auto (Java %1$d)</string>
 
-    <!-- JRE Fallback PRAETOR -->
+    &lt;!-- JRE Fallback PRAETOR -->
     <string name="praetor_subtitle_jre_fallback">JAVA RUNTIME FALLBACK</string>
     <string name="praetor_reason_jre_fallback">Java %1$d could not be loaded.\n\nReason: %2$s\n\nThe server will start with Java 25 instead. This may cause compatibility issues with older Minecraft versions or mods that require Java %1$d.</string>
     <string name="praetor_jre_reason_unknown">Unknown error</string>
@@ -293,7 +293,7 @@
     <string name="cdns_open_settings">%1$s Settings</string>
     <string name="praetor_delete_account_explanation">You are about to permanently delete your KodaHosting account. This action cannot be undone.\n\n• All your servers, worlds, and plugin data will be irrevocably deleted.\n• KodaHosting support cannot restore deleted accounts.\n• Any subdomains registered under your account will be released to the public pool.\n• Your personal data will be purged in compliance with GDPR guidelines.</string>
 
-    
+
     <string name="dev_options">DEVELOPER OPTIONS</string>
     <string name="dev_liquid_glass">LiquidGlass Overdrive Mode</string>
     <string name="new_database">New Database</string>
@@ -330,7 +330,7 @@
     <string name="tap_to_change">Tap to change</string>
     <string name="btn_create_server">Create Server</string>
     <string name="preparing_java">Preparing Java...</string>
-<string name="pm_heal">Heal</string><string name="pm_feed">Feed</string><string name="pm_starve">Starve</string><string name="pm_kill">Kill</string><string name="pm_wipe">Wipe</string><string name="pm_wipe_title">Wipe Player Data</string><string name="pm_wipe_desc">Are you sure? This will kick the player and delete their inventory and stats.</string><string name="pm_whitelisted">Whitelisted</string><string name="pm_inventory">Inventory</string><string name="pm_deaths">Deaths:</string><string name="pm_blocks_mined">Blocks Mined:</string><string name="pm_hours_played">Hours Played:</string><string name="pm_mobs_killed">Mobs Killed:</string><string name="pm_damage_taken">Damage Taken:</string><string name="pm_online">(Online)</string><string name="pm_offline">(Offline)</string><string name="pm_wiped_toast">Player data wiped</string><string name="pm_action_toast">Executed action on player</string><string name="pm_stats">Statistics</string><string name="pm_offline_hint">No internet connection, actions are disabled</string><string name="pm_empty_players">No players yet, join the server!</string><string name="sd_files_empty">This directory is empty</string><string name="sd_close_loading">Close loading screen</string>
+    <string name="pm_heal">Heal</string><string name="pm_feed">Feed</string><string name="pm_starve">Starve</string><string name="pm_kill">Kill</string><string name="pm_wipe">Wipe</string><string name="pm_wipe_title">Wipe Player Data</string><string name="pm_wipe_desc">Are you sure? This will kick the player and delete their inventory and stats.</string><string name="pm_whitelisted">Whitelisted</string><string name="pm_inventory">Inventory</string><string name="pm_deaths">Deaths:</string><string name="pm_blocks_mined">Blocks Mined:</string><string name="pm_hours_played">Hours Played:</string><string name="pm_mobs_killed">Mobs Killed:</string><string name="pm_damage_taken">Damage Taken:</string><string name="pm_online">(Online)</string><string name="pm_offline">(Offline)</string><string name="pm_wiped_toast">Player data wiped</string><string name="pm_action_toast">Executed action on player</string><string name="pm_stats">Statistics</string><string name="pm_offline_hint">No internet connection, actions are disabled</string><string name="pm_empty_players">No players yet, join the server!</string><string name="sd_files_empty">This directory is empty</string><string name="sd_close_loading">Close loading screen</string>
     <string name="err_server_create_cooldown">Please wait %1$d seconds before creating a new server.</string>
     <string name="err_server_limit_reached">You have reached the limit of %1$d active servers.</string>
     <string name="err_wakeup_limit_reached">Server limit reached. You can run a maximum of %1$d active servers simultaneously. Please hibernate another server first.</string>
@@ -436,7 +436,7 @@
     <string name="server_banned_reason_unknown">Unknown</string>
     <string name="server_banned_download">Download Backup</string>
 
-    <!-- Files tab actions -->
+    &lt;!-- Files tab actions -->
     <string name="sd_files_action_title">FILE MANAGER</string>
     <string name="sd_files_new_file">New File</string>
     <string name="sd_files_new_folder">New Folder</string>
@@ -458,7 +458,7 @@
     <string name="sd_action_paste">Paste (%1$s)</string>
     <string name="sd_action_ok">OK</string>
 
-    <!-- Player manager -->
+    &lt;!-- Player manager -->
     <string name="pm_op">OP</string>
     <string name="pm_deop">DeOP</string>
     <string name="pm_fed_toast">Fed %1$s</string>
@@ -470,7 +470,7 @@
     <string name="pm_ban_desc">Ban %1$s from this server? They will not be able to rejoin until pardoned.</string>
     <string name="pm_ban_confirm">Ban</string>
 
-    <!-- server.properties manual change warning -->
+    &lt;!-- server.properties manual change warning -->
     <string name="sd_props_changed_title">server.properties was changed</string>
     <string name="sd_props_changed_prefix">You changed these values manually in server.properties:</string>
     <string name="sd_props_app_value">App value:</string>
@@ -479,7 +479,7 @@
     <string name="sd_props_use_app">Use app values</string>
     <string name="sd_props_port_ip_managed">server-port and server-ip are managed by the app and cannot be changed. Your edit was reverted.</string>
 
-    <!-- Crash Detection / PRAETOR Crash Screen -->
+    &lt;!-- Crash Detection / Crash Screen -->
     <string name="crash_title">SERVER CRASH</string>
     <string name="crash_subtitle">CRASH ANALYSIS &amp; DIAGNOSTICS</string>
     <string name="crash_server_info">%1$s · %2$s %3$s</string>
@@ -541,4 +541,16 @@
     <string name="tutorial_done_title">You\'re all set!</string>
     <string name="tutorial_done_body">Your first server is ready. Have fun hosting. you can restart this tutorial anytime in Settings.</string>
     <string name="tutorial_next">Next</string>
-    <string name="tutorial_replay_hint">Tutorial will start on next app launch</string>\n</resources>
+    
+    <string name="tutorial_replay_hint">Tutorial will start on next app launch</string>
+    <string name="license_overview">This app is offered under three different licenses. You can choose which one fits you best.\n\nOption 1: GPL v3 (free, with copyleft)\nFor individuals, open-source projects, schools, and anyone who wants to open source their own code. Free of charge, but if you modify and distribute the app, you must also publish your version under GPL v3.\n\nOption 2: LOPL v1.0 PREVIEW (free up to €100,000, with copyleft)\nFor commercial users who want to open source their own code and support an ethical licensing model. Free for small users under €100,000 annual revenue. Larger users pay on a sliding scale based on revenue. Copyleft remains, meaning your changes must be published under LOPL. This license is currently in a 6-month PREVIEW phase.\n\nOption 3: Commercial License (paid, no copyleft)\nFor companies that want to use the app commercially WITHOUT having to open source their own code. Tiered pricing based on revenue, one-time fee per project.</string>
+    <string name="license_gpl">GNU General Public License Version 3 (GPL v3)\n\nThe GPL v3 is a well-known, established open-source license. It allows you to:\n- Use the app for free, including privately and in non-commercial projects\n- Modify and distribute the app\n- Use the app in commercial products if you also publish your own code under GPL v3\n\nImportant conditions:\n- If you modify and distribute the app, you must also publish the modified version under GPL v3 and disclose the source code\n- You may not incorporate the app into closed-source products without open-sourcing your own code\n\nThe full text of the GPL v3 is available at https://www.gnu.org/licenses/gpl-3.0.html and is provided in the source code repository of this app.</string>
+    <string name="license_lopl">Libre Open Project License (LOPL) Version 1.0 PREVIEW\n\nThe LOPL is our own Ethical Source License. It is in the PREVIEW phase and is currently being tested in real-world projects for 6 months before the final version is released.\n\nWhat the LOPL allows:\n- Use, modification, and distribution of the app\n- Commercial use, tiered by annual revenue\n- SaaS hosting is also allowed, but you must publish your server-side code\n\nImportant conditions:\n- Copyleft remains, meaning anyone who modifies the app must publish their version under LOPL or a compatible strong copyleft license\n- If you use the app commercially, you pay a tiered fee based on annual revenue\n- Use during the PREVIEW phase is at your own legal risk\n- For Production at Scale (more than 100 users or more than €100,000 revenue) during the PREVIEW phase, a separate written agreement is required\n\nLOPL Pricing Structure:\n- Under €100,000 annual revenue: Free\n- €100k to €1M: €1,000\n- €1M to €10M: €5,000\n- €10M to €100M: €10,000\n- Over €100M: €50,000\n\nThe fee is a one-time payment per project. Upon payment, you receive an unlimited, worldwide, non-exclusive license.\n\nThe full text of the LOPL v1.0 PREVIEW is available in the source code repository of this app in the LOPL_v1.0_PREVIEW.pdf file.\n\nFor questions about the LOPL, write to: licence@kodaserv.eu</string>
+    <string name="license_commercial">Commercial License (without copyleft)\n\nThe commercial license is for companies that want to use this app or parts of it in a commercial product without having to publish their own source code under GPL v3 or LOPL.\n\nWhat the commercial license allows:\n- Use, modification, and distribution of the app in commercial products\n- Closed source code: You do not have to publish your changes\n- SaaS hosting without the obligation to publish your server-side code\n- Unlimited, worldwide, non-exclusive license per project\n\nCommercial License Pricing Structure:\n- Under €100,000 annual revenue: €250\n- €100k to €1M: €1,000\n- €1M to €10M: €5,000\n- €10M to €100M: €10,000\n- Over €100M: €50,000\n\nThe fee is a one-time payment per project. Upon payment, you receive an unlimited, worldwide, non-exclusive license to use the app commercially in the named project without copyleft obligations.\n\nIf interested, write to: licence@kodaserv.eu\n\nYou will then receive a formal offer with an invoice and license agreement within 5 working days.\n\nThe full text of the commercial license is available in the source code repository of this app in the TRIPLE-LICENSING-KONZEPT.pdf file.</string>
+    <string name="license_which">Which license is right for you?\n\nPrivate individual, private use: GPL v3. (Free)\nOpen-source project: GPL v3. (Free)\nSchool, university, research project: GPL v3. (Free)\nSmall business (&lt; €100k revenue), willing to open source: LOPL. (Free)\nSmall business (&lt; €100k revenue), wants closed source: Commercial License. (€250)\nMid-sized business (€100k - €10M revenue), willing to open source: LOPL. (€1k - €5k)\nMid-sized business, wants closed source: Commercial License. (€1k - €5k)\nLarge enterprise (€10M+ revenue), willing to open source: LOPL. (€10k - €50k)\nLarge enterprise, wants closed source: Commercial License. (€10k - €50k)</string>
+    <string name="license_source">Source Code\n\nThe full source code of this app is publicly available at:\nhttps://github.com/libredroid-project/kodahosting\n\nThere you will also find the following files with the full license texts:\n- LICENSE (GPL v3)\n- LOPL_v1.0_PREVIEW.pdf (LOPL v1.0 PREVIEW)\n- TRIPLE-LICENSING-KONZEPT.pdf (Commercial License)</string>
+    <string name="license_donate">Donations\n\nThis app is free for everyone. If you\'d like to support the developer\'s work, you can donate.\nDonations are voluntary and have no impact on the app\'s features. Donors do not receive extra features or preferential treatment.\n\nDonation link: https://ko-fi.com/kodahosting\n\nEvery amount helps. Thank you.</string>
+    <string name="license_libs">Used Libraries\n\nThis app uses various open-source libraries whose own licenses (e.g., Apache 2.0, MIT) remain valid unchanged. A detailed list can be found in the \"Legal &amp; Licenses\" tab.</string>
+    <string name="license_disclaimer">Disclaimer\n\nThis app is provided without any warranty, to the extent permitted by law. The developer is not liable for damages arising from the use of the app, unless mandatorily required by law.\nThe app is provided \"as is\". There is no guarantee that the app is suitable for a specific purpose or works error-free.\nThe LOPL v1.0 PREVIEW is in the testing phase. Users who choose the LOPL do so at their own legal risk, as the license has not yet been finally tested.</string>
+    <string name="license_contact">Contact\n\nFor questions about the license, commercial use, the LOPL, donations, or bugs in the app, you can contact me:\n\n- Email: licence@kodaserv.eu\n- GitHub: libredroid-project</string>
+</resources>

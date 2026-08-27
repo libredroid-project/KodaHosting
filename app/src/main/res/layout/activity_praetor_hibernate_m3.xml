@@ -6,38 +6,50 @@
     android:orientation="vertical"
     android:background="#A6000000"
     android:gravity="center"
-    android:padding="32dp">
+    android:padding="16dp">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:layout_margin="32dp"
+        android:layout_margin="16dp"
         android:background="@drawable/bg_dialog_custom"
-        android:padding="32dp"
+        android:padding="16dp"
         android:gravity="center">
 
             <!-- Title: P.R.A.E.T.O.R. (Colors applied in Java) -->
             <TextView
                 android:id="@+id/tv_praetor_title"
-                android:layout_width="wrap_content"
+                android:maxLines="1"
+        app:autoSizeTextType="uniform"
+        app:autoSizeMinTextSize="14sp"
+        app:autoSizeMaxTextSize="36sp"
+        app:autoSizeStepGranularity="2sp"
+        android:layout_width="match_parent"
+        android:paddingEnd="8dp"
+        android:paddingStart="8dp"
+        android:gravity="center"
                 android:layout_height="wrap_content"
-                android:text="@string/praetor_title"
+                android:fontFamily="@font/space_grotesk_bold"
+        app:fontFamily="@font/space_grotesk_bold"
+        android:text="@string/praetor_title"
                 android:textColor="?attr/colorError"
                 android:textSize="36sp"
                 android:textStyle="bold"
-                android:letterSpacing="0.1"
-                android:gravity="center" />
+                
+                 />
 
             <!-- Subtitle -->
             <TextView
-                android:layout_width="wrap_content"
+                android:fontFamily="@font/space_grotesk_regular"
+        app:fontFamily="@font/space_grotesk_regular"
+        android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/praetor_subtitle"
                 android:textColor="?attr/colorOnSurfaceVariant"
                 android:textSize="10sp"
                 android:textStyle="bold"
-                android:letterSpacing="0.05"
+                
                 android:gravity="center"
                 android:layout_marginTop="8dp" />
             
@@ -50,7 +62,9 @@
 
             <!-- Warning Icon -->
             <TextView
-                android:layout_width="wrap_content"
+                android:fontFamily="@font/space_grotesk_regular"
+        app:fontFamily="@font/space_grotesk_regular"
+        android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="❄"
                 android:textColor="#00BFFF"
@@ -60,7 +74,9 @@
             <!-- Reason Message -->
             <TextView
                 android:id="@+id/tv_praetor_reason"
-                android:layout_width="match_parent"
+                android:fontFamily="@font/space_grotesk_regular"
+        app:fontFamily="@font/space_grotesk_regular"
+        android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/praetor_hibernate_warning"
                 android:textColor="?attr/colorOnSurface"
@@ -71,7 +87,9 @@
             <!-- Long Explanation Button -->
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btn_praetor_explanation"
-                android:layout_width="wrap_content"
+                android:fontFamily="@font/space_grotesk_regular"
+        app:fontFamily="@font/space_grotesk_regular"
+        android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 style="@style/Widget.Material3.Button.OutlinedButton"
                 android:text="@string/praetor_hibernate_long_explanation"
@@ -80,7 +98,9 @@
             <!-- Countdown Timer -->
             <TextView
                 android:id="@+id/tv_praetor_countdown"
-                android:layout_width="wrap_content"
+                android:fontFamily="@font/space_grotesk_regular"
+        app:fontFamily="@font/space_grotesk_regular"
+        android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textColor="#FFA500"
                 android:textSize="18sp"
@@ -96,7 +116,9 @@
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btn_praetor_confirm"
-                    android:layout_width="match_parent"
+                    android:fontFamily="@font/space_grotesk_regular"
+        app:fontFamily="@font/space_grotesk_regular"
+        android:layout_width="match_parent"
                     android:layout_height="56dp"
                     style="@style/Widget.Material3.Button"
                     android:text="@string/praetor_hibernate_confirm"
@@ -107,7 +129,9 @@
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btn_praetor_cancel"
-                    android:layout_width="match_parent"
+                    android:fontFamily="@font/space_grotesk_regular"
+        app:fontFamily="@font/space_grotesk_regular"
+        android:layout_width="match_parent"
                     android:layout_height="56dp"
                     style="@style/Widget.Material3.Button.OutlinedButton"
                     android:text="@string/praetor_hibernate_cancel"

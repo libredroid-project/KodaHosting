@@ -4,29 +4,41 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:padding="32dp"
+    android:padding="16dp"
     android:background="@drawable/bg_dialog_custom"
     android:gravity="center">
 
     <TextView
         android:id="@+id/tvUpdateTitle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:maxLines="1"
+        app:autoSizeTextType="uniform"
+        app:autoSizeMinTextSize="14sp"
+        app:autoSizeMaxTextSize="36sp"
+        app:autoSizeStepGranularity="2sp"
+        android:layout_width="match_parent"
+        android:paddingEnd="8dp"
+        android:paddingStart="8dp"
         android:gravity="center"
+        android:layout_height="wrap_content"
+        
+        android:fontFamily="@font/space_grotesk_bold"
+        app:fontFamily="@font/space_grotesk_bold"
         android:text="@string/praetor_title"
         android:textColor="#FF3333"
         android:textSize="36sp"
         android:textStyle="bold"
-        android:letterSpacing="0.1" />
+         />
 
     <TextView
+        android:fontFamily="@font/space_grotesk_regular"
+        app:fontFamily="@font/space_grotesk_regular"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/praetor_subtitle"
         android:textColor="#8A8A9A"
         android:textSize="10sp"
         android:textStyle="bold"
-        android:letterSpacing="0.05"
+        
         android:gravity="center"
         android:layout_marginTop="8dp" />
 
@@ -39,6 +51,8 @@
 
     <TextView
         android:id="@+id/tvUpdateSubtitle"
+        android:fontFamily="@font/space_grotesk_regular"
+        app:fontFamily="@font/space_grotesk_regular"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
@@ -49,6 +63,8 @@
 
     <TextView
         android:id="@+id/tvUpdateMessage"
+        android:fontFamily="@font/space_grotesk_regular"
+        app:fontFamily="@font/space_grotesk_regular"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
@@ -67,7 +83,9 @@
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnUpdateNow"
             style="@style/KodaButton"
-            android:layout_width="match_parent"
+            android:fontFamily="@font/space_grotesk_regular"
+        app:fontFamily="@font/space_grotesk_regular"
+        android:layout_width="match_parent"
             android:layout_height="56dp"
             app:backgroundTint="#FF6B00"
             android:stateListAnimator="@null"
@@ -77,7 +95,9 @@
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnUpdateSkip"
             style="@style/KodaButton.Outline"
-            android:layout_width="match_parent"
+            android:fontFamily="@font/space_grotesk_regular"
+        app:fontFamily="@font/space_grotesk_regular"
+        android:layout_width="match_parent"
             android:layout_height="56dp"
             android:stateListAnimator="@null"
             android:enabled="false"

@@ -5,30 +5,42 @@
     android:layout_height="wrap_content"
     android:orientation="vertical"
     android:background="@drawable/bg_dialog_custom"
-    android:padding="32dp"
+    android:padding="16dp"
     android:gravity="center">
 
     <!-- Title: P.R.A.E.T.O.R. -->
     <TextView
         android:id="@+id/tv_praetor_title"
-        android:layout_width="wrap_content"
+        android:maxLines="1"
+        app:autoSizeTextType="uniform"
+        app:autoSizeMinTextSize="14sp"
+        app:autoSizeMaxTextSize="36sp"
+        app:autoSizeStepGranularity="2sp"
+        android:layout_width="match_parent"
+        android:paddingEnd="8dp"
+        android:paddingStart="8dp"
+        android:gravity="center"
         android:layout_height="wrap_content"
+        android:fontFamily="@font/space_grotesk_bold"
+        app:fontFamily="@font/space_grotesk_bold"
         android:text="@string/praetor_title"
         android:textColor="#FF3333"
         android:textSize="28sp"
         android:textStyle="bold"
-        android:letterSpacing="0.1"
-        android:gravity="center" />
+        
+         />
 
     <!-- Subtitle -->
     <TextView
+        android:fontFamily="@font/space_grotesk_regular"
+        app:fontFamily="@font/space_grotesk_regular"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/praetor_subtitle"
         android:textColor="#8A8A9A"
         android:textSize="10sp"
         android:textStyle="bold"
-        android:letterSpacing="0.05"
+        
         android:gravity="center"
         android:layout_marginTop="8dp" />
 
@@ -42,6 +54,8 @@
     <!-- Addon Title -->
     <TextView
         android:id="@+id/tv_addon_title"
+        android:fontFamily="@font/space_grotesk_regular"
+        app:fontFamily="@font/space_grotesk_regular"
         android:layout_width="match_parent" 
         android:layout_height="wrap_content"
         android:text="BEDROCK SUPPORT"
@@ -59,7 +73,9 @@
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_addon_toggle"
-            android:layout_width="match_parent"
+            android:fontFamily="@font/space_grotesk_regular"
+        app:fontFamily="@font/space_grotesk_regular"
+        android:layout_width="match_parent"
             android:layout_height="56dp"
             style="@style/KodaButton"
             android:text="TURN OFF"
@@ -68,7 +84,9 @@
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_addon_change_domain"
-            android:layout_width="match_parent"
+            android:fontFamily="@font/space_grotesk_regular"
+        app:fontFamily="@font/space_grotesk_regular"
+        android:layout_width="match_parent"
             android:layout_height="56dp"
             style="@style/KodaButton.Outline"
             android:text="CHANGE DOMAIN"
@@ -77,7 +95,9 @@
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_addon_unlink_domain"
-            android:layout_width="match_parent"
+            android:fontFamily="@font/space_grotesk_regular"
+        app:fontFamily="@font/space_grotesk_regular"
+        android:layout_width="match_parent"
             android:layout_height="56dp"
             style="@style/KodaButton.Danger"
             android:text="UNLINK DOMAIN"
@@ -94,7 +114,9 @@
         
         <TextView
             android:id="@+id/tv_addon_warning_text"
-            android:layout_width="match_parent"
+            android:fontFamily="@font/space_grotesk_regular"
+        app:fontFamily="@font/space_grotesk_regular"
+        android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textColor="#F0F0F0"
             android:textSize="14sp"
@@ -103,7 +125,9 @@
 
         <TextView
             android:id="@+id/tv_addon_countdown"
-            android:layout_width="wrap_content"
+            android:fontFamily="@font/space_grotesk_regular"
+        app:fontFamily="@font/space_grotesk_regular"
+        android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textColor="#FFA500"
             android:textSize="18sp"
@@ -112,7 +136,9 @@
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_addon_confirm_off"
-            android:layout_width="match_parent"
+            android:fontFamily="@font/space_grotesk_regular"
+        app:fontFamily="@font/space_grotesk_regular"
+        android:layout_width="match_parent"
             android:layout_height="56dp"
             style="@style/KodaButton.Danger"
             android:text="CONFIRM DISABLE"
@@ -122,7 +148,9 @@
             
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_addon_cancel"
-            android:layout_width="match_parent"
+            android:fontFamily="@font/space_grotesk_regular"
+        app:fontFamily="@font/space_grotesk_regular"
+        android:layout_width="match_parent"
             android:layout_height="56dp"
             style="@style/KodaButton.Outline"
             android:text="CANCEL"

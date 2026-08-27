@@ -78,7 +78,7 @@ public class CrashAlertActivity extends androidx.appcompat.app.AppCompatActivity
         new Handler(Looper.getMainLooper()).postDelayed(() -> HapticUtil.forceVibrate(this, 300), 300);
         new Handler(Looper.getMainLooper()).postDelayed(() -> HapticUtil.forceVibrate(this, 150), 700);
 
-        Typeface kodaFont = androidx.core.content.res.ResourcesCompat.getFont(this, R.font.font_koda);
+        Typeface kodaFont = androidx.core.content.res.ResourcesCompat.getFont(this, R.font.space_grotesk_regular);
         Typeface kodaBold = androidx.core.content.res.ResourcesCompat.getFont(this, R.font.space_grotesk_bold);
 
         // ── Root layout ──────────────────────────────────────────────────────

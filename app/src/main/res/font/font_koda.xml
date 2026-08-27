@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <font-family xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
-    <font android:fontStyle="normal" android:fontWeight="400" android:font="@font/space_grotesk_regular"
-        app:fontStyle="normal" app:fontWeight="400" app:font="@font/space_grotesk_regular" />
-    <font android:fontStyle="normal" android:fontWeight="500" android:font="@font/space_grotesk_medium"
-        app:fontStyle="normal" app:fontWeight="500" app:font="@font/space_grotesk_medium" />
-    <font android:fontStyle="normal" android:fontWeight="700" android:font="@font/space_grotesk_bold"
-        app:fontStyle="normal" app:fontWeight="700" app:font="@font/space_grotesk_bold" />
+    <font android:fontStyle="normal" android:fontWeight="400" android:font="@font/golos_text"
+        app:fontStyle="normal" app:fontWeight="400" app:font="@font/golos_text" />
+    <font android:fontStyle="normal" android:fontWeight="500" android:font="@font/golos_text"
+        app:fontStyle="normal" app:fontWeight="500" app:font="@font/golos_text" />
+    <font android:fontStyle="normal" android:fontWeight="700" android:font="@font/golos_text"
+        app:fontStyle="normal" app:fontWeight="700" app:font="@font/golos_text" />
 </font-family>

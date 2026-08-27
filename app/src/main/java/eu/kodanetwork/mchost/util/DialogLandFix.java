@@ -26,6 +26,7 @@ public class DialogLandFix {
                 android.view.ViewGroup.LayoutParams oldLp = child.getLayoutParams();
                 content.removeView(child);
                 ScrollView scroller = new ScrollView(d.getContext());
+                scroller.setFillViewport(true);
                 scroller.addView(child, new ViewGroup.LayoutParams(
                         ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
                 content.addView(scroller, 0, new ViewGroup.LayoutParams(

@@ -446,8 +446,7 @@
                 android:layout_width="0dp" android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:textColor="#8A8A9A" android:textSize="12sp"
-                android:fontFamily="@font/font_koda" android:singleLine="true"
-                android:ellipsize="middle"/>
+                android:fontFamily="@font/font_koda"         android:ellipsize="middle"/>
             <ImageButton android:id="@+id/btn_import_file"
                 android:layout_width="32dp" android:layout_height="32dp"
                 android:src="@android:drawable/ic_menu_add"
@@ -534,8 +533,7 @@
                         android:fontFamily="@font/font_koda"
                         android:textColorHint="#3A3A48"
                         android:paddingStart="16dp" android:paddingEnd="16dp"
-                        android:inputType="text" android:singleLine="true"
-                        android:layout_marginBottom="16dp"/>
+                        android:inputType="text"                 android:layout_marginBottom="16dp"/>
 
                     <View android:layout_width="match_parent" android:layout_height="1dp"
                         android:background="#1A1A24" android:layout_marginBottom="16dp"/>
@@ -552,8 +550,7 @@
                         android:fontFamily="@font/font_koda"
                         android:textColorHint="#3A3A48"
                         android:paddingStart="16dp" android:paddingEnd="16dp"
-                        android:inputType="text" android:singleLine="true"
-                        android:layout_marginBottom="16dp"/>
+                        android:inputType="text"                 android:layout_marginBottom="16dp"/>
 
                     <!-- PASSWORD -->
                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"

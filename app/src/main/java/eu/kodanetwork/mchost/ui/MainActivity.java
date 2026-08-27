@@ -233,6 +233,15 @@ public class MainActivity extends AppCompatActivity {
                 });
             }
 
+            
+            View btnDonateMain = findViewById(R.id.btn_donate_main);
+            if (btnDonateMain != null) {
+                btnDonateMain.setOnClickListener(v -> {
+                    eu.kodanetwork.mchost.util.HapticUtil.forceVibrate(this, 80);
+                    showSupportDialog();
+                });
+            }
+
             View btnSupportMain = findViewById(R.id.btn_support_main);
             if (btnSupportMain != null) {
                 btnSupportMain.setOnClickListener(v -> {
@@ -972,4 +981,34 @@ public class MainActivity extends AppCompatActivity {
         }
         return null;
     }
+
+    private void showSupportDialog() {
+        android.app.Dialog dialog = new android.app.Dialog(this);
+        dialog.setContentView(R.layout.dialog_praetor_support);
+        eu.kodanetwork.mchost.util.DialogLandFix.apply(dialog);
+        dialog.getWindow().setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT));
+        dialog.getWindow().setLayout(android.view.ViewGroup.LayoutParams.MATCH_PARENT, android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
+
+        String praetorHtml = "<font color=\"#4CAF50\">DONATE</font>";
+        ((android.widget.TextView) dialog.findViewById(R.id.tv_dialog_title)).setText(android.text.Html.fromHtml(praetorHtml, android.text.Html.FROM_HTML_MODE_LEGACY));
+        android.widget.TextView subtitle = dialog.findViewById(R.id.tv_dialog_subtitle);
+        subtitle.setVisibility(android.view.View.GONE);
+        ((android.widget.TextView) dialog.findViewById(R.id.tv_dialog_message)).setText(android.text.Html.fromHtml("KodaHosting is built and maintained by a <font color=\"#FF8C00\">single developer</font>.<br><br>By supporting me on Ko-fi, you directly help me pay for the <font color=\"#FFFFFF\">expensive server costs</font> and keep this project <font color=\"#AAAAAA\">completely ad-free</font>.<br><br>Every coffee means the world to me and keeps KodaHosting alive!", android.text.Html.FROM_HTML_MODE_LEGACY));
+
+        android.widget.Button btnKofi = dialog.findViewById(R.id.btn_open_kofi);
+        if (btnKofi != null) {
+            btnKofi.setOnClickListener(v -> {
+                dialog.dismiss();
+                startActivity(new android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse("https://ko-fi.com/kodahosting")));
+            });
+        }
+        
+        android.widget.Button btnCancel = dialog.findViewById(R.id.btn_dialog_cancel);
+        if (btnCancel != null) {
+            btnCancel.setOnClickListener(v -> dialog.dismiss());
+        }
+
+        dialog.show();
+    }
+
 }

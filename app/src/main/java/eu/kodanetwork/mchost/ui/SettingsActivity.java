@@ -1,5 +1,17 @@
 package eu.kodanetwork.mchost.ui;
 
+/*
+ * Copyright (c) 2026 Karol Brzostowski / KodaHosting
+ *
+ * Triple-Licensed under:
+ *   - GNU General Public License v3 (GPL-3.0) — see LICENSE
+ *   - Libre Open Project License v1.0 PREVIEW — see LOPL_v1.0_PREVIEW.md
+ *   - Commercial License — see COMMERCIAL-LICENSE.md
+ *
+ * For commercial inquiries: licence@kodaserv.eu
+ */
+
+
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -36,6 +48,9 @@ public class SettingsActivity extends Activity {
         prefs = eu.kodanetwork.mchost.App.getPrefs(this);
         boolean isCyber = "cyber".equals(prefs.getString("app_theme", "modern"));
         
+        findViewById(R.id.card_app_license).setOnClickListener(v -> {
+            startActivity(new android.content.Intent(this, AppLicenseActivity.class));
+        });
         findViewById(R.id.card_legal).setOnClickListener(v -> {
             startActivity(new android.content.Intent(this, LicensesActivity.class));
         });
@@ -1768,7 +1783,7 @@ public class SettingsActivity extends Activity {
             tvTitle.setText(getString(R.string.select_language));
             tvTitle.setTextColor(0xFFFF6B00);
             tvTitle.setTextSize(13);
-            android.graphics.Typeface kodaBold = androidx.core.content.res.ResourcesCompat.getFont(this, R.font.space_grotesk_bold);
+            android.graphics.Typeface kodaBold = androidx.core.content.res.ResourcesCompat.getFont(this, R.font.font_koda);
             tvTitle.setTypeface(kodaBold != null ? kodaBold : android.graphics.Typeface.DEFAULT_BOLD);
             tvTitle.setLetterSpacing(0.12f);
             tvTitle.setPadding(48, 40, 48, 24);
@@ -1789,7 +1804,7 @@ public class SettingsActivity extends Activity {
                 boolean isSelected = codes[i].equals(prefs.getString("language", "system"));
                 if (isSelected) {
                     tv.setTextColor(0xFFFF6B00);
-                    android.graphics.Typeface kodaBoldSel = androidx.core.content.res.ResourcesCompat.getFont(this, R.font.space_grotesk_bold);
+                    android.graphics.Typeface kodaBoldSel = androidx.core.content.res.ResourcesCompat.getFont(this, R.font.font_koda);
                     tv.setTypeface(kodaBoldSel != null ? kodaBoldSel : android.graphics.Typeface.DEFAULT_BOLD);
                 } else {
                     tv.setTextColor(isLight() ? 0xFF111827 : 0xFFFFFFFF);

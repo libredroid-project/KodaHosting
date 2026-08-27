@@ -824,6 +824,32 @@
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 
+                        <!-- APP LICENSE CARD -->
+            <androidx.cardview.widget.CardView
+                android:id="@+id/card_app_license"
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                android:clickable="true" android:focusable="true"
+                android:foreground="?attr/selectableItemBackground"
+                app:cardBackgroundColor="#241C18"
+                app:cardCornerRadius="12dp" app:cardElevation="0dp">
+
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:orientation="vertical" android:padding="16dp" android:gravity="center">
+
+                    <TextView
+                        android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:text="App License" android:textColor="#FFFFFF"
+                        android:textSize="18sp" android:fontFamily="@font/font_koda"
+                        android:layout_marginBottom="4dp"/>
+
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:text="View GPL &amp; LOPL License" android:textColor="#888899"
+                        android:textSize="12sp" android:fontFamily="@font/font_koda"/>
+
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
             <!-- APP UUID CARD -->
             <androidx.cardview.widget.CardView
                 android:id="@+id/card_app_uuid"

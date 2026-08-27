@@ -1,5 +1,17 @@
 package eu.kodanetwork.mchost.ui;
 
+/*
+ * Copyright (c) 2026 Karol Brzostowski / KodaHosting
+ *
+ * Triple-Licensed under:
+ *   - GNU General Public License v3 (GPL-3.0) — see LICENSE
+ *   - Libre Open Project License v1.0 PREVIEW — see LOPL_v1.0_PREVIEW.md
+ *   - Commercial License — see COMMERCIAL-LICENSE.md
+ *
+ * For commercial inquiries: licence@kodaserv.eu
+ */
+
+
 import android.os.Bundle;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -26,6 +38,9 @@ public class LicensesActivity extends AppCompatActivity {
         findViewById(R.id.btn_back).setOnClickListener(v -> finish());
 
         LinearLayout topContainer = findViewById(R.id.ll_legal_top_container);
+        addLicense(topContainer, "App License (GPL v3)", "gpl_v3.txt");
+        addPdfLicense(topContainer, "LOPL v1.0 PREVIEW", "lopl_preview.pdf");
+        addPdfLicense(topContainer, "Commercial License", "commercial_license.pdf");
         addLicense(topContainer, "Imprint (Impressum)", "impressum.txt");
         addLicense(topContainer, "Terms of Service", "tos.txt");
         addLicense(topContainer, "Privacy Policy", "privacy.txt");
@@ -40,6 +55,9 @@ public class LicensesActivity extends AppCompatActivity {
         addLicense(container, "PCRE2", "pcre2.txt");
         addLicense(container, "Fast Reverse Proxy (FRP)", "frp.txt");
         addLicense(container, "Press Start 2P Font", "press_start_2p.txt");
+        addLicense(container, "Golos Text Font (SIL OFL 1.1)", "golos_text.txt");
+        addLicense(container, "Noto Sans Font (SIL OFL 1.1)", "noto_sans.txt");
+        addLicense(container, "Changa One Font (SIL OFL 1.1)", "changa_one.txt");
         addLicense(container, "Space Grotesk Font (SIL OFL 1.1)", "space_grotesk.txt");
         addLicense(container, "JetBrains Mono Font (SIL OFL 1.1)", "jetbrains_mono.txt");
         addLicense(container, "Lottie by Airbnb", "lottie.txt");
@@ -71,6 +89,66 @@ public class LicensesActivity extends AppCompatActivity {
         addLicense(container, "Google Play Services (Auth, App Update, Integrity)", "play_services.txt");
         addLicense(container, "RootBeer", "rootbeer.txt");
         addLicense(container, "BlurView", "blurview.txt");
+    }
+
+    
+    private void addPdfLicense(LinearLayout container, String title, String filename) {
+        androidx.cardview.widget.CardView card = new androidx.cardview.widget.CardView(this);
+        LinearLayout.LayoutParams cardParams = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        cardParams.setMargins(0, 0, 0, 32);
+        card.setLayoutParams(cardParams);
+        card.setCardBackgroundColor(0xFF241C18);
+        card.setRadius(24f);
+        card.setCardElevation(0f);
+
+        LinearLayout row = new LinearLayout(this);
+        row.setOrientation(LinearLayout.VERTICAL);
+        row.setPadding(32, 32, 32, 32);
+
+        TextView tvTitle = new TextView(this);
+        tvTitle.setText("📄 " + title);
+        tvTitle.setTextColor(0xFF4CA1AF); // A different color for PDFs
+        tvTitle.setTextSize(16);
+        tvTitle.setClickable(true);
+        tvTitle.setFocusable(true);
+        android.util.TypedValue outValue = new android.util.TypedValue();
+        getTheme().resolveAttribute(android.R.attr.selectableItemBackground, outValue, true);
+        tvTitle.setBackgroundResource(outValue.resourceId);
+        
+        tvTitle.setOnClickListener(v -> {
+            try {
+                // Copy asset to cache
+                java.io.File cacheDir = new java.io.File(getCacheDir(), "licenses");
+                cacheDir.mkdirs();
+                java.io.File pdfFile = new java.io.File(cacheDir, filename);
+                
+                if (!pdfFile.exists()) {
+                    java.io.InputStream in = getAssets().open("licenses/" + filename);
+                    java.io.FileOutputStream out = new java.io.FileOutputStream(pdfFile);
+                    byte[] buffer = new byte[1024];
+                    int read;
+                    while ((read = in.read(buffer)) != -1) {
+                        out.write(buffer, 0, read);
+                    }
+                    in.close();
+                    out.flush();
+                    out.close();
+                }
+                
+                android.net.Uri uri = androidx.core.content.FileProvider.getUriForFile(this, "eu.kodanetwork.mchost.fileprovider", pdfFile);
+                android.content.Intent intent = new android.content.Intent(android.content.Intent.ACTION_VIEW);
+                intent.setDataAndType(uri, "application/pdf");
+                intent.addFlags(android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                startActivity(intent);
+            } catch (Exception e) {
+                android.widget.Toast.makeText(this, "Failed to open PDF", android.widget.Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        row.addView(tvTitle);
+        card.addView(row);
+        container.addView(card);
     }
 
     private void addLicense(LinearLayout container, String title, String filename) {

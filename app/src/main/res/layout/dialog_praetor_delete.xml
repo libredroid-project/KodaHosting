@@ -14,31 +14,43 @@
         android:orientation="vertical"
         android:layout_margin="8dp"
         android:background="@drawable/bg_dialog_custom"
-        android:padding="24dp"
+        android:padding="16dp"
         android:gravity="center">
 
         <!-- Title -->
         <TextView
             android:id="@+id/tv_dialog_title"
-            android:layout_width="wrap_content"
+            android:maxLines="1"
+        app:autoSizeTextType="uniform"
+        app:autoSizeMinTextSize="14sp"
+        app:autoSizeMaxTextSize="36sp"
+        app:autoSizeStepGranularity="2sp"
+        android:layout_width="match_parent"
+        android:paddingEnd="8dp"
+        android:paddingStart="8dp"
+        android:gravity="center"
             android:layout_height="wrap_content"
-            android:text="@string/praetor_title"
+            android:fontFamily="@font/space_grotesk_bold"
+        app:fontFamily="@font/space_grotesk_bold"
+        android:text="@string/praetor_title"
             android:textColor="#FF3333"
             android:textSize="36sp"
             android:textStyle="bold"
-            android:letterSpacing="0.1"
-            android:gravity="center" />
+            
+             />
 
         <!-- Subtitle -->
         <TextView
             android:id="@+id/tv_dialog_subtitle"
-            android:layout_width="wrap_content"
+            android:fontFamily="@font/space_grotesk_regular"
+        app:fontFamily="@font/space_grotesk_regular"
+        android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/praetor_subtitle"
             android:textColor="#8A8A9A"
             android:textSize="10sp"
             android:textStyle="bold"
-            android:letterSpacing="0.05"
+            
             android:gravity="center"
             android:layout_marginTop="8dp" />
 
@@ -52,7 +64,9 @@
         <!-- Action Title -->
         <TextView
             android:id="@+id/tv_delete_title"
-            android:layout_width="match_parent"
+            android:fontFamily="@font/space_grotesk_regular"
+        app:fontFamily="@font/space_grotesk_regular"
+        android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/sd_delete_dialog_title"
             android:textColor="#F0F0F0"
@@ -64,7 +78,9 @@
         <!-- Delete Msg Text -->
         <TextView
             android:id="@+id/tv_delete_body"
-            android:layout_width="match_parent"
+            android:fontFamily="@font/space_grotesk_regular"
+        app:fontFamily="@font/space_grotesk_regular"
+        android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/sd_delete_dialog_msg"
             android:textColor="#F0F0F0"
@@ -81,7 +97,9 @@
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btn_dialog_delete"
-                android:layout_width="match_parent"
+                android:fontFamily="@font/space_grotesk_regular"
+        app:fontFamily="@font/space_grotesk_regular"
+        android:layout_width="match_parent"
                 android:layout_height="56dp"
                 style="@style/KodaButton"
                 android:text="@string/sd_delete_btn_ready"
@@ -90,7 +108,9 @@
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btn_dialog_cancel"
-                android:layout_width="match_parent"
+                android:fontFamily="@font/space_grotesk_regular"
+        app:fontFamily="@font/space_grotesk_regular"
+        android:layout_width="match_parent"
                 android:layout_height="56dp"
                 style="@style/KodaButton.Outline"
                 android:text="@string/sd_eula_decline"

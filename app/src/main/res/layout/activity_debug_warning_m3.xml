@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#000000">
@@ -20,17 +21,29 @@
         android:gravity="center">
 
         <TextView
-            android:layout_width="wrap_content"
+            android:maxLines="1"
+        app:autoSizeTextType="uniform"
+        app:autoSizeMinTextSize="14sp"
+        app:autoSizeMaxTextSize="36sp"
+        app:autoSizeStepGranularity="2sp"
+        android:layout_width="match_parent"
+        android:paddingEnd="8dp"
+        android:paddingStart="8dp"
+        android:gravity="center"
             android:layout_height="wrap_content"
-            android:text="P.R.A.E.T.O.R."
+            android:fontFamily="@font/space_grotesk_bold"
+        app:fontFamily="@font/space_grotesk_bold"
+        android:text="P.R.A.E.T.O.R."
             android:textColor="#FF9800"
             android:textSize="36sp"
             android:textStyle="bold"
             android:letterSpacing="0.1"
-            android:gravity="center" />
+             />
 
         <TextView
-            android:layout_width="wrap_content"
+            android:fontFamily="@font/space_grotesk_regular"
+        app:fontFamily="@font/space_grotesk_regular"
+        android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="USB DEBUGGING DETECTED"
             android:textColor="?attr/colorOnSurfaceVariant"
@@ -48,7 +61,9 @@
             android:layout_marginBottom="24dp" />
 
         <TextView
-            android:layout_width="wrap_content"
+            android:fontFamily="@font/space_grotesk_regular"
+        app:fontFamily="@font/space_grotesk_regular"
+        android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="SECURITY PROTOCOL ENGAGED.\n\nUSB Debugging enables unauthorized access to runtime memory and API keys.\n\nDisable USB Debugging in your device settings to continue using KodaHosting."
             android:textSize="14sp"
@@ -59,7 +74,9 @@
 
         <TextView
             android:id="@+id/countdownText"
-            android:layout_width="wrap_content"
+            android:fontFamily="@font/space_grotesk_regular"
+        app:fontFamily="@font/space_grotesk_regular"
+        android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="SHUTDOWN IN 10"
             android:textColor="?attr/colorError"

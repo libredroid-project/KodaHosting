@@ -221,7 +221,10 @@
     <option name="autoReloadType" value="NONE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="1c7b5403-826e-4eb8-9d43-ed80980da5f9" name="Changes" comment="ToS added, Settings UI fixes. Wesbite redesign" />
+    <list default="true" id="1c7b5403-826e-4eb8-9d43-ed80980da5f9" name="Changes" comment="ToS added, Settings UI fixes. Wesbite redesign">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/values/strings.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/values/strings.xml" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -230,7 +233,7 @@
   <component name="ClangdSettings">
     <option name="formatViaClangd" value="false" />
   </component>
-  <component name="ExecutionTargetManager" SELECTED_TARGET="device_and_snapshot_combo_box_target[PhysicalDevice::serial=45d368fb]" />
+  <component name="ExecutionTargetManager" SELECTED_TARGET="device_and_snapshot_combo_box_target[FirebaseDirectAccess:template:model_id=frankel/36]" />
   <component name="ExternalProjectsData">
     <projectState path="$PROJECT_DIR$">
       <ProjectState />
@@ -478,12 +481,12 @@
       <map>
         <entry key="eu.kodanetwork.mchost">
           <value>
-            <CheckInfo lastCheckTimestamp="1787350325814" />
+            <CheckInfo lastCheckTimestamp="1787774289270" />
           </value>
         </entry>
         <entry key="eu.kodanetwork.mchost.test">
           <value>
-            <CheckInfo lastCheckTimestamp="1787350325813" />
+            <CheckInfo lastCheckTimestamp="1787774289266" />
           </value>
         </entry>
       </map>
