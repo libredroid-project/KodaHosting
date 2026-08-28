@@ -4903,6 +4903,12 @@ public class ServerDetailActivity extends AppCompatActivity {
             }
         }
 
+        // Deep link from the sleek Files nav: open straight on the Files tab (index 2)
+        String openTab = getIntent() != null ? getIntent().getStringExtra("OPEN_TAB") : null;
+        if ("files".equals(openTab)) {
+            switchTab[0].accept(2, null);
+        }
+
         // Back button
         View back = findViewById(R.id.btn_back);
         if (back != null) {

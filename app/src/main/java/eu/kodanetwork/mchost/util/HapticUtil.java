@@ -61,6 +61,12 @@ public class HapticUtil {
             return;
         }
 
+        // SleekTouch owns the full touch feedback (press animation + click + haptic).
+        // Overwriting its listener here would silently kill the button's click.
+        if (root.getTag(eu.kodanetwork.mchost.R.id.sleek_touch_tag) != null) {
+            return;
+        }
+
         // All clickable elements (buttons, cards, textviews with click listeners)
         if (root.isClickable() || root.hasOnClickListeners() || root instanceof Button || root instanceof ImageButton || root.getClass().getName().contains("Button")) {
             root.setOnTouchListener((v, event) -> {

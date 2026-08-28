@@ -249,12 +249,11 @@ public class MainActivity extends AppCompatActivity {
                     eu.kodanetwork.mchost.util.SleekTouch.button(view, action);
                 };
 
-
                 wire.accept(findViewById(R.id.nav_log), () ->
                         startActivity(new android.content.Intent(MainActivity.this, eu.kodanetwork.mchost.ui.DebugLogActivity.class)));
 
-                wire.accept(findViewById(R.id.nav_settings), () ->
-                        startActivity(new android.content.Intent(MainActivity.this, eu.kodanetwork.mchost.ui.SettingsActivity.class)));
+                // Right nav button: Files — pick a server, jump straight to its Files tab
+                wire.accept(findViewById(R.id.nav_files), this::showSleekFilesPicker);
 
                 // Header settings button
                 View btnSleekSettings = findViewById(R.id.btn_settings);
@@ -1061,7 +1060,94 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
+    /**
+     * Sleek nav "Files": bottom sheet listing all servers; picking one opens the
+     * server detail straight on its Files tab.
+     */
+    private void showSleekFilesPicker() {
+        java.util.List<ServerInstance> all = repo != null ? repo.all() : java.util.Collections.emptyList();
+        if (all.isEmpty()) {
+            android.widget.Toast.makeText(this, "Create a server first", android.widget.Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        com.google.android.material.bottomsheet.BottomSheetDialog sheet =
+                new com.google.android.material.bottomsheet.BottomSheetDialog(this);
+        android.widget.LinearLayout content = new android.widget.LinearLayout(this);
+        content.setOrientation(android.widget.LinearLayout.VERTICAL);
+        float d = getResources().getDisplayMetrics().density;
+        int pad = (int)(20 * d);
+        content.setPadding(pad, pad, pad, pad);
+
+        TextView title = new TextView(this);
+        title.setText("Files");
+        title.setTextColor(0xFFF2EFE9);
+        title.setTextSize(20);
+        title.setTypeface(null, android.graphics.Typeface.BOLD);
+        title.setPadding(0, 0, 0, (int)(14 * d));
+        content.addView(title);
+
+        for (ServerInstance s : all) {
+            android.widget.LinearLayout row = new android.widget.LinearLayout(this);
+            row.setOrientation(android.widget.LinearLayout.HORIZONTAL);
+            row.setGravity(android.view.Gravity.CENTER_VERTICAL);
+            row.setPadding((int)(12 * d), (int)(12 * d), (int)(12 * d), (int)(12 * d));
+            android.graphics.drawable.GradientDrawable rowBg = new android.graphics.drawable.GradientDrawable();
+            rowBg.setCornerRadius(16 * d);
+            rowBg.setColor(0xFF2E2A26);
+            row.setBackground(rowBg);
+
+            View dotView = new View(this);
+            int dotCol;
+            switch (s.state) {
+                case ONLINE: dotCol = 0xFF3DBE3D; break;
+                case STARTING: case RESTARTING: dotCol = 0xFFF5A623; break;
+                case CRASHED: dotCol = 0xFFE8442E; break;
+                default: dotCol = 0xFF5C5852; break;
+            }
+            android.graphics.drawable.GradientDrawable dot = new android.graphics.drawable.GradientDrawable();
+            dot.setShape(android.graphics.drawable.GradientDrawable.OVAL);
+            dot.setColor(dotCol);
+            dotView.setBackground(dot);
+            android.widget.LinearLayout.LayoutParams dotLp = new android.widget.LinearLayout.LayoutParams((int)(10 * d), (int)(10 * d));
+            row.addView(dotView, dotLp);
+
+            TextView name = new TextView(this);
+            name.setText(s.getName());
+            name.setTextColor(0xFFF2EFE9);
+            name.setTextSize(16);
+            android.widget.LinearLayout.LayoutParams nameLp = new android.widget.LinearLayout.LayoutParams(0, android.view.ViewGroup.LayoutParams.WRAP_CONTENT, 1f);
+            nameLp.leftMargin = (int)(12 * d);
+            row.addView(name, nameLp);
+
+            TextView addr = new TextView(this);
+            addr.setText(s.getJoinAddress());
+            addr.setTextColor(0xFFF0762B);
+            addr.setTextSize(12);
+            row.addView(addr);
+
+            android.widget.LinearLayout.LayoutParams rowLp = new android.widget.LinearLayout.LayoutParams(
+                    android.view.ViewGroup.LayoutParams.MATCH_PARENT, android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
+            rowLp.bottomMargin = (int)(10 * d);
+            content.addView(row, rowLp);
+
+            eu.kodanetwork.mchost.util.SleekTouch.apply(row, () -> {
+                sheet.dismiss();
+                android.content.Intent i = new android.content.Intent(MainActivity.this, ServerDetailActivity.class);
+                i.putExtra("id", s.getId());
+                i.putExtra("OPEN_TAB", "files");
+                startActivity(i);
+            }, 50);
+        }
+
+        sheet.setContentView(content);
+        sheet.getBehavior().setPeekHeight((int)(380 * d));
+        sheet.show();
+    }
+
     private void updateSleekStats() {
+        // Custom (sleek) mode only — the legacy list keeps its own adapter/cards
+        if (!eu.kodanetwork.mchost.util.SleekThemeHelper.isSleekEnabled(this)) return;
         try {
             java.util.List<ServerInstance> all = repo != null ? repo.all() : java.util.Collections.emptyList();
 

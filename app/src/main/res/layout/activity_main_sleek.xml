@@ -250,16 +250,16 @@
                 android:layout_height="match_parent" />
 
             <ImageView
-                android:id="@+id/nav_settings"
+                android:id="@+id/nav_files"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
-                android:src="@drawable/sleek_ic_gear"
+                android:src="@drawable/sleek_ic_folder"
                 android:tint="@color/sleek_on_dark_muted"
                 android:padding="16dp"
                 android:clickable="true"
                 android:focusable="true"
-                android:contentDescription="Settings" />
+                android:contentDescription="Files" />
         </LinearLayout>
 
         <!-- Central FAB: protrudes above nav -->

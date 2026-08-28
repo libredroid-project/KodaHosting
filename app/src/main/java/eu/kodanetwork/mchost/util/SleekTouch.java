@@ -16,6 +16,10 @@ public class SleekTouch {
     }
 
     public static void apply(final View v, final Runnable onClick, final int hapticMs) {
+        // Mark as SleekTouch-owned: HapticUtil.applyHaptics would otherwise overwrite
+        // this listener with a vibration-only one (breaking the click entirely)
+        v.setTag(eu.kodanetwork.mchost.R.id.sleek_touch_tag, Boolean.TRUE);
+        v.setClickable(true);
         v.setOnTouchListener(new View.OnTouchListener() {
             private boolean pressed = false;
 
