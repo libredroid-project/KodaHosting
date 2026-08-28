@@ -1,5 +1,4 @@
 # Baut Pumpkin (Rust-Minecraft-Server) als natives aarch64-linux-android Binary.
-# Pumpkin hat keine GitHub Releases — der Code liegt auf master/nightly.
 # Ergebnis: pumpkin-android-arm64.tar.xz als Actions-Artifact.
 name: Pumpkin Android Build
 
@@ -7,7 +6,7 @@ on:
   workflow_dispatch:
     inputs:
       pumpkin_ref:
-        description: 'Pumpkin branch oder tag (z.B. master, nightly)'
+        description: 'Pumpkin branch oder tag'
         required: true
         default: 'master'
 
@@ -20,58 +19,52 @@ jobs:
         with:
           targets: aarch64-linux-android
 
-      - name: Install cargo-ndk
-        run: cargo install cargo-ndk
-
       - name: Checkout Pumpkin
         run: |
-          REF="${{ github.event.inputs.pumpkin_ref }}"
-          echo "Cloning Pumpkin at ref: $REF"
-          git clone --depth 1 --branch "$REF" https://github.com/Pumpkin-MC/Pumpkin.git pumpkin
-          ls -la pumpkin/
+          git clone --depth 1 --branch "${{ github.event.inputs.pumpkin_ref }}" \
+            https://github.com/Pumpkin-MC/Pumpkin.git pumpkin
+          echo "Pumpkin cloned, binary crate at crates/pumpkin"
 
-      - name: Build aarch64-linux-android
+      - name: Build for Android ARM64
         working-directory: pumpkin
         run: |
-          # NDK-Pfad ermitteln
+          # NDK finden und Umgebungsvariablen setzen
           NDK_DIR=$(ls -d $ANDROID_HOME/ndk/* 2>/dev/null | head -1)
           if [ -z "$NDK_DIR" ]; then
-            echo "No NDK found in $ANDROID_HOME"
+            echo "ERROR: No NDK found at $ANDROID_HOME"
             ls -la $ANDROID_HOME/
             exit 1
           fi
-          export ANDROID_NDK_HOME=$NDK_DIR
-          echo "Using NDK: $ANDROID_NDK_HOME"
+          echo "NDK: $NDK_DIR"
 
-          # cargo-ndk baut die .so — wir brauchen ein standalone Binary
-          cargo ndk -t arm64-v8a -p app/src/main build --release --bin pumpkin 2>&1 || {
-            # Fallback: direktes cargo build mit --target
-            echo "cargo ndk failed, trying direct cargo build..."
-            export CARGO_TARGET_AARCH64_LINUX_ANDROID_LINKER=$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android24-clang
-            cargo build --target aarch64-linux-android --release --bin pumpkin
-            cp target/aarch64-linux-android/release/pumpkin ./pumpkin-android-arm64
-          }
+          TOOLCHAIN=$NDK_DIR/toolchains/llvm/prebuilt/linux-x86_64/bin
+          API=24
 
-          # Wenn cargo-ndk erfolgreich war, .so in Binary umbenennen
-          if [ -f app/src/main/lib/arm64-v8a/libpumpkin.so ]; then
-            cp app/src/main/lib/arm64-v8a/libpumpkin.so ./pumpkin-android-arm64
-          elif [ -f android/arm64-v8a/libpumpkin.so ]; then
-            cp android/arm64-v8a/libpumpkin.so ./pumpkin-android-arm64
-          elif [ ! -f pumpkin-android-arm64 ]; then
-            echo "ERROR: Binary not found!"
-            find . -name "*.so" -o -name "pumpkin" | head -10
+          export CARGO_TARGET_AARCH64_LINUX_ANDROID_LINKER=$TOOLCHAIN/aarch64-linux-android${API}-clang
+          export AR_aarch64_linux_android=$TOOLCHAIN/llvm-ar
+          export CC_aarch64_linux_android=$TOOLCHAIN/aarch64-linux-android${API}-clang
+          export CXX_aarch64_linux_android=$TOOLCHAIN/aarch64-linux-android${API}-clang++
+          export RANLIB_aarch64_linux_android=$TOOLCHAIN/llvm-ranlib
+
+          echo "Building Pumpkin for aarch64-linux-android..."
+          cargo build --target aarch64-linux-android --release -p pumpkin
+
+          BINARY=target/aarch64-linux-android/release/pumpkin
+          if [ ! -f "$BINARY" ]; then
+            echo "ERROR: Binary not found at $BINARY"
+            find target -name "pumpkin" -type f 2>/dev/null | head -5
             exit 1
           fi
 
-          # Strip debug symbols (reduziert von ~110MB auf ~15-25MB)
-          $ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-strip pumpkin-android-arm64
-          ls -lh pumpkin-android-arm64
+          # Strip debug symbols (~110MB -> ~15-25MB)
+          $TOOLCHAIN/llvm-strip "$BINARY"
+          ls -lh "$BINARY"
 
       - name: Package
         run: |
-          chmod +x pumpkin/pumpkin-android-arm64
           mkdir -p pkg
-          cp pumpkin/pumpkin-android-arm64 pkg/
+          cp pumpkin/target/aarch64-linux-android/release/pumpkin pkg/pumpkin-android-arm64
+          chmod +x pkg/pumpkin-android-arm64
           tar -cJf pumpkin-android-arm64.tar.xz -C pkg pumpkin-android-arm64
           ls -lh pumpkin-android-arm64.tar.xz
           sha256sum pumpkin-android-arm64.tar.xz
