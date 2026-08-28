@@ -182,6 +182,7 @@ public class ServerDetailActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        eu.kodanetwork.mchost.util.SleekThemeHelper.applyTheme(this);
         eu.kodanetwork.mchost.util.Material3ThemeHelper.applyTheme(this);
         super.onCreate(savedInstanceState);
         
@@ -189,7 +190,9 @@ public class ServerDetailActivity extends AppCompatActivity {
         // Screen protection removed
 
         if (eu.kodanetwork.mchost.App.getPrefs(this).getBoolean("dev_terminal_enabled", false)) {
-            setContentView(R.layout.activity_server_detail_terminal);
+            setContentView(eu.kodanetwork.mchost.util.SleekThemeHelper.isSleekEnabled(this)
+                    ? R.layout.activity_server_detail_sleek : R.layout.activity_server_detail_terminal);
+        setupSleekDetail();
         } else if (eu.kodanetwork.mchost.util.Material3ThemeHelper.isM3Enabled(this)) {
             setContentView(R.layout.activity_server_detail_m3);
         } else {
@@ -4846,4 +4849,71 @@ public class ServerDetailActivity extends AppCompatActivity {
         }
     }
 
+
+    // ── Sleek Server Detail: Tab-Wiring + Press-Animationen ──
+    private void setupSleekDetail() {
+        if (!eu.kodanetwork.mchost.util.SleekThemeHelper.isSleekEnabled(this)) return;
+
+        // Tab-Werte
+        TextView[] tabs = {
+            findViewById(R.id.tab_dash), findViewById(R.id.tab_console),
+            findViewById(R.id.tab_files), findViewById(R.id.tab_mods), findViewById(R.id.tab_settings)};
+        View[] panels = {
+            findViewById(R.id.panel_dashboard), findViewById(R.id.panel_console),
+            findViewById(R.id.panel_files), findViewById(R.id.panel_mods), findViewById(R.id.panel_settings)};
+
+        java.util.function.BiConsumer<Integer, Runnable>[] switchTab = new java.util.function.BiConsumer[1];
+        switchTab[0] = (idx, after) -> {
+            for (int i = 0; i < tabs.length; i++) {
+                if (tabs[i] == null || panels[i] == null) continue;
+                boolean active = i == idx;
+                panels[i].setVisibility(active ? View.VISIBLE : View.GONE);
+                tabs[i].setTextColor(active ? 0xFFFFFFFF : 0xFF9C968F);
+                if (active) tabs[i].setBackgroundResource(R.drawable.sleek_pill_accent); else tabs[i].setBackground(null);
+                if (active) tabs[i].setPadding((int)(20 * getResources().getDisplayMetrics().density), 0, (int)(20 * getResources().getDisplayMetrics().density), 0);
+            }
+            eu.kodanetwork.mchost.util.HapticUtil.forceVibrate(this, 40);
+            if (after != null) after.run();
+        };
+
+        for (int i = 0; i < tabs.length; i++) {
+            final int idx = i;
+            if (tabs[i] != null) {
+                tabs[i].setOnClickListener(v -> {
+                    v.animate().scaleX(0.92f).scaleY(0.92f).setDuration(60)
+                            .withEndAction(() -> v.animate().scaleX(1f).scaleY(1f).setDuration(100).start()).start();
+                    switchTab[0].accept(idx, null);
+                });
+            }
+        }
+
+        // Back button
+        View back = findViewById(R.id.btn_back);
+        if (back != null) {
+            back.setOnClickListener(v -> {
+                eu.kodanetwork.mchost.util.HapticUtil.forceVibrate(this, 40);
+                finish();
+            });
+        }
+
+        // Header mit Server-Daten füllen
+        TextView tvName = findViewById(R.id.tv_server_name);
+        if (tvName != null && server != null) tvName.setText(server.getName());
+
+        // Copy address
+        View btnCopy = findViewById(R.id.btn_copy_address);
+        if (btnCopy != null) {
+            btnCopy.setOnClickListener(v -> {
+                eu.kodanetwork.mchost.util.HapticUtil.forceVibrate(this, 40);
+                TextView tvAddr = findViewById(R.id.tv_join_address);
+                if (tvAddr != null) {
+                    android.content.ClipboardManager cm = (android.content.ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+                    cm.setPrimaryClip(android.content.ClipData.newPlainText("address", tvAddr.getText().toString()));
+                    Toast.makeText(this, "Copied", Toast.LENGTH_SHORT).show();
+                }
+            });
+            TextView tvAddr = findViewById(R.id.tv_join_address);
+            if (tvAddr != null && server != null) tvAddr.setText(server.getJoinAddress());
+        }
+    }
 }

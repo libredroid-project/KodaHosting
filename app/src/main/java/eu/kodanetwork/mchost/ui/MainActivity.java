@@ -254,11 +254,7 @@ public class MainActivity extends AppCompatActivity {
                 });
                 wire.accept(findViewById(R.id.nav_log), () ->
                         startActivity(new android.content.Intent(MainActivity.this, eu.kodanetwork.mchost.ui.DebugLogActivity.class)));
-                wire.accept(findViewById(R.id.nav_files), () -> {
-                    // Opens file manager intent
-                    android.content.Intent intent = new android.content.Intent(android.content.Intent.ACTION_OPEN_DOCUMENT_TREE);
-                    try { startActivityForResult(intent, 1001); } catch (Exception ignored) {}
-                });
+
                 wire.accept(findViewById(R.id.nav_settings), () ->
                         startActivity(new android.content.Intent(MainActivity.this, eu.kodanetwork.mchost.ui.SettingsActivity.class)));
 

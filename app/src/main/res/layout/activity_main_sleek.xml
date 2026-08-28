@@ -251,7 +251,7 @@
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
-                android:src="@drawable/sleek_ic_console"
+                android:src="@drawable/sleek_ic_activity"
                 android:tint="@color/sleek_on_dark_muted"
                 android:padding="16dp"
                 android:background="?attr/selectableItemBackgroundBorderless"
@@ -262,19 +262,6 @@
             <Space
                 android:layout_width="68dp"
                 android:layout_height="match_parent" />
-
-            <ImageView
-                android:id="@+id/nav_files"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:src="@drawable/sleek_ic_folder"
-                android:tint="@color/sleek_on_dark_muted"
-                android:padding="16dp"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                android:clickable="true"
-                android:focusable="true"
-                android:contentDescription="Files" />
 
             <ImageView
                 android:id="@+id/nav_settings"
