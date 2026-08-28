@@ -198,7 +198,9 @@ public class MainActivity extends AppCompatActivity {
             if (rootLayout != null) rootLayout.setBackgroundResource(R.drawable.bg_liquid_glass);
             if (topBar != null) topBar.setBackgroundColor(0x33000000);
             if (bottomBar != null) bottomBar.setBackgroundColor(0x33000000);
-        } else if (ThemeHelper.isLightMode(this)) {
+        } else if (ThemeHelper.isLightMode(this)
+                && !eu.kodanetwork.mchost.util.SleekThemeHelper.isSleekEnabled(this)) {
+            // Sleek is always warm-dark; the light-mode overrides would wash out the nav pill
             if (rootLayout != null) rootLayout.setBackgroundColor(0xFFF5F5F5);
             if (topBar != null) topBar.setBackgroundColor(0xFFF5F5F5);
             if (bottomBar != null) bottomBar.setBackgroundColor(0xFFF5F5F5);
@@ -216,14 +218,28 @@ public class MainActivity extends AppCompatActivity {
             rv.setLayoutManager(new LinearLayoutManager(this));
             rv.setAdapter(adapter);
 
-            ExtendedFloatingActionButton fab = findViewById(R.id.fab_add);
-            if (fab != null) {
+            // Sleek uses a plain FloatingActionButton, legacy/M3 an ExtendedFloatingActionButton.
+            // A hard cast here throws ClassCastException in sleek mode and silently kills
+            // every wiring below (caught by the surrounding try/catch) — hence View + instanceof.
+            View fabAdd = findViewById(R.id.fab_add);
+            if (fabAdd instanceof ExtendedFloatingActionButton) {
+                ExtendedFloatingActionButton fab = (ExtendedFloatingActionButton) fabAdd;
                 if (this.lastM3Enabled) eu.kodanetwork.mchost.util.M3AnimationHelper.applySpringTouch(fab);
                 fab.setText(R.string.new_server_btn);
-                eu.kodanetwork.mchost.util.SleekTouch.apply(fab, () ->
-                    startActivity(new Intent(MainActivity.this, CreateServerActivity.class)), 80);
                 // In-app coach phase 1: explain the NEW SERVER button on first launch
                 eu.kodanetwork.mchost.util.TutorialCoach.maybeShowNewServerHint(this, fab);
+            }
+            if (fabAdd != null) {
+                if (eu.kodanetwork.mchost.util.SleekThemeHelper.isSleekEnabled(this)) {
+                    eu.kodanetwork.mchost.util.SleekTouch.apply(fabAdd, () ->
+                        startActivity(new Intent(MainActivity.this, CreateServerActivity.class)), 80);
+                } else {
+                    fabAdd.setOnClickListener(v -> {
+                        eu.kodanetwork.mchost.util.HapticUtil.forceVibrate(this, 80);
+                        startActivity(new Intent(MainActivity.this, CreateServerActivity.class));
+                    });
+                }
+            }
 
             // ── Sleek layout: nav bar buttons + header icon ──
             if (eu.kodanetwork.mchost.util.SleekThemeHelper.isSleekEnabled(this)) {
@@ -251,8 +267,6 @@ public class MainActivity extends AppCompatActivity {
 
                 // Quick stats update
                 updateSleekStats();
-            }
-
             }
 
             View fabDb = findViewById(R.id.fab_add_db);
@@ -1063,7 +1077,7 @@ public class MainActivity extends AppCompatActivity {
                         startActivity(i);
                     }));
                 } else {
-                    ((eu.kodanetwork.mchost.ui.SleekServerAdapter) rv.getAdapter()).notifyDataSetChanged();
+                    ((eu.kodanetwork.mchost.ui.SleekServerAdapter) rv.getAdapter()).update(all);
                 }
             }
             int online = 0;

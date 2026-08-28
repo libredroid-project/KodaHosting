@@ -32,6 +32,13 @@ public class SleekServerAdapter extends RecyclerView.Adapter<SleekServerAdapter.
         this.listener = listener;
     }
 
+    /** Swap in a fresh snapshot from the repo (repo.all() returns new instances). */
+    public void update(List<ServerInstance> fresh) {
+        servers.clear();
+        servers.addAll(fresh);
+        notifyDataSetChanged();
+    }
+
     @NonNull
     @Override
     public VH onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {

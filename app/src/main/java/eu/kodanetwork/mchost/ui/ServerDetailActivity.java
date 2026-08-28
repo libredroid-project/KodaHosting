@@ -333,8 +333,12 @@ public class ServerDetailActivity extends AppCompatActivity {
         tvJavaInfo = findViewById(R.id.tv_java_info);
         tvBedrockPortDash = findViewById(R.id.tv_bedrock_port_dash);
 
-        tvJoinAddr.setOnClickListener(v -> copyToClipboard("Join Address", server.getJoinAddress()));
-        tvBedrockPortDash.setOnClickListener(v -> {
+        // Sleek layout uses different IDs — alias them onto the same fields so all
+        // existing dashboard/console logic (updateDash, appendLog, sendCmd…) keeps working
+        if (tvJoinAddr == null) tvJoinAddr = findViewById(R.id.tv_join_address);
+
+        if (tvJoinAddr != null) tvJoinAddr.setOnClickListener(v -> copyToClipboard("Join Address", server.getJoinAddress()));
+        if (tvBedrockPortDash != null) tvBedrockPortDash.setOnClickListener(v -> {
             if (server.isBedrockSupport() && server.getBedrockPort() > 0) {
                 copyToClipboard("Bedrock Port", String.valueOf(server.getBedrockPort()));
             }
@@ -359,6 +363,10 @@ public class ServerDetailActivity extends AppCompatActivity {
         tvLog       = findViewById(R.id.tv_log);
         scrollLog   = findViewById(R.id.scroll_log);
         etCmd       = findViewById(R.id.et_cmd);
+        // Sleek console aliases (types match: TextView / ScrollView / EditText)
+        if (tvLog == null) tvLog = findViewById(R.id.tv_console);
+        if (scrollLog == null) scrollLog = findViewById(R.id.sv_console);
+        if (etCmd == null) etCmd = findViewById(R.id.et_console_input);
         layoutChips = null;
 
         layoutFileList = findViewById(R.id.layout_files);
@@ -1302,20 +1310,20 @@ public class ServerDetailActivity extends AppCompatActivity {
     // ── Dashboard ─────────────────────────────────────────────────────────────
 
     private void setupDashButtons() {
-        btnStart.setOnClickListener(v -> {
+        if (btnStart != null) btnStart.setOnClickListener(v -> {
             eu.kodanetwork.mchost.util.AppLogger.log("UI", "START android.widget.Button clicked for server: " + server.getName());
             File serverDir = new File(server.getServerDir());
             if (!serverDir.exists()) {
                 eu.kodanetwork.mchost.util.AppLogger.log("UI", "Server directory does not exist: " + serverDir.getAbsolutePath());
                 serverDir.mkdirs();
             }
-            
+
             if (!server.isDatabase()) {
                 File[] jars = serverDir.listFiles((d, name) -> name.endsWith(".jar"));
                 if (jars == null || jars.length == 0) {
                     eu.kodanetwork.mchost.util.AppLogger.log("UI", "No .jar file found in " + serverDir.getAbsolutePath());
                     Toast.makeText(this, "Bitte zuerst die Server .jar herunterladen (Settings-Tab)", Toast.LENGTH_LONG).show();
-                    tabs.selectTab(tabs.getTabAt(tabs.getTabCount() - 1));
+                    if (tabs != null) tabs.selectTab(tabs.getTabAt(tabs.getTabCount() - 1));
                     return;
                 }
                 eu.kodanetwork.mchost.util.AppLogger.log("UI", "Found jar: " + jars[0].getName() + ". Binding and starting service...");
@@ -1324,9 +1332,9 @@ public class ServerDetailActivity extends AppCompatActivity {
                 checkQueueAndStart();
             }
         });
-        btnStop   .setOnClickListener(v -> sendAction(KodaServerService.ACTION_STOP));
-        btnRestart.setOnClickListener(v -> sendAction(KodaServerService.ACTION_RESTART));
-        btnKill   .setOnClickListener(v ->
+        if (btnStop != null) btnStop.setOnClickListener(v -> sendAction(KodaServerService.ACTION_STOP));
+        if (btnRestart != null) btnRestart.setOnClickListener(v -> sendAction(KodaServerService.ACTION_RESTART));
+        if (btnKill != null) btnKill.setOnClickListener(v ->
             new AlertDialog.Builder(this)
                 .setTitle(getString(R.string.sd_dialog_force_kill_title))
                 .setMessage("Welt-Daten werden möglicherweise nicht gespeichert. Fortfahren?")
@@ -1749,10 +1757,13 @@ public class ServerDetailActivity extends AppCompatActivity {
             label = "⬇ UPDATING…";
             col = 0xFF00E676;
         }
-        tvBadge.setText(label);
-        tvBadge.setTextColor(col);
+        if (tvBadge != null) {
+            tvBadge.setText(label);
+            tvBadge.setTextColor(col);
+        }
         int playerCount = server.onlinePlayerNames != null ? server.onlinePlayerNames.size() : server.onlinePlayers;
-        tvPlayers.setText(playerCount + " / " + server.getMaxPlayers() + " Spieler");
+        if (tvPlayers != null) tvPlayers.setText(playerCount + " / " + server.getMaxPlayers() + " Spieler");
+        updateSleekDash(st, label, col, playerCount);
 
         boolean running = server.isRunning();
         boolean restarting = st == ServerInstance.State.RESTARTING;
@@ -1822,10 +1833,10 @@ public class ServerDetailActivity extends AppCompatActivity {
         }
         
         boolean updating = server.isUpdating();
-        btnStart  .setEnabled(!running && st != ServerInstance.State.INSTALLING && !restarting && !settingUp && !hibernated && !updating);
-        btnStop   .setEnabled(running && !updating);
-        btnRestart.setEnabled(running && !updating);
-        btnKill   .setEnabled((running || restarting) && !updating);
+        if (btnStart != null) btnStart.setEnabled(!running && st != ServerInstance.State.INSTALLING && !restarting && !settingUp && !hibernated && !updating);
+        if (btnStop != null) btnStop.setEnabled(running && !updating);
+        if (btnRestart != null) btnRestart.setEnabled(running && !updating);
+        if (btnKill != null) btnKill.setEnabled((running || restarting) && !updating);
         
         android.widget.TextView btnHibernate = findViewById(R.id.btn_hibernate);
         if (btnHibernate != null) {
@@ -1964,15 +1975,24 @@ public class ServerDetailActivity extends AppCompatActivity {
         View btnSend  = findViewById(R.id.btn_send);
         View btnClear = findViewById(R.id.btn_clear);
         View btnCopy  = findViewById(R.id.btn_copy_log);
-        btnSend .setOnClickListener(v -> sendCmd());
-        btnClear.setOnClickListener(v -> tvLog.setText(""));
-        btnCopy .setOnClickListener(v -> {
-            android.content.ClipboardManager clipboard = (android.content.ClipboardManager) getSystemService(android.content.Context.CLIPBOARD_SERVICE);
-            android.content.ClipData clip = android.content.ClipData.newPlainText("Server Log", tvLog.getText().toString());
-            clipboard.setPrimaryClip(clip);
+        boolean sleek = eu.kodanetwork.mchost.util.SleekThemeHelper.isSleekEnabled(this);
+        if (btnSend != null) {
+            if (sleek) {
+                // Custom sleek press feedback instead of the ripple click
+                eu.kodanetwork.mchost.util.SleekTouch.apply(btnSend, this::sendCmd, 40);
+            } else {
+                btnSend.setOnClickListener(v -> sendCmd());
+            }
+        }
+        if (btnClear != null) btnClear.setOnClickListener(v -> { if (tvLog != null) tvLog.setText(""); });
+        if (btnCopy != null) btnCopy.setOnClickListener(v -> {
+            if (tvLog == null) return;
+                android.content.ClipboardManager clipboard = (android.content.ClipboardManager) getSystemService(android.content.Context.CLIPBOARD_SERVICE);
+                android.content.ClipData clip = android.content.ClipData.newPlainText("Server Log", tvLog.getText().toString());
+                clipboard.setPrimaryClip(clip);
             Toast.makeText(this, getString(R.string.sd_toast_log_copied), Toast.LENGTH_SHORT).show();
         });
-        etCmd.setOnEditorActionListener((v, id, e) -> {
+        if (etCmd != null) etCmd.setOnEditorActionListener((v, id, e) -> {
             if (id == EditorInfo.IME_ACTION_SEND ||
                     (e != null && e.getKeyCode() == KeyEvent.KEYCODE_ENTER)) {
                 sendCmd(); return true;
@@ -2079,7 +2099,7 @@ public class ServerDetailActivity extends AppCompatActivity {
     }
 
     private void sendCmd() {
-        if (etCmd.getText() == null) return;
+        if (etCmd == null || etCmd.getText() == null) return;
         String cmd = etCmd.getText().toString().trim();
         if (cmd.isEmpty()) return;
         etCmd.setText("");
@@ -2094,7 +2114,7 @@ public class ServerDetailActivity extends AppCompatActivity {
     private long lastScrollTime = 0;
 
     private void appendLog(String raw) {
-        if (raw == null || raw.isEmpty()) return;
+        if (raw == null || raw.isEmpty() || tvLog == null) return;
         
         String[] lines = raw.split("\n");
         android.text.SpannableStringBuilder ssb = new android.text.SpannableStringBuilder();
@@ -2127,7 +2147,7 @@ public class ServerDetailActivity extends AppCompatActivity {
         long now = System.currentTimeMillis();
         if (now - lastScrollTime > 250) {
             lastScrollTime = now;
-            scrollLog.post(() -> scrollLog.fullScroll(View.FOCUS_DOWN));
+            if (scrollLog != null) scrollLog.post(() -> scrollLog.fullScroll(View.FOCUS_DOWN));
         }
     }
 
@@ -4896,6 +4916,49 @@ public class ServerDetailActivity extends AppCompatActivity {
         TextView tvName = findViewById(R.id.tv_server_name);
         if (tvName != null && server != null) tvName.setText(server.getName());
 
+        // Power FAB: start/stop toggle (mirrors the legacy btnStart logic incl. EULA check)
+        View fabPower = findViewById(R.id.fab_power);
+        if (fabPower != null) {
+            eu.kodanetwork.mchost.util.SleekTouch.apply(fabPower, () -> {
+                if (server.isRunning()) {
+                    sendAction(KodaServerService.ACTION_STOP);
+                    return;
+                }
+                java.io.File serverDir = new java.io.File(server.getServerDir());
+                if (!serverDir.exists()) serverDir.mkdirs();
+                if (!server.isDatabase()) {
+                    java.io.File[] jars = serverDir.listFiles((d, name) -> name.endsWith(".jar"));
+                    if (jars == null || jars.length == 0) {
+                        Toast.makeText(this, "Bitte zuerst die Server .jar herunterladen (Settings-Tab)", Toast.LENGTH_LONG).show();
+                        switchTab[0].accept(4, null);
+                        return;
+                    }
+                    checkEulaAndStart();
+                } else {
+                    checkQueueAndStart();
+                }
+            }, 60);
+        }
+
+        // Restart (dashboard) + Delete
+        if (btnRestart != null) {
+            eu.kodanetwork.mchost.util.SleekTouch.apply(btnRestart,
+                    () -> sendAction(KodaServerService.ACTION_RESTART), 50);
+        }
+        View btnDelete = findViewById(R.id.btn_delete);
+        if (btnDelete != null) {
+            eu.kodanetwork.mchost.util.SleekTouch.apply(btnDelete, () -> {
+                android.content.Intent i = new android.content.Intent(ServerDetailActivity.this, DeleteServerActivity.class);
+                i.putExtra("SERVER_ID", server.getId());
+                startActivity(i);
+            }, 50);
+        }
+
+        // Console: replay log the service already captured (tvLog/etCmd are aliased in bindViews)
+        if (bound && svc != null && tvLog != null) {
+            for (String l : svc.getLog(server.getId())) appendLog(l);
+        }
+
         // Copy address
         View btnCopy = findViewById(R.id.btn_copy_address);
         if (btnCopy != null) {
@@ -4910,6 +4973,65 @@ public class ServerDetailActivity extends AppCompatActivity {
             });
             TextView tvAddr = findViewById(R.id.tv_join_address);
             if (tvAddr != null && server != null) tvAddr.setText(server.getJoinAddress());
+        }
+
+        updateSleekDash(server != null ? server.state : ServerInstance.State.OFFLINE, null, 0, 0);
+    }
+
+    /**
+     * Sleek-only dashboard refresh: status text + dot, power FAB icon/tint,
+     * RAM usage bar and player count. Called from updateDash().
+     */
+    private void updateSleekDash(ServerInstance.State st, String label, int col, int playerCount) {
+        TextView tvStatus = findViewById(R.id.tv_status);
+        View dotStatus = findViewById(R.id.dot_status);
+        if (tvStatus == null && dotStatus == null) return;
+
+        if (label == null) {
+            switch (st) {
+                case ONLINE:     label = "ONLINE";     col = 0xFF3DBE3D; break;
+                case STARTING:   label = "STARTING…";  col = 0xFFFFCC00; break;
+                case STOPPING:   label = "STOPPING…";  col = 0xFFFF8800; break;
+                case RESTARTING: label = "RESTARTING…";col = 0xFFFF8800; break;
+                case CRASHED:    label = "CRASHED";    col = 0xFFE8442E; break;
+                case INSTALLING: label = "LOADING…";   col = 0xFF44AAFF; break;
+                case SETTING_UP: label = "SETTING UP…";col = 0xFF9C27B0; break;
+                case HIBERNATED: label = "HIBERNATED"; col = 0xFF44AAFF; break;
+                default:         label = "OFFLINE";    col = 0xFF9C968F; break;
+            }
+        }
+        if (tvStatus != null) {
+            tvStatus.setText(label);
+            tvStatus.setTextColor(col);
+        }
+        if (dotStatus != null) {
+            android.graphics.drawable.GradientDrawable gd = new android.graphics.drawable.GradientDrawable();
+            gd.setShape(android.graphics.drawable.GradientDrawable.OVAL);
+            gd.setColor(col);
+            dotStatus.setBackground(gd);
+        }
+
+        // Power FAB reflects the state: play/green when off, pause/red when running
+        com.google.android.material.floatingactionbutton.FloatingActionButton fabPower = findViewById(R.id.fab_power);
+        if (fabPower != null && server != null) {
+            boolean running = server.isRunning() || st == ServerInstance.State.STARTING;
+            fabPower.setImageResource(running
+                    ? android.R.drawable.ic_media_pause : android.R.drawable.ic_media_play);
+            fabPower.setBackgroundTintList(android.content.res.ColorStateList.valueOf(
+                    running ? 0xFFE8442E : 0xFF3DBE3D));
+        }
+
+        // RAM: live usage vs. allocated
+        TextView tvRam = findViewById(R.id.tv_ram_usage);
+        android.widget.ProgressBar pbRam = findViewById(R.id.pb_ram);
+        if (tvRam != null && server != null) {
+            int used = Math.max(0, server.ramUsageMB);
+            int max = server.getRamMB();
+            tvRam.setText(used + " / " + max + " MB");
+            if (pbRam != null && max > 0) {
+                pbRam.setMax(max);
+                pbRam.setProgress(Math.min(used, max));
+            }
         }
     }
 }
