@@ -51,6 +51,7 @@ public class MainActivity extends AppCompatActivity {
     private ServerRepo repo;
     private KodaServerService svc;
     private boolean bound = false;
+    private boolean tutorialRunning = false;
     private final Handler handler = new Handler(Looper.getMainLooper());
 
     private final ServiceConnection conn = new ServiceConnection() {
@@ -74,6 +75,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        eu.kodanetwork.mchost.util.SleekThemeHelper.applyTheme(this);
         eu.kodanetwork.mchost.util.Material3ThemeHelper.applyTheme(this);
         super.onCreate(savedInstanceState);
         
@@ -174,7 +176,9 @@ public class MainActivity extends AppCompatActivity {
         eu.kodanetwork.mchost.security.AntiTamperSystem.check(this);
         eu.kodanetwork.mchost.security.TripwireObserver.startWatching(this);
 
-        if (this.lastM3Enabled) {
+        if (eu.kodanetwork.mchost.util.SleekThemeHelper.isSleekEnabled(this)) {
+            setContentView(R.layout.activity_main_sleek);
+        } else if (this.lastM3Enabled) {
             setContentView(R.layout.activity_main_m3);
         } else {
             setContentView(R.layout.activity_main);
@@ -309,8 +313,10 @@ public class MainActivity extends AppCompatActivity {
             eu.kodanetwork.mchost.util.HapticUtil.applyHaptics(this);
             // First app open: cinematic tutorial takes over (includes the ToS step);
             // the plain ToS dialog below stays as fallback for skipped tutorials
-            eu.kodanetwork.mchost.util.TutorialCoach.maybeStartTutorial(this);
-            checkToS(0);
+            tutorialRunning = eu.kodanetwork.mchost.util.TutorialCoach.maybeStartTutorial(this);
+            if (!tutorialRunning) {
+                checkToS(0);
+            }
             Log.d(TAG, "MainActivity created");
         } catch (Exception e) {
             Log.e(TAG, "Error in onCreate", e);
@@ -318,6 +324,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void checkToS(long newTs) {
+        if (tutorialRunning) return;
         android.content.SharedPreferences prefs = eu.kodanetwork.mchost.App.getPrefs(this);
         if (!prefs.getBoolean("tos_accepted_v3", false) || (newTs > 0 && newTs > prefs.getLong("accepted_tos_version_ts", 0))) {
             android.app.Dialog dialog = new android.app.Dialog(this, android.R.style.Theme_Black_NoTitleBar_Fullscreen);
@@ -445,9 +452,9 @@ public class MainActivity extends AppCompatActivity {
         handler.postDelayed(new Runnable() {
             @Override public void run() {
                 if (bound) adapter.notifyDataSetChanged();
-                handler.postDelayed(this, 10000);
+                handler.postDelayed(this, 1000);
             }
-        }, 10000);
+        }, 1000);
     }
 
     private void requestPerms() {

@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Sleek Theme: warm-premium dark -->
+    <style name="Theme.KodaNetwork.Sleek" parent="Theme.MaterialComponents.NoActionBar">
+        <item name="colorPrimary">@color/sleek_accent</item>
+        <item name="colorPrimaryVariant">@color/sleek_accent_dim</item>
+        <item name="colorOnPrimary">@color/sleek_on_dark</item>
+        <item name="colorSecondary">@color/sleek_accent</item>
+        <item name="colorOnSecondary">@color/sleek_on_dark</item>
+        <item name="android:colorBackground">@color/sleek_bg</item>
+        <item name="colorSurface">@color/sleek_surface</item>
+        <item name="colorOnSurface">@color/sleek_on_dark</item>
+        <item name="android:statusBarColor">@color/sleek_bg</item>
+        <item name="android:navigationBarColor">@color/sleek_bg</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:textColorPrimary">@color/sleek_on_dark</item>
+        <item name="android:textColorSecondary">@color/sleek_on_dark_muted</item>
+        <item name="android:fontFamily">@font/font_koda</item>
+        <item name="fontFamily">@font/font_koda</item>
+    </style>
+
+    <!-- Pill Buttons -->
+    <style name="SleekButton" parent="Widget.MaterialComponents.Button">
+        <item name="android:background">@drawable/sleek_pill_accent</item>
+        <item name="android:backgroundTint">@null</item>
+        <item name="android:textColor">@color/sleek_on_dark</item>
+        <item name="android:textSize">15sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:fontFamily">@font/font_koda</item>
+        <item name="android:letterSpacing">0.01</item>
+        <item name="android:minHeight">56dp</item>
+        <item name="android:paddingStart">32dp</item>
+        <item name="android:paddingEnd">32dp</item>
+        <item name="android:stateListAnimator">@null</item>
+    </style>
+
+    <style name="SleekButton.Dark" parent="SleekButton">
+        <item name="android:background">@drawable/sleek_pill_dark</item>
+        <item name="android:textColor">@color/sleek_on_dark</item>
+    </style>
+
+    <style name="SleekButton.Cream" parent="SleekButton">
+        <item name="android:background">@drawable/sleek_pill_cream</item>
+        <item name="android:textColor">@color/sleek_on_cream</item>
+    </style>
+
+    <!-- Text Appearances -->
+    <style name="TextAppearance.Sleek.Headline" parent="TextAppearance.MaterialComponents.Headline4">
+        <item name="android:textSize">30sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/sleek_on_dark</item>
+        <item name="android:fontFamily">@font/font_koda</item>
+        <item name="android:letterSpacing">-0.02</item>
+    </style>
+
+    <style name="TextAppearance.Sleek.Title" parent="TextAppearance.MaterialComponents.Subtitle1">
+        <item name="android:textSize">18sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/sleek_on_dark</item>
+        <item name="android:fontFamily">@font/font_koda</item>
+    </style>
+
+    <style name="TextAppearance.Sleek.Body" parent="TextAppearance.MaterialComponents.Body1">
+        <item name="android:textSize">14sp</item>
+        <item name="android:textColor">@color/sleek_on_dark_muted</item>
+        <item name="android:fontFamily">@font/font_koda</item>
+    </style>
+
+    <style name="TextAppearance.Sleek.Caption" parent="TextAppearance.MaterialComponents.Caption">
+        <item name="android:textSize">12sp</item>
+        <item name="android:textColor">@color/sleek_on_dark_muted</item>
+        <item name="android:fontFamily">@font/font_koda</item>
+    </style>
+
+    <style name="TextAppearance.Sleek.Stat" parent="TextAppearance.MaterialComponents.Headline5">
+        <item name="android:textSize">22sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/sleek_on_cream</item>
+        <item name="android:fontFamily">@font/font_koda</item>
+    </style>
+</resources>

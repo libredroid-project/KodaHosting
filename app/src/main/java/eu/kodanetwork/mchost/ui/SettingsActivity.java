@@ -154,7 +154,17 @@ public class SettingsActivity extends Activity {
             cardDevOptions.setVisibility(View.VISIBLE);
         }
 
-        switchLiquidGlass.setChecked(prefs.getBoolean("dev_liquid_glass", false));
+ 
+        // Sleek Redesign toggle (dev option)
+        com.google.android.material.switchmaterial.SwitchMaterial swSleek = findViewById(R.id.switch_dev_sleek);
+        if (swSleek != null) {
+            swSleek.setChecked(prefs.getBoolean("dev_sleek_enabled", false));
+            swSleek.setOnCheckedChangeListener((btn, checked) -> {
+                prefs.edit().putBoolean("dev_sleek_enabled", checked).apply();
+                Toast.makeText(this, checked ? "Sleek design enabled. Restart app." : "Sleek design disabled. Restart app.", Toast.LENGTH_LONG).show();
+            });
+        }
+       switchLiquidGlass.setChecked(prefs.getBoolean("dev_liquid_glass", false));
         switchLiquidGlass.setOnCheckedChangeListener((buttonView, isChecked) -> {
             prefs.edit().putBoolean("dev_liquid_glass", isChecked).apply();
             eu.kodanetwork.mchost.util.HapticUtil.forceVibrate(this, 80);
@@ -324,6 +334,15 @@ public class SettingsActivity extends Activity {
             Toast.makeText(this, checked ? "Material 3 aktiviert" : "Material 3 deaktiviert", Toast.LENGTH_SHORT).show();
             btn.postDelayed(this::recreate, 300);
         });
+        
+        com.google.android.material.switchmaterial.SwitchMaterial switchTerminal = findViewById(R.id.switch_dev_terminal);
+        if (switchTerminal != null) {
+            switchTerminal.setChecked(prefs.getBoolean("dev_terminal_enabled", false));
+            switchTerminal.setOnCheckedChangeListener((btn, checked) -> {
+                prefs.edit().putBoolean("dev_terminal_enabled", checked).apply();
+                eu.kodanetwork.mchost.util.HapticUtil.forceVibrate(this, 80);
+            });
+        }
         
         setupM3ColorModeSegmented();
         setupM3ColorPresets();

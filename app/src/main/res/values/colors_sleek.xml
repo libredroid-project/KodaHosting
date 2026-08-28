@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Sleek Design System: warm-premium dark -->
+    <color name="sleek_bg">#1C1917</color>
+    <color name="sleek_surface">#2E2A26</color>
+    <color name="sleek_surface_2">#3A3632</color>
+    <color name="sleek_surface_3">#45403B</color>
+    <color name="sleek_cream">#F2EFE9</color>
+    <color name="sleek_cream_2">#E8E3DA</color>
+    <color name="sleek_cream_3">#DDD6CB</color>
+
+    <color name="sleek_accent">#F0762B</color>
+    <color name="sleek_accent_dim">#C85E1E</color>
+    <color name="sleek_accent_soft">#1FF0762B</color>
+    <color name="sleek_accent_glow">#FF9A5C</color>
+
+    <color name="sleek_on_dark">#FFFFFF</color>
+    <color name="sleek_on_dark_muted">#9C968F</color>
+    <color name="sleek_on_dark_faint">#5C5852</color>
+    <color name="sleek_on_cream">#2B2825</color>
+    <color name="sleek_on_cream_muted">#8A857D</color>
+
+    <color name="sleek_stroke">#14FFFFFF</color>
+    <color name="sleek_stroke_strong">#28FFFFFF</color>
+
+    <color name="sleek_success">#3DBE3D</color>
+    <color name="sleek_error">#E8442E</color>
+    <color name="sleek_warning">#F5A623</color>
+    <color name="sleek_info">#4A9EFF</color>
+</resources>
