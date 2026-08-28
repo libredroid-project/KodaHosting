@@ -9,25 +9,27 @@ import org.apache.commons.compress.compressors.xz.XZCompressorInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
+import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Provisioning for the PumpkinMC server binary (Rust, native aarch64-linux-android).
- * Downloads the tar.xz from the Supabase artifacts bucket first (same pattern as
- * the JRE runtimes) and falls back to the GitHub Actions artifact mirror.
+ * Primary source: the OFFICIAL PumpkinMC nightly release (raw ELF, ~100 MB).
+ * Optional Supabase tar.xz mirror is tried first (same pattern as the JRE runtimes).
  */
 public class PumpkinRuntime {
 
     private static final AtomicBoolean downloadLock = new AtomicBoolean(false);
 
+    // Official upstream nightly — always fresh, aarch64-android build (NDK, PIE)
+    private static final String GITHUB_NIGHTLY =
+            "https://github.com/Pumpkin-MC/Pumpkin/releases/download/nightly/pumpkin-aarch64-android";
+
+    // Optional compressed mirror in the artifacts bucket (user-managed)
     private static final String SUPABASE_URL =
             "https://scsezpfrrmpyuapblbxk.supabase.co/storage/v1/object/public/artifacts/pumpkin/pumpkin-android-arm64.tar.xz";
-
-    // Fallback: latest Actions artifact from the KodaNetwork repo (needs a public release)
-    private static final String GITHUB_FALLBACK =
-            "https://github.com/libredroid-project/KodaNetwork/releases/latest/download/pumpkin-android-arm64.tar.xz";
 
     public static File getBinaryFile(Context ctx) {
         return new File(ctx.getFilesDir(), "runtimes/pumpkin/pumpkin-android-arm64");
@@ -35,7 +37,7 @@ public class PumpkinRuntime {
 
     public static boolean isInstalled(Context ctx) {
         File f = getBinaryFile(ctx);
-        return f.exists() && f.canExecute();
+        return f.exists() && f.canExecute() && f.length() > 10_000_000;
     }
 
     public static interface Progress {
@@ -56,17 +58,22 @@ public class PumpkinRuntime {
             File target = getBinaryFile(ctx);
             target.getParentFile().mkdirs();
 
-            String url = resolveUrl(SUPABASE_URL);
-            if (url == null) url = resolveUrl(GITHUB_FALLBACK);
-            if (url == null) {
-                android.util.Log.e("PumpkinRuntime", "no download source reachable");
-                return false;
+            // Prefer the compressed Supabase mirror when the user has uploaded one,
+            // otherwise fetch the official nightly raw ELF straight from GitHub.
+            if (resolveUrl(SUPABASE_URL) != null) {
+                File tmp = new File(target.getParentFile(), "pumpkin-android-arm64.tar.xz");
+                download(SUPABASE_URL, tmp, progress);
+                extractTarXz(tmp, target.getParentFile());
+                tmp.delete();
+            } else {
+                download(GITHUB_NIGHTLY, target, progress);
             }
 
-            File tmp = new File(target.getParentFile(), "pumpkin-android-arm64.tar.xz");
-            download(url, tmp, progress);
-            extractTarXz(tmp, target.getParentFile());
-            tmp.delete();
+            if (!isElf(target)) {
+                target.delete();
+                android.util.Log.e("PumpkinRuntime", "downloaded file is not an ELF binary");
+                return false;
+            }
             target.setExecutable(true, false);
             return isInstalled(ctx);
         } catch (Exception e) {
@@ -74,6 +81,15 @@ public class PumpkinRuntime {
             return false;
         } finally {
             downloadLock.set(false);
+        }
+    }
+
+    /** Minimal sanity check: file starts with the ELF magic bytes. */
+    private static boolean isElf(File f) {
+        try (java.io.FileInputStream fis = new java.io.FileInputStream(f)) {
+            return fis.read() == 0x7F && fis.read() == 'E' && fis.read() == 'L' && fis.read() == 'F';
+        } catch (IOException e) {
+            return false;
         }
     }
 

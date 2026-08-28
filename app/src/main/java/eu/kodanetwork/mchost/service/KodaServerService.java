@@ -3537,6 +3537,42 @@ public class KodaServerService extends Service {
 
     // ── PumpkinMC (native Rust binary) ──────────────────────────────────────
 
+    /**
+     * First start only: write a minimal pumpkin.toml with the keys we manage.
+     * Pumpkin merges it with its defaults and writes the full file back, so a
+     * partial file is fine and later user edits in the Files tab are never clobbered.
+     * Schema verified against the actual nightly binary (generated pumpkin.toml).
+     */
+    private void writePumpkinConfigIfMissing(ServerInstance srv, File dir) {
+        try {
+            File cfg = new File(dir, "pumpkin.toml");
+            if (cfg.exists()) return;
+
+            StringBuilder sb = new StringBuilder();
+            sb.append("# Managed by KodaHosting — Pumpkin merges the rest with defaults\n");
+            sb.append("[networking.java]\n");
+            sb.append("address = \"0.0.0.0:").append(srv.getPort()).append("\"\n");
+            sb.append("online_mode = false\n");
+            sb.append("encryption = false\n");
+            sb.append("max_players = ").append(Math.max(1, srv.getMaxPlayers())).append("\n");
+            if (srv.isBedrockSupport() && srv.getBedrockPort() > 0) {
+                sb.append("[networking.bedrock]\n");
+                sb.append("enabled = true\n");
+                sb.append("online_mode = false\n");
+            } else {
+                // avoid UDP 19132 collisions between multiple pumpkin servers
+                sb.append("[networking.bedrock]\n");
+                sb.append("enabled = false\n");
+            }
+
+            try (java.io.FileWriter w = new java.io.FileWriter(cfg)) {
+                w.write(sb.toString());
+            }
+        } catch (Exception e) {
+            android.util.Log.e("KodaServerService", "pumpkin config write failed", e);
+        }
+    }
+
     private void startPumpkin(ServerInstance srv) {
         String id = srv.getId();
         srv.startTime = System.currentTimeMillis();
@@ -3545,7 +3581,7 @@ public class KodaServerService extends Service {
 
         exec.submit(() -> {
             if (!eu.kodanetwork.mchost.util.PumpkinRuntime.isInstalled(this)) {
-                log(id, "  ⬇ Lade Pumpkin-Binary (~10 MB)...");
+                log(id, "  ⬇ Lade Pumpkin-Binary (~100 MB)...");
                 boolean ok = eu.kodanetwork.mchost.util.PumpkinRuntime.ensureBinarySync(this,
                         (pct, msg) -> log(id, "  ⬇ Pumpkin: " + pct + "% (" + msg + ")"));
                 if (!ok) {
@@ -3558,6 +3594,7 @@ public class KodaServerService extends Service {
             File binary = eu.kodanetwork.mchost.util.PumpkinRuntime.getBinaryFile(this);
             File dir = new File(srv.getServerDir());
             if (!dir.exists()) dir.mkdirs();
+            writePumpkinConfigIfMissing(srv, dir);
 
             try {
                 java.io.File logFile = new java.io.File(dir, "pumpkin.log");

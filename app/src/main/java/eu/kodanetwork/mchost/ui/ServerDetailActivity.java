@@ -1319,6 +1319,11 @@ public class ServerDetailActivity extends AppCompatActivity {
             }
 
             if (!server.isDatabase()) {
+                if (server.getType() == eu.kodanetwork.mchost.model.ServerInstance.Type.PUMPKIN) {
+                    // native Rust binary — no jar in the server dir
+                    checkEulaAndStart();
+                    return;
+                }
                 File[] jars = serverDir.listFiles((d, name) -> name.endsWith(".jar"));
                 if (jars == null || jars.length == 0) {
                     eu.kodanetwork.mchost.util.AppLogger.log("UI", "No .jar file found in " + serverDir.getAbsolutePath());
@@ -4933,6 +4938,11 @@ public class ServerDetailActivity extends AppCompatActivity {
                 java.io.File serverDir = new java.io.File(server.getServerDir());
                 if (!serverDir.exists()) serverDir.mkdirs();
                 if (!server.isDatabase()) {
+                    if (server.getType() == eu.kodanetwork.mchost.model.ServerInstance.Type.PUMPKIN) {
+                        // native Rust binary — no jar check
+                        checkEulaAndStart();
+                        return;
+                    }
                     java.io.File[] jars = serverDir.listFiles((d, name) -> name.endsWith(".jar"));
                     if (jars == null || jars.length == 0) {
                         Toast.makeText(this, "Bitte zuerst die Server .jar herunterladen (Settings-Tab)", Toast.LENGTH_LONG).show();
