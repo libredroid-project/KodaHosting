@@ -1,0 +1,64 @@
+# Baut Pumpkin (Rust-Minecraft-Server) als natives aarch64-linux-android Binary.
+# Ausloeser: manuell (workflow_dispatch, Pumpkin-Version/Tag eingeben) oder Schedule.
+# Das fertige pumpkin-android-arm64.tar.gz muss danach einmalig in den Supabase
+# "artifacts"-Bucket nach pumpkin/pumpkin-android-arm64.tar.xz hochgeladen werden
+# (Drag&Drop im Dashboard oder curl mit SERVICE_KEY).
+name: Pumpkin Android Build
+
+on:
+  workflow_dispatch:
+    inputs:
+      pumpkin_tag:
+        description: 'Pumpkin Release-Tag (z.B. 0.1.0)'
+        required: true
+        default: 'latest'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-linux-android
+
+      - name: NDK
+        run: |
+          sudo apt-get update && sudo apt-get install -y cmake
+          # Rust-NDK-Linker ueber cargo-ndk
+          cargo install cargo-ndk
+
+      - name: Checkout Pumpkin
+        run: |
+          TAG="${{ github.event.inputs.pumpkin_tag }}"
+          [ "$TAG" = "latest" ] && TAG=$(curl -s https://api.github.com/repos/Pumpkin-MC/Pumpkin/releases/latest | jq -r .tag_name)
+          git clone --depth 1 --branch "$TAG" https://github.com/Pumpkin-MC/Pumpkin.git pumpkin
+          echo "TAG=$TAG" >> $GITHUB_ENV
+
+      - name: Build aarch64-linux-android
+        working-directory: pumpkin
+        run: |
+          export ANDROID_NDK_HOME=$ANDROID_HOME/ndk-bundle
+          ls $ANDROID_HOME/ndk/ || true
+          # NDK-Pfad ermitteln (GitHub-Runner liefert ndk;XX als Ordner)
+          NDK_DIR=$(ls -d $ANDROID_HOME/ndk/* | head -1)
+          export ANDROID_NDK_HOME=$NDK_DIR
+          cargo ndk -t arm64-v8a -o android build --release --bin pumpkin
+          strip android/arm64-v8a/libpumpkin.so 2>/dev/null || true
+          # cargo-ndk erzeugt eine .so — wir wandeln sie in ein ausfuehrbares Binary um
+          mv android/arm64-v8a/libpumpkin.so pumpkin-android-arm64 2>/dev/null || \
+            mv target/aarch64-linux-android/release/pumpkin pumpkin-android-arm64
+
+      - name: Package
+        run: |
+          chmod +x pumpkin/pumpkin-android-arm64
+          mkdir -p pkg
+          cp pumpkin/pumpkin-android-arm64 pkg/
+          tar -cJf pumpkin-android-arm64.tar.xz -C pkg pumpkin-android-arm64
+          sha256sum pumpkin-android-arm64.tar.xz
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: pumpkin-android-arm64
+          path: pumpkin-android-arm64.tar.xz
