@@ -188,7 +188,9 @@ public class ServerDetailActivity extends AppCompatActivity {
         // Prevent screenshots & screen recording
         // Screen protection removed
 
-        if (eu.kodanetwork.mchost.util.Material3ThemeHelper.isM3Enabled(this)) {
+        if (eu.kodanetwork.mchost.App.getPrefs(this).getBoolean("dev_terminal_enabled", false)) {
+            setContentView(R.layout.activity_server_detail_terminal);
+        } else if (eu.kodanetwork.mchost.util.Material3ThemeHelper.isM3Enabled(this)) {
             setContentView(R.layout.activity_server_detail_m3);
         } else {
             setContentView(R.layout.activity_server_detail);
@@ -612,7 +614,8 @@ public class ServerDetailActivity extends AppCompatActivity {
                         
             if (server != null && server.onlinePlayerNames != null && !server.onlinePlayerNames.isEmpty()) {
                 for (String playerName : server.onlinePlayerNames) {
-                    android.view.View playerRow = getLayoutInflater().inflate(R.layout.item_player_row, containerOnline, false);
+                    android.view.View playerRow = getLayoutInflater().inflate(R.layout.item_player_row, containerOnline, false);;
+        eu.kodanetwork.mchost.util.TerminalThemeHelper.applyThemeToView(playerRow.getContext(), playerRow);
                     android.widget.TextView tvName = playerRow.findViewById(R.id.tv_row_player_name);
                     tvName.setText(playerName);
                     
@@ -669,7 +672,8 @@ public class ServerDetailActivity extends AppCompatActivity {
                         if (!offlineNames.isEmpty()) {
                             runOnUiThread(() -> {
                                 for (String offlineName : offlineNames) {
-                                    android.view.View playerRow = getLayoutInflater().inflate(R.layout.item_player_row, containerOffline, false);
+                                    android.view.View playerRow = getLayoutInflater().inflate(R.layout.item_player_row, containerOffline, false);;
+        eu.kodanetwork.mchost.util.TerminalThemeHelper.applyThemeToView(playerRow.getContext(), playerRow);
                                     android.widget.TextView tvName = playerRow.findViewById(R.id.tv_row_player_name);
                                     tvName.setText(offlineName);
                                     tvName.setTextColor(0xFF888899); // darker text for offline
@@ -716,7 +720,8 @@ public class ServerDetailActivity extends AppCompatActivity {
         com.google.android.material.bottomsheet.BottomSheetDialog sheet = 
             new com.google.android.material.bottomsheet.BottomSheetDialog(this, R.style.KodaBottomSheetDialog);
         
-        View view = getLayoutInflater().inflate(R.layout.bottom_sheet_player_manage, null);
+        View view = getLayoutInflater().inflate(R.layout.bottom_sheet_player_manage, null);;
+        eu.kodanetwork.mchost.util.TerminalThemeHelper.applyThemeToView(view.getContext(), view);
         sheet.setContentView(view);
         
         android.view.Window w = sheet.getWindow();
@@ -1096,7 +1101,8 @@ public class ServerDetailActivity extends AppCompatActivity {
         containerOffhand.addView(getLayoutInflater().inflate(R.layout.item_inventory_slot, containerOffhand, false));
 
         for (int i = 0; i < 27; i++) {
-            android.view.View slot = getLayoutInflater().inflate(R.layout.item_inventory_slot, gridMain, false);
+            android.view.View slot = getLayoutInflater().inflate(R.layout.item_inventory_slot, gridMain, false);;
+        eu.kodanetwork.mchost.util.TerminalThemeHelper.applyThemeToView(slot.getContext(), slot);
             android.widget.GridLayout.LayoutParams params = new android.widget.GridLayout.LayoutParams(
                 android.widget.GridLayout.spec(i / 9), android.widget.GridLayout.spec(i % 9)
             );
@@ -1104,7 +1110,8 @@ public class ServerDetailActivity extends AppCompatActivity {
         }
 
         for (int i = 0; i < 9; i++) {
-            android.view.View slot = getLayoutInflater().inflate(R.layout.item_inventory_slot, gridHotbar, false);
+            android.view.View slot = getLayoutInflater().inflate(R.layout.item_inventory_slot, gridHotbar, false);;
+        eu.kodanetwork.mchost.util.TerminalThemeHelper.applyThemeToView(slot.getContext(), slot);
             android.widget.GridLayout.LayoutParams params = new android.widget.GridLayout.LayoutParams(
                 android.widget.GridLayout.spec(0), android.widget.GridLayout.spec(i)
             );
@@ -3094,7 +3101,8 @@ public class ServerDetailActivity extends AppCompatActivity {
         java.util.List<eu.kodanetwork.mchost.util.ModrinthHelper.ModrinthProject> pluginList = new java.util.ArrayList<>();
         androidx.recyclerview.widget.RecyclerView.Adapter<?> pluginAdapter = new androidx.recyclerview.widget.RecyclerView.Adapter<androidx.recyclerview.widget.RecyclerView.ViewHolder>() {
             @Override public androidx.recyclerview.widget.RecyclerView.ViewHolder onCreateViewHolder(android.view.ViewGroup parent, int viewType) {
-                View v = getLayoutInflater().inflate(R.layout.item_modrinth_project, parent, false);
+                View v = getLayoutInflater().inflate(R.layout.item_modrinth_project, parent, false);;
+        eu.kodanetwork.mchost.util.TerminalThemeHelper.applyThemeToView(v.getContext(), v);
                 return new androidx.recyclerview.widget.RecyclerView.ViewHolder(v) {};
             }
             @Override public void onBindViewHolder(androidx.recyclerview.widget.RecyclerView.ViewHolder holder, int position) {

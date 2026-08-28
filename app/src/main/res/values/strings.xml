@@ -527,8 +527,8 @@
     <string name="tutorial_welcome_title">Welcome to KodaHosting!</string>
     <string name="tutorial_welcome_body">Host your own Minecraft server directly on your phone. for free. No PC, no VPS, no monthly bill. Create a server, add mods and manage everything right here.</string>
     <string name="tutorial_ack">Let\'s go</string>
-    <string name="tutorial_tos_title">Terms of Service</string>
-    <string name="tutorial_tos_confirm">I have read and accept the Terms of Service</string>
+    <string name="tutorial_tos_title">Legal Agreements</string>
+    <string name="tutorial_tos_confirm">I have read and accept all Legal Agreements</string>
     <string name="tutorial_tos_accept">Accept &amp; continue</string>
     <string name="tutorial_tos_close">Close</string>
     <string name="tutorial_hint_new_server_title">Create your first server</string>

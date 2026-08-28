@@ -53,6 +53,7 @@ public class ModrinthSearchAdapter extends RecyclerView.Adapter<ModrinthSearchAd
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(context).inflate(R.layout.item_modrinth_project, parent, false);
+        eu.kodanetwork.mchost.util.TerminalThemeHelper.applyThemeToView(parent.getContext(), view);
         return new ViewHolder(view);
     }
 

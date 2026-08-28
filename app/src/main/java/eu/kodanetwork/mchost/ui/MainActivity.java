@@ -222,10 +222,59 @@ public class MainActivity extends AppCompatActivity {
                 fab.setText(R.string.new_server_btn);
                 fab.setOnClickListener(v -> {
                     eu.kodanetwork.mchost.util.HapticUtil.forceVibrate(this, 80);
-                    startActivity(new Intent(this, CreateServerActivity.class));
+                    v.animate().scaleX(0.88f).scaleY(0.88f).setDuration(80)
+                            .withEndAction(() -> v.animate().scaleX(1f).scaleY(1f).setDuration(140)
+                                    .setInterpolator(new android.view.animation.OvershootInterpolator(2.5f))
+                                    .withEndAction(() -> startActivity(new Intent(MainActivity.this, CreateServerActivity.class)))
+                                    .start()).start();
                 });
                 // In-app coach phase 1: explain the NEW SERVER button on first launch
                 eu.kodanetwork.mchost.util.TutorialCoach.maybeShowNewServerHint(this, fab);
+
+            // ── Sleek layout: nav bar buttons + header icon ──
+            if (eu.kodanetwork.mchost.util.SleekThemeHelper.isSleekEnabled(this)) {
+                // Press animation + haptics helper
+                java.util.function.BiConsumer<View, Runnable> wire = (view, action) -> {
+                    if (view == null) return;
+                    view.setOnClickListener(v -> {
+                        eu.kodanetwork.mchost.util.HapticUtil.forceVibrate(this, 50);
+                        v.animate().scaleX(0.88f).scaleY(0.88f).setDuration(80)
+                                .withEndAction(() -> v.animate().scaleX(1f).scaleY(1f).setDuration(120)
+                                        .setInterpolator(new android.view.animation.OvershootInterpolator(2f))
+                                        .withEndAction(action).start()).start();
+                    });
+                };
+
+                wire.accept(findViewById(R.id.nav_home), () -> {
+                    // Scroll server list to top + highlight
+                    View rvv = findViewById(R.id.rv);
+                    if (rvv instanceof androidx.recyclerview.widget.RecyclerView) {
+                        ((androidx.recyclerview.widget.RecyclerView) rvv).smoothScrollToPosition(0);
+                    }
+                });
+                wire.accept(findViewById(R.id.nav_log), () ->
+                        startActivity(new android.content.Intent(MainActivity.this, eu.kodanetwork.mchost.ui.DebugLogActivity.class)));
+                wire.accept(findViewById(R.id.nav_files), () -> {
+                    // Opens file manager intent
+                    android.content.Intent intent = new android.content.Intent(android.content.Intent.ACTION_OPEN_DOCUMENT_TREE);
+                    try { startActivityForResult(intent, 1001); } catch (Exception ignored) {}
+                });
+                wire.accept(findViewById(R.id.nav_settings), () ->
+                        startActivity(new android.content.Intent(MainActivity.this, eu.kodanetwork.mchost.ui.SettingsActivity.class)));
+
+                // Header settings button
+                View btnSleekSettings = findViewById(R.id.btn_settings);
+                if (btnSleekSettings != null) {
+                    btnSleekSettings.setOnClickListener(v -> {
+                        eu.kodanetwork.mchost.util.HapticUtil.forceVibrate(this, 40);
+                        startActivity(new android.content.Intent(MainActivity.this, eu.kodanetwork.mchost.ui.SettingsActivity.class));
+                    });
+                }
+
+                // Quick stats update
+                updateSleekStats();
+            }
+
             }
 
             View fabDb = findViewById(R.id.fab_add_db);
@@ -503,6 +552,7 @@ public class MainActivity extends AppCompatActivity {
         // Re-theme dynamically created views (server cards) so light mode
         // works here like it does in Settings
         eu.kodanetwork.mchost.util.ThemeHelper.reapply(this);
+        updateSleekStats();
         android.content.SharedPreferences prefs = eu.kodanetwork.mchost.App.getPrefs(this);
         String currentTheme = prefs.getString("app_theme", "modern");
         String currentMode = prefs.getString("theme_mode", "dark");
@@ -1018,4 +1068,33 @@ public class MainActivity extends AppCompatActivity {
         dialog.show();
     }
 
+
+    private void updateSleekStats() {
+        try {
+            java.util.List<ServerInstance> all = repo != null ? repo.all() : java.util.Collections.emptyList();
+            int online = 0;
+            long totalRam = 0;
+            for (ServerInstance s : all) {
+                if (s.state == ServerInstance.State.ONLINE) online++;
+                totalRam += s.getRamMB();
+            }
+            TextView tvTotal = findViewById(R.id.tv_stat_total);
+            TextView tvOnline = findViewById(R.id.tv_stat_online);
+            TextView tvRam = findViewById(R.id.tv_stat_ram);
+            if (tvTotal != null) tvTotal.setText(String.valueOf(all.size()));
+            if (tvOnline != null) tvOnline.setText(String.valueOf(online));
+            if (tvRam != null) tvRam.setText((totalRam / 1024) + "GB");
+
+            TextView tvCount = findViewById(R.id.tv_server_count);
+            if (tvCount != null) tvCount.setText(all.size() + " SERVERS");
+
+            View empty = findViewById(R.id.tv_empty);
+            View rv = findViewById(R.id.rv);
+            if (empty != null && rv != null) {
+                boolean hasServers = !all.isEmpty();
+                empty.setVisibility(hasServers ? View.GONE : View.VISIBLE);
+                rv.setVisibility(hasServers ? View.VISIBLE : View.GONE);
+            }
+        } catch (Exception ignored) {}
+    }
 }

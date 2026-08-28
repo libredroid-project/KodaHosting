@@ -274,11 +274,16 @@ public class TutorialActivity extends Activity {
         card.setPadding(48, 32, 48, 32);
         card.setBackgroundResource(R.drawable.bg_dialog_custom);
 
-        applyPraetorHeader(card, getString(R.string.tutorial_tos_title), "TERMS OF SERVICE");
+        applyPraetorHeader(card, getString(R.string.tutorial_tos_title), "LEGAL AGREEMENTS");
 
         ScrollView scroll = new ScrollView(this);
         TextView tosText = new TextView(this);
-        tosText.setText(readAssetText("licenses/tos.txt"));
+        
+        String divider = "\n\n========================================\n\n";
+        String combinedText = readAssetText("licenses/tos.txt") + divider +
+                              readAssetText("licenses/privacy.txt") + divider +
+                              readAssetText("licenses/impressum.txt");
+        tosText.setText(combinedText);
         tosText.setTextColor(0xFF8A8A9A);
         tosText.setTextSize(11);
         tosText.setLineSpacing(4, 1f);

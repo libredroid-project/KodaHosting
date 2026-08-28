@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Pressed state (Inset shadow) -->
+    <item android:state_pressed="true">
+        <layer-list>
+            <item>
+                <shape android:shape="rectangle">
+                    <solid android:color="#883300" />
+                </shape>
+            </item>
+            <item android:top="4dp" android:left="4dp">
+                <shape android:shape="rectangle">
+                    <solid android:color="#FF8800" />
+                </shape>
+            </item>
+        </layer-list>
+    </item>
+
+    <!-- Default state (Raised shadow) -->
+    <item>
+        <layer-list>
+            <item>
+                <shape android:shape="rectangle">
+                    <solid android:color="#883300" />
+                </shape>
+            </item>
+            <item android:bottom="4dp" android:right="4dp">
+                <shape android:shape="rectangle">
+                    <solid android:color="#FFCC88" />
+                </shape>
+            </item>
+            <item android:bottom="4dp" android:right="4dp" android:top="4dp" android:left="4dp">
+                <shape android:shape="rectangle">
+                    <solid android:color="#FF8800" />
+                </shape>
+            </item>
+        </layer-list>
+    </item>
+</selector>

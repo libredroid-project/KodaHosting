@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:layout_marginBottom="16dp"
+    android:layout_marginHorizontal="8dp"
+    android:background="#000000"
+    android:padding="2dp">
+
+    <!-- Inner Terminal Box with Green/Orange border simulation -->
+    <LinearLayout
+        android:id="@+id/ll_terminal_border"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="@drawable/bg_mc_button_dark"
+        android:padding="12dp">
+
+        <!-- Top Header -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="[!] SYS.SERVER:"
+                android:textColor="#555555"
+                android:textSize="12sp"
+                android:fontFamily="monospace"
+                android:layout_marginEnd="4dp"/>
+            <TextView
+                android:id="@+id/tv_name"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="PUMPKIN"
+                android:textColor="#FFFFFF"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:fontFamily="monospace"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="STATUS: "
+                android:textColor="#555555"
+                android:textSize="12sp"
+                android:fontFamily="monospace"/>
+            <TextView
+                android:id="@+id/tv_badge"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="ON"
+                android:textColor="#00FF00"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                android:fontFamily="monospace"/>
+        </LinearLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#333333"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp"/>
+
+        <!-- Stats Grid -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+            
+            <!-- Left Column -->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+                <LinearLayout android:orientation="horizontal" android:layout_width="wrap_content" android:layout_height="wrap_content">
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="> UPTIME: " android:textColor="#555555" android:textSize="12sp" android:fontFamily="monospace"/>
+                    <TextView android:id="@+id/tv_uptime" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="00:00:00" android:textColor="#FFFFFF" android:textSize="12sp" android:fontFamily="monospace"/>
+                </LinearLayout>
+                <LinearLayout android:orientation="horizontal" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="4dp">
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="> RAM: " android:textColor="#555555" android:textSize="12sp" android:fontFamily="monospace"/>
+                    <TextView android:id="@+id/tv_ram" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="0MB" android:textColor="#FFFFFF" android:textSize="12sp" android:fontFamily="monospace"/>
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- Right Column -->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+                <LinearLayout android:orientation="horizontal" android:layout_width="wrap_content" android:layout_height="wrap_content">
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="> USR: " android:textColor="#555555" android:textSize="12sp" android:fontFamily="monospace"/>
+                    <TextView android:id="@+id/tv_players" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="0/0" android:textColor="#FFFFFF" android:textSize="12sp" android:fontFamily="monospace"/>
+                </LinearLayout>
+                <LinearLayout android:orientation="horizontal" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="4dp">
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="> TPS: " android:textColor="#555555" android:textSize="12sp" android:fontFamily="monospace"/>
+                    <TextView android:id="@+id/tv_tps" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="20.0" android:textColor="#FFFFFF" android:textSize="12sp" android:fontFamily="monospace"/>
+                </LinearLayout>
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- Hidden Address Box -->
+        <LinearLayout
+            android:id="@+id/ll_address_box"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="8dp"
+            android:background="#222222"
+            android:padding="6dp">
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="> ADDR: " android:textColor="#555555" android:textSize="12sp" android:fontFamily="monospace"/>
+            <TextView android:id="@+id/tv_addr" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="localhost:25565" android:textColor="#FFFFFF" android:textSize="12sp" android:fontFamily="monospace"/>
+        </LinearLayout>
+
+        <!-- Start/Stop Button -->
+        <com.google.android.material.button.MaterialButton
+        android:background="@drawable/bg_mc_button_green"
+        app:backgroundTint="@null"
+            android:id="@+id/btn_action"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:gravity="center"
+            app:cornerRadius="0dp"
+            android:padding="10dp"
+            android:text="[ INITIATE START ]"
+            android:textColor="#FFFFFF"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            android:fontFamily="monospace"
+            android:clickable="true"
+            android:focusable="true"
+            />
+
+        <!-- Version/Engine (Small) -->
+        <TextView
+            android:id="@+id/tv_ver"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:gravity="center"
+            android:text="PAPER // 1.20.4"
+            android:textColor="#444444"
+            android:textSize="10sp"
+            android:fontFamily="monospace"/>
+
+    </LinearLayout>
+
+    <View
+        android:id="@+id/status_line"
+        android:layout_width="match_parent"
+        android:layout_height="3dp"
+        android:background="#555555"/>
+
+    <!-- Hidden standard elements needed by adapter to avoid crash -->
+    <ImageView android:id="@+id/iv_server_icon" android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone"/>
+    <View android:id="@+id/dot" android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone"/>
+    <TextView android:id="@+id/tv_type" android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone"/>
+</LinearLayout>

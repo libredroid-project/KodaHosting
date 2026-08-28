@@ -22,6 +22,8 @@ public class ServerCardAdapter extends RecyclerView.Adapter<ServerCardAdapter.VH
 
     public interface Click { void on(ServerInstance s); }
 
+    private static final java.util.Map<String, android.graphics.Bitmap> iconCache = new java.util.concurrent.ConcurrentHashMap<>();
+
     private List<ServerInstance> data = new ArrayList<>();
     private final Context ctx;
     private final Click click;
@@ -33,8 +35,16 @@ public class ServerCardAdapter extends RecyclerView.Adapter<ServerCardAdapter.VH
 
     @NonNull @Override
     public VH onCreateViewHolder(@NonNull ViewGroup p, int t) {
+        boolean terminalEnabled = eu.kodanetwork.mchost.App.getPrefs(ctx).getBoolean("dev_terminal_enabled", false);
         boolean m3Enabled = eu.kodanetwork.mchost.util.Material3ThemeHelper.isM3Enabled(ctx);
-        int layoutId = m3Enabled ? R.layout.item_server_m3 : R.layout.item_server;
+        int layoutId;
+        if (terminalEnabled) {
+            layoutId = R.layout.item_server_terminal;
+        } else if (m3Enabled) {
+            layoutId = R.layout.item_server_m3;
+        } else {
+            layoutId = R.layout.item_server;
+        }
         return new VH(LayoutInflater.from(ctx).inflate(layoutId, p, false));
     }
 
@@ -43,7 +53,7 @@ public class ServerCardAdapter extends RecyclerView.Adapter<ServerCardAdapter.VH
 
     class VH extends RecyclerView.ViewHolder {
         TextView name, badge, type, ver, ram, addr, players;
-        View dot, leftPanel;
+        View dot, statusLine;
         android.widget.ProgressBar pbRam;
         com.google.android.material.button.MaterialButton btnAction;
         android.widget.ImageView ivServerIcon;
@@ -63,17 +73,13 @@ public class ServerCardAdapter extends RecyclerView.Adapter<ServerCardAdapter.VH
             btnAction = v.findViewById(R.id.btn_action);
             ivServerIcon = v.findViewById(R.id.iv_server_icon);
             tvBattery = v.findViewById(R.id.tv_battery);
-            leftPanel = v.findViewById(R.id.left_panel);
+            statusLine = v.findViewById(R.id.status_line);
             tvUptime = v.findViewById(R.id.tv_uptime);
         }
 
-        private void tintLeftPanel(int statusColor) {
-            if (leftPanel == null) return;
-            int r = (statusColor >> 16) & 0xFF;
-            int g = (statusColor >> 8) & 0xFF;
-            int b = statusColor & 0xFF;
-            int darkColor = android.graphics.Color.rgb(r / 5, g / 5, b / 5);
-            leftPanel.setBackgroundColor(darkColor);
+        private void tintCardStroke(int statusColor) {
+            if (statusLine == null) return;
+            statusLine.setBackgroundColor(statusColor);
         }
 
         private void bindUptime(ServerInstance s) {
@@ -175,23 +181,36 @@ public class ServerCardAdapter extends RecyclerView.Adapter<ServerCardAdapter.VH
                     case STARTING: label=ctx.getString(R.string.status_starting); dotDrw=R.drawable.dot_warn; textCol=0xFFFFCC00; break;
                     case STOPPING: label=ctx.getString(R.string.status_stopping); dotDrw=R.drawable.dot_warn; textCol=0xFFFF8800; break;
                     case CRASHED: label=ctx.getString(R.string.status_crashed); dotDrw=R.drawable.dot_err; textCol=0xFFFF3333; break;
-                    default: label=ctx.getString(R.string.status_offline); dotDrw=R.drawable.dot_offline; textCol=0xFF5C6BC0; break; // Indigo for offline
+                    default: label=ctx.getString(R.string.status_offline); dotDrw=R.drawable.dot_offline; textCol=0xFF555555; break; // Grey for offline
                 }
                 badge.setText(label);
                 badge.setTextColor(textCol);
                 dot.setBackground(ctx.getDrawable(dotDrw));
-                tintLeftPanel(textCol);
+                tintCardStroke(textCol);
 
                 // Start/Stop button
                 if (btnAction != null) {
+                    btnAction.setTag(R.id.tag_themed, "BLOCKED");
                     if (st == ServerInstance.State.ONLINE || st == ServerInstance.State.STARTING) {
                         btnAction.setText(ctx.getString(R.string.stop));
-                        btnAction.setBackgroundTintList(android.content.res.ColorStateList.valueOf(0xFFFF5252));
-                        btnAction.setTextColor(0xFF111111);
+                        if (eu.kodanetwork.mchost.App.getPrefs(ctx).getBoolean("dev_terminal_enabled", false)) {
+                            btnAction.setBackgroundResource(R.drawable.bg_mc_button_red);
+                            btnAction.setBackgroundTintList(null);
+                            btnAction.setTextColor(0xFF000000);
+                        } else {
+                            btnAction.setBackgroundTintList(android.content.res.ColorStateList.valueOf(0xFFFF5252));
+                            btnAction.setTextColor(0xFF111111);
+                        }
                     } else {
                         btnAction.setText(ctx.getString(R.string.start));
-                        btnAction.setBackgroundTintList(android.content.res.ColorStateList.valueOf(0xFFFF6B00));
-                        btnAction.setTextColor(0xFF111111);
+                        if (eu.kodanetwork.mchost.App.getPrefs(ctx).getBoolean("dev_terminal_enabled", false)) {
+                            btnAction.setBackgroundResource(R.drawable.bg_mc_button_orange);
+                            btnAction.setBackgroundTintList(null);
+                            btnAction.setTextColor(0xFF000000);
+                        } else {
+                            btnAction.setBackgroundTintList(android.content.res.ColorStateList.valueOf(0xFFFF6B00));
+                            btnAction.setTextColor(0xFF111111);
+                        }
                     }
                     btnAction.setOnClickListener(v -> {
                         eu.kodanetwork.mchost.util.HapticUtil.forceVibrate(v.getContext(), 50);
@@ -284,16 +303,22 @@ public class ServerCardAdapter extends RecyclerView.Adapter<ServerCardAdapter.VH
             if (ivServerIcon != null) {
                 java.io.File iconFile = new java.io.File(s.getServerDir(), "server-icon.png");
                 if (iconFile.exists()) {
-                    // Quick async load to prevent ANR on Main Thread
-                    ivServerIcon.setTag(iconFile.getAbsolutePath());
-                    new Thread(() -> {
-                        android.graphics.Bitmap bitmap = android.graphics.BitmapFactory.decodeFile(iconFile.getAbsolutePath());
-                        new android.os.Handler(android.os.Looper.getMainLooper()).post(() -> {
-                            if (iconFile.getAbsolutePath().equals(ivServerIcon.getTag())) {
-                                ivServerIcon.setImageBitmap(bitmap);
-                            }
-                        });
-                    }).start();
+                    String path = iconFile.getAbsolutePath();
+                    if (iconCache.containsKey(path)) {
+                        ivServerIcon.setImageBitmap(iconCache.get(path));
+                        ivServerIcon.setTag(null);
+                    } else {
+                        ivServerIcon.setTag(path);
+                        new Thread(() -> {
+                            android.graphics.Bitmap bitmap = android.graphics.BitmapFactory.decodeFile(path);
+                            if (bitmap != null) iconCache.put(path, bitmap);
+                            new android.os.Handler(android.os.Looper.getMainLooper()).post(() -> {
+                                if (path.equals(ivServerIcon.getTag())) {
+                                    ivServerIcon.setImageBitmap(bitmap);
+                                }
+                            });
+                        }).start();
+                    }
                 } else {
                     ivServerIcon.setImageResource(R.mipmap.ic_launcher);
                     if (isLight) {
@@ -318,11 +343,11 @@ public class ServerCardAdapter extends RecyclerView.Adapter<ServerCardAdapter.VH
                 case CRASHED: label=ctx.getString(R.string.status_crashed); dotDrw=R.drawable.dot_err; textCol=0xFFFF3333; break;
                 case INSTALLING: label=ctx.getString(R.string.status_installing); dotDrw=R.drawable.dot_warn; textCol=0xFF2277FF; break;
                 case HIBERNATED: label=ctx.getString(R.string.hibernate); dotDrw=R.drawable.dot_offline; textCol=0xFF44AAFF; break;
-                default: label=ctx.getString(R.string.status_offline); dotDrw=R.drawable.dot_offline; textCol=0xFF5C6BC0; break; // Indigo for offline
+                default: label=ctx.getString(R.string.status_offline); dotDrw=R.drawable.dot_offline; textCol=0xFF555555; break; // Grey for offline
             }
             badge.setText(label);
             badge.setTextColor(textCol);
-            tintLeftPanel(textCol);
+            tintCardStroke(textCol);
             
             String verText = s.getType().name();
             if (!s.isDatabase()) {
@@ -336,6 +361,7 @@ public class ServerCardAdapter extends RecyclerView.Adapter<ServerCardAdapter.VH
             if (ver != null) ver.setText(verText);
 
             if (btnAction != null) {
+                btnAction.setTag(R.id.tag_themed, "BLOCKED");
                 if (st == ServerInstance.State.HIBERNATED) {
                     btnAction.setText(ctx.getString(R.string.wake_up));
                     btnAction.setBackgroundTintList(android.content.res.ColorStateList.valueOf(0xFFFF6B00));

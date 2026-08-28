@@ -6,12 +6,13 @@
     android:background="@color/sleek_bg"
     android:fitsSystemWindows="true">
 
+    <!-- ═══ Main Content ═══ -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical">
 
-        <!-- ═══ Header ═══ -->
+        <!-- Header -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -22,18 +23,14 @@
             android:paddingTop="16dp"
             android:paddingBottom="12dp">
 
-            <FrameLayout
+            <ImageView
+                android:id="@+id/iv_avatar"
                 android:layout_width="48dp"
-                android:layout_height="48dp">
-
-                <ImageView
-                    android:id="@+id/iv_avatar"
-                    android:layout_width="48dp"
-                    android:layout_height="48dp"
-                    android:src="@mipmap/ic_launcher"
-                    android:scaleType="centerCrop"
-                    android:background="@drawable/sleek_circle_dark" />
-            </FrameLayout>
+                android:layout_height="48dp"
+                android:src="@mipmap/ic_launcher"
+                android:scaleType="centerCrop"
+                android:background="@drawable/sleek_circle_dark"
+                android:clipToOutline="true" />
 
             <LinearLayout
                 android:layout_width="0dp"
@@ -64,13 +61,14 @@
                 android:id="@+id/btn_settings"
                 android:layout_width="44dp"
                 android:layout_height="44dp"
-                android:src="@android:drawable/ic_menu_preferences"
+                android:src="@drawable/sleek_ic_gear"
                 android:background="@drawable/sleek_circle_dark"
                 android:tint="@color/sleek_on_dark_muted"
+                android:padding="10dp"
                 android:contentDescription="Settings" />
         </LinearLayout>
 
-        <!-- ═══ Quick Stats Cream Card ═══ -->
+        <!-- Quick Stats Cream Card -->
         <LinearLayout
             android:id="@+id/card_quick_stats"
             android:layout_width="match_parent"
@@ -81,6 +79,7 @@
             android:layout_marginStart="16dp"
             android:layout_marginEnd="16dp"
             android:layout_marginBottom="16dp"
+            android:elevation="4dp"
             android:gravity="center_vertical">
 
             <LinearLayout
@@ -95,8 +94,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="0"
-                    android:textAppearance="@style/TextAppearance.Sleek.Stat"
-                    android:textColor="@color/sleek_on_cream" />
+                    android:textAppearance="@style/TextAppearance.Sleek.Stat" />
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -155,8 +153,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="0GB"
-                    android:textAppearance="@style/TextAppearance.Sleek.Stat"
-                    android:textColor="@color/sleek_on_cream" />
+                    android:textAppearance="@style/TextAppearance.Sleek.Stat" />
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -169,7 +166,7 @@
             </LinearLayout>
         </LinearLayout>
 
-        <!-- ═══ Server List ═══ -->
+        <!-- Server List -->
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rv"
             android:layout_width="match_parent"
@@ -177,10 +174,10 @@
             android:layout_weight="1"
             android:paddingStart="16dp"
             android:paddingEnd="16dp"
-            android:paddingBottom="100dp"
+            android:paddingBottom="120dp"
             android:clipToPadding="false" />
 
-        <!-- ═══ Empty State ═══ -->
+        <!-- Empty State -->
         <LinearLayout
             android:id="@+id/tv_empty"
             android:layout_width="match_parent"
@@ -190,77 +187,93 @@
             android:gravity="center"
             android:visibility="gone">
 
+            <ImageView
+                android:layout_width="64dp"
+                android:layout_height="64dp"
+                android:src="@drawable/sleek_ic_server"
+                android:tint="@color/sleek_on_dark_faint"
+                android:padding="8dp" />
+
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="No Servers Yet"
                 android:textAppearance="@style/TextAppearance.Sleek.Title"
-                android:textColor="@color/sleek_on_dark_muted" />
+                android:textColor="@color/sleek_on_dark_muted"
+                android:layout_marginTop="12dp" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Tap + to create your first server"
                 android:textAppearance="@style/TextAppearance.Sleek.Body"
-                android:layout_marginTop="8dp" />
+                android:layout_marginTop="6dp" />
         </LinearLayout>
     </LinearLayout>
 
     <!-- ═══ Floating Bottom Nav with FAB ═══ -->
-    <RelativeLayout
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"
-        android:paddingStart="24dp"
-        android:paddingEnd="24dp"
-        android:paddingBottom="20dp">
+        android:paddingStart="20dp"
+        android:paddingEnd="20dp"
+        android:paddingBottom="24dp">
 
+        <!-- Nav bar -->
         <LinearLayout
             android:id="@+id/main_bottom_bar"
             android:layout_width="match_parent"
-            android:layout_height="64dp"
+            android:layout_height="68dp"
+            android:layout_marginTop="28dp"
             android:orientation="horizontal"
-            android:background="@drawable/sleek_card_24"
-            android:backgroundTint="@color/sleek_surface"
+            android:background="@drawable/sleek_nav_pill"
             android:gravity="center_vertical"
-            android:paddingStart="12dp"
-            android:paddingEnd="12dp"
-            android:elevation="8dp">
+            android:elevation="12dp"
+            android:paddingStart="20dp"
+            android:paddingEnd="20dp">
 
             <ImageView
                 android:id="@+id/nav_home"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
-                android:src="@android:drawable/ic_menu_compass"
+                android:src="@drawable/sleek_ic_server"
                 android:tint="@color/sleek_accent"
-                android:padding="14dp"
-                android:contentDescription="Home" />
+                android:padding="16dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:clickable="true"
+                android:focusable="true"
+                android:contentDescription="Servers" />
 
             <ImageView
                 android:id="@+id/nav_log"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
-                android:src="@android:drawable/ic_menu_agenda"
+                android:src="@drawable/sleek_ic_console"
                 android:tint="@color/sleek_on_dark_muted"
-                android:padding="14dp"
-                android:contentDescription="Log" />
+                android:padding="16dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:clickable="true"
+                android:focusable="true"
+                android:contentDescription="Console" />
 
-            <!-- FAB slot in center -->
             <Space
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1" />
+                android:layout_width="68dp"
+                android:layout_height="match_parent" />
 
             <ImageView
                 android:id="@+id/nav_files"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
-                android:src="@android:drawable/ic_menu_gallery"
+                android:src="@drawable/sleek_ic_folder"
                 android:tint="@color/sleek_on_dark_muted"
-                android:padding="14dp"
+                android:padding="16dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:clickable="true"
+                android:focusable="true"
                 android:contentDescription="Files" />
 
             <ImageView
@@ -268,25 +281,29 @@
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
-                android:src="@android:drawable/ic_menu_preferences"
+                android:src="@drawable/sleek_ic_gear"
                 android:tint="@color/sleek_on_dark_muted"
-                android:padding="14dp"
+                android:padding="16dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:clickable="true"
+                android:focusable="true"
                 android:contentDescription="Settings" />
         </LinearLayout>
 
-        <!-- Central FAB -->
+        <!-- Central FAB: protrudes above nav -->
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/fab_add"
-            android:layout_width="56dp"
-            android:layout_height="56dp"
-            android:layout_centerInParent="true"
-            android:layout_alignParentTop="true"
-            android:layout_marginTop="-8dp"
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            android:layout_gravity="center_horizontal|top"
             android:src="@android:drawable/ic_input_add"
             android:backgroundTint="@color/sleek_accent"
             android:tint="@color/sleek_on_dark"
-            app:elevation="12dp"
-            app:fabCustomSize="56dp"
+            app:elevation="16dp"
+            app:fabCustomSize="64dp"
+            app:maxImageSize="32dp"
+            app:borderWidth="6dp"
+            app:rippleColor="#33F0762B"
             android:contentDescription="New Server" />
-    </RelativeLayout>
+    </FrameLayout>
 </FrameLayout>
