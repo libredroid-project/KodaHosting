@@ -4879,11 +4879,7 @@ public class ServerDetailActivity extends AppCompatActivity {
         for (int i = 0; i < tabs.length; i++) {
             final int idx = i;
             if (tabs[i] != null) {
-                tabs[i].setOnClickListener(v -> {
-                    v.animate().scaleX(0.92f).scaleY(0.92f).setDuration(60)
-                            .withEndAction(() -> v.animate().scaleX(1f).scaleY(1f).setDuration(100).start()).start();
-                    switchTab[0].accept(idx, null);
-                });
+                eu.kodanetwork.mchost.util.SleekTouch.apply(tabs[i], () -> switchTab[0].accept(idx, null), 40);
             }
         }
 

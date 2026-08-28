@@ -230,21 +230,8 @@
             android:background="@drawable/sleek_nav_pill"
             android:gravity="center_vertical"
             android:elevation="12dp"
-            android:paddingStart="20dp"
-            android:paddingEnd="20dp">
-
-            <ImageView
-                android:id="@+id/nav_home"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:src="@drawable/sleek_ic_server"
-                android:tint="@color/sleek_accent"
-                android:padding="16dp"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                android:clickable="true"
-                android:focusable="true"
-                android:contentDescription="Servers" />
+            android:paddingStart="24dp"
+            android:paddingEnd="24dp">
 
             <ImageView
                 android:id="@+id/nav_log"
@@ -254,10 +241,9 @@
                 android:src="@drawable/sleek_ic_activity"
                 android:tint="@color/sleek_on_dark_muted"
                 android:padding="16dp"
-                android:background="?attr/selectableItemBackgroundBorderless"
                 android:clickable="true"
                 android:focusable="true"
-                android:contentDescription="Console" />
+                android:contentDescription="Activity" />
 
             <Space
                 android:layout_width="68dp"
@@ -271,7 +257,6 @@
                 android:src="@drawable/sleek_ic_gear"
                 android:tint="@color/sleek_on_dark_muted"
                 android:padding="16dp"
-                android:background="?attr/selectableItemBackgroundBorderless"
                 android:clickable="true"
                 android:focusable="true"
                 android:contentDescription="Settings" />

@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="@drawable/sleek_server_card"
+    android:padding="20dp"
+    android:layout_marginBottom="12dp"
+    android:elevation="4dp"
+    android:clickable="true"
+    android:focusable="true">
+
+    <!-- Top: Name + Status -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
+
+        <TextView
+            android:id="@+id/tv_server_name"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Server"
+            android:textAppearance="@style/TextAppearance.Sleek.Title"
+            android:textSize="18sp"
+            android:maxLines="1"
+            android:ellipsize="end" />
+
+        <View
+            android:id="@+id/dot_status"
+            android:layout_width="10dp"
+            android:layout_height="10dp"
+            android:background="@drawable/sleek_circle_dark"
+            android:backgroundTint="@color/sleek_success" />
+    </LinearLayout>
+
+    <!-- Join Address -->
+    <TextView
+        android:id="@+id/tv_join_address"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="server.kodanetwork.eu"
+        android:textColor="@color/sleek_accent"
+        android:textSize="12sp"
+        android:fontFamily="@font/font_koda_mono"
+        android:layout_marginTop="4dp" />
+
+    <!-- Bottom: Stats Row -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="14dp"
+        android:gravity="center_vertical">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <ImageView
+                android:layout_width="16dp"
+                android:layout_height="16dp"
+                android:src="@drawable/sleek_ic_server"
+                android:tint="@color/sleek_on_dark_faint"
+                android:padding="2dp" />
+
+            <TextView
+                android:id="@+id/tv_type"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="PAPER"
+                android:textSize="11sp"
+                android:textColor="@color/sleek_on_dark_muted"
+                android:fontFamily="@font/font_koda"
+                android:layout_marginStart="4dp" />
+        </LinearLayout>
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
+
+        <TextView
+            android:id="@+id/tv_players"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="0/20"
+            android:textSize="12sp"
+            android:textColor="@color/sleek_on_dark_muted"
+            android:fontFamily="@font/font_koda" />
+
+        <View
+            android:layout_width="12dp"
+            android:layout_height="1dp"
+            android:background="@color/sleek_stroke" />
+
+        <TextView
+            android:id="@+id/tv_ram"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="4GB"
+            android:textSize="12sp"
+            android:textColor="@color/sleek_on_dark_muted"
+            android:fontFamily="@font/font_koda" />
+    </LinearLayout>
+</LinearLayout>

@@ -220,38 +220,20 @@ public class MainActivity extends AppCompatActivity {
             if (fab != null) {
                 if (this.lastM3Enabled) eu.kodanetwork.mchost.util.M3AnimationHelper.applySpringTouch(fab);
                 fab.setText(R.string.new_server_btn);
-                fab.setOnClickListener(v -> {
-                    eu.kodanetwork.mchost.util.HapticUtil.forceVibrate(this, 80);
-                    v.animate().scaleX(0.88f).scaleY(0.88f).setDuration(80)
-                            .withEndAction(() -> v.animate().scaleX(1f).scaleY(1f).setDuration(140)
-                                    .setInterpolator(new android.view.animation.OvershootInterpolator(2.5f))
-                                    .withEndAction(() -> startActivity(new Intent(MainActivity.this, CreateServerActivity.class)))
-                                    .start()).start();
-                });
+                eu.kodanetwork.mchost.util.SleekTouch.apply(fab, () ->
+                    startActivity(new Intent(MainActivity.this, CreateServerActivity.class)), 80);
                 // In-app coach phase 1: explain the NEW SERVER button on first launch
                 eu.kodanetwork.mchost.util.TutorialCoach.maybeShowNewServerHint(this, fab);
 
             // ── Sleek layout: nav bar buttons + header icon ──
             if (eu.kodanetwork.mchost.util.SleekThemeHelper.isSleekEnabled(this)) {
-                // Press animation + haptics helper
+                // Custom Sleek touch feedback (no Android ripple)
                 java.util.function.BiConsumer<View, Runnable> wire = (view, action) -> {
                     if (view == null) return;
-                    view.setOnClickListener(v -> {
-                        eu.kodanetwork.mchost.util.HapticUtil.forceVibrate(this, 50);
-                        v.animate().scaleX(0.88f).scaleY(0.88f).setDuration(80)
-                                .withEndAction(() -> v.animate().scaleX(1f).scaleY(1f).setDuration(120)
-                                        .setInterpolator(new android.view.animation.OvershootInterpolator(2f))
-                                        .withEndAction(action).start()).start();
-                    });
+                    eu.kodanetwork.mchost.util.SleekTouch.button(view, action);
                 };
 
-                wire.accept(findViewById(R.id.nav_home), () -> {
-                    // Scroll server list to top + highlight
-                    View rvv = findViewById(R.id.rv);
-                    if (rvv instanceof androidx.recyclerview.widget.RecyclerView) {
-                        ((androidx.recyclerview.widget.RecyclerView) rvv).smoothScrollToPosition(0);
-                    }
-                });
+
                 wire.accept(findViewById(R.id.nav_log), () ->
                         startActivity(new android.content.Intent(MainActivity.this, eu.kodanetwork.mchost.ui.DebugLogActivity.class)));
 
@@ -1068,6 +1050,22 @@ public class MainActivity extends AppCompatActivity {
     private void updateSleekStats() {
         try {
             java.util.List<ServerInstance> all = repo != null ? repo.all() : java.util.Collections.emptyList();
+
+            // Sleek adapter: set once, update list on changes
+            View rvView = findViewById(R.id.rv);
+            if (rvView instanceof androidx.recyclerview.widget.RecyclerView && rvView.getVisibility() == View.VISIBLE) {
+                androidx.recyclerview.widget.RecyclerView rv = (androidx.recyclerview.widget.RecyclerView) rvView;
+                if (rv.getAdapter() == null || !(rv.getAdapter() instanceof eu.kodanetwork.mchost.ui.SleekServerAdapter)) {
+                    rv.setLayoutManager(new androidx.recyclerview.widget.LinearLayoutManager(this));
+                    rv.setAdapter(new eu.kodanetwork.mchost.ui.SleekServerAdapter(all, server -> {
+                        android.content.Intent i = new android.content.Intent(MainActivity.this, ServerDetailActivity.class);
+                        i.putExtra("id", server.getId());
+                        startActivity(i);
+                    }));
+                } else {
+                    ((eu.kodanetwork.mchost.ui.SleekServerAdapter) rv.getAdapter()).notifyDataSetChanged();
+                }
+            }
             int online = 0;
             long totalRam = 0;
             for (ServerInstance s : all) {
