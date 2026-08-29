@@ -7,59 +7,60 @@
         android:id="@+id/container_main"
         android:layout_width="match_parent" android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:background="#1D1714">
+        android:layout_marginBottom="14dp"
+        android:background="@drawable/bg_card_server">
 
         <LinearLayout
             android:layout_width="match_parent" android:layout_height="wrap_content"
             android:orientation="vertical"
             android:padding="16dp">
 
-            <!-- OBERE REIHE: Icon, Name, Status -->
+            <!-- ROW 1: Name + Version-Chip -->
             <LinearLayout
                 android:layout_width="match_parent" android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:gravity="center_vertical">
 
-                <ImageView android:id="@+id/iv_server_icon"
-                    android:layout_width="48dp" android:layout_height="48dp"
-                    android:background="@drawable/server_icon_bg"
-                    android:scaleType="centerCrop" />
-
-                <LinearLayout
+                <TextView android:id="@+id/tv_name"
                     android:layout_width="0dp" android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:orientation="vertical"
-                    android:layout_marginStart="12dp">
-                    
-                    <TextView android:id="@+id/tv_name"
-                        android:layout_width="match_parent" android:layout_height="wrap_content"
-                        android:text="Server Name" android:textColor="#F0F0F0"
-                        android:textSize="18sp" android:fontFamily="@font/font_koda"
-                        android:textStyle="bold"
-                        android:maxLines="1" android:ellipsize="end" />
-                        
-                    <TextView android:id="@+id/tv_addr"
-                        android:layout_width="match_parent" android:layout_height="wrap_content"
-                        android:text="address.kodaserv.eu" android:textColor="#8A8A9A"
-                        android:textSize="12sp" android:fontFamily="@font/font_koda"
-                        android:maxLines="1" android:ellipsize="end" />
-                </LinearLayout>
+                    android:text="Server Name" android:textColor="#F0F0F0"
+                    android:textSize="19sp" android:fontFamily="@font/font_koda"
+                    android:textStyle="bold"
+                    android:maxLines="1" android:ellipsize="end" />
 
-                <!-- Status Badge -->
+                <TextView android:id="@+id/chip_version"
+                    android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:layout_marginStart="10dp"
+                    android:background="@drawable/pill_address_bg"
+                    android:backgroundTint="#26221E"
+                    android:paddingHorizontal="10dp" android:paddingVertical="4dp"
+                    android:text="PAPER 1.21" android:textColor="#B7AE9F"
+                    android:textSize="9sp" android:fontFamily="@font/font_koda"
+                    android:textStyle="bold" android:letterSpacing="0.08"
+                    android:maxLines="1" android:ellipsize="end" />
+            </LinearLayout>
+
+            <!-- ROW 2: Status-Pill + Adresse -->
+            <LinearLayout
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginTop="10dp">
+
                 <LinearLayout
                     android:layout_width="wrap_content" android:layout_height="wrap_content"
                     android:orientation="horizontal"
                     android:gravity="center_vertical"
                     android:background="@drawable/pill_address_bg"
-                    android:backgroundTint="#222226"
-                    android:paddingHorizontal="8dp"
-                    android:paddingVertical="4dp">
-                    
+                    android:backgroundTint="#26221E"
+                    android:paddingHorizontal="10dp" android:paddingVertical="4dp">
+
                     <View android:id="@+id/dot"
                         android:layout_width="8dp" android:layout_height="8dp"
                         android:background="@drawable/dot_offline"
                         android:layout_marginEnd="6dp" />
-                        
+
                     <TextView android:id="@+id/tv_badge"
                         android:layout_width="wrap_content" android:layout_height="wrap_content"
                         android:text="OFFLINE" android:textColor="#8A8A9A"
@@ -67,93 +68,126 @@
                         android:textStyle="bold" android:letterSpacing="0.05" />
                 </LinearLayout>
 
+                <TextView android:id="@+id/tv_addr"
+                    android:layout_width="0dp" android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginStart="12dp"
+                    android:gravity="end"
+                    android:text="address.kodaserv.eu" android:textColor="#B7AE9F"
+                    android:textSize="11sp" android:fontFamily="@font/font_koda"
+                    android:maxLines="1" android:ellipsize="end" />
             </LinearLayout>
 
-            <!-- MITTLERE REIHE: Stats -->
+            <!-- ROW 3: Dunkle Kacheln — TPS-Balken + RAM-Linie -->
             <LinearLayout
                 android:layout_width="match_parent" android:layout_height="wrap_content"
                 android:orientation="horizontal"
-                android:layout_marginTop="16dp"
-                android:gravity="center_vertical">
-                
-                <TextView android:id="@+id/tv_ver"
-                    android:layout_width="wrap_content" android:layout_height="wrap_content"
-                    android:text="Version 1.21" android:textColor="#AAAAAA"
-                    android:textSize="12sp" android:fontFamily="@font/font_koda" />
-                    
-                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                    android:text="  •  " android:textColor="#555555"
-                    android:textSize="12sp" />
-                    
-                <TextView android:id="@+id/tv_uptime"
-                    android:layout_width="wrap_content" android:layout_height="wrap_content"
-                    android:text="00:00:00" android:textColor="#AAAAAA"
-                    android:textSize="12sp" android:fontFamily="@font/font_koda" />
-                    
-                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                    android:text="  •  TPS: " android:textColor="#555555"
-                    android:textSize="12sp" />
-                    
-                <TextView android:id="@+id/tv_tps"
-                    android:layout_width="wrap_content" android:layout_height="wrap_content"
-                    android:text="20.0" android:textColor="#00E676"
-                    android:textSize="12sp" android:fontFamily="@font/font_koda"
-                    android:textStyle="bold" />
-            </LinearLayout>
+                android:layout_marginTop="14dp">
 
-            <!-- UNTERE REIHE: RAM & Start Button -->
-            <LinearLayout
-                android:layout_width="match_parent" android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:layout_marginTop="12dp"
-                android:gravity="center_vertical">
-
-                <LinearLayout
+                <LinearLayout android:id="@+id/tile_tps"
                     android:layout_width="0dp" android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:orientation="vertical"
-                    android:layout_marginEnd="16dp">
-                    
+                    android:background="@drawable/bg_card_tile"
+                    android:padding="10dp">
+
                     <LinearLayout
                         android:layout_width="match_parent" android:layout_height="wrap_content"
                         android:orientation="horizontal"
-                        android:layout_marginBottom="4dp">
+                        android:gravity="center_vertical">
+
                         <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                            android:text="RAM" android:textColor="#8A8A9A"
-                            android:textSize="10sp" android:fontFamily="@font/font_koda"
-                            android:layout_marginEnd="6dp" />
-                        <TextView android:id="@+id/tv_ram"
-                            android:layout_width="wrap_content" android:layout_height="wrap_content"
-                            android:text="1.3 / 1.9GB" android:textColor="#E0E0E0"
-                            android:textSize="10sp" android:fontFamily="@font/font_koda" />
+                            android:text="TPS" android:textColor="#8A8075"
+                            android:textSize="9sp" android:fontFamily="@font/font_koda"
+                            android:textStyle="bold" android:letterSpacing="0.1" />
+
+                        <TextView android:id="@+id/tv_tps"
+                            android:layout_width="0dp" android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:gravity="end"
+                            android:text="20.0" android:textColor="#F2EFE9"
+                            android:textSize="12sp" android:fontFamily="@font/font_koda"
+                            android:textStyle="bold" />
                     </LinearLayout>
-                    
-                    <ProgressBar android:id="@+id/pb_ram"
-                        style="?android:attr/progressBarStyleHorizontal"
-                        android:layout_width="match_parent" android:layout_height="4dp"
-                        android:progressDrawable="@drawable/custom_progress_bar"
-                        android:progress="68" android:max="100" />
+
+                    <eu.kodanetwork.mchost.util.MiniChartView android:id="@+id/chart_tps"
+                        android:layout_width="match_parent" android:layout_height="34dp"
+                        android:layout_marginTop="6dp" />
                 </LinearLayout>
+
+                <LinearLayout android:id="@+id/tile_ram"
+                    android:layout_width="0dp" android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginStart="10dp"
+                    android:orientation="vertical"
+                    android:background="@drawable/bg_card_tile"
+                    android:padding="10dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical">
+
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                            android:text="RAM" android:textColor="#8A8075"
+                            android:textSize="9sp" android:fontFamily="@font/font_koda"
+                            android:textStyle="bold" android:letterSpacing="0.1" />
+
+                        <TextView android:id="@+id/tv_ram"
+                            android:layout_width="0dp" android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:gravity="end"
+                            android:text="0.8/2.0GB" android:textColor="#F2EFE9"
+                            android:textSize="12sp" android:fontFamily="@font/font_koda"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+
+                    <eu.kodanetwork.mchost.util.MiniChartView android:id="@+id/chart_ram"
+                        android:layout_width="match_parent" android:layout_height="34dp"
+                        android:layout_marginTop="6dp" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- ROW 4: Spieler-Avatare + Aktion -->
+            <LinearLayout
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginTop="14dp">
+
+                <LinearLayout android:id="@+id/layout_avatars"
+                    android:layout_width="0dp" android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical" />
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btn_action"
-                    android:layout_width="100dp" android:layout_height="40dp"
+                    android:layout_width="wrap_content" android:layout_height="38dp"
+                    android:minWidth="108dp"
+                    android:paddingHorizontal="18dp"
                     android:text="START"
-                    android:textColor="#111111" android:textSize="13sp"
+                    android:textColor="#F2EFE9" android:textSize="12sp"
                     android:fontFamily="@font/font_koda" android:textStyle="bold"
-                    app:backgroundTint="#FF6B00" app:cornerRadius="20dp"
-                    android:insetTop="0dp" android:insetBottom="0dp" />
-
+                    android:letterSpacing="0.06"
+                    app:backgroundTint="#241207" app:cornerRadius="19dp"
+                    android:insetTop="0dp" android:insetBottom="0dp"
+                    app:elevation="0dp" />
             </LinearLayout>
-            </LinearLayout>
-            
-            <View android:id="@+id/status_line"
-                android:layout_width="match_parent" android:layout_height="3dp"
-                android:background="#2A2A30" />
-                
         </LinearLayout>
 
-    <!-- Hidden views to prevent crash -->
+        <View android:id="@+id/status_line"
+            android:layout_width="match_parent" android:layout_height="3dp"
+            android:background="#2A2A30" />
+    </LinearLayout>
+
+    <!-- Hidden legacy views: IDs kept so ServerCardAdapter never NPEs -->
+    <ImageView android:id="@+id/iv_server_icon" android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone" />
+    <TextView android:id="@+id/tv_ver" android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone" />
+    <TextView android:id="@+id/tv_uptime" android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone" />
+    <ProgressBar android:id="@+id/pb_ram" style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone"
+        android:max="100" />
     <TextView android:id="@+id/tv_type" android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone" />
     <TextView android:id="@+id/tv_players" android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone" />
     <ProgressBar android:id="@+id/pb_battery" style="?android:attr/progressBarStyleHorizontal"

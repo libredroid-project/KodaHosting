@@ -58,6 +58,11 @@ public class ServerCardAdapter extends RecyclerView.Adapter<ServerCardAdapter.VH
         com.google.android.material.button.MaterialButton btnAction;
         android.widget.ImageView ivServerIcon;
         TextView tvBattery, tvUptime;
+        // v2 card elements (item_server.xml — null in terminal/m3 variants)
+        TextView chipVersion;
+        eu.kodanetwork.mchost.util.MiniChartView chartTps, chartRam;
+        android.widget.LinearLayout layoutAvatars;
+        View statusPill, cardFace;
 
         VH(View v) {
             super(v);
@@ -75,6 +80,34 @@ public class ServerCardAdapter extends RecyclerView.Adapter<ServerCardAdapter.VH
             tvBattery = v.findViewById(R.id.tv_battery);
             statusLine = v.findViewById(R.id.status_line);
             tvUptime = v.findViewById(R.id.tv_uptime);
+            chipVersion = v.findViewById(R.id.chip_version);
+            chartTps = v.findViewById(R.id.chart_tps);
+            chartRam = v.findViewById(R.id.chart_ram);
+            layoutAvatars = v.findViewById(R.id.layout_avatars);
+            statusPill = dot != null ? (View) dot.getParent() : null;
+            cardFace = v.findViewById(R.id.container_main);
+        }
+
+        /** Colored avatar circle with a letter (v2 card footer). */
+        private android.view.View makeAvatar(String label, int bgColor, boolean wide) {
+            float d = ctx.getResources().getDisplayMetrics().density;
+            android.widget.TextView av = new android.widget.TextView(ctx);
+            av.setText(label);
+            av.setTextColor(0xFFF7F3EB);
+            av.setTextSize(10);
+            av.setTypeface(null, android.graphics.Typeface.BOLD);
+            av.setGravity(android.view.Gravity.CENTER);
+            android.graphics.drawable.GradientDrawable bg = new android.graphics.drawable.GradientDrawable();
+            bg.setShape(android.graphics.drawable.GradientDrawable.OVAL);
+            bg.setColor(bgColor);
+            bg.setStroke((int) d, 0xFFF7F3EB); // ring so overlapping circles separate
+            av.setBackground(bg);
+            int size = (int) (28 * d);
+            android.widget.LinearLayout.LayoutParams lp = new android.widget.LinearLayout.LayoutParams(size, size);
+            lp.rightMargin = (int) (-6 * d); // overlap like the design reference
+            av.setLayoutParams(lp);
+            if (wide) av.setMinWidth(size);
+            return av;
         }
 
         private void tintCardStroke(int statusColor) {
@@ -332,6 +365,76 @@ public class ServerCardAdapter extends RecyclerView.Adapter<ServerCardAdapter.VH
 
             addr.setText(s.getJoinAddress());
 
+            // ── v2 card elements (only in the redesigned item_server.xml) ──
+            if (chipVersion != null) {
+                String shortVer = s.getVersion() == null ? "" : s.getVersion();
+                chipVersion.setText((s.getType().name() + " " + shortVer).toUpperCase().trim());
+                chipVersion.setTag(R.id.tag_themed, "BLOCKED");
+                chipVersion.setBackgroundTintList(android.content.res.ColorStateList.valueOf(
+                        isLight ? 0xFFE9E2D4 : 0xFF26221E));
+                chipVersion.setTextColor(isLight ? 0xFF5C5344 : 0xFFB7AE9F);
+            }
+            if (cardFace != null) {
+                // keep the espresso elements outside ThemeHelper's BFS recoloring and
+                // tint the card face per mode ourselves
+                cardFace.setTag(R.id.tag_themed, "BLOCKED");
+                android.graphics.drawable.GradientDrawable face = new android.graphics.drawable.GradientDrawable();
+                face.setCornerRadius(ctx.getResources().getDisplayMetrics().density * 20);
+                face.setColor(isLight ? 0xFFF7F3EB : 0xFF1D1714);
+                face.setStroke((int)(ctx.getResources().getDisplayMetrics().density + 0.5f),
+                        isLight ? 0xFFE5DECF : 0xFF2A2A30);
+                cardFace.setBackground(face);
+            }
+            if (statusPill != null) {
+                statusPill.setTag(R.id.tag_themed, "BLOCKED");
+                statusPill.setBackgroundTintList(android.content.res.ColorStateList.valueOf(
+                        isLight ? 0xFFE9E2D4 : 0xFF26221E));
+            }
+            View tileTps = itemView.findViewById(R.id.tile_tps);
+            View tileRam = itemView.findViewById(R.id.tile_ram);
+            if (tileTps != null) tileTps.setTag(R.id.tag_themed, "BLOCKED");
+            if (tileRam != null) tileRam.setTag(R.id.tag_themed, "BLOCKED");
+            if (chartTps != null) {
+                chartTps.setTag(R.id.tag_themed, "BLOCKED");
+                chartTps.configure(eu.kodanetwork.mchost.util.MiniChartView.MODE_BARS, 20f,
+                        0xFFF2EFE9, isLight ? 0xFF69781D : 0xFFFF6B00);
+                float tps = s.state == ServerInstance.State.ONLINE ? s.currentTps : 0f;
+                chartTps.push(s.getId(), Math.max(0f, Math.min(1f, tps / 20f)));
+            }
+            if (chartRam != null) {
+                chartRam.setTag(R.id.tag_themed, "BLOCKED");
+                chartRam.configure(eu.kodanetwork.mchost.util.MiniChartView.MODE_LINE, 1f,
+                        0xFFF2EFE9, isLight ? 0xFF69781D : 0xFFFF6B00);
+                float used = s.getRamMB() > 0
+                        ? (s.state == ServerInstance.State.ONLINE ? s.ramUsageMB : 0) / (float) s.getRamMB()
+                        : 0f;
+                chartRam.push(s.getId(), Math.max(0f, Math.min(1f, used)));
+            }
+            if (layoutAvatars != null) {
+                layoutAvatars.setTag(R.id.tag_themed, "BLOCKED");
+                layoutAvatars.removeAllViews();
+                java.util.List<String> names = s.state == ServerInstance.State.ONLINE && s.onlinePlayerNames != null
+                        ? s.onlinePlayerNames : java.util.Collections.emptyList();
+                int[] palette = {0xFFE8913A, 0xFF69781D, 0xFFC96F1E, 0xFF8A9BCE};
+                int shown = Math.min(3, names.size());
+                for (int ai = 0; ai < shown; ai++) {
+                    String letter = names.get(ai).isEmpty() ? "?" : names.get(ai).substring(0, 1).toUpperCase();
+                    layoutAvatars.addView(makeAvatar(letter, palette[ai % palette.length], false));
+                }
+                if (names.size() > 3) {
+                    layoutAvatars.addView(makeAvatar("+" + (names.size() - 3), 0xFF241207, true));
+                }
+                if (names.isEmpty()) {
+                    TextView none = new TextView(ctx);
+                    none.setText(s.getMaxPlayers() + " " + ctx.getString(R.string.players));
+                    none.setTextColor(isLight ? 0xFF8A8075 : 0xFF8A8A9A);
+                    none.setTextSize(12);
+                    none.setFontFeatureSettings("");
+                    none.setTypeface(name.getTypeface());
+                    layoutAvatars.addView(none);
+                }
+            }
+
             ServerInstance.State st = s.state;
             String label; int dotDrw; int textCol;
             switch (st) {
@@ -364,16 +467,16 @@ public class ServerCardAdapter extends RecyclerView.Adapter<ServerCardAdapter.VH
                 btnAction.setTag(R.id.tag_themed, "BLOCKED");
                 if (st == ServerInstance.State.HIBERNATED) {
                     btnAction.setText(ctx.getString(R.string.wake_up));
-                    btnAction.setBackgroundTintList(android.content.res.ColorStateList.valueOf(0xFFFF6B00));
-                    btnAction.setTextColor(0xFF111111);
+                    btnAction.setBackgroundTintList(android.content.res.ColorStateList.valueOf(0xFFD9701A));
+                    btnAction.setTextColor(0xFFF7F3EB);
                 } else if (st == ServerInstance.State.ONLINE || st == ServerInstance.State.STARTING) {
                     btnAction.setText(ctx.getString(R.string.stop));
-                    btnAction.setBackgroundTintList(android.content.res.ColorStateList.valueOf(0xFFFF5252));
-                    btnAction.setTextColor(0xFF111111);
+                    btnAction.setBackgroundTintList(android.content.res.ColorStateList.valueOf(0xFF241207));
+                    btnAction.setTextColor(0xFFF7F3EB);
                 } else {
                     btnAction.setText(ctx.getString(R.string.start));
-                    btnAction.setBackgroundTintList(android.content.res.ColorStateList.valueOf(0xFFFF6B00));
-                    btnAction.setTextColor(0xFF111111);
+                    btnAction.setBackgroundTintList(android.content.res.ColorStateList.valueOf(0xFFD9701A));
+                    btnAction.setTextColor(0xFFF7F3EB);
                 }
                 btnAction.setOnClickListener(v -> {
                     eu.kodanetwork.mchost.util.HapticUtil.forceVibrate(v.getContext(), 50);
