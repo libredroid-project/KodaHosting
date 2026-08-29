@@ -59,7 +59,7 @@ public class SleekServerAdapter extends RecyclerView.Adapter<SleekServerAdapter.
         // Status dot color
         int dotColor;
         switch (s.state) {
-            case ONLINE: dotColor = 0xFF3DBE3D; break;
+            case ONLINE: dotColor = 0xFF69781D; break;
             case STARTING: case RESTARTING: dotColor = 0xFFF5A623; break;
             case CRASHED: dotColor = 0xFFE8442E; break;
             default: dotColor = 0xFF5C5852; break;

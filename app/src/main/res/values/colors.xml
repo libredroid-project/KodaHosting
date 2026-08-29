@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- KodaHosting — Premium Dark Orange Theme -->
+    <!-- Single source of truth for the ONLINE status color (badge, dots, stats) -->
+    <color name="koda_online">#69781D</color>
     <color name="koda_orange">#FF6B00</color>
     <color name="koda_orange_dim">#CC5500</color>
     <color name="koda_orange_glow">#FF8C38</color>

@@ -177,7 +177,7 @@ public class ServerCardAdapter extends RecyclerView.Adapter<ServerCardAdapter.VH
                 ServerInstance.State st = s.state;
                 String label; int dotDrw; int textCol;
                 switch (st) {
-                    case ONLINE: label=ctx.getString(R.string.status_online); dotDrw=R.drawable.dot_online; textCol=0xFF00E676; break;
+                    case ONLINE: label=ctx.getString(R.string.status_online); dotDrw=R.drawable.dot_online; textCol=0xFF69781D; break;
                     case STARTING: label=ctx.getString(R.string.status_starting); dotDrw=R.drawable.dot_warn; textCol=0xFFFFCC00; break;
                     case STOPPING: label=ctx.getString(R.string.status_stopping); dotDrw=R.drawable.dot_warn; textCol=0xFFFF8800; break;
                     case CRASHED: label=ctx.getString(R.string.status_crashed); dotDrw=R.drawable.dot_err; textCol=0xFFFF3333; break;
@@ -335,7 +335,7 @@ public class ServerCardAdapter extends RecyclerView.Adapter<ServerCardAdapter.VH
             ServerInstance.State st = s.state;
             String label; int dotDrw; int textCol;
             switch (st) {
-                case ONLINE: label=ctx.getString(R.string.status_online); dotDrw=R.drawable.dot_online; textCol=0xFF00E676; break;
+                case ONLINE: label=ctx.getString(R.string.status_online); dotDrw=R.drawable.dot_online; textCol=0xFF69781D; break;
                 case STARTING: label=ctx.getString(R.string.status_starting); dotDrw=R.drawable.dot_warn; textCol=0xFFFFCC00; break;
                 case STOPPING: label=ctx.getString(R.string.status_stopping); dotDrw=R.drawable.dot_warn; textCol=0xFFFF8800; break;
                 case RESTARTING: label=ctx.getString(R.string.status_restarting); dotDrw=R.drawable.dot_warn; textCol=0xFFFF8800; break;

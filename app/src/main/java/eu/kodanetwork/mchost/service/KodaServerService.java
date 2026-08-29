@@ -584,9 +584,16 @@ public class KodaServerService extends Service {
 
     private void startServerInternal(ServerInstance srv, boolean writePluginConfigs) {
         String id = srv.getId();
-        if (runtimes.containsKey(id)) {
+        RT existing = runtimes.get(id);
+        if (existing != null && existing.proc != null && existing.proc.isAlive()) {
             Log.w(TAG, "Server already running: " + id);
             return;
+        }
+        if (existing != null) {
+            // stale entry: the process died without the reader cleaning up (e.g. killed
+            // externally) — every start would silently no-op on the map check above
+            Log.w(TAG, "Clearing dead runtime entry for " + id);
+            runtimes.remove(id);
         }
 
         if (srv.isDatabase()) {
@@ -3546,6 +3553,13 @@ public class KodaServerService extends Service {
     private void writePumpkinConfigIfMissing(ServerInstance srv, File dir) {
         try {
             File cfg = new File(dir, "pumpkin.toml");
+            if (!cfg.exists()) {
+                // leftover from the old pre-nightly schema — the binary ignores it
+                File stale = new File(dir, "config/configuration.toml");
+                if (stale.exists() && stale.delete()) {
+                    // ignore
+                }
+            }
             if (cfg.exists()) return;
 
             StringBuilder sb = new StringBuilder();
@@ -3596,15 +3610,33 @@ public class KodaServerService extends Service {
             if (!dir.exists()) dir.mkdirs();
             writePumpkinConfigIfMissing(srv, dir);
 
+            // Kill leftovers from a previous app process that MIUI killed: the native
+            // child survives as an orphan (PPID 1) and keeps the server port blocked,
+            // which makes every new instance die instantly on bind.
             try {
+                Runtime.getRuntime().exec(new String[]{"/system/bin/sh", "-c", "pkill pumpkin-android"})
+                        .waitFor();
+                Log.d(TAG, "startPumpkin: orphan cleanup done");
+            } catch (Exception e) {
+                Log.w(TAG, "startPumpkin: orphan cleanup failed: " + e.getMessage());
+            }
+
+            try {
+                Log.i(TAG, "startPumpkin: launching " + binary.getAbsolutePath() + " in " + dir.getAbsolutePath());
                 java.io.File logFile = new java.io.File(dir, "pumpkin.log");
                 RT rt = new RT();
                 rt.isNative = true;
 
-                ProcessBuilder pb = new ProcessBuilder(binary.getAbsolutePath());
+                // Exec through /system/bin/sh like the Java/MariaDB flows: direct execve of a
+                // filesDir binary from the app process gets EACCES on this Android, while
+                // sh-launched binaries run fine. sh -c replaces itself with the binary, so
+                // stdin/stdout piping for the console keeps working.
+                ProcessBuilder pb = new ProcessBuilder("/system/bin/sh", "-c",
+                        "exec '" + binary.getAbsolutePath() + "'");
                 pb.directory(dir);
                 pb.redirectErrorStream(true);
                 Process proc = pb.start();
+                Log.i(TAG, "startPumpkin: process started, alive=" + proc.isAlive());
                 rt.proc = proc;
                 rt.stdin = new java.io.PrintStream(proc.getOutputStream(), true);
                 rt.logs.add("🎃 Pumpkin started");
@@ -3620,12 +3652,13 @@ public class KodaServerService extends Service {
                             final String l = line;
                             mainHandler.post(() -> log(id, l));
                         }
-                    } catch (Exception ignored) {}
-                    mainHandler.post(() -> {
-                        runtimes.remove(id);
-                        setState(srv, ServerInstance.State.OFFLINE);
-                        log(id, "  ⏹ Pumpkin exited.");
-                    });
+                } catch (Exception ignored) {}
+                Log.i(TAG, "startPumpkin: stream EOF, server exited");
+                mainHandler.post(() -> {
+                    runtimes.remove(id);
+                    setState(srv, ServerInstance.State.OFFLINE);
+                    log(id, "  ⏹ Pumpkin exited.");
+                });
                 });
                 reader.setDaemon(true);
                 reader.start();

@@ -245,6 +245,9 @@ public class ServerDetailActivity extends AppCompatActivity {
         if (server.isDatabase()) {
             setupDatabaseOverrides();
         }
+        if (server.getType() == eu.kodanetwork.mchost.model.ServerInstance.Type.PUMPKIN) {
+            setupPumpkinOverrides();
+        }
 
         TextView tvTitle = findViewById(R.id.tv_title);
         tvTitle.setText(server.getName());
@@ -444,6 +447,12 @@ public class ServerDetailActivity extends AppCompatActivity {
 
     private void updateJavaInfoDash() {
         if (tvJavaInfo == null) return;
+        // Pumpkin runs a native Rust binary — no JDK involved, keep the pumpkin label
+        if (server.getType() == eu.kodanetwork.mchost.model.ServerInstance.Type.PUMPKIN) {
+            tvJavaInfo.setText("🎃 Rust native — kein Java-Runtime nötig");
+            tvJavaInfo.setTextColor(0xFFF0762B);
+            return;
+        }
         tvJavaInfo.setText("checking java…");
         tvJavaInfo.setTextColor(eu.kodanetwork.mchost.util.ThemeHelper.isLightMode(this) ? 0xFF555566 : android.graphics.Color.parseColor("#888888"));
         new Thread(() -> {
@@ -475,6 +484,35 @@ public class ServerDetailActivity extends AppCompatActivity {
                 tvJavaInfo.setTextColor(fColor);
             });
         }).start();
+    }
+
+    /**
+     * Pumpkin servers are native Rust binaries — hide everything from the Java world
+     * that has no effect for them (jar download, JDK picker, -Xmx RAM, server.properties
+     * gameplay card). Configuration lives in pumpkin.toml via the Files tab.
+     */
+    private void setupPumpkinOverrides() {
+        View layoutJavaRuntime = findViewById(R.id.layout_java_runtime);
+        if (layoutJavaRuntime != null) layoutJavaRuntime.setVisibility(View.GONE);
+
+        View cardGameplay = findViewById(R.id.card_settings_gameplay);
+        if (cardGameplay != null) cardGameplay.setVisibility(View.GONE);
+
+        View cardRam = findViewById(R.id.card_settings_ram);
+        if (cardRam != null) cardRam.setVisibility(View.GONE);
+
+        View btnJar = findViewById(R.id.btn_dl_jar);
+        if (btnJar != null) btnJar.setVisibility(View.GONE);
+
+        // Bedrock crossplay is built into Pumpkin — the legacy Geyser row is meaningless
+        View rowBedrock = findViewById(R.id.row_bedrock);
+        if (rowBedrock != null) rowBedrock.setVisibility(View.GONE);
+
+        if (tvJavaInfo != null) {
+            tvJavaInfo.setText("🎃 Rust native — kein Java-Runtime nötig");
+            tvJavaInfo.setTextColor(0xFFF0762B);
+        }
+        if (tvVerInfo != null) tvVerInfo.setText("Pumpkin 0.1.0 (MC 1.26.40 + Bedrock)");
     }
 
     private void setupDatabaseOverrides() {
@@ -1493,8 +1531,12 @@ public class ServerDetailActivity extends AppCompatActivity {
         io.execute(() -> {
             try {
                 okhttp3.OkHttpClient client = new okhttp3.OkHttpClient.Builder()
-                        .connectTimeout(10, java.util.concurrent.TimeUnit.SECONDS)
-                        .readTimeout(10, java.util.concurrent.TimeUnit.SECONDS)
+                        .connectTimeout(5, java.util.concurrent.TimeUnit.SECONDS)
+                        .readTimeout(5, java.util.concurrent.TimeUnit.SECONDS)
+                        // bounds the WHOLE call incl. DNS/TLS — without this a hung
+                        // lookup blocks the single-thread io executor forever and every
+                        // later START tap silently queues behind it
+                        .callTimeout(12, java.util.concurrent.TimeUnit.SECONDS)
                         .build();
 
                 okhttp3.Request req = new okhttp3.Request.Builder()
@@ -1729,7 +1771,7 @@ public class ServerDetailActivity extends AppCompatActivity {
         ServerInstance.State st = server.state;
         String label; int col;
         switch (st) {
-            case ONLINE:     label = "● ONLINE";     col = 0xFF00E676; break;
+            case ONLINE:     label = "● ONLINE";     col = 0xFF69781D; break;
             case STARTING:   label = "◌ STARTING…";  col = 0xFFFFCC00; break;
             case STOPPING:   label = "◌ STOPPING…";  col = 0xFFFF8800;
                 if (tvBadge != null) {
@@ -4468,6 +4510,11 @@ public class ServerDetailActivity extends AppCompatActivity {
         super.onResume();
         // Re-theme dynamically built dashboard/tab content for light mode
         eu.kodanetwork.mchost.util.ThemeHelper.reapply(this);
+        // Re-sync control buttons: if the service died while we were backgrounded
+        // (e.g. MIUI killed the app), no state callback ever re-enables START otherwise
+        if (server != null) {
+            try { updateDash(); } catch (Exception ignored) {}
+        }
         if (tvJoinAddr != null && server != null) {
             updateJoinAddressDisplay();
         }
@@ -5005,7 +5052,7 @@ public class ServerDetailActivity extends AppCompatActivity {
 
         if (label == null) {
             switch (st) {
-                case ONLINE:     label = "ONLINE";     col = 0xFF3DBE3D; break;
+                case ONLINE:     label = "ONLINE";     col = 0xFF69781D; break;
                 case STARTING:   label = "STARTING…";  col = 0xFFFFCC00; break;
                 case STOPPING:   label = "STOPPING…";  col = 0xFFFF8800; break;
                 case RESTARTING: label = "RESTARTING…";col = 0xFFFF8800; break;
@@ -5034,7 +5081,7 @@ public class ServerDetailActivity extends AppCompatActivity {
             fabPower.setImageResource(running
                     ? android.R.drawable.ic_media_pause : android.R.drawable.ic_media_play);
             fabPower.setBackgroundTintList(android.content.res.ColorStateList.valueOf(
-                    running ? 0xFFE8442E : 0xFF3DBE3D));
+                    running ? 0xFFE8442E : 0xFF69781D));
         }
 
         // RAM: live usage vs. allocated

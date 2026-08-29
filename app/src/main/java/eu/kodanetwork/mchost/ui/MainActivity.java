@@ -1100,7 +1100,7 @@ public class MainActivity extends AppCompatActivity {
             View dotView = new View(this);
             int dotCol;
             switch (s.state) {
-                case ONLINE: dotCol = 0xFF3DBE3D; break;
+                case ONLINE: dotCol = 0xFF69781D; break;
                 case STARTING: case RESTARTING: dotCol = 0xFFF5A623; break;
                 case CRASHED: dotCol = 0xFFE8442E; break;
                 default: dotCol = 0xFF5C5852; break;
