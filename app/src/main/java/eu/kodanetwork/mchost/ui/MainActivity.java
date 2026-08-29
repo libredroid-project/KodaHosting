@@ -201,9 +201,9 @@ public class MainActivity extends AppCompatActivity {
         } else if (ThemeHelper.isLightMode(this)
                 && !eu.kodanetwork.mchost.util.SleekThemeHelper.isSleekEnabled(this)) {
             // Sleek is always warm-dark; the light-mode overrides would wash out the nav pill
-            if (rootLayout != null) rootLayout.setBackgroundColor(0xFFF5F5F5);
-            if (topBar != null) topBar.setBackgroundColor(0xFFF5F5F5);
-            if (bottomBar != null) bottomBar.setBackgroundColor(0xFFF5F5F5);
+            if (rootLayout != null) rootLayout.setBackgroundColor(0xFFF4EFE7);
+            if (topBar != null) topBar.setBackgroundColor(0xFFF4EFE7);
+            if (bottomBar != null) bottomBar.setBackgroundColor(0xFFF4EFE7);
         }
         
         permLauncher = registerForActivityResult(new ActivityResultContracts.RequestMultiplePermissions(), r -> {});

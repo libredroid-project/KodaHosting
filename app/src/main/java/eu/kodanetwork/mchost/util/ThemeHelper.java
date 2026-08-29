@@ -29,14 +29,16 @@ public class ThemeHelper {
     private static final String TAG = "ThemeHelper";
     private static final Handler main = new Handler(Looper.getMainLooper());
 
-    // ─── Light Mode Colors ───────────────────────────────────────
-    private static final int LIGHT_BG       = 0xFFFFFFFF; // Pure white background
-    private static final int LIGHT_SURFACE  = 0xFFFFFFFF;
-    private static final int LIGHT_CELL     = 0xFFFAFAFA; // near-white cards on the white background
-    private static final int LIGHT_TEXT     = 0xFF111111;
-    private static final int LIGHT_TEXT_SEC = 0xFF555555;
-    private static final int LIGHT_HEADER   = 0xFFFFFFFF;
-    private static final int LIGHT_STATUS   = 0xFFFAFAFA; // near-white under the status bar
+    // ─── Light Mode Colors (warm cream, per design reference) ──
+    private static final int LIGHT_BG       = 0xFFF4EFE7; // warm cream background
+    private static final int LIGHT_SURFACE  = 0xFFF7F3EB; // slightly lighter surface
+    private static final int LIGHT_CELL     = 0xFFF7F3EB; // cream cards
+    private static final int LIGHT_TEXT     = 0xFF241207; // espresso brown titles
+    private static final int LIGHT_TEXT_SEC = 0xFF8A8075; // warm gray secondary
+    private static final int LIGHT_HEADER   = 0xFFF4EFE7;
+    private static final int LIGHT_STATUS   = 0xFFF4EFE7; // cream under the status bar
+    private static final int LIGHT_BORDER   = 0xFFE5DECF; // thin warm card border
+    private static final int LIGHT_ACCENT   = 0xFFC96F1E; // terracotta accent on cream
 
     // ─── Dark Mode Colors ────────────────────────────────────────
     private static final int DARK_BG        = 0xFF0A0807;
@@ -324,7 +326,7 @@ public class ThemeHelper {
                 if (lightMode) {
                     tl.setSelectedTabIndicatorColor(0xFFE2E2E8);
                     tl.setTabTextColors(0xFF555555, 0xFF111111);
-                    tl.setBackgroundColor(0xFFFAFAFA);
+                    tl.setBackgroundColor(LIGHT_BG);
                 }
                 return;
             }
@@ -483,7 +485,7 @@ public class ThemeHelper {
                         } else if (v instanceof android.widget.EditText) {
                             android.graphics.drawable.GradientDrawable gd = new android.graphics.drawable.GradientDrawable();
                             gd.setColor(LIGHT_CELL);
-                            gd.setStroke(3, 0xFFFF8C38);
+                            gd.setStroke(3, LIGHT_BORDER);
                             gd.setCornerRadius(16f); // slight corner for text inputs
                             int pL = v.getPaddingLeft(), pT = v.getPaddingTop(), pR = v.getPaddingRight(), pB = v.getPaddingBottom();
                             v.setBackground(gd);
@@ -510,8 +512,8 @@ public class ThemeHelper {
                                 // Create bounded boxes for everything else that had a background (like CardViews)
                                 android.graphics.drawable.GradientDrawable gd = new android.graphics.drawable.GradientDrawable();
                                 gd.setColor(LIGHT_CELL);
-                                gd.setStroke(3, 0xFFFF8C38);
-                                gd.setCornerRadius(24f); 
+                                gd.setStroke(3, LIGHT_BORDER);
+                                gd.setCornerRadius(24f);
                                 v.setBackground(gd);
                             }
                             v.setPadding(pL, pT, pR, pB);
