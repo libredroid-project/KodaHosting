@@ -1602,8 +1602,24 @@ public class KodaServerService extends Service {
                 ProcessBuilder pb = new ProcessBuilder(frpcPath, "-c", new File(dir, ".frpc.toml").getAbsolutePath());
                 pb.directory(dir);
                 pb.redirectErrorStream(true);
-                pb.redirectOutput(new File(dir, "bore.log"));
                 rt.frpcProc = pb.start();
+                // tunnel log -> console: disconnect causes become visible with timestamps
+                Thread frpcReader = new Thread(() -> {
+                    try (java.io.BufferedReader br = new java.io.BufferedReader(
+                            new java.io.InputStreamReader(rt.frpcProc.getInputStream()))) {
+                        String line;
+                        java.text.SimpleDateFormat ts = new java.text.SimpleDateFormat("HH:mm:ss");
+                        while ((line = br.readLine()) != null) {
+                            final String l = line;
+                            mainHandler.post(() -> log(id, "  ⛓ [" + ts.format(new java.util.Date()) + "] " + l));
+                        }
+                    } catch (Exception ignored) {}
+                    mainHandler.post(() -> log(id, "  ⚠ ⛌ Tunnel-Prozess beendet um "
+                            + new java.text.SimpleDateFormat("HH:mm:ss").format(new java.util.Date())
+                            + " — Ursache siehe Zeilen darüber"));
+                });
+                frpcReader.setDaemon(true);
+                frpcReader.start();
                 
                 // Root Protection: Delete the config file from disk immediately after it is loaded into memory
                 new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
@@ -2518,6 +2534,7 @@ public class KodaServerService extends Service {
         String randSuffix = Integer.toHexString((int)(Math.random() * 0xFFFFF));
         String toml = "serverAddr = \"" + resolvedHost + "\"\n" +
             "serverPort = 7000\n" +
+            "loginFailExit = false\n" +
             "auth.method = \"token\"\n" +
             "auth.token = \"" + eu.kodanetwork.mchost.security.PraetorSecurity.getFrpcToken() + "\"\n\n" +
             "[[proxies]]\n" +
