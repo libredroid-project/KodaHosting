@@ -5320,73 +5320,132 @@ public class ServerDetailActivity extends AppCompatActivity {
         sheet.show();
     }
 
-    /** Create or edit one rule: limit, period, network types, action. */
+    /** Create or edit one rule with simple chip options (fullscreen sheet). */
     private void editNetworkRule(eu.kodanetwork.mchost.util.NetworkPolicy.Rule existing, Runnable done) {
         boolean de = getResources().getConfiguration().getLocales().get(0).getLanguage().equals("de");
         float d = getResources().getDisplayMetrics().density;
         eu.kodanetwork.mchost.util.NetworkPolicy.Rule r = existing != null ? existing : new eu.kodanetwork.mchost.util.NetworkPolicy.Rule();
         if (r.id == null) { r.id = java.util.UUID.randomUUID().toString(); r.periodDays = 7; r.mobile = true; r.wifi = true; r.action = eu.kodanetwork.mchost.util.NetworkPolicy.ACTION_WARN; }
-        String[] actions = {eu.kodanetwork.mchost.util.NetworkPolicy.ACTION_WARN, eu.kodanetwork.mchost.util.NetworkPolicy.ACTION_STOP, eu.kodanetwork.mchost.util.NetworkPolicy.ACTION_BLOCK};
 
-        android.app.Dialog dlg = new android.app.Dialog(this);
+        com.google.android.material.bottomsheet.BottomSheetDialog sheet =
+                new com.google.android.material.bottomsheet.BottomSheetDialog(this);
         android.widget.LinearLayout root = new android.widget.LinearLayout(this);
         root.setOrientation(android.widget.LinearLayout.VERTICAL);
         int pad = (int)(20*d); root.setPadding(pad, pad, pad, pad);
 
         TextView t = new TextView(this);
         t.setText(existing == null ? (de?"Neue Regel":"New rule") : (de?"Regel bearbeiten":"Edit rule"));
-        t.setTextColor(0xFFF0F0F0); t.setTextSize(16); t.setTypeface(null, android.graphics.Typeface.BOLD);
+        t.setTextColor(0xFFF0F0F0); t.setTextSize(20); t.setTypeface(null, android.graphics.Typeface.BOLD);
         root.addView(t);
 
-        final EditText etGb = new EditText(this);
-        etGb.setInputType(android.text.InputType.TYPE_CLASS_NUMBER | android.text.InputType.TYPE_NUMBER_FLAG_DECIMAL);
-        etGb.setText(existing != null ? String.valueOf(r.limitBytes / 1073741824f) : "1");
-        etGb.setHint(de ? "Limit in GB" : "Limit in GB");
-        root.addView(etGb);
+        final long[] limits = {500L*1048576, 1073741824L, 2L*1073741824, 5L*1073741824, 10L*1073741824, 20L*1073741824, -1};
+        final String[] limitNames = {"500 MB","1 GB","2 GB","5 GB","10 GB","20 GB", de?"Eigenes":"Custom"};
+        final int[] pickedLimit = {1};
+        for (int i = 0; i < limits.length - 1; i++) if (limits[i] == r.limitBytes) pickedLimit[0] = i;
 
-        final EditText etDays = new EditText(this);
-        etDays.setInputType(android.text.InputType.TYPE_CLASS_NUMBER);
-        etDays.setText(String.valueOf(r.periodDays));
-        etDays.setHint(de ? "Zeitraum in Tagen (1/7/30)" : "Period in days (1/7/30)");
-        root.addView(etDays);
+        final EditText etCustom = new EditText(this);
+        etCustom.setInputType(android.text.InputType.TYPE_CLASS_NUMBER | android.text.InputType.TYPE_NUMBER_FLAG_DECIMAL);
+        etCustom.setHint(de ? "Limit in GB" : "Limit in GB");
+        etCustom.setVisibility(android.view.View.GONE);
+
+        java.util.function.BiConsumer<Integer, TextView[]> paint = (sel, views) -> {
+            for (int i = 0; i < views.length; i++) {
+                views[i].setTextColor(sel == i ? 0xFFFF6B00 : 0xFFE8E2D6);
+                views[i].setTypeface(null, sel == i ? android.graphics.Typeface.BOLD : android.graphics.Typeface.NORMAL);
+            }
+        };
+
+        android.widget.LinearLayout rowLimit = new android.widget.LinearLayout(this);
+        TextView[] limitViews = new TextView[limitNames.length];
+        for (int i = 0; i < limitNames.length; i++) {
+            final int fi = i;
+            TextView chip = new TextView(this);
+            chip.setText(limitNames[i]); chip.setTextSize(13);
+            chip.setPadding((int)(10*d), (int)(8*d), (int)(10*d), (int)(8*d));
+            chip.setOnClickListener(v -> { pickedLimit[0] = fi; paint.accept(fi, limitViews);
+                etCustom.setVisibility(fi == limits.length-1 ? android.view.View.VISIBLE : android.view.View.GONE); });
+            limitViews[i] = chip; rowLimit.addView(chip);
+        }
+        paint.accept(pickedLimit[0], limitViews);
+        root.addView(netLabel(de ? "Wie viel Datenvolumen?" : "How much data?", d));
+        root.addView(rowLimit); root.addView(etCustom);
+
+        final int[] periods = {1, 7, 30};
+        final String[] periodNames = {de?"Tag":"Day", de?"Woche":"Week", de?"Monat":"Month"};
+        int pickedPeriod = r.periodDays == 1 ? 0 : (r.periodDays == 30 ? 2 : 1);
+        final int[] selPeriod = {pickedPeriod};
+        android.widget.LinearLayout rowPeriod = new android.widget.LinearLayout(this);
+        TextView[] periodViews = new TextView[3];
+        for (int i = 0; i < 3; i++) {
+            final int fi = i;
+            TextView chip = new TextView(this);
+            chip.setText(periodNames[i]); chip.setTextSize(13);
+            chip.setPadding((int)(10*d), (int)(8*d), (int)(10*d), (int)(8*d));
+            chip.setOnClickListener(v -> { selPeriod[0] = fi; paint.accept(fi, periodViews); });
+            periodViews[i] = chip; rowPeriod.addView(chip);
+        }
+        paint.accept(selPeriod[0], periodViews);
+        root.addView(netLabel(de ? "Pro Zeitraum" : "Per period", d));
+        root.addView(rowPeriod);
 
         final android.widget.CheckBox cbMobile = new android.widget.CheckBox(this);
         cbMobile.setText("Mobile Data"); cbMobile.setChecked(r.mobile); root.addView(cbMobile);
         final android.widget.CheckBox cbWifi = new android.widget.CheckBox(this);
         cbWifi.setText("WLAN"); cbWifi.setChecked(r.wifi); root.addView(cbWifi);
 
-        final com.google.android.material.button.MaterialButton btnAction = eu.kodanetwork.mchost.util.KodaButtons.dark(this, "");
-        final int[] ai = {java.util.Arrays.asList(actions).indexOf(r.action)};
-        Runnable[] upd = new Runnable[1];
-        upd[0] = () -> btnAction.setText((de ? "Aktion: " : "Action: ") + actions[ai[0]]);
-        upd[0].run();
-        btnAction.setOnClickListener(v -> { ai[0] = (ai[0]+1) % actions.length; upd[0].run(); });
-        root.addView(btnAction);
+        final String[] actions = {eu.kodanetwork.mchost.util.NetworkPolicy.ACTION_WARN, eu.kodanetwork.mchost.util.NetworkPolicy.ACTION_STOP, eu.kodanetwork.mchost.util.NetworkPolicy.ACTION_BLOCK};
+        final String[] actionNames = {de?"Nur warnen":"Warn only", de?"Server stoppen":"Stop server", de?"Start blockieren":"Block start"};
+        final String[] actionDesc = {de?"Zeigt eine Warnung":"Shows a warning", de?"Stoppt den Server":"Stops the server", de?"Kein Start bis frei":"No start until free"};
+        int actIdx = java.util.Arrays.asList(actions).indexOf(r.action); if (actIdx < 0) actIdx = 0;
+        final int[] selAct = {actIdx};
+        android.widget.LinearLayout rowAct = new android.widget.LinearLayout(this);
+        TextView[] actViews = new TextView[3];
+        for (int i = 0; i < 3; i++) {
+            final int fi = i;
+            TextView chip = new TextView(this);
+            chip.setText(actionNames[i] + "\n" + actionDesc[i]); chip.setTextSize(12);
+            chip.setPadding((int)(10*d), (int)(8*d), (int)(10*d), (int)(8*d));
+            chip.setOnClickListener(v -> { selAct[0] = fi; paint.accept(fi, actViews); });
+            actViews[i] = chip; rowAct.addView(chip);
+        }
+        paint.accept(selAct[0], actViews);
+        root.addView(netLabel(de ? "Wenn erreicht" : "When reached", d));
+        root.addView(rowAct);
 
         com.google.android.material.button.MaterialButton save = eu.kodanetwork.mchost.util.KodaButtons.primary(this, de ? "Speichern" : "Save");
         save.setOnClickListener(v -> {
             try {
-                r.limitBytes = (long)(Float.parseFloat(etGb.getText().toString()) * 1073741824f);
-                r.periodDays = Math.max(1, Integer.parseInt(etDays.getText().toString()));
+                if (pickedLimit[0] == limits.length-1) {
+                    r.limitBytes = (long)(Float.parseFloat(etCustom.getText().toString()) * 1073741824f);
+                } else r.limitBytes = limits[pickedLimit[0]];
+                r.periodDays = periods[selPeriod[0]];
                 r.mobile = cbMobile.isChecked(); r.wifi = cbWifi.isChecked();
-                r.action = actions[ai[0]];
+                r.action = actions[selAct[0]];
                 java.util.List<eu.kodanetwork.mchost.util.NetworkPolicy.Rule> rules =
                         eu.kodanetwork.mchost.util.NetworkPolicy.getRules(this, server.getId());
                 if (!rules.contains(r)) rules.add(r);
                 eu.kodanetwork.mchost.util.NetworkPolicy.saveRules(this, server.getId(), rules);
-                dlg.dismiss(); done.run();
+                sheet.dismiss(); done.run();
             } catch (Exception e) {
                 android.widget.Toast.makeText(this, de ? "Ungültige Eingabe" : "Invalid input", android.widget.Toast.LENGTH_SHORT).show();
             }
         });
         android.widget.LinearLayout.LayoutParams saveLp = new android.widget.LinearLayout.LayoutParams(
                 android.view.ViewGroup.LayoutParams.MATCH_PARENT, android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
-        saveLp.topMargin = (int)(16*d);
+        saveLp.topMargin = (int)(20*d);
         root.addView(save, saveLp);
 
-        dlg.setContentView(root);
-        eu.kodanetwork.mchost.util.DialogLandFix.apply(dlg);
-        dlg.getWindow().setLayout(android.view.ViewGroup.LayoutParams.MATCH_PARENT, android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
-        dlg.show();
+        android.widget.ScrollView sc = new android.widget.ScrollView(this);
+        sc.setFillViewport(true); sc.addView(root);
+        sheet.setContentView(sc);
+        styleSheetFullscreen(sheet);
+        sheet.show();
+    }
+
+    private TextView netLabel(String txt, float d) {
+        TextView tv = new TextView(this);
+        tv.setText(txt); tv.setTextColor(0xFFB7AE9F); tv.setTextSize(11);
+        tv.setPadding(0,(int)(14*d),0,(int)(4*d));
+        return tv;
     }
 }
