@@ -166,8 +166,48 @@ public class KodaServerService extends Service {
         scheduler.scheduleAtFixedRate(this::pollNewRemoteServers, 15, 15, java.util.concurrent.TimeUnit.SECONDS);
         
         scheduler.scheduleAtFixedRate(this::pingAppStatus, 15, 15, java.util.concurrent.TimeUnit.SECONDS);
-        
+
+        // Network budget: meter app traffic every 5s and enforce per-server rules.
+        // acted-rules reset automatically once the rule is no longer violated
+        // (e.g. user switched from exhausted mobile data to wifi).
+        scheduler.scheduleAtFixedRate(this::networkBudgetTick, 5, 5, java.util.concurrent.TimeUnit.SECONDS);
+
         Log.d(TAG, "Service Created.");
+    }
+
+    private final java.util.Set<String> netRulesActed = java.util.Collections.synchronizedSet(new java.util.HashSet<>());
+
+    private void networkBudgetTick() {
+        try {
+            android.net.ConnectivityManager cm = (android.net.ConnectivityManager)
+                    getSystemService(Context.CONNECTIVITY_SERVICE);
+            boolean onMobile = cm != null && cm.isActiveNetworkMetered();
+            eu.kodanetwork.mchost.util.NetworkPolicy.meterTick(this, onMobile);
+
+            for (ServerInstance srv : ServerRepo.get(this).all()) {
+                if (!runtimes.containsKey(srv.getId())) continue;
+                eu.kodanetwork.mchost.util.NetworkPolicy.Rule r =
+                        eu.kodanetwork.mchost.util.NetworkPolicy.violatedRule(this, srv.getId(), onMobile);
+                String key = srv.getId() + ":" + (r == null ? "-" : r.id);
+                if (r == null) {
+                    // rule no longer violated (e.g. switched to wifi): re-arm enforcement
+                    netRulesActed.removeIf(k -> k.startsWith(srv.getId() + ":"));
+                    continue;
+                }
+                if (netRulesActed.contains(key)) continue; // already enforced
+                netRulesActed.add(key);
+                String ruleTxt = eu.kodanetwork.mchost.util.NetworkPolicy.humanBytes(r.limitBytes)
+                        + " / " + r.periodDays + "d "
+                        + (onMobile ? "Mobile" : "WLAN");
+                log(srv.getId(), "  🚫 Netzwerk-Limit erreicht (" + ruleTxt + ") — Aktion: " + r.action);
+                if (eu.kodanetwork.mchost.util.NetworkPolicy.ACTION_STOP.equals(r.action)
+                        || eu.kodanetwork.mchost.util.NetworkPolicy.ACTION_BLOCK.equals(r.action)) {
+                    stopServer(srv, false);
+                }
+            }
+        } catch (Exception e) {
+            Log.d(TAG, "netBudget tick failed", e);
+        }
     }
     
     private void pingAppStatus() {
