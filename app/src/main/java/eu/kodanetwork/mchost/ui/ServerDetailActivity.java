@@ -4509,7 +4509,6 @@ public class ServerDetailActivity extends AppCompatActivity {
     private String lastTheme = "modern";
     private String lastThemeMode = "dark";
 
-    @Override
     private android.net.ConnectivityManager.NetworkCallback netCb;
 
     /** Slow-internet banner: link bandwidth below these thresholds = warn the user. */
@@ -4533,19 +4532,6 @@ public class ServerDetailActivity extends AppCompatActivity {
             cm.registerDefaultNetworkCallback(netCb);
         } catch (Exception e) {
             android.util.Log.d("ServerDetail", "net watcher failed", e);
-        }
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        if (netCb != null) {
-            try {
-                android.net.ConnectivityManager cm = (android.net.ConnectivityManager)
-                        getSystemService(Context.CONNECTIVITY_SERVICE);
-                cm.unregisterNetworkCallback(netCb);
-            } catch (Exception ignored) {}
-            netCb = null;
         }
     }
 
@@ -4587,6 +4573,14 @@ public class ServerDetailActivity extends AppCompatActivity {
         super.onPause();
         for (TiltEffectHelper helper : tiltHelpers) {
             helper.unregister();
+        }
+        if (netCb != null) {
+            try {
+                android.net.ConnectivityManager cm = (android.net.ConnectivityManager)
+                        getSystemService(Context.CONNECTIVITY_SERVICE);
+                cm.unregisterNetworkCallback(netCb);
+            } catch (Exception ignored) {}
+            netCb = null;
         }
     }
 
