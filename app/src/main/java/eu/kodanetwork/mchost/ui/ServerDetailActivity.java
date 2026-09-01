@@ -260,7 +260,6 @@ public class ServerDetailActivity extends AppCompatActivity {
             com.google.android.material.button.MaterialButton btnNetM = btnNet.findViewById(R.id.btn_net_rules_entry);
             btnNetM.setText(getResources().getConfiguration().getLocales().get(0).getLanguage().equals("de")
                     ? "Netzwerk-Regeln" : "Network Rules");
-            btnNetM.setTag(R.id.tag_themed, "BLOCKED");
             btnNetM.setOnClickListener(v -> showNetworkRulesSheet());
             int idx = parent.indexOfChild(cardNet) + 1;
             parent.addView(btnNet, idx);
@@ -4672,7 +4671,10 @@ public class ServerDetailActivity extends AppCompatActivity {
                     ? (android.view.ViewGroup) ((android.widget.ScrollView) dashPanel).getChildAt(0)
                     : (android.view.ViewGroup) dashPanel;
         }
-        if (dash && dashHost != null && netDashCard == null) {
+        boolean hasRules = !eu.kodanetwork.mchost.util.NetworkPolicy.getRules(this, server.getId()).isEmpty();
+        if (!hasRules && netDashCard != null) netDashCard.setVisibility(android.view.View.GONE);
+        if (dash && hasRules && dashHost != null && netDashCard != null) netDashCard.setVisibility(android.view.View.VISIBLE);
+        if (dash && hasRules && dashHost != null && netDashCard == null) {
             // dedicated network card BELOW all dashboard tiles, styled like card_controls
             android.widget.LinearLayout card = new android.widget.LinearLayout(this);
             netDashCard = card;
@@ -4686,7 +4688,7 @@ public class ServerDetailActivity extends AppCompatActivity {
             card.setTag(R.id.tag_themed, "BLOCKED");
             android.widget.LinearLayout.LayoutParams cardLp = new android.widget.LinearLayout.LayoutParams(
                     android.view.ViewGroup.LayoutParams.MATCH_PARENT, android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
-            cardLp.topMargin = (int)(14*dd); cardLp.leftMargin = (int)(10*dd); cardLp.rightMargin = (int)(10*dd);
+            cardLp.bottomMargin = (int)(12*dd);
             card.setLayoutParams(cardLp);
 
             TextView cardTitle = new TextView(this);
