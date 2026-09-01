@@ -4641,7 +4641,37 @@ public class ServerDetailActivity extends AppCompatActivity {
         }
     };
 
+    private android.view.ViewGroup netTileHome;
+
+    /** Usage-Kachel zwischen Header-Position und Dashboard verschieben (Pref: net_usage_pos). */
+    private void relocateNetUsageTile() {
+        TextView tile = findViewById(R.id.tv_network_usage);
+        if (tile == null) return;
+        android.view.ViewGroup parent = (android.view.ViewGroup) tile.getParent();
+        if (parent == null) return;
+        if (netTileHome == null) netTileHome = parent; // original spot under the header
+        boolean dash = "dash".equals(eu.kodanetwork.mchost.App.getPrefs(this).getString("net_usage_pos", "top"));
+        View dashPanel = findViewById(R.id.panel_dash);
+        android.view.ViewGroup dashHost = null;
+        if (dashPanel instanceof android.view.ViewGroup) {
+            dashHost = dashPanel instanceof android.widget.ScrollView && ((android.widget.ScrollView) dashPanel).getChildCount() > 0
+                    ? (android.view.ViewGroup) ((android.widget.ScrollView) dashPanel).getChildAt(0)
+                    : (android.view.ViewGroup) dashPanel;
+        }
+        if (dash && dashHost != null && parent != dashHost) {
+            parent.removeView(tile);
+            tile.setPadding(tile.getPaddingLeft(), (int)(16*d()), tile.getPaddingRight(), tile.getPaddingBottom());
+            dashHost.addView(tile, 1);
+        } else if (!dash && parent != netTileHome) {
+            parent.removeView(tile);
+            netTileHome.addView(tile, netTileHome.indexOfChild(findViewById(R.id.tv_net_warning)) + 1);
+        }
+    }
+
+    private int d() { return Math.round(16 * getResources().getDisplayMetrics().density / 16f); }
+
     private void startNetworkUsageTicker() {
+        relocateNetUsageTile();
         netUsageHandler.removeCallbacks(netUsageTick);
         netUsageHandler.post(netUsageTick);
     }
@@ -5229,6 +5259,23 @@ public class ServerDetailActivity extends AppCompatActivity {
         title.setText(de ? "Netzwerk-Regeln" : "Network rules");
         title.setTextColor(0xFFF0F0F0); title.setTextSize(18); title.setTypeface(null, android.graphics.Typeface.BOLD);
         root.addView(title);
+
+        // Kachel-Platz: oben (unter Header) oder Dashboard
+        final String[] pos = {eu.kodanetwork.mchost.App.getPrefs(this).getString("net_usage_pos", "top")};
+        com.google.android.material.button.MaterialButton btnPos = eu.kodanetwork.mchost.util.KodaButtons.dark(this,
+                (pos[0].equals("dash") ? (de ? "Position: Dashboard" : "Position: Dashboard")
+                        : (de ? "Position: Oben" : "Position: Top")));
+        btnPos.setOnClickListener(v -> {
+            pos[0] = pos[0].equals("dash") ? "top" : "dash";
+            eu.kodanetwork.mchost.App.getPrefs(this).edit().putString("net_usage_pos", pos[0]).apply();
+            relocateNetUsageTile();
+            btnPos.setText(pos[0].equals("dash") ? (de ? "Position: Dashboard" : "Position: Dashboard")
+                    : (de ? "Position: Oben" : "Position: Top"));
+        });
+        android.widget.LinearLayout.LayoutParams posLp = new android.widget.LinearLayout.LayoutParams(
+                android.view.ViewGroup.LayoutParams.WRAP_CONTENT, android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
+        posLp.topMargin = (int)(10*d);
+        root.addView(btnPos, posLp);
 
         Runnable[] refresh = new Runnable[1];
         refresh[0] = () -> { sheet.dismiss(); showNetworkRulesSheet(); };
