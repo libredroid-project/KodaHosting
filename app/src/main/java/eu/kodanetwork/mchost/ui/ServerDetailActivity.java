@@ -4555,6 +4555,7 @@ public class ServerDetailActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         registerNetQualityWatcher();
+        startNetworkUsageTicker();
         // Re-theme dynamically built dashboard/tab content for light mode
         eu.kodanetwork.mchost.util.ThemeHelper.reapply(this);
         // Re-sync control buttons: if the service died while we were backgrounded
@@ -4585,9 +4586,52 @@ public class ServerDetailActivity extends AppCompatActivity {
         }
     }
 
-    @Override
+    private final android.os.Handler netUsageHandler = new android.os.Handler(android.os.Looper.getMainLooper());
+    private final Runnable netUsageTick = new Runnable() {
+        @Override public void run() {
+            TextView tv = findViewById(R.id.tv_network_usage);
+            if (tv != null && server != null) {
+                try {
+                    android.net.ConnectivityManager cm = (android.net.ConnectivityManager)
+                            getSystemService(Context.CONNECTIVITY_SERVICE);
+                    boolean onMobile = cm != null && cm.isActiveNetworkMetered();
+                    eu.kodanetwork.mchost.util.NetworkPolicy.Rule worst = null;
+                    int worstPct = -1; long used = 0, limit = 0;
+                    for (eu.kodanetwork.mchost.util.NetworkPolicy.Rule r :
+                            eu.kodanetwork.mchost.util.NetworkPolicy.getRules(ServerDetailActivity.this, server.getId())) {
+                        if (!(onMobile ? r.mobile : r.wifi)) continue;
+                        eu.kodanetwork.mchost.util.NetworkPolicy.Usage u =
+                                eu.kodanetwork.mchost.util.NetworkPolicy.usageFor(ServerDetailActivity.this, r.periodDays);
+                        long ru = onMobile ? u.mobileBytes : u.wifiBytes;
+                        if (r.limitBytes <= 0) continue;
+                        int pct = (int) Math.min(100, ru * 100 / r.limitBytes);
+                        if (pct > worstPct) { worstPct = pct; worst = r; used = ru; limit = r.limitBytes; }
+                    }
+                    if (worst != null) {
+                        String type = onMobile ? "Mobile" : "WLAN";
+                        tv.setText(getString(R.string.net_usage_label,
+                                eu.kodanetwork.mchost.util.NetworkPolicy.humanBytes(used),
+                                eu.kodanetwork.mchost.util.NetworkPolicy.humanBytes(limit),
+                                worstPct, type));
+                        tv.setTextColor(eu.kodanetwork.mchost.util.NetworkPolicy.colorForPercent(worstPct));
+                        tv.setVisibility(android.view.View.VISIBLE);
+                    } else {
+                        tv.setVisibility(android.view.View.GONE);
+                    }
+                } catch (Exception ignored) {}
+            }
+            netUsageHandler.postDelayed(this, 3000);
+        }
+    };
+
+    private void startNetworkUsageTicker() {
+        netUsageHandler.removeCallbacks(netUsageTick);
+        netUsageHandler.post(netUsageTick);
+    }
+
     protected void onPause() {
         super.onPause();
+        netUsageHandler.removeCallbacks(netUsageTick);
         for (TiltEffectHelper helper : tiltHelpers) {
             helper.unregister();
         }

@@ -80,6 +80,13 @@
         android:maxLines="2"
         android:text="@string/net_quality_warning"
         android:visibility="gone" />
+        <TextView android:id="@+id/tv_network_usage"
+        android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:textColor="#B7AE9F" android:textSize="12sp"
+        android:fontFamily="@font/font_koda"
+        android:paddingHorizontal="12dp" android:paddingVertical="3dp"
+        android:visibility="gone" />
+
 
 <com.google.android.material.tabs.TabLayout
         android:id="@+id/tabs"

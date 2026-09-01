@@ -556,4 +556,6 @@
     <string name="net_quality_warning">Slow internet connection detected. Lag may be caused by your connection, not the server.</string>
     
     <string name="net_offline_warning">No internet connection. Players cannot connect to the server.</string>
+    <string name="net_usage_label">Network: %1$s / %2$s (%3$d%%) \u00b7 %4$s</string>
+    <string name="net_start_blocked">Network limit reached. Edit the rule or use WiFi to start.</string>
 </resources>

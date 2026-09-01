@@ -624,6 +624,18 @@ public class KodaServerService extends Service {
 
     private void startServerInternal(ServerInstance srv, boolean writePluginConfigs) {
         String id = srv.getId();
+        // blocked-by-budget start attempts are refused until the rule is edited or wifi is used
+        try {
+            android.net.ConnectivityManager cm = (android.net.ConnectivityManager)
+                    getSystemService(Context.CONNECTIVITY_SERVICE);
+            eu.kodanetwork.mchost.util.NetworkPolicy.Rule blocked =
+                    eu.kodanetwork.mchost.util.NetworkPolicy.violatedRule(this, id, cm != null && cm.isActiveNetworkMetered());
+            if (blocked != null && eu.kodanetwork.mchost.util.NetworkPolicy.ACTION_BLOCK.equals(blocked.action)) {
+                log(id, "  🚫 Start blockiert: Netzwerk-Limit erreicht — Regel bearbeiten oder WLAN nutzen.");
+                setState(srv, ServerInstance.State.OFFLINE);
+                return;
+            }
+        } catch (Exception ignored) {}
         RT existing = runtimes.get(id);
         if (existing != null && existing.proc != null && existing.proc.isAlive()) {
             Log.w(TAG, "Server already running: " + id);
