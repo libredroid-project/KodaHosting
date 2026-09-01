@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Exact copy of btn_change_name styling so both buttons match 1:1 -->
+<com.google.android.material.button.MaterialButton
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/btn_net_rules_entry"
+    android:layout_width="match_parent" android:layout_height="50dp"
+    android:layout_marginTop="8dp"
+    android:text="NETWORK RULES" android:textColor="#111111"
+    app:backgroundTint="#FF6B00" app:cornerRadius="6dp"
+    android:textAllCaps="true"
+    android:textSize="14sp" android:fontFamily="@font/font_koda"/>
