@@ -5259,6 +5259,14 @@ public class ServerDetailActivity extends AppCompatActivity {
 
         sheet.setContentView(root);
         eu.kodanetwork.mchost.util.SheetFix.apply(sheet);
+        // BottomSheet default bg is cold gray — tint to the app's warm dark
+        android.view.View sheetBg = sheet.findViewById(com.google.android.material.R.id.design_bottom_sheet);
+        if (sheetBg != null) {
+            android.graphics.drawable.GradientDrawable bg = new android.graphics.drawable.GradientDrawable();
+            bg.setColor(0xFF1D1714);
+            bg.setCornerRadius(24f * getResources().getDisplayMetrics().density);
+            sheetBg.setBackground(bg);
+        }
         sheet.show();
     }
 
