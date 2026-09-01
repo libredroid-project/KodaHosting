@@ -254,6 +254,7 @@ public class ServerDetailActivity extends AppCompatActivity {
         View cardNet = findViewById(R.id.btn_change_name) != null
                 ? (View) findViewById(R.id.btn_change_name).getParent() : findViewById(R.id.card_settings_network);
         if (cardNet != null && cardNet.getParent() instanceof android.view.ViewGroup && server != null) {
+            android.view.ViewGroup parent = (android.view.ViewGroup) cardNet.getParent();
             // inflate the change-name twin from XML so text/font/size match 1:1
             android.view.View btnNet = getLayoutInflater().inflate(R.layout.view_net_rules_btn, parent, false);
             com.google.android.material.button.MaterialButton btnNetM = btnNet.findViewById(R.id.btn_net_rules_entry);
