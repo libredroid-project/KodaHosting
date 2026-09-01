@@ -1609,9 +1609,13 @@ public class KodaServerService extends Service {
                             new java.io.InputStreamReader(rt.frpcProc.getInputStream()))) {
                         String line;
                         java.text.SimpleDateFormat ts = new java.text.SimpleDateFormat("HH:mm:ss");
+                        boolean devMode = eu.kodanetwork.mchost.App.getPrefs(KodaServerService.this)
+                                .getBoolean("dev_mode_unlocked", false);
                         while ((line = br.readLine()) != null) {
                             final String l = line;
-                            mainHandler.post(() -> log(id, "  ⛓ [" + ts.format(new java.util.Date()) + "] " + l));
+                            if (devMode) {
+                                mainHandler.post(() -> log(id, "  ⛓ [" + ts.format(new java.util.Date()) + "] " + l));
+                            }
                         }
                     } catch (Exception ignored) {}
                     mainHandler.post(() -> log(id, "  ⚠ ⛌ Tunnel-Prozess beendet um "
