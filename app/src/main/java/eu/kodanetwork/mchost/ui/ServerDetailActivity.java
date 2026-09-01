@@ -250,12 +250,19 @@ public class ServerDetailActivity extends AppCompatActivity {
         }
 
         // Network budget rules: entry button in the settings panel (programmatic)
+        // sit as its own element BELOW the network card, not inside it
         View cardNet = findViewById(R.id.card_settings_network);
-        if (cardNet instanceof android.view.ViewGroup && server != null) {
+        if (cardNet != null && cardNet.getParent() instanceof android.view.ViewGroup && server != null) {
             com.google.android.material.button.MaterialButton btnNet = eu.kodanetwork.mchost.util.KodaButtons.primary(this,
                     getResources().getConfiguration().getLocales().get(0).getLanguage().equals("de") ? "Netzwerk-Regeln" : "Network rules");
             btnNet.setOnClickListener(v -> showNetworkRulesSheet());
-            ((android.view.ViewGroup) cardNet).addView(btnNet);
+            android.view.ViewGroup parent = (android.view.ViewGroup) cardNet.getParent();
+            int idx = parent.indexOfChild(cardNet) + 1;
+            android.widget.LinearLayout.LayoutParams lp = new android.widget.LinearLayout.LayoutParams(
+                    android.view.ViewGroup.LayoutParams.MATCH_PARENT, android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
+            float d = getResources().getDisplayMetrics().density;
+            lp.topMargin = (int)(12 * d);
+            parent.addView(btnNet, idx, lp);
         }
 
         TextView tvTitle = findViewById(R.id.tv_title);
