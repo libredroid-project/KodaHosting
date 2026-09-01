@@ -532,4 +532,5 @@
     <string name="tutorial_next">下一步</string>
     <string name="tutorial_replay_hint">教程将在下次启动应用时开始</string>\n
     <string name="net_quality_warning">检测到网络连接较慢。卡顿可能是你的网络造成的，而不是服务器。</string>
+    <string name="net_offline_warning">无网络连接。玩家无法连接到服务器。</string>
 </resources>

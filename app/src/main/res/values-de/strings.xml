@@ -562,4 +562,6 @@
     <string name="tutorial_next">Weiter</string>
     <string name="tutorial_replay_hint">Tutorial startet beim nächsten App-Start</string>\n
     <string name="net_quality_warning">Langsame Internetverbindung erkannt. Lag kann an deiner Verbindung liegen, nicht am Server.</string>
-    </resources>
+    
+    <string name="net_offline_warning">Keine Internetverbindung. Spieler können sich nicht mit dem Server verbinden.</string>
+</resources>

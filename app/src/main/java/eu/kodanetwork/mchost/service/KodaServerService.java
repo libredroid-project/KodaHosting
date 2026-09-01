@@ -1605,22 +1605,27 @@ public class KodaServerService extends Service {
                 rt.frpcProc = pb.start();
                 // tunnel log -> console: disconnect causes become visible with timestamps
                 Thread frpcReader = new Thread(() -> {
+                        String reason = "";
                     try (java.io.BufferedReader br = new java.io.BufferedReader(
                             new java.io.InputStreamReader(rt.frpcProc.getInputStream()))) {
                         String line;
                         java.text.SimpleDateFormat ts = new java.text.SimpleDateFormat("HH:mm:ss");
                         boolean devMode = eu.kodanetwork.mchost.App.getPrefs(KodaServerService.this)
                                 .getBoolean("dev_mode_unlocked", false);
+                        String lastLine = "";
                         while ((line = br.readLine()) != null) {
                             final String l = line;
+                            if (!l.trim().isEmpty()) lastLine = l;
                             if (devMode) {
                                 mainHandler.post(() -> log(id, "  ⛓ [" + ts.format(new java.util.Date()) + "] " + l));
                             }
                         }
+                        reason = lastLine.length() > 160 ? lastLine.substring(0, 160) + "..." : lastLine;
                     } catch (Exception ignored) {}
-                    mainHandler.post(() -> log(id, "  ⚠ ⛌ Tunnel-Prozess beendet um "
+                    String reasonTxt = reason.isEmpty() ? "unbekannt" : reason.replaceAll("\\u001B\\[[;\\d]*[ -/]*[@-~]", "");
+                    mainHandler.post(() -> log(id, "  ⚠ ⛌ Tunnel abgestürzt um "
                             + new java.text.SimpleDateFormat("HH:mm:ss").format(new java.util.Date())
-                            + " — Ursache siehe Zeilen darüber"));
+                            + " — Grund: " + reasonTxt));
                 });
                 frpcReader.setDaemon(true);
                 frpcReader.start();

@@ -4513,7 +4513,7 @@ public class ServerDetailActivity extends AppCompatActivity {
 
     /** Slow-internet banner: link bandwidth below these thresholds = warn the user. */
     private void registerNetQualityWatcher() {
-        android.view.View banner = findViewById(R.id.tv_net_warning);
+        TextView banner = findViewById(R.id.tv_net_warning);
         if (banner == null) return;
         try {
             android.net.ConnectivityManager cm = (android.net.ConnectivityManager)
@@ -4523,10 +4523,27 @@ public class ServerDetailActivity extends AppCompatActivity {
                 @Override public void onCapabilitiesChanged(android.net.Network n, android.net.NetworkCapabilities caps) {
                     boolean slow = caps.getLinkDownstreamBandwidthKbps() > 0
                             && caps.getLinkDownstreamBandwidthKbps() < 1500;
-                    runOnUiThread(() -> banner.setVisibility(slow ? android.view.View.VISIBLE : android.view.View.GONE));
+                    runOnUiThread(() -> {
+                        if (slow) {
+                            banner.setText(getString(R.string.net_quality_warning));
+                            banner.setBackgroundColor(0x33FFCC00);
+                            banner.setTextColor(0xFFFFCC00);
+                            banner.setVisibility(android.view.View.VISIBLE);
+                        } else {
+                            banner.setVisibility(android.view.View.GONE);
+                        }
+                    });
                 }
                 @Override public void onLost(android.net.Network n) {
-                    runOnUiThread(() -> banner.setVisibility(android.view.View.GONE));
+                    runOnUiThread(() -> {
+                        banner.setText(getString(R.string.net_offline_warning));
+                        banner.setBackgroundColor(0x44FF4444);
+                        banner.setTextColor(0xFFFF4444);
+                        banner.setVisibility(android.view.View.VISIBLE);
+                        eu.kodanetwork.mchost.util.HapticUtil.forceVibrate(ServerDetailActivity.this, 250);
+                        new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() ->
+                                eu.kodanetwork.mchost.util.HapticUtil.forceVibrate(ServerDetailActivity.this, 400), 450);
+                    });
                 }
             };
             cm.registerDefaultNetworkCallback(netCb);
