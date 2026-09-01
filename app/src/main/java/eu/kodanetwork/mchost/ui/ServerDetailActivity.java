@@ -5384,11 +5384,11 @@ public class ServerDetailActivity extends AppCompatActivity {
         int pickedPeriod = r.periodDays == 1 ? 0 : (r.periodDays == 30 ? 2 : 1);
         if (pickedPeriod == 1 && r.periodDays != 7) pickedPeriod = 3;
         final int[] selPeriod = {pickedPeriod};
+        final EditText etDays = new EditText(this);
         android.widget.FrameLayout pillPeriod = makePillSwitch(periodNames, selPeriod[0], sel -> {
             selPeriod[0] = sel;
             etDays.setVisibility(periods[sel] == -1 ? android.view.View.VISIBLE : android.view.View.GONE);
         });
-        final EditText etDays = new EditText(this);
         etDays.setInputType(android.text.InputType.TYPE_CLASS_NUMBER);
         etDays.setHint(de ? "Tage" : "Days");
         etDays.setText(r.periodDays == 7 || pickedPeriod != 3 ? "" : String.valueOf(r.periodDays));
