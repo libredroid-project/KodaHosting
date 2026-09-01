@@ -84,6 +84,15 @@ public class NetworkPolicy {
     // ── usage metering ───────────────────────────────────────────────
 
     private static long lastUidBytes = -1;
+    private static long lastDeltaBytes = 0;
+    private static long lastTickMs = 0;
+
+    /** Live speed estimate from the last meter tick (bytes per second). */
+    public static float speedBps() {
+        long dt = System.currentTimeMillis() - lastTickMs;
+        if (dt <= 0 || dt > 60000) return 0f;
+        return lastDeltaBytes / (dt / 1000f);
+    }
     private static boolean lastWasMobile = false;
 
     /**
@@ -98,6 +107,8 @@ public class NetworkPolicy {
             if (lastUidBytes < 0) { lastUidBytes = uid; lastWasMobile = onMobile; return; }
             long delta = uid - lastUidBytes;
             lastUidBytes = uid;
+            lastDeltaBytes = Math.max(0, delta);
+            lastTickMs = System.currentTimeMillis();
             if (delta <= 0) return;
 
             long prev = App.getPrefs(ctx).getLong("net_acc_bytes", 0);

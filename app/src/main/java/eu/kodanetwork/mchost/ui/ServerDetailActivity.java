@@ -260,9 +260,10 @@ public class ServerDetailActivity extends AppCompatActivity {
             android.view.ViewGroup parent = (android.view.ViewGroup) cardNet.getParent();
             int idx = parent.indexOfChild(cardNet) + 1;
             android.widget.LinearLayout.LayoutParams lp = new android.widget.LinearLayout.LayoutParams(
-                    android.view.ViewGroup.LayoutParams.MATCH_PARENT, android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
+                    android.view.ViewGroup.LayoutParams.MATCH_PARENT, (int)(48 * getResources().getDisplayMetrics().density));
             float d = getResources().getDisplayMetrics().density;
             lp.topMargin = (int)(12 * d);
+            lp.leftMargin = (int)(16 * d); lp.rightMargin = (int)(16 * d);
             parent.addView(btnNet, idx, lp);
         }
 
@@ -4626,6 +4627,20 @@ public class ServerDetailActivity extends AppCompatActivity {
                     }
                     if (worst != null) {
                         String type = onMobile ? "Mobile" : "WLAN";
+                        if (netDashBar != null) {
+                            netDashBar.setProgress(worstPct);
+                            netDashBar.getProgressDrawable().setColorFilter(
+                                    eu.kodanetwork.mchost.util.NetworkPolicy.colorForPercent(worstPct),
+                                    android.graphics.PorterDuff.Mode.SRC_IN);
+                        }
+                        if (netDashExtra != null) {
+                            eu.kodanetwork.mchost.util.NetworkPolicy.Usage u =
+                                    eu.kodanetwork.mchost.util.NetworkPolicy.usageFor(ServerDetailActivity.this, worst.periodDays);
+                            netDashExtra.setText("Mobile: " + eu.kodanetwork.mchost.util.NetworkPolicy.humanBytes(u.mobileBytes)
+                                    + " · WLAN: " + eu.kodanetwork.mchost.util.NetworkPolicy.humanBytes(u.wifiBytes)
+                                    + "\n↓ " + eu.kodanetwork.mchost.util.NetworkPolicy.humanBytes(
+                                        (long) eu.kodanetwork.mchost.util.NetworkPolicy.speedBps()) + "/s");
+                        }
                         tv.setText(getString(R.string.net_usage_label,
                                 eu.kodanetwork.mchost.util.NetworkPolicy.humanBytes(used),
                                 eu.kodanetwork.mchost.util.NetworkPolicy.humanBytes(limit),
@@ -4658,15 +4673,48 @@ public class ServerDetailActivity extends AppCompatActivity {
                     ? (android.view.ViewGroup) ((android.widget.ScrollView) dashPanel).getChildAt(0)
                     : (android.view.ViewGroup) dashPanel;
         }
-        if (dash && dashHost != null && parent != dashHost) {
+        if (dash && dashHost != null && parent.getId() != View.generateViewId()) {
+            // dedicated network card BELOW all dashboard tiles
+            android.widget.LinearLayout card = new android.widget.LinearLayout(this);
+            card.setId(0x7f099999);
+            card.setOrientation(android.widget.LinearLayout.VERTICAL);
+            float dd = getResources().getDisplayMetrics().density;
+            int cp = (int)(16*dd); card.setPadding(cp, cp, cp, cp);
+            card.setBackgroundResource(eu.kodanetwork.mchost.R.drawable.bg_card_server);
+            android.widget.LinearLayout.LayoutParams cardLp = new android.widget.LinearLayout.LayoutParams(
+                    android.view.ViewGroup.LayoutParams.MATCH_PARENT, android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
+            cardLp.topMargin = (int)(14*dd); cardLp.leftMargin = (int)(10*dd); cardLp.rightMargin = (int)(10*dd);
+            card.setLayoutParams(cardLp);
+
+            TextView cardTitle = new TextView(this);
+            cardTitle.setText(getResources().getConfiguration().getLocales().get(0).getLanguage().equals("de") ? "Netzwerk" : "Network");
+            cardTitle.setTextColor(0xFFF0F0F0); cardTitle.setTextSize(15);
+            cardTitle.setTypeface(null, android.graphics.Typeface.BOLD);
+            card.addView(cardTitle);
+
             parent.removeView(tile);
-            tile.setPadding(tile.getPaddingLeft(), (int)(16*d()), tile.getPaddingRight(), tile.getPaddingBottom());
-            dashHost.addView(tile, 1);
-        } else if (!dash && parent != netTileHome) {
+            tile.setPadding(0, (int)(6*dd), 0, 0);
+            card.addView(tile);
+
+            netDashBar = new android.widget.ProgressBar(this, null, android.R.attr.progressBarStyleHorizontal);
+            netDashBar.setMax(100);
+            netDashBar.getProgressDrawable().setColorFilter(0xFF3DBE3D, android.graphics.PorterDuff.Mode.SRC_IN);
+            card.addView(netDashBar, new android.widget.LinearLayout.LayoutParams(
+                    android.view.ViewGroup.LayoutParams.MATCH_PARENT, (int)(6*dd)));
+
+            netDashExtra = new TextView(this);
+            netDashExtra.setTextColor(0xFFB7AE9F); netDashExtra.setTextSize(11);
+            card.addView(netDashExtra);
+            dashHost.addView(card);
+        } else if (!dash && parent != netTileHome && parent.getId() != netTileHome.getId()) {
+            if (parent.getId() == 0x7f099999) parent.setVisibility(android.view.View.GONE);
             parent.removeView(tile);
             netTileHome.addView(tile, netTileHome.indexOfChild(findViewById(R.id.tv_net_warning)) + 1);
         }
     }
+
+    private android.widget.ProgressBar netDashBar;
+    private TextView netDashExtra;
 
     private int d() { return Math.round(16 * getResources().getDisplayMetrics().density / 16f); }
 
@@ -5249,7 +5297,8 @@ public class ServerDetailActivity extends AppCompatActivity {
         boolean de = getResources().getConfiguration().getLocales().get(0).getLanguage().equals("de");
         float d = getResources().getDisplayMetrics().density;
         com.google.android.material.bottomsheet.BottomSheetDialog sheet =
-                new com.google.android.material.bottomsheet.BottomSheetDialog(this);
+                new com.google.android.material.bottomsheet.BottomSheetDialog(this, R.style.KodaBottomSheetDialog);
+        setupWindowDecor(sheet.getWindow());
         android.widget.LinearLayout root = new android.widget.LinearLayout(this);
         root.setOrientation(android.widget.LinearLayout.VERTICAL);
         root.setBackgroundColor(0xFF1D1714);
@@ -5260,22 +5309,18 @@ public class ServerDetailActivity extends AppCompatActivity {
         title.setTextColor(0xFFF0F0F0); title.setTextSize(18); title.setTypeface(null, android.graphics.Typeface.BOLD);
         root.addView(title);
 
-        // Kachel-Platz: oben (unter Header) oder Dashboard
-        final String[] pos = {eu.kodanetwork.mchost.App.getPrefs(this).getString("net_usage_pos", "top")};
-        com.google.android.material.button.MaterialButton btnPos = eu.kodanetwork.mchost.util.KodaButtons.dark(this,
-                (pos[0].equals("dash") ? (de ? "Position: Dashboard" : "Position: Dashboard")
-                        : (de ? "Position: Oben" : "Position: Top")));
-        btnPos.setOnClickListener(v -> {
-            pos[0] = pos[0].equals("dash") ? "top" : "dash";
-            eu.kodanetwork.mchost.App.getPrefs(this).edit().putString("net_usage_pos", pos[0]).apply();
-            relocateNetUsageTile();
-            btnPos.setText(pos[0].equals("dash") ? (de ? "Position: Dashboard" : "Position: Dashboard")
-                    : (de ? "Position: Oben" : "Position: Top"));
-        });
+        // Kachel-Platz: Sliding-Pill (Oben | Dashboard) wie bei der Join-Address-Wall
+        int selPos = "dash".equals(eu.kodanetwork.mchost.App.getPrefs(this).getString("net_usage_pos", "top")) ? 1 : 0;
+        android.widget.FrameLayout pillPos = makePillSwitch(
+                new String[]{de ? "Oben" : "Top", "Dashboard"}, selPos, sel -> {
+                    eu.kodanetwork.mchost.App.getPrefs(this).edit()
+                            .putString("net_usage_pos", sel == 1 ? "dash" : "top").apply();
+                    relocateNetUsageTile();
+                });
         android.widget.LinearLayout.LayoutParams posLp = new android.widget.LinearLayout.LayoutParams(
-                android.view.ViewGroup.LayoutParams.WRAP_CONTENT, android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
+                android.view.ViewGroup.LayoutParams.MATCH_PARENT, android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
         posLp.topMargin = (int)(10*d);
-        root.addView(btnPos, posLp);
+        root.addView(pillPos, posLp);
 
         Runnable[] refresh = new Runnable[1];
         refresh[0] = () -> { sheet.dismiss(); showNetworkRulesSheet(); };
@@ -5336,7 +5381,8 @@ public class ServerDetailActivity extends AppCompatActivity {
         boolean de = getResources().getConfiguration().getLocales().get(0).getLanguage().equals("de");
         float d = getResources().getDisplayMetrics().density;
         com.google.android.material.bottomsheet.BottomSheetDialog sheet =
-                new com.google.android.material.bottomsheet.BottomSheetDialog(this);
+                new com.google.android.material.bottomsheet.BottomSheetDialog(this, R.style.KodaBottomSheetDialog);
+        setupWindowDecor(sheet.getWindow());
         android.widget.LinearLayout root = new android.widget.LinearLayout(this);
         root.setOrientation(android.widget.LinearLayout.VERTICAL);
         root.setBackgroundColor(0xFF1D1714);
@@ -5383,7 +5429,8 @@ public class ServerDetailActivity extends AppCompatActivity {
         if (r.id == null) { r.id = java.util.UUID.randomUUID().toString(); r.periodDays = 7; r.mobile = true; r.wifi = true; r.action = eu.kodanetwork.mchost.util.NetworkPolicy.ACTION_WARN; }
 
         com.google.android.material.bottomsheet.BottomSheetDialog sheet =
-                new com.google.android.material.bottomsheet.BottomSheetDialog(this);
+                new com.google.android.material.bottomsheet.BottomSheetDialog(this, R.style.KodaBottomSheetDialog);
+        setupWindowDecor(sheet.getWindow());
         android.widget.LinearLayout root = new android.widget.LinearLayout(this);
         root.setOrientation(android.widget.LinearLayout.VERTICAL);
         root.setBackgroundColor(0xFF1D1714);
@@ -5538,7 +5585,7 @@ public class ServerDetailActivity extends AppCompatActivity {
         frame.addView(pill[0], new android.widget.FrameLayout.LayoutParams(0,
                 android.view.ViewGroup.LayoutParams.MATCH_PARENT));
         frame.addView(row, new android.widget.FrameLayout.LayoutParams(
-                android.view.ViewGroup.LayoutParams.MATCH_PARENT, android.view.ViewGroup.LayoutParams.WRAP_CONTENT));
+                android.view.ViewGroup.LayoutParams.MATCH_PARENT, android.view.ViewGroup.LayoutParams.MATCH_PARENT));
         // initial pill width/position nach Layout
         frame.post(() -> {
             TextView selTv = items[Math.max(0, Math.min(selected, items.length - 1))];
