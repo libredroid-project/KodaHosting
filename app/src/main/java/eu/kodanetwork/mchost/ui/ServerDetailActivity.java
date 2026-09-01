@@ -254,24 +254,15 @@ public class ServerDetailActivity extends AppCompatActivity {
         View cardNet = findViewById(R.id.btn_change_name) != null
                 ? (View) findViewById(R.id.btn_change_name).getParent() : findViewById(R.id.card_settings_network);
         if (cardNet != null && cardNet.getParent() instanceof android.view.ViewGroup && server != null) {
-            com.google.android.material.button.MaterialButton btnNet = new com.google.android.material.button.MaterialButton(
-                    new android.view.ContextThemeWrapper(this, R.style.Theme_KodaNetwork), null, 0);
-            btnNet.setText(getResources().getConfiguration().getLocales().get(0).getLanguage().equals("de")
+            // inflate the change-name twin from XML so text/font/size match 1:1
+            android.view.View btnNet = getLayoutInflater().inflate(R.layout.view_net_rules_btn, parent, false);
+            com.google.android.material.button.MaterialButton btnNetM = btnNet.findViewById(R.id.btn_net_rules_entry);
+            btnNetM.setText(getResources().getConfiguration().getLocales().get(0).getLanguage().equals("de")
                     ? "Netzwerk-Regeln" : "Network Rules");
-            btnNet.setTextColor(0xFF111111);
-            btnNet.setBackgroundTintList(android.content.res.ColorStateList.valueOf(0xFFFF6B00));
-            btnNet.setCornerRadius((int)(6 * getResources().getDisplayMetrics().density));
-            btnNet.setAllCaps(true);
-            btnNet.setTextSize(14);
-            btnNet.setTypeface(androidx.core.content.res.ResourcesCompat.getFont(this, R.font.font_koda));
-            btnNet.setTag(R.id.tag_themed, "BLOCKED");
-            btnNet.setOnClickListener(v -> showNetworkRulesSheet());
-            android.view.ViewGroup parent = (android.view.ViewGroup) cardNet.getParent();
+            btnNetM.setTag(R.id.tag_themed, "BLOCKED");
+            btnNetM.setOnClickListener(v -> showNetworkRulesSheet());
             int idx = parent.indexOfChild(cardNet) + 1;
-            android.widget.LinearLayout.LayoutParams lp = new android.widget.LinearLayout.LayoutParams(
-                    android.view.ViewGroup.LayoutParams.MATCH_PARENT, (int)(50 * getResources().getDisplayMetrics().density));
-            lp.topMargin = (int)(8 * getResources().getDisplayMetrics().density);
-            parent.addView(btnNet, idx, lp);
+            parent.addView(btnNet, idx);
         }
 
         TextView tvTitle = findViewById(R.id.tv_title);
@@ -4699,7 +4690,7 @@ public class ServerDetailActivity extends AppCompatActivity {
 
             TextView cardTitle = new TextView(this);
             cardTitle.setText(getResources().getConfiguration().getLocales().get(0).getLanguage().equals("de") ? "Netzwerk" : "Network");
-            cardTitle.setTextColor(0xFFF0F0F0); cardTitle.setTextSize(15);
+            cardTitle.setTextColor(0xFFFF6B00); cardTitle.setTextSize(16);
             cardTitle.setTypeface(null, android.graphics.Typeface.BOLD);
             card.addView(cardTitle);
 
@@ -4714,7 +4705,7 @@ public class ServerDetailActivity extends AppCompatActivity {
                     android.view.ViewGroup.LayoutParams.MATCH_PARENT, (int)(6*dd)));
 
             netDashExtra = new TextView(this);
-            netDashExtra.setTextColor(0xFFB7AE9F); netDashExtra.setTextSize(11);
+            netDashExtra.setTextColor(0xFFE8E2D6); netDashExtra.setTextSize(12);
             card.addView(netDashExtra);
             dashHost.addView(card);
         } else if (!dash && parent != netTileHome && netDashCard != null) {
@@ -5332,7 +5323,7 @@ public class ServerDetailActivity extends AppCompatActivity {
                     relocateNetUsageTile();
                 });
         android.widget.LinearLayout.LayoutParams posLp = new android.widget.LinearLayout.LayoutParams(
-                android.view.ViewGroup.LayoutParams.MATCH_PARENT, android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
+                android.view.ViewGroup.LayoutParams.MATCH_PARENT, (int)(44 * d));
         posLp.topMargin = (int)(10*d);
         root.addView(pillPos, posLp);
 
