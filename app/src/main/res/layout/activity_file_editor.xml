@@ -35,6 +35,15 @@
             android:hint="Search..." android:textColor="#888888" android:textSize="10sp"
             android:paddingStart="10dp" android:fontFamily="@font/font_koda_mono"
             android:singleLine="true"/>
+        <ImageButton android:id="@+id/btn_search_prev"
+            android:layout_width="30dp" android:layout_height="30dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@android:drawable/ic_menu_search" android:tint="#888888"/>
+        <TextView android:id="@+id/tv_match_count"
+            android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:text="" android:textColor="#8A8A9A" android:textSize="10sp"
+            android:fontFamily="@font/font_koda" android:minWidth="36dp"
+            android:gravity="center"/>
         <ImageButton android:id="@+id/btn_search_next"
             android:layout_width="30dp" android:layout_height="30dp"
             android:background="?attr/selectableItemBackgroundBorderless"

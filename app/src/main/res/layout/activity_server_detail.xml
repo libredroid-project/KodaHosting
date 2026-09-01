@@ -445,7 +445,7 @@
             <TextView android:id="@+id/tv_files_root"
                 android:layout_width="0dp" android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:textColor="#8A8A9A" android:textSize="12sp"
+                android:textColor="#B7AE9F" android:textSize="12sp"
                 android:fontFamily="@font/font_koda"         android:ellipsize="middle"/>
             <ImageButton android:id="@+id/btn_import_file"
                 android:layout_width="32dp" android:layout_height="32dp"

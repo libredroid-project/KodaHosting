@@ -75,11 +75,25 @@ public class FileEditorActivity extends AppCompatActivity {
         btnBack.setOnClickListener(v -> finish());
         btnSave.setOnClickListener(v -> saveFile());
         btnSearchNext.setOnClickListener(v -> searchNext());
-
+        ImageButton btnSearchPrev = findViewById(R.id.btn_search_prev);
+        if (btnSearchPrev != null) btnSearchPrev.setOnClickListener(v -> searchPrev());
+        etSearch.addTextChangedListener(new TextWatcher() {
+            @Override public void beforeTextChanged(CharSequence cs, int a, int b, int c) {}
+            @Override public void onTextChanged(CharSequence cs, int a, int b, int c) {}
+            @Override public void afterTextChanged(Editable e) {
+                lastSearchIndex = 0;
+                rebuildMatches(e.toString());
+                if (!matchPositions.isEmpty()) jumpToMatch(0 - 1 + 1); // jump to first
+            }
+        });
+        // rebuild match list after content changes too
         etEditor.addTextChangedListener(new TextWatcher() {
-            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-            @Override public void onTextChanged(CharSequence s, int start, int before, int count) {}
-            @Override public void afterTextChanged(Editable s) { syntaxHighlight(); }
+            @Override public void beforeTextChanged(CharSequence cs, int a, int b, int c) {}
+            @Override public void onTextChanged(CharSequence cs, int a, int b, int c) {}
+            @Override public void afterTextChanged(Editable e) {
+                syntaxHighlight();
+                rebuildMatches(etSearch.getText().toString());
+            }
         });
 
         loadFile();
@@ -119,23 +133,68 @@ public class FileEditorActivity extends AppCompatActivity {
         } catch (Exception ignored) {}
     }
 
-    private void searchNext() {
-        String query = etSearch.getText().toString();
-        if (query.isEmpty()) return;
-        String content = etEditor.getText().toString();
-        int index = content.indexOf(query, lastSearchIndex);
-        if (index == -1) { index = content.indexOf(query, 0); }
-        if (index != -1) {
-            etEditor.setSelection(index, index + query.length());
-            etEditor.requestFocus();
-            lastSearchIndex = index + query.length();
-        } else {
-            Toast.makeText(this, "Nicht gefunden", Toast.LENGTH_SHORT).show();
+    private int totalMatches = 0;
+    private java.util.ArrayList<Integer> matchPositions = new java.util.ArrayList<>();
+    private int matchCursor = -1;
+
+    private void rebuildMatches(String query) {
+        matchPositions.clear();
+        matchCursor = -1;
+        if (query != null && !query.isEmpty()) {
+            String content = etEditor.getText().toString();
+            String lower = content.toLowerCase();
+            String q = query.toLowerCase();
+            int idx = 0;
+            while ((idx = lower.indexOf(q, idx)) != -1) {
+                matchPositions.add(idx);
+                idx += q.length();
+            }
         }
+        updateMatchCounter();
+    }
+
+    private void updateMatchCounter() {
+        TextView tvCount = findViewById(R.id.tv_match_count);
+        if (tvCount == null) return;
+        tvCount.setText(matchPositions.isEmpty()
+                ? ""
+                : (matchCursor + 1) + "/" + matchPositions.size());
+    }
+
+    private void jumpToMatch(int dir) {
+        if (matchPositions.isEmpty()) { updateMatchCounter(); return; }
+        matchCursor = (matchCursor + dir + matchPositions.size()) % matchPositions.size();
+        int index = matchPositions.get(matchCursor);
+        int len = etSearch.getText().toString().length();
+        etEditor.requestFocus();
+        etEditor.setSelection(index, index + len);
+        etEditor.bringPointIntoView(index + len); // auto-scroll to the hit
+        updateMatchCounter();
+    }
+
+    private void searchNext() { jumpToMatch(1); }
+    private void searchPrev() { jumpToMatch(-1); }
+
+    /** Extensions that never open in the text editor (binaries / blocked per request). */
+    private static final String[] BLOCKED_EXT = {
+            ".jar", ".java", ".class", ".exe", ".dll", ".so", ".bin",
+            ".png", ".jpg", ".jpeg", ".gif", ".webp", ".bmp", ".ico",
+            ".zip", ".gz", ".tar", ".xz", ".rar", ".7z",
+            ".db", ".sqlite", ".dat", ".mca", ".region", ".mcr",
+            ".mp3", ".ogg", ".wav", ".mp4", ".flac"};
+
+    private boolean isBlocked(String name) {
+        String n = name.toLowerCase();
+        for (String ext : BLOCKED_EXT) if (n.endsWith(ext)) return true;
+        return false;
     }
 
     private void loadFile() {
         if (!targetFile.exists()) { finish(); return; }
+        if (isBlocked(targetFile.getName())) {
+            Toast.makeText(this, "Dieser Dateityp kann hier nicht geöffnet werden", Toast.LENGTH_LONG).show();
+            finish(); return;
+        }
         if (targetFile.length() > 1024 * 1024) { Toast.makeText(this, "File too large!", Toast.LENGTH_LONG).show(); finish(); return; }
 
         new Thread(() -> {
