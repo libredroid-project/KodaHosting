@@ -250,8 +250,9 @@ public class ServerDetailActivity extends AppCompatActivity {
         }
 
         // Network budget rules: entry button in the settings panel (programmatic)
-        // sit as its own element BELOW the network card, not inside it
-        View cardNet = findViewById(R.id.card_settings_network);
+        // own element directly BELOW the CHANGE SERVER NAME card
+        View cardNet = findViewById(R.id.btn_change_name) != null
+                ? (View) findViewById(R.id.btn_change_name).getParent() : findViewById(R.id.card_settings_network);
         if (cardNet != null && cardNet.getParent() instanceof android.view.ViewGroup && server != null) {
             com.google.android.material.button.MaterialButton btnNet = eu.kodanetwork.mchost.util.KodaButtons.primary(this,
                     getResources().getConfiguration().getLocales().get(0).getLanguage().equals("de") ? "Netzwerk-Regeln" : "Network rules");
@@ -5266,7 +5267,12 @@ public class ServerDetailActivity extends AppCompatActivity {
     /** Fullscreen slide-up sheet (Modrinth-search pattern) with app-warm background. */
     private void styleSheetFullscreen(com.google.android.material.bottomsheet.BottomSheetDialog sheet) {
         int screenH = getResources().getDisplayMetrics().heightPixels;
-        sheet.getBehavior().setPeekHeight(screenH);
+        // the gray line at the bottom is the dialog WINDOW background showing through
+        if (sheet.getWindow() != null) {
+            sheet.getWindow().setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(0xFF1D1714));
+            sheet.getWindow().setNavigationBarColor(0xFF1D1714);
+        }
+        sheet.getBehavior().setPeekHeight((int)(screenH * 0.9f));
         sheet.getBehavior().setState(com.google.android.material.bottomsheet.BottomSheetBehavior.STATE_EXPANDED);
         sheet.getBehavior().setSkipCollapsed(true);
         android.view.View sheetBg = sheet.findViewById(com.google.android.material.R.id.design_bottom_sheet);
@@ -5366,49 +5372,30 @@ public class ServerDetailActivity extends AppCompatActivity {
             }
         };
 
-        android.widget.LinearLayout rowLimit = new android.widget.LinearLayout(this);
-        TextView[] limitViews = new TextView[limitNames.length];
-        for (int i = 0; i < limitNames.length; i++) {
-            final int fi = i;
-            TextView chip = new TextView(this);
-            chip.setText(limitNames[i]); chip.setTextSize(13);
-            chip.setPadding((int)(12*d), (int)(10*d), (int)(12*d), (int)(10*d));
-            chip.setBackgroundResource(eu.kodanetwork.mchost.R.drawable.pill_address_bg);
-            chip.setTag(R.id.tag_themed, "BLOCKED");
-            chip.setOnClickListener(v -> { pickedLimit[0] = fi; paint.accept(fi, limitViews);
-                etCustom.setVisibility(fi == limits.length-1 ? android.view.View.VISIBLE : android.view.View.GONE); });
-            limitViews[i] = chip; rowLimit.addView(chip);
-        }
-        paint.accept(pickedLimit[0], limitViews);
+        android.widget.FrameLayout pillLimit = makePillSwitch(limitNames, pickedLimit[0], sel -> {
+            pickedLimit[0] = sel;
+            etCustom.setVisibility(sel == limits.length - 1 ? android.view.View.VISIBLE : android.view.View.GONE);
+        });
         root.addView(netLabel(de ? "Wie viel Datenvolumen?" : "How much data?", d));
-        root.addView(rowLimit); root.addView(etCustom);
+        root.addView(pillLimit); root.addView(etCustom);
 
         final int[] periods = {1, 7, 30, -1};
         final String[] periodNames = {de?"Tag":"Day", de?"Woche":"Week", de?"Monat":"Month", de?"Eigenes":"Custom"};
         int pickedPeriod = r.periodDays == 1 ? 0 : (r.periodDays == 30 ? 2 : 1);
         if (pickedPeriod == 1 && r.periodDays != 7) pickedPeriod = 3;
         final int[] selPeriod = {pickedPeriod};
-        android.widget.LinearLayout rowPeriod = new android.widget.LinearLayout(this);
-        TextView[] periodViews = new TextView[3];
-        for (int i = 0; i < 3; i++) {
-            final int fi = i;
-            TextView chip = new TextView(this);
-            chip.setText(periodNames[i]); chip.setTextSize(13);
-            chip.setPadding((int)(10*d), (int)(8*d), (int)(10*d), (int)(8*d));
-            chip.setOnClickListener(v -> { selPeriod[0] = fi; paint.accept(fi, periodViews); });
-            periodViews[i] = chip; rowPeriod.addView(chip);
-        }
+        android.widget.FrameLayout pillPeriod = makePillSwitch(periodNames, selPeriod[0], sel -> {
+            selPeriod[0] = sel;
+            etDays.setVisibility(periods[sel] == -1 ? android.view.View.VISIBLE : android.view.View.GONE);
+        });
         final EditText etDays = new EditText(this);
         etDays.setInputType(android.text.InputType.TYPE_CLASS_NUMBER);
         etDays.setHint(de ? "Tage" : "Days");
         etDays.setText(r.periodDays == 7 || pickedPeriod != 3 ? "" : String.valueOf(r.periodDays));
         etDays.setVisibility(pickedPeriod == 3 ? android.view.View.VISIBLE : android.view.View.GONE);
-        final int fpp = pickedPeriod;
-        for (int i = 0; i < 3; i++) { final int fi = i; periodViews[i].setOnClickListener(v -> { selPeriod[0] = fi; paint.accept(fi, periodViews);
-            etCustom2Sel(etDays, fi == 3); }); }
-        paint.accept(selPeriod[0], periodViews);
+        etDays.setVisibility(periods[selPeriod[0]] == -1 ? android.view.View.VISIBLE : android.view.View.GONE);
         root.addView(netLabel(de ? "Pro Zeitraum" : "Per period", d));
-        root.addView(rowPeriod); root.addView(etDays);
+        root.addView(pillPeriod); root.addView(etDays);
 
         final android.widget.CheckBox cbMobile = new android.widget.CheckBox(this);
         cbMobile.setText("Mobile Data"); cbMobile.setChecked(r.mobile); root.addView(cbMobile);
@@ -5463,6 +5450,63 @@ public class ServerDetailActivity extends AppCompatActivity {
         sheet.setContentView(sc);
         styleSheetFullscreen(sheet);
         sheet.show();
+    }
+
+    /** Segmented sliding-pill switch (like the theme dark/light/auto picker). */
+    private android.widget.FrameLayout makePillSwitch(String[] options, int selected, java.util.function.IntConsumer onPick) {
+        float d = getResources().getDisplayMetrics().density;
+        android.widget.FrameLayout frame = new android.widget.FrameLayout(this);
+        android.widget.LinearLayout row = new android.widget.LinearLayout(this);
+        row.setOrientation(android.widget.LinearLayout.HORIZONTAL);
+        final android.view.View[] pill = new android.view.View[1];
+        pill[0] = new android.view.View(this);
+        android.graphics.drawable.GradientDrawable pillBg = new android.graphics.drawable.GradientDrawable();
+        pillBg.setCornerRadius(18 * d); pillBg.setColor(0xFFFF6B00);
+        pill[0].setBackground(pillBg);
+        TextView[] items = new TextView[options.length];
+        for (int i = 0; i < options.length; i++) {
+            final int fi = i;
+            TextView tv = new TextView(this);
+            tv.setText(options[i]); tv.setTextSize(12); tv.setGravity(android.view.Gravity.CENTER);
+            tv.setPadding((int)(6*d), (int)(12*d), (int)(6*d), (int)(12*d));
+            tv.setOnClickListener(v -> {
+                onPick.accept(fi);
+                android.view.View sv = (android.view.View) tv.getParent();
+                int left = tv.getLeft();
+                pill[0].animate().translationX(left).setDuration(200)
+                        .setInterpolator(new android.view.animation.DecelerateInterpolator()).start();
+                for (int k = 0; k < items.length; k++)
+                    items[k].setTextColor(k == fi ? 0xFF1D1714 : 0xFFE8E2D6);
+            });
+            items[i] = tv; row.addView(tv, new android.widget.LinearLayout.LayoutParams(0,
+                    android.view.ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
+        }
+        android.view.View track = new android.view.View(this);
+        android.graphics.drawable.GradientDrawable trackBg = new android.graphics.drawable.GradientDrawable();
+        trackBg.setCornerRadius(18 * d); trackBg.setColor(0xFF26221E);
+        track.setBackground(trackBg);
+        frame.addView(track, new android.widget.FrameLayout.LayoutParams(
+                android.view.ViewGroup.LayoutParams.MATCH_PARENT, android.view.ViewGroup.LayoutParams.MATCH_PARENT));
+        frame.addView(row, new android.widget.FrameLayout.LayoutParams(
+                android.view.ViewGroup.LayoutParams.MATCH_PARENT, android.view.ViewGroup.LayoutParams.WRAP_CONTENT));
+        frame.addView(pill[0], new android.widget.FrameLayout.LayoutParams(0,
+                android.view.ViewGroup.LayoutParams.MATCH_PARENT));
+        // initial pill width/position nach Layout
+        frame.post(() -> {
+            TextView selTv = items[Math.max(0, Math.min(selected, items.length - 1))];
+            android.widget.FrameLayout.LayoutParams lp = (android.widget.FrameLayout.LayoutParams) pill[0].getLayoutParams();
+            lp.width = selTv.getWidth(); lp.leftMargin = 0;
+            pill[0].setLayoutParams(lp);
+            pill[0].setTranslationX(selTv.getLeft());
+            for (int k = 0; k < items.length; k++)
+                items[k].setTextColor(k == selected ? 0xFF1D1714 : 0xFFE8E2D6);
+        });
+        int h = (int)(44 * d);
+        android.widget.LinearLayout.LayoutParams flp = new android.widget.LinearLayout.LayoutParams(
+                android.view.ViewGroup.LayoutParams.MATCH_PARENT, h);
+        flp.topMargin = (int)(6 * d);
+        frame.setLayoutParams(flp);
+        return frame;
     }
 
     private void etCustom2Sel(View v, boolean show) {
