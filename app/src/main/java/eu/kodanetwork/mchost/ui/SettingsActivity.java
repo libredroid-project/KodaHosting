@@ -1866,6 +1866,7 @@ public class SettingsActivity extends Activity {
                 w.setNavigationBarColor(navColor);
                 w.setStatusBarColor(navColor);
             }
+            eu.kodanetwork.mchost.util.SheetFix.apply(sheet);
             sheet.show();
         });
     }

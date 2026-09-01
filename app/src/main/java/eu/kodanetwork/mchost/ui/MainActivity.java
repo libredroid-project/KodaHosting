@@ -779,6 +779,7 @@ public class MainActivity extends AppCompatActivity {
             w.getDecorView().setSystemUiVisibility(flags);
         }
 
+        eu.kodanetwork.mchost.util.SheetFix.apply(dialog);
         dialog.show();
     }
 
@@ -1142,6 +1143,7 @@ public class MainActivity extends AppCompatActivity {
 
         sheet.setContentView(content);
         sheet.getBehavior().setPeekHeight((int)(380 * d));
+        eu.kodanetwork.mchost.util.SheetFix.apply(sheet);
         sheet.show();
     }
 

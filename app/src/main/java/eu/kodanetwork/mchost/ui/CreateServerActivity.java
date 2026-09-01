@@ -1320,6 +1320,7 @@ public class CreateServerActivity extends AppCompatActivity {
             }
         });
 
+        eu.kodanetwork.mchost.util.SheetFix.apply(sheet);
         sheet.show();
         HapticUtil.applyHapticsToView(container, this);
     }

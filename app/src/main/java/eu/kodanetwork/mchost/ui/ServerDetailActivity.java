@@ -762,6 +762,7 @@ public class ServerDetailActivity extends AppCompatActivity {
             }).start();
         }
 
+        eu.kodanetwork.mchost.util.SheetFix.apply(sheet);
         sheet.show();
     }
     
@@ -2625,6 +2626,7 @@ public class ServerDetailActivity extends AppCompatActivity {
             container.addView(btn, lp);
         }
         sheet.setContentView(container);
+        eu.kodanetwork.mchost.util.SheetFix.apply(sheet);
         sheet.show();
     }
 
@@ -3425,6 +3427,7 @@ public class ServerDetailActivity extends AppCompatActivity {
                                 }
                                 
                                 sheet.setContentView(container);
+                                eu.kodanetwork.mchost.util.SheetFix.apply(sheet);
                                 sheet.show();
                             });
                         } catch (Exception e) {
@@ -4445,6 +4448,7 @@ public class ServerDetailActivity extends AppCompatActivity {
         // Trigger initial search for popular resource packs
         doSearch.onClick(null);
         
+        eu.kodanetwork.mchost.util.SheetFix.apply(dialog);
         dialog.show();
     }
 
