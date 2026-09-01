@@ -43,7 +43,7 @@ public final class SheetFix {
         }
 
         // let the content itself grow instead of wrapping at its (small) natural size
-        View contentRoot = sheet.findViewById(com.google.android.material.R.id.design_bottom_sheet);
+        android.view.View contentRoot = sheet.findViewById(com.google.android.material.R.id.design_bottom_sheet);
         if (contentRoot != null) {
             ViewGroup.LayoutParams lp = contentRoot.getLayoutParams();
             lp.height = ViewGroup.LayoutParams.MATCH_PARENT;
