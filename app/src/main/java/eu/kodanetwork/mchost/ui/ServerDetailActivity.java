@@ -4636,7 +4636,7 @@ public class ServerDetailActivity extends AppCompatActivity {
                                     eu.kodanetwork.mchost.util.NetworkPolicy.usageFor(ServerDetailActivity.this, worst.periodDays);
                             netDashExtra.setText("Mobile: " + eu.kodanetwork.mchost.util.NetworkPolicy.humanBytes(u.mobileBytes)
                                     + " · WLAN: " + eu.kodanetwork.mchost.util.NetworkPolicy.humanBytes(u.wifiBytes)
-                                    + "\n↓ " + eu.kodanetwork.mchost.util.NetworkPolicy.humanBytes(
+                                    + " · ↓ " + eu.kodanetwork.mchost.util.NetworkPolicy.humanBytes(
                                         (long) eu.kodanetwork.mchost.util.NetworkPolicy.speedBps()) + "/s");
                         }
                         tv.setText(getString(R.string.net_usage_label,
@@ -4680,7 +4680,7 @@ public class ServerDetailActivity extends AppCompatActivity {
             netDashCard = card;
             card.setOrientation(android.widget.LinearLayout.VERTICAL);
             float dd = getResources().getDisplayMetrics().density;
-            int cp = (int)(16*dd); card.setPadding(cp, cp, cp, cp);
+            int cp = (int)(12*dd); card.setPadding(cp, cp, cp, cp);
             android.graphics.drawable.GradientDrawable cardBg = new android.graphics.drawable.GradientDrawable();
             cardBg.setColor(0xFF241C18);
             cardBg.setCornerRadius(12 * getResources().getDisplayMetrics().density);
@@ -4689,6 +4689,7 @@ public class ServerDetailActivity extends AppCompatActivity {
             android.widget.LinearLayout.LayoutParams cardLp = new android.widget.LinearLayout.LayoutParams(
                     android.view.ViewGroup.LayoutParams.MATCH_PARENT, android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
             cardLp.bottomMargin = (int)(12*dd);
+            cardLp.topMargin = (int)(12*dd);
             card.setLayoutParams(cardLp);
 
             TextView cardTitle = new TextView(this);
@@ -5537,6 +5538,7 @@ public class ServerDetailActivity extends AppCompatActivity {
                 rules.removeIf(x -> x.id.equals(r.id)); // same rule = replace, never duplicate
                 rules.add(r);
                 eu.kodanetwork.mchost.util.NetworkPolicy.saveRules(this, server.getId(), rules);
+                eu.kodanetwork.mchost.util.HapticUtil.forceVibrate(this, 50);
                 sheet.dismiss(); done.run();
             } catch (Exception e) {
                 android.widget.Toast.makeText(this, de ? "Ungültige Eingabe" : "Invalid input", android.widget.Toast.LENGTH_SHORT).show();
@@ -5573,6 +5575,7 @@ public class ServerDetailActivity extends AppCompatActivity {
             tv.setSingleLine(true);
             tv.setPadding((int)(6*d), (int)(12*d), (int)(6*d), (int)(12*d));
             tv.setOnClickListener(v -> {
+                eu.kodanetwork.mchost.util.HapticUtil.forceVibrate(this, 30);
                 onPick.accept(fi);
                 android.view.View sv = (android.view.View) tv.getParent();
                 int left = tv.getLeft();
@@ -5594,16 +5597,20 @@ public class ServerDetailActivity extends AppCompatActivity {
                 android.view.ViewGroup.LayoutParams.MATCH_PARENT));
         frame.addView(row, new android.widget.FrameLayout.LayoutParams(
                 android.view.ViewGroup.LayoutParams.MATCH_PARENT, android.view.ViewGroup.LayoutParams.MATCH_PARENT));
-        // initial pill width/position nach Layout
-        frame.post(() -> {
+        // initial pill width/position — retry until the layout is measured
+        final int[] tries = {0};
+        Runnable[] init = new Runnable[1];
+        init[0] = () -> {
             TextView selTv = items[Math.max(0, Math.min(selected, items.length - 1))];
+            if (selTv.getWidth() == 0 && tries[0]++ < 10) { frame.post(init[0]); return; }
             android.widget.FrameLayout.LayoutParams lp = (android.widget.FrameLayout.LayoutParams) pill[0].getLayoutParams();
             lp.width = selTv.getWidth(); lp.leftMargin = 0;
             pill[0].setLayoutParams(lp);
             pill[0].setTranslationX(selTv.getLeft());
             for (int k = 0; k < items.length; k++)
                 items[k].setTextColor(k == selected ? 0xFF1D1714 : 0xFFE8E2D6);
-        });
+        };
+        frame.post(init[0]);
         int h = (int)(44 * d);
         android.widget.LinearLayout.LayoutParams flp = new android.widget.LinearLayout.LayoutParams(
                 android.view.ViewGroup.LayoutParams.MATCH_PARENT, h);
