@@ -553,4 +553,6 @@
     <string name="license_libs">Used Libraries\n\nThis app uses various open-source libraries whose own licenses (e.g., Apache 2.0, MIT) remain valid unchanged. A detailed list can be found in the \"Legal &amp; Licenses\" tab.</string>
     <string name="license_disclaimer">Disclaimer\n\nThis app is provided without any warranty, to the extent permitted by law. The developer is not liable for damages arising from the use of the app, unless mandatorily required by law.\nThe app is provided \"as is\". There is no guarantee that the app is suitable for a specific purpose or works error-free.\nThe LOPL v1.0 PREVIEW is in the testing phase. Users who choose the LOPL do so at their own legal risk, as the license has not yet been finally tested.</string>
     <string name="license_contact">Contact\n\nFor questions about the license, commercial use, the LOPL, donations, or bugs in the app, you can contact me:\n\n- Email: licence@kodaserv.eu\n- GitHub: libredroid-project</string>
+    <string name="net_quality_warning">Slow internet connection detected. Lag may be caused by your connection, not the server.</string>
+    <string name="net_quality_warning">Slow internet connection detected. Lag may be caused by your connection, not the server.</string>
 </resources>

@@ -4510,8 +4510,48 @@ public class ServerDetailActivity extends AppCompatActivity {
     private String lastThemeMode = "dark";
 
     @Override
+    private android.net.ConnectivityManager.NetworkCallback netCb;
+
+    /** Slow-internet banner: link bandwidth below these thresholds = warn the user. */
+    private void registerNetQualityWatcher() {
+        android.view.View banner = findViewById(R.id.tv_net_warning);
+        if (banner == null) return;
+        try {
+            android.net.ConnectivityManager cm = (android.net.ConnectivityManager)
+                    getSystemService(Context.CONNECTIVITY_SERVICE);
+            if (netCb != null) { try { cm.unregisterNetworkCallback(netCb); } catch (Exception ignored) {} }
+            netCb = new android.net.ConnectivityManager.NetworkCallback() {
+                @Override public void onCapabilitiesChanged(android.net.Network n, android.net.NetworkCapabilities caps) {
+                    boolean slow = caps.getLinkDownstreamBandwidthKbps() > 0
+                            && caps.getLinkDownstreamBandwidthKbps() < 1500;
+                    runOnUiThread(() -> banner.setVisibility(slow ? android.view.View.VISIBLE : android.view.View.GONE));
+                }
+                @Override public void onLost(android.net.Network n) {
+                    runOnUiThread(() -> banner.setVisibility(android.view.View.GONE));
+                }
+            };
+            cm.registerDefaultNetworkCallback(netCb);
+        } catch (Exception e) {
+            android.util.Log.d("ServerDetail", "net watcher failed", e);
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (netCb != null) {
+            try {
+                android.net.ConnectivityManager cm = (android.net.ConnectivityManager)
+                        getSystemService(Context.CONNECTIVITY_SERVICE);
+                cm.unregisterNetworkCallback(netCb);
+            } catch (Exception ignored) {}
+            netCb = null;
+        }
+    }
+
     protected void onResume() {
         super.onResume();
+        registerNetQualityWatcher();
         // Re-theme dynamically built dashboard/tab content for light mode
         eu.kodanetwork.mchost.util.ThemeHelper.reapply(this);
         // Re-sync control buttons: if the service died while we were backgrounded

@@ -530,4 +530,6 @@
     <string name="tutorial_done_title">一切就绪！</string>
     <string name="tutorial_done_body">你的第一个服务器已准备就绪。祝您托管愉快, , 你可以随时在设置中重新查看教程。</string>
     <string name="tutorial_next">下一步</string>
-    <string name="tutorial_replay_hint">教程将在下次启动应用时开始</string>\n</resources>
+    <string name="tutorial_replay_hint">教程将在下次启动应用时开始</string>\n
+    <string name="net_quality_warning">检测到网络连接较慢。卡顿可能是你的网络造成的，而不是服务器。</string>
+</resources>

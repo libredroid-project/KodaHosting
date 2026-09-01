@@ -71,7 +71,17 @@
     </com.google.android.material.card.MaterialCardView>
 
     <!-- ┌─ TABS ─────────────────────────────────────────────────────────┐ -->
-    <com.google.android.material.tabs.TabLayout
+        <!-- Netzwerk-Qualitaet: zwischen Header und Tab-Leiste -->
+    <TextView android:id="@+id/tv_net_warning"
+        android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:background="#33FFCC00" android:textColor="#FFCC00"
+        android:textSize="11sp" android:fontFamily="@font/font_koda"
+        android:paddingHorizontal="12dp" android:paddingVertical="5dp"
+        android:maxLines="2"
+        android:text="@string/net_quality_warning"
+        android:visibility="gone" />
+
+<com.google.android.material.tabs.TabLayout
         android:id="@+id/tabs"
         android:layout_width="match_parent" android:layout_height="44dp"
         android:background="#111111"
