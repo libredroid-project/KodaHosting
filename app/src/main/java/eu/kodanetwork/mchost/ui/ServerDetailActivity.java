@@ -249,6 +249,17 @@ public class ServerDetailActivity extends AppCompatActivity {
             setupPumpkinOverrides();
         }
 
+        // Network budget rules: entry button in the settings panel (programmatic)
+        View settingsPanel = findViewById(R.id.panel_settings);
+        if (settingsPanel instanceof android.view.ViewGroup && server != null) {
+            com.google.android.material.button.MaterialButton btnNet = eu.kodanetwork.mchost.util.KodaButtons.primary(this,
+                    getResources().getConfiguration().getLocales().get(0).getLanguage().equals("de") ? "Netzwerk-Regeln" : "Network rules");
+            btnNet.setOnClickListener(v -> showNetworkRulesSheet());
+            android.view.ViewGroup vg = (android.view.ViewGroup) settingsPanel;
+            android.widget.ScrollView scroller = vg instanceof android.widget.ScrollView ? (android.widget.ScrollView) vg : null;
+            (scroller != null ? (android.view.ViewGroup) scroller.getChildAt(0) : vg).addView(btnNet);
+        }
+
         TextView tvTitle = findViewById(R.id.tv_title);
         tvTitle.setText(server.getName());
         tvTitle.setClickable(true);
@@ -5195,5 +5206,129 @@ public class ServerDetailActivity extends AppCompatActivity {
                 pbRam.setProgress(Math.min(used, max));
             }
         }
+    }
+
+    /** Bottom sheet: list + edit + delete network budget rules for this server. */
+    private void showNetworkRulesSheet() {
+        boolean de = getResources().getConfiguration().getLocales().get(0).getLanguage().equals("de");
+        float d = getResources().getDisplayMetrics().density;
+        com.google.android.material.bottomsheet.BottomSheetDialog sheet =
+                new com.google.android.material.bottomsheet.BottomSheetDialog(this);
+        android.widget.LinearLayout root = new android.widget.LinearLayout(this);
+        root.setOrientation(android.widget.LinearLayout.VERTICAL);
+        int pad = (int)(20*d); root.setPadding(pad, pad, pad, pad);
+
+        TextView title = new TextView(this);
+        title.setText(de ? "Netzwerk-Regeln" : "Network rules");
+        title.setTextColor(0xFFF0F0F0); title.setTextSize(18); title.setTypeface(null, android.graphics.Typeface.BOLD);
+        root.addView(title);
+
+        Runnable[] refresh = new Runnable[1];
+        refresh[0] = () -> { sheet.dismiss(); showNetworkRulesSheet(); };
+
+        java.util.List<eu.kodanetwork.mchost.util.NetworkPolicy.Rule> rules =
+                eu.kodanetwork.mchost.util.NetworkPolicy.getRules(this, server.getId());
+        if (rules.isEmpty()) {
+            TextView none = new TextView(this);
+            none.setText(de ? "Noch keine Regeln. Verbrauch wird trotzdem gemessen." : "No rules yet. Usage is still measured.");
+            none.setTextColor(0xFF8A8A9A); none.setTextSize(12);
+            none.setPadding(0,(int)(12*d),0,(int)(12*d));
+            root.addView(none);
+        }
+        for (eu.kodanetwork.mchost.util.NetworkPolicy.Rule r : rules) {
+            TextView row = new TextView(this);
+            String types = (r.mobile?"Mobile ":"") + (r.wifi?"WLAN":"");
+            row.setText("• " + eu.kodanetwork.mchost.util.NetworkPolicy.humanBytes(r.limitBytes) + " / " + r.periodDays + "d · " + types.trim() + " → " + r.action);
+            row.setTextColor(0xFFE8E2D6); row.setTextSize(13);
+            row.setPadding((int)(8*d),(int)(14*d),(int)(8*d),(int)(14*d));
+            row.setOnClickListener(v -> editNetworkRule(r, refresh[0]));
+            row.setOnLongClickListener(v -> {
+                rules.remove(r); eu.kodanetwork.mchost.util.NetworkPolicy.saveRules(this, server.getId(), rules);
+                android.widget.Toast.makeText(this, de ? "Regel gelöscht" : "Rule deleted", android.widget.Toast.LENGTH_SHORT).show();
+                refresh[0].run(); return true;
+            });
+            root.addView(row);
+        }
+        com.google.android.material.button.MaterialButton add = eu.kodanetwork.mchost.util.KodaButtons.primary(this,
+                de ? "Regel hinzufügen" : "Add rule");
+        add.setOnClickListener(v -> editNetworkRule(null, refresh[0]));
+        android.widget.LinearLayout.LayoutParams addLp = new android.widget.LinearLayout.LayoutParams(
+                android.view.ViewGroup.LayoutParams.MATCH_PARENT, android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
+        addLp.topMargin = (int)(16*d);
+        root.addView(add, addLp);
+
+        sheet.setContentView(root);
+        eu.kodanetwork.mchost.util.SheetFix.apply(sheet);
+        sheet.show();
+    }
+
+    /** Create or edit one rule: limit, period, network types, action. */
+    private void editNetworkRule(eu.kodanetwork.mchost.util.NetworkPolicy.Rule existing, Runnable done) {
+        boolean de = getResources().getConfiguration().getLocales().get(0).getLanguage().equals("de");
+        float d = getResources().getDisplayMetrics().density;
+        eu.kodanetwork.mchost.util.NetworkPolicy.Rule r = existing != null ? existing : new eu.kodanetwork.mchost.util.NetworkPolicy.Rule();
+        if (r.id == null) { r.id = java.util.UUID.randomUUID().toString(); r.periodDays = 7; r.mobile = true; r.wifi = true; r.action = eu.kodanetwork.mchost.util.NetworkPolicy.ACTION_WARN; }
+        String[] actions = {eu.kodanetwork.mchost.util.NetworkPolicy.ACTION_WARN, eu.kodanetwork.mchost.util.NetworkPolicy.ACTION_STOP, eu.kodanetwork.mchost.util.NetworkPolicy.ACTION_BLOCK};
+
+        android.app.Dialog dlg = new android.app.Dialog(this);
+        android.widget.LinearLayout root = new android.widget.LinearLayout(this);
+        root.setOrientation(android.widget.LinearLayout.VERTICAL);
+        int pad = (int)(20*d); root.setPadding(pad, pad, pad, pad);
+
+        TextView t = new TextView(this);
+        t.setText(existing == null ? (de?"Neue Regel":"New rule") : (de?"Regel bearbeiten":"Edit rule"));
+        t.setTextColor(0xFFF0F0F0); t.setTextSize(16); t.setTypeface(null, android.graphics.Typeface.BOLD);
+        root.addView(t);
+
+        final EditText etGb = new EditText(this);
+        etGb.setInputType(android.text.InputType.TYPE_CLASS_NUMBER | android.text.InputType.TYPE_NUMBER_FLAG_DECIMAL);
+        etGb.setText(existing != null ? String.valueOf(r.limitBytes / 1073741824f) : "1");
+        etGb.setHint(de ? "Limit in GB" : "Limit in GB");
+        root.addView(etGb);
+
+        final EditText etDays = new EditText(this);
+        etDays.setInputType(android.text.InputType.TYPE_CLASS_NUMBER);
+        etDays.setText(String.valueOf(r.periodDays));
+        etDays.setHint(de ? "Zeitraum in Tagen (1/7/30)" : "Period in days (1/7/30)");
+        root.addView(etDays);
+
+        final android.widget.CheckBox cbMobile = new android.widget.CheckBox(this);
+        cbMobile.setText("Mobile Data"); cbMobile.setChecked(r.mobile); root.addView(cbMobile);
+        final android.widget.CheckBox cbWifi = new android.widget.CheckBox(this);
+        cbWifi.setText("WLAN"); cbWifi.setChecked(r.wifi); root.addView(cbWifi);
+
+        final com.google.android.material.button.MaterialButton btnAction = eu.kodanetwork.mchost.util.KodaButtons.dark(this, "");
+        final int[] ai = {java.util.Arrays.asList(actions).indexOf(r.action)};
+        Runnable[] upd = new Runnable[1];
+        upd[0] = () -> btnAction.setText((de ? "Aktion: " : "Action: ") + actions[ai[0]]);
+        upd[0].run();
+        btnAction.setOnClickListener(v -> { ai[0] = (ai[0]+1) % actions.length; upd[0].run(); });
+        root.addView(btnAction);
+
+        com.google.android.material.button.MaterialButton save = eu.kodanetwork.mchost.util.KodaButtons.primary(this, de ? "Speichern" : "Save");
+        save.setOnClickListener(v -> {
+            try {
+                r.limitBytes = (long)(Float.parseFloat(etGb.getText().toString()) * 1073741824f);
+                r.periodDays = Math.max(1, Integer.parseInt(etDays.getText().toString()));
+                r.mobile = cbMobile.isChecked(); r.wifi = cbWifi.isChecked();
+                r.action = actions[ai[0]];
+                java.util.List<eu.kodanetwork.mchost.util.NetworkPolicy.Rule> rules =
+                        eu.kodanetwork.mchost.util.NetworkPolicy.getRules(this, server.getId());
+                if (!rules.contains(r)) rules.add(r);
+                eu.kodanetwork.mchost.util.NetworkPolicy.saveRules(this, server.getId(), rules);
+                dlg.dismiss(); done.run();
+            } catch (Exception e) {
+                android.widget.Toast.makeText(this, de ? "Ungültige Eingabe" : "Invalid input", android.widget.Toast.LENGTH_SHORT).show();
+            }
+        });
+        android.widget.LinearLayout.LayoutParams saveLp = new android.widget.LinearLayout.LayoutParams(
+                android.view.ViewGroup.LayoutParams.MATCH_PARENT, android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
+        saveLp.topMargin = (int)(16*d);
+        root.addView(save, saveLp);
+
+        dlg.setContentView(root);
+        eu.kodanetwork.mchost.util.DialogLandFix.apply(dlg);
+        dlg.getWindow().setLayout(android.view.ViewGroup.LayoutParams.MATCH_PARENT, android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
+        dlg.show();
     }
 }
