@@ -5491,7 +5491,7 @@ public class ServerDetailActivity extends AppCompatActivity {
         frame.addView(pill[0], new android.widget.FrameLayout.LayoutParams(0,
                 android.view.ViewGroup.LayoutParams.MATCH_PARENT));
         frame.addView(row, new android.widget.FrameLayout.LayoutParams(
-                android.view.ViewGroup.LayoutParams.MATCH_PARENT, android.view.ViewGroup.WRAP_CONTENT));
+                android.view.ViewGroup.LayoutParams.MATCH_PARENT, android.view.ViewGroup.LayoutParams.WRAP_CONTENT));
         // initial pill width/position nach Layout
         frame.post(() -> {
             TextView selTv = items[Math.max(0, Math.min(selected, items.length - 1))];
