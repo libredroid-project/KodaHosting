@@ -254,16 +254,23 @@ public class ServerDetailActivity extends AppCompatActivity {
         View cardNet = findViewById(R.id.btn_change_name) != null
                 ? (View) findViewById(R.id.btn_change_name).getParent() : findViewById(R.id.card_settings_network);
         if (cardNet != null && cardNet.getParent() instanceof android.view.ViewGroup && server != null) {
-            com.google.android.material.button.MaterialButton btnNet = eu.kodanetwork.mchost.util.KodaButtons.primary(this,
-                    getResources().getConfiguration().getLocales().get(0).getLanguage().equals("de") ? "Netzwerk-Regeln" : "Network rules");
+            com.google.android.material.button.MaterialButton btnNet = new com.google.android.material.button.MaterialButton(
+                    new android.view.ContextThemeWrapper(this, R.style.Theme_KodaNetwork), null, 0);
+            btnNet.setText(getResources().getConfiguration().getLocales().get(0).getLanguage().equals("de")
+                    ? "Netzwerk-Regeln" : "Network Rules");
+            btnNet.setTextColor(0xFF111111);
+            btnNet.setBackgroundTintList(android.content.res.ColorStateList.valueOf(0xFFFF6B00));
+            btnNet.setCornerRadius((int)(6 * getResources().getDisplayMetrics().density));
+            btnNet.setTextAllCaps(true);
+            btnNet.setTextSize(14);
+            btnNet.setTypeface(androidx.core.content.res.ResourcesCompat.getFont(this, R.font.font_koda));
+            btnNet.setTag(R.id.tag_themed, "BLOCKED");
             btnNet.setOnClickListener(v -> showNetworkRulesSheet());
             android.view.ViewGroup parent = (android.view.ViewGroup) cardNet.getParent();
             int idx = parent.indexOfChild(cardNet) + 1;
             android.widget.LinearLayout.LayoutParams lp = new android.widget.LinearLayout.LayoutParams(
-                    android.view.ViewGroup.LayoutParams.MATCH_PARENT, (int)(48 * getResources().getDisplayMetrics().density));
-            float d = getResources().getDisplayMetrics().density;
-            lp.topMargin = (int)(12 * d);
-            lp.leftMargin = (int)(16 * d); lp.rightMargin = (int)(16 * d);
+                    android.view.ViewGroup.LayoutParams.MATCH_PARENT, (int)(50 * getResources().getDisplayMetrics().density));
+            lp.topMargin = (int)(8 * getResources().getDisplayMetrics().density);
             parent.addView(btnNet, idx, lp);
         }
 
@@ -4673,14 +4680,18 @@ public class ServerDetailActivity extends AppCompatActivity {
                     ? (android.view.ViewGroup) ((android.widget.ScrollView) dashPanel).getChildAt(0)
                     : (android.view.ViewGroup) dashPanel;
         }
-        if (dash && dashHost != null && parent.getId() != View.generateViewId()) {
-            // dedicated network card BELOW all dashboard tiles
+        if (dash && dashHost != null && netDashCard == null) {
+            // dedicated network card BELOW all dashboard tiles, styled like card_controls
             android.widget.LinearLayout card = new android.widget.LinearLayout(this);
-            card.setId(0x7f099999);
+            netDashCard = card;
             card.setOrientation(android.widget.LinearLayout.VERTICAL);
             float dd = getResources().getDisplayMetrics().density;
             int cp = (int)(16*dd); card.setPadding(cp, cp, cp, cp);
-            card.setBackgroundResource(eu.kodanetwork.mchost.R.drawable.bg_card_server);
+            android.graphics.drawable.GradientDrawable cardBg = new android.graphics.drawable.GradientDrawable();
+            cardBg.setColor(0xFF241C18);
+            cardBg.setCornerRadius(12 * getResources().getDisplayMetrics().density);
+            card.setBackground(cardBg);
+            card.setTag(R.id.tag_themed, "BLOCKED");
             android.widget.LinearLayout.LayoutParams cardLp = new android.widget.LinearLayout.LayoutParams(
                     android.view.ViewGroup.LayoutParams.MATCH_PARENT, android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
             cardLp.topMargin = (int)(14*dd); cardLp.leftMargin = (int)(10*dd); cardLp.rightMargin = (int)(10*dd);
@@ -4696,7 +4707,7 @@ public class ServerDetailActivity extends AppCompatActivity {
             tile.setPadding(0, (int)(6*dd), 0, 0);
             card.addView(tile);
 
-            netDashBar = new android.widget.ProgressBar(this, null, android.R.attr.progressBarStyleHorizontal);
+            if (netDashBar == null) netDashBar = new android.widget.ProgressBar(this, null, android.R.attr.progressBarStyleHorizontal);
             netDashBar.setMax(100);
             netDashBar.getProgressDrawable().setColorFilter(0xFF3DBE3D, android.graphics.PorterDuff.Mode.SRC_IN);
             card.addView(netDashBar, new android.widget.LinearLayout.LayoutParams(
@@ -4706,13 +4717,16 @@ public class ServerDetailActivity extends AppCompatActivity {
             netDashExtra.setTextColor(0xFFB7AE9F); netDashExtra.setTextSize(11);
             card.addView(netDashExtra);
             dashHost.addView(card);
-        } else if (!dash && parent != netTileHome && parent.getId() != netTileHome.getId()) {
-            if (parent.getId() == 0x7f099999) parent.setVisibility(android.view.View.GONE);
-            parent.removeView(tile);
-            netTileHome.addView(tile, netTileHome.indexOfChild(findViewById(R.id.tv_net_warning)) + 1);
+        } else if (!dash && parent != netTileHome && netDashCard != null) {
+            netDashCard.setVisibility(android.view.View.GONE);
+            if (tile.getParent() instanceof android.view.ViewGroup) {
+                ((android.view.ViewGroup) tile.getParent()).removeView(tile);
+                netTileHome.addView(tile, netTileHome.indexOfChild(findViewById(R.id.tv_net_warning)) + 1);
+            }
         }
     }
 
+    private android.widget.LinearLayout netDashCard;
     private android.widget.ProgressBar netDashBar;
     private TextView netDashExtra;
 
