@@ -261,7 +261,7 @@ public class ServerDetailActivity extends AppCompatActivity {
             btnNet.setTextColor(0xFF111111);
             btnNet.setBackgroundTintList(android.content.res.ColorStateList.valueOf(0xFFFF6B00));
             btnNet.setCornerRadius((int)(6 * getResources().getDisplayMetrics().density));
-            btnNet.setTextAllCaps(true);
+            btnNet.setAllCaps(true);
             btnNet.setTextSize(14);
             btnNet.setTypeface(androidx.core.content.res.ResourcesCompat.getFont(this, R.font.font_koda));
             btnNet.setTag(R.id.tag_themed, "BLOCKED");
