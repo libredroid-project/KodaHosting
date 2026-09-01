@@ -13,7 +13,7 @@
         android:id="@+id/iv_project_icon"
         android:layout_width="64dp"
         android:layout_height="64dp"
-        android:background="#22222A"
+        android:background="#26221E"
         android:scaleType="centerCrop"
         android:layout_marginEnd="12dp" />
 
@@ -27,7 +27,7 @@
             android:id="@+id/tv_project_title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textColor="#FFFFFF"
+            android:textColor="#F2EFE9"
             android:textSize="16sp"
             android:fontFamily="@font/font_koda"
             android:textStyle="bold"
@@ -47,7 +47,7 @@
             android:id="@+id/tv_project_desc"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textColor="#8A8A9A"
+            android:textColor="#B7AE9F"
             android:textSize="12sp"
             android:fontFamily="@font/font_koda"
             android:maxLines="2"

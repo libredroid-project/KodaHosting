@@ -2248,7 +2248,7 @@ public class ServerDetailActivity extends AppCompatActivity {
         layoutFileList.addView(btn, lp);
         
         View div = new View(this);
-        div.setBackgroundColor(0xFF222222);
+        div.setBackgroundColor(eu.kodanetwork.mchost.util.ThemeHelper.isLightMode(this) ? 0xFFE5DECF : 0xFF2A241E);
         div.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 2));
         layoutFileList.addView(div);
     }
@@ -2312,7 +2312,7 @@ public class ServerDetailActivity extends AppCompatActivity {
 
         TextView tv = new TextView(this);
         tv.setText(getString(R.string.sd_files_empty));
-        tv.setTextColor(0xFF555566);
+        tv.setTextColor(eu.kodanetwork.mchost.util.ThemeHelper.isLightMode(this) ? 0xFF8A8075 : 0xFF8A8A9A);
         tv.setTextSize(13);
         tv.setGravity(android.view.Gravity.CENTER);
         box.addView(tv);
@@ -2328,7 +2328,7 @@ public class ServerDetailActivity extends AppCompatActivity {
         android.graphics.Typeface mono = androidx.core.content.res.ResourcesCompat.getFont(this, R.font.font_koda_mono);
         if (mono != null) tv.setTypeface(mono);
         boolean light = eu.kodanetwork.mchost.util.ThemeHelper.isLightMode(this);
-        tv.setTextColor(text.contains("📁") || text.startsWith("..") ? 0xFFFF6B00 : (light ? 0xFF333333 : 0xFFCCCCCC));
+        tv.setTextColor(text.contains("📁") || text.startsWith("..") ? 0xFFFF6B00 : (light ? 0xFF241207 : 0xFFE8E2D6));
         
         if (file != null) {
             tv.setBackgroundResource(android.R.drawable.list_selector_background);
@@ -2426,7 +2426,7 @@ public class ServerDetailActivity extends AppCompatActivity {
 
         layoutFileList.addView(tv);
         View div = new View(this);
-        div.setBackgroundColor(0xFF222222);
+        div.setBackgroundColor(eu.kodanetwork.mchost.util.ThemeHelper.isLightMode(this) ? 0xFFE5DECF : 0xFF2A241E);
         div.setLayoutParams(new LinearLayout.LayoutParams(
             LinearLayout.LayoutParams.MATCH_PARENT, 1));
         layoutFileList.addView(div);

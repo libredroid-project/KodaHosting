@@ -51,7 +51,21 @@ public class ServerCardAdapter extends RecyclerView.Adapter<ServerCardAdapter.VH
         } else {
             layoutId = R.layout.item_server_legacy;
         }
-        return new VH(LayoutInflater.from(ctx).inflate(layoutId, p, false));
+        View v = LayoutInflater.from(ctx).inflate(layoutId, p, false);
+        // Tablet/landscape quick-win: cap the card width and center it instead of
+        // stretching full-width across big screens
+        int screenDp = Math.round(p.getResources().getDisplayMetrics().widthPixels
+                / p.getResources().getDisplayMetrics().density);
+        if (screenDp >= 900) {
+            int maxPx = Math.round(600 * p.getResources().getDisplayMetrics().density);
+            android.view.ViewGroup.MarginLayoutParams lp =
+                    (android.view.ViewGroup.MarginLayoutParams) v.getLayoutParams();
+            lp.width = maxPx;
+            lp.leftMargin = lp.rightMargin =
+                    Math.max(0, (p.getWidth() == 0 ? p.getResources().getDisplayMetrics().widthPixels : p.getWidth()) / 2 - maxPx / 2);
+            v.setLayoutParams(lp);
+        }
+        return new VH(v);
     }
 
     @Override public void onBindViewHolder(@NonNull VH h, int i) { h.bind(data.get(i)); }
