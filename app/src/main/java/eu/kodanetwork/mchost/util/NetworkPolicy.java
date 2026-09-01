@@ -1,6 +1,7 @@
 package eu.kodanetwork.mchost.util;
 
 import android.content.Context;
+import eu.kodanetwork.mchost.App;
 import android.net.TrafficStats;
 import org.json.JSONArray;
 import org.json.JSONObject;
