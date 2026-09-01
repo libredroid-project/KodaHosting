@@ -453,7 +453,7 @@ public class ThemeHelper {
                     
                     if (isTarget || (isDark(tint) && !isOrange(tint) && tint != 0)) {
                         mb.setBackgroundTintList(android.content.res.ColorStateList.valueOf(0xFFEDEDED));
-                        mb.setStrokeColor(android.content.res.ColorStateList.valueOf(0xFFFF8C38)); // Orange stroke
+                        mb.setStrokeColor(android.content.res.ColorStateList.valueOf(LIGHT_BORDER)); // subtle warm border, was loud orange
                         mb.setStrokeWidth(3);
                         mb.setTextColor(0xFF111111); // Force visible text color
                         if (mb.getIconTint() != null) {

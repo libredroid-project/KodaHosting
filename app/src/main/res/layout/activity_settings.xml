@@ -27,7 +27,7 @@
         <View android:layout_width="0dp" android:layout_height="0dp" android:layout_weight="1"/>
         <TextView android:id="@+id/tv_settings_version"
             android:layout_width="wrap_content" android:layout_height="wrap_content"
-            android:text="v0.127alpha" android:textColor="#888899"
+            android:text="v0.128alpha" android:textColor="#888899"
             android:textSize="11sp" android:fontFamily="@font/font_koda"/>
     </LinearLayout>
     
@@ -602,7 +602,7 @@
 
                     <TextView android:id="@+id/tv_app_version_card"
                         android:layout_width="wrap_content" android:layout_height="wrap_content"
-                        android:text="v0.127alpha" android:textColor="#FFFFFF"
+                        android:text="v0.128alpha" android:textColor="#FFFFFF"
                         android:textSize="18sp" android:fontFamily="@font/font_koda"
                         android:layout_marginBottom="4dp"/>
 
@@ -756,6 +756,37 @@
 
                         <com.google.android.material.switchmaterial.SwitchMaterial
                             android:id="@+id/switch_dev_sleek"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:buttonTint="#F0762B" />
+                    </LinearLayout>
+
+                    <!-- Neue Server-Karten im Dark Mode (dev option) -->
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:orientation="horizontal" android:gravity="center_vertical"
+                        android:layout_marginBottom="12dp">
+
+                        <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+                            android:layout_weight="1" android:orientation="vertical">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Neue Server-Karten im Dark Mode"
+                                android:textColor="#F0F0F0"
+                                android:textSize="14sp"
+                                android:fontFamily="@font/font_koda" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Charts + Chip Karten auch dunkel (Light nutzt sie immer)"
+                                android:textColor="#8A8A9A"
+                                android:textSize="11sp" />
+                        </LinearLayout>
+
+                        <com.google.android.material.switchmaterial.SwitchMaterial
+                            android:id="@+id/switch_dev_v2_cards"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:buttonTint="#F0762B" />

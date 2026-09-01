@@ -164,6 +164,16 @@ public class SettingsActivity extends Activity {
                 Toast.makeText(this, checked ? "Sleek design enabled. Restart app." : "Sleek design disabled. Restart app.", Toast.LENGTH_LONG).show();
             });
         }
+
+        // Redesigned server cards in DARK mode too (light mode uses them by default)
+        com.google.android.material.switchmaterial.SwitchMaterial swV2Cards = findViewById(R.id.switch_dev_v2_cards);
+        if (swV2Cards != null) {
+            swV2Cards.setChecked(prefs.getBoolean("dev_v2_cards_dark", false));
+            swV2Cards.setOnCheckedChangeListener((btn, checked) -> {
+                prefs.edit().putBoolean("dev_v2_cards_dark", checked).apply();
+                Toast.makeText(this, checked ? "Neue Karten im Dark Mode. Restart app." : "Alte Karten im Dark Mode. Restart app.", Toast.LENGTH_LONG).show();
+            });
+        }
        switchLiquidGlass.setChecked(prefs.getBoolean("dev_liquid_glass", false));
         switchLiquidGlass.setOnCheckedChangeListener((buttonView, isChecked) -> {
             prefs.edit().putBoolean("dev_liquid_glass", isChecked).apply();

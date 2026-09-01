@@ -37,13 +37,19 @@ public class ServerCardAdapter extends RecyclerView.Adapter<ServerCardAdapter.VH
     public VH onCreateViewHolder(@NonNull ViewGroup p, int t) {
         boolean terminalEnabled = eu.kodanetwork.mchost.App.getPrefs(ctx).getBoolean("dev_terminal_enabled", false);
         boolean m3Enabled = eu.kodanetwork.mchost.util.Material3ThemeHelper.isM3Enabled(ctx);
+        // Redesigned cards are the LIGHT default; in dark mode they need the
+        // "Neue Server-Karten" developer toggle (not part of the release default)
+        boolean lightMode = eu.kodanetwork.mchost.util.ThemeHelper.isLightMode(ctx);
+        boolean v2CardsDark = eu.kodanetwork.mchost.App.getPrefs(ctx).getBoolean("dev_v2_cards_dark", false);
         int layoutId;
         if (terminalEnabled) {
             layoutId = R.layout.item_server_terminal;
         } else if (m3Enabled) {
             layoutId = R.layout.item_server_m3;
-        } else {
+        } else if (lightMode || v2CardsDark) {
             layoutId = R.layout.item_server;
+        } else {
+            layoutId = R.layout.item_server_legacy;
         }
         return new VH(LayoutInflater.from(ctx).inflate(layoutId, p, false));
     }
@@ -365,74 +371,78 @@ public class ServerCardAdapter extends RecyclerView.Adapter<ServerCardAdapter.VH
 
             addr.setText(s.getJoinAddress());
 
-            // ── v2 card elements (only in the redesigned item_server.xml) ──
+            // ── v2 card elements: chip_version only exists in the redesigned item_server.xml ──
             if (chipVersion != null) {
-                String shortVer = s.getVersion() == null ? "" : s.getVersion();
-                chipVersion.setText((s.getType().name() + " " + shortVer).toUpperCase().trim());
-                chipVersion.setTag(R.id.tag_themed, "BLOCKED");
-                chipVersion.setBackgroundTintList(android.content.res.ColorStateList.valueOf(
-                        isLight ? 0xFFE9E2D4 : 0xFF26221E));
-                chipVersion.setTextColor(isLight ? 0xFF5C5344 : 0xFFB7AE9F);
-            }
-            if (cardFace != null) {
-                // keep the espresso elements outside ThemeHelper's BFS recoloring and
-                // tint the card face per mode ourselves
-                cardFace.setTag(R.id.tag_themed, "BLOCKED");
-                android.graphics.drawable.GradientDrawable face = new android.graphics.drawable.GradientDrawable();
-                face.setCornerRadius(ctx.getResources().getDisplayMetrics().density * 20);
-                face.setColor(isLight ? 0xFFF7F3EB : 0xFF1D1714);
-                face.setStroke((int)(ctx.getResources().getDisplayMetrics().density + 0.5f),
-                        isLight ? 0xFFE5DECF : 0xFF2A2A30);
-                cardFace.setBackground(face);
-            }
-            if (statusPill != null) {
-                statusPill.setTag(R.id.tag_themed, "BLOCKED");
-                statusPill.setBackgroundTintList(android.content.res.ColorStateList.valueOf(
-                        isLight ? 0xFFE9E2D4 : 0xFF26221E));
-            }
-            View tileTps = itemView.findViewById(R.id.tile_tps);
-            View tileRam = itemView.findViewById(R.id.tile_ram);
-            if (tileTps != null) tileTps.setTag(R.id.tag_themed, "BLOCKED");
-            if (tileRam != null) tileRam.setTag(R.id.tag_themed, "BLOCKED");
-            if (chartTps != null) {
-                chartTps.setTag(R.id.tag_themed, "BLOCKED");
-                chartTps.configure(eu.kodanetwork.mchost.util.MiniChartView.MODE_BARS, 20f,
-                        0xFFF2EFE9, isLight ? 0xFF69781D : 0xFFFF6B00);
-                float tps = s.state == ServerInstance.State.ONLINE ? s.currentTps : 0f;
-                chartTps.push(s.getId(), Math.max(0f, Math.min(1f, tps / 20f)));
-            }
-            if (chartRam != null) {
-                chartRam.setTag(R.id.tag_themed, "BLOCKED");
-                chartRam.configure(eu.kodanetwork.mchost.util.MiniChartView.MODE_LINE, 1f,
-                        0xFFF2EFE9, isLight ? 0xFF69781D : 0xFFFF6B00);
-                float used = s.getRamMB() > 0
-                        ? (s.state == ServerInstance.State.ONLINE ? s.ramUsageMB : 0) / (float) s.getRamMB()
-                        : 0f;
-                chartRam.push(s.getId(), Math.max(0f, Math.min(1f, used)));
-            }
-            if (layoutAvatars != null) {
-                layoutAvatars.setTag(R.id.tag_themed, "BLOCKED");
-                layoutAvatars.removeAllViews();
-                java.util.List<String> names = s.state == ServerInstance.State.ONLINE && s.onlinePlayerNames != null
-                        ? s.onlinePlayerNames : java.util.Collections.emptyList();
-                int[] palette = {0xFFE8913A, 0xFF69781D, 0xFFC96F1E, 0xFF8A9BCE};
-                int shown = Math.min(3, names.size());
-                for (int ai = 0; ai < shown; ai++) {
-                    String letter = names.get(ai).isEmpty() ? "?" : names.get(ai).substring(0, 1).toUpperCase();
-                    layoutAvatars.addView(makeAvatar(letter, palette[ai % palette.length], false));
+            if (chipVersion != null) {
+                    String shortVer = s.getVersion() == null ? "" : s.getVersion();
+                    chipVersion.setText((s.getType().name() + " " + shortVer).toUpperCase().trim());
+                    chipVersion.setTag(R.id.tag_themed, "BLOCKED");
+                    chipVersion.setBackgroundTintList(android.content.res.ColorStateList.valueOf(
+                            isLight ? 0xFFE9E2D4 : 0xFF26221E));
+                    chipVersion.setTextColor(isLight ? 0xFF5C5344 : 0xFFB7AE9F);
                 }
-                if (names.size() > 3) {
-                    layoutAvatars.addView(makeAvatar("+" + (names.size() - 3), 0xFF241207, true));
+                if (cardFace != null) {
+                    // keep the espresso elements outside ThemeHelper's BFS recoloring and
+                    // tint the card face per mode ourselves
+                    cardFace.setTag(R.id.tag_themed, "BLOCKED");
+                    android.graphics.drawable.GradientDrawable face = new android.graphics.drawable.GradientDrawable();
+                    face.setCornerRadius(ctx.getResources().getDisplayMetrics().density * 20);
+                    face.setColor(isLight ? 0xFFF7F3EB : 0xFF1D1714);
+                    face.setStroke((int)(ctx.getResources().getDisplayMetrics().density + 0.5f),
+                            isLight ? 0xFFE5DECF : 0xFF2A2A30);
+                    cardFace.setBackground(face);
                 }
-                if (names.isEmpty()) {
-                    TextView none = new TextView(ctx);
-                    none.setText(s.getMaxPlayers() + " " + ctx.getString(R.string.players));
-                    none.setTextColor(isLight ? 0xFF8A8075 : 0xFF8A8A9A);
-                    none.setTextSize(12);
-                    none.setFontFeatureSettings("");
-                    none.setTypeface(name.getTypeface());
-                    layoutAvatars.addView(none);
+                if (statusPill != null) {
+                    statusPill.setTag(R.id.tag_themed, "BLOCKED");
+                    statusPill.setBackgroundTintList(android.content.res.ColorStateList.valueOf(
+                            isLight ? 0xFFE9E2D4 : 0xFF26221E));
                 }
+                View tileTps = itemView.findViewById(R.id.tile_tps);
+                View tileRam = itemView.findViewById(R.id.tile_ram);
+                if (tileTps != null) tileTps.setTag(R.id.tag_themed, "BLOCKED");
+                if (tileRam != null) tileRam.setTag(R.id.tag_themed, "BLOCKED");
+                if (chartTps != null) {
+                    chartTps.setTag(R.id.tag_themed, "BLOCKED");
+                    chartTps.configure(eu.kodanetwork.mchost.util.MiniChartView.MODE_BARS, 20f,
+                            0xFFF2EFE9, isLight ? 0xFF69781D : 0xFFFF6B00);
+                    float tps = s.state == ServerInstance.State.ONLINE ? s.currentTps : 0f;
+                    chartTps.push(s.getId(), Math.max(0f, Math.min(1f, tps / 20f)));
+                }
+                if (chartRam != null) {
+                    chartRam.setTag(R.id.tag_themed, "BLOCKED");
+                    chartRam.configure(eu.kodanetwork.mchost.util.MiniChartView.MODE_LINE, 1f,
+                            0xFFF2EFE9, isLight ? 0xFF69781D : 0xFFFF6B00);
+                    float used = s.getRamMB() > 0
+                            ? (s.state == ServerInstance.State.ONLINE ? s.ramUsageMB : 0) / (float) s.getRamMB()
+                            : 0f;
+                    chartRam.push(s.getId(), Math.max(0f, Math.min(1f, used)));
+                }
+                if (layoutAvatars != null) {
+                    layoutAvatars.setTag(R.id.tag_themed, "BLOCKED");
+                    layoutAvatars.removeAllViews();
+                    java.util.List<String> names = s.state == ServerInstance.State.ONLINE && s.onlinePlayerNames != null
+                            ? s.onlinePlayerNames : java.util.Collections.emptyList();
+                    int[] palette = {0xFFE8913A, 0xFF69781D, 0xFFC96F1E, 0xFF8A9BCE};
+                    int shown = Math.min(3, names.size());
+                    for (int ai = 0; ai < shown; ai++) {
+                        String letter = names.get(ai).isEmpty() ? "?" : names.get(ai).substring(0, 1).toUpperCase();
+                        layoutAvatars.addView(makeAvatar(letter, palette[ai % palette.length], false));
+                    }
+                    if (names.size() > 3) {
+                        layoutAvatars.addView(makeAvatar("+" + (names.size() - 3), 0xFF241207, true));
+                    }
+                    if (names.isEmpty()) {
+                        TextView none = new TextView(ctx);
+                        none.setText(s.getMaxPlayers() + " " + ctx.getString(R.string.players));
+                        none.setTextColor(isLight ? 0xFF8A8075 : 0xFF8A8A9A);
+                        none.setTextSize(12);
+                        none.setFontFeatureSettings("");
+                        none.setTypeface(name.getTypeface());
+                        layoutAvatars.addView(none);
+                    }
+                }
+
+
             }
 
             ServerInstance.State st = s.state;
