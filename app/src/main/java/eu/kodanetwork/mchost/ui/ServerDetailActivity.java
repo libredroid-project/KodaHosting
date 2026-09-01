@@ -5269,7 +5269,7 @@ public class ServerDetailActivity extends AppCompatActivity {
         int screenH = getResources().getDisplayMetrics().heightPixels;
         // the gray line at the bottom is the dialog WINDOW background showing through
         if (sheet.getWindow() != null) {
-            sheet.getWindow().setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(0xFF1D1714));
+            sheet.getWindow().setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT));
             sheet.getWindow().setNavigationBarColor(0xFF1D1714);
         }
         sheet.getBehavior().setPeekHeight((int)(screenH * 0.9f));
@@ -5355,8 +5355,8 @@ public class ServerDetailActivity extends AppCompatActivity {
         upd.accept(null, null);
         root.addView(preview);
 
-        final long[] limits = {500L*1048576, 1073741824L, 2L*1073741824, 5L*1073741824, 10L*1073741824, 20L*1073741824, -1};
-        final String[] limitNames = {"500 MB","1 GB","2 GB","5 GB","10 GB","20 GB", de?"Eigenes":"Custom"};
+        final long[] limits = {500L*1048576, 1073741824L, 5L*1073741824, 20L*1073741824, -1};
+        final String[] limitNames = {"500 MB","1 GB","5 GB","20 GB", de?"Eigenes":"Custom"};
         final int[] pickedLimit = {1};
         for (int i = 0; i < limits.length - 1; i++) if (limits[i] == r.limitBytes) pickedLimit[0] = i;
 
@@ -5467,7 +5467,8 @@ public class ServerDetailActivity extends AppCompatActivity {
         for (int i = 0; i < options.length; i++) {
             final int fi = i;
             TextView tv = new TextView(this);
-            tv.setText(options[i]); tv.setTextSize(12); tv.setGravity(android.view.Gravity.CENTER);
+            tv.setText(options[i]); tv.setTextSize(11); tv.setGravity(android.view.Gravity.CENTER);
+            tv.setSingleLine(true);
             tv.setPadding((int)(6*d), (int)(12*d), (int)(6*d), (int)(12*d));
             tv.setOnClickListener(v -> {
                 onPick.accept(fi);
@@ -5487,10 +5488,10 @@ public class ServerDetailActivity extends AppCompatActivity {
         track.setBackground(trackBg);
         frame.addView(track, new android.widget.FrameLayout.LayoutParams(
                 android.view.ViewGroup.LayoutParams.MATCH_PARENT, android.view.ViewGroup.LayoutParams.MATCH_PARENT));
-        frame.addView(row, new android.widget.FrameLayout.LayoutParams(
-                android.view.ViewGroup.LayoutParams.MATCH_PARENT, android.view.ViewGroup.LayoutParams.WRAP_CONTENT));
         frame.addView(pill[0], new android.widget.FrameLayout.LayoutParams(0,
                 android.view.ViewGroup.LayoutParams.MATCH_PARENT));
+        frame.addView(row, new android.widget.FrameLayout.LayoutParams(
+                android.view.ViewGroup.LayoutParams.MATCH_PARENT, android.view.ViewGroup.WRAP_CONTENT));
         // initial pill width/position nach Layout
         frame.post(() -> {
             TextView selTv = items[Math.max(0, Math.min(selected, items.length - 1))];
