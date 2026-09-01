@@ -2535,6 +2535,12 @@ public class KodaServerService extends Service {
         String toml = "serverAddr = \"" + resolvedHost + "\"\n" +
             "serverPort = 7000\n" +
             "loginFailExit = false\n" +
+            // aggressive heartbeat: idle NAT/relay kills are prevented or detected
+            // in seconds instead of silently dropping the player's tunnel
+            "transport.heartbeatInterval = 10\n" +
+            "transport.heartbeatTimeout = 30\n" +
+            // pre-warmed connections so joins right after a blip don't wait for a fresh one
+            "transport.poolCount = 2\n" +
             "auth.method = \"token\"\n" +
             "auth.token = \"" + eu.kodanetwork.mchost.security.PraetorSecurity.getFrpcToken() + "\"\n\n" +
             "[[proxies]]\n" +
