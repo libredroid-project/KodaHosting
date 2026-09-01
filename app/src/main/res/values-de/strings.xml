@@ -562,5 +562,4 @@
     <string name="tutorial_next">Weiter</string>
     <string name="tutorial_replay_hint">Tutorial startet beim nächsten App-Start</string>\n
     <string name="net_quality_warning">Langsame Internetverbindung erkannt. Lag kann an deiner Verbindung liegen, nicht am Server.</string>
-    <string name="net_quality_warning">Langsame Internetverbindung erkannt. Lag kann an deiner Verbindung liegen, nicht am Server.</string>
-</resources>
+    </resources>
