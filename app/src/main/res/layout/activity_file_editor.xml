@@ -38,7 +38,7 @@
         <ImageButton android:id="@+id/btn_search_prev"
             android:layout_width="30dp" android:layout_height="30dp"
             android:background="?attr/selectableItemBackgroundBorderless"
-            android:src="@android:drawable/ic_menu_search" android:tint="#888888"/>
+            android:src="@drawable/ic_chevron_up" android:tint="#FF6B00"/>/>
         <TextView android:id="@+id/tv_match_count"
             android:layout_width="wrap_content" android:layout_height="wrap_content"
             android:text="" android:textColor="#8A8A9A" android:textSize="10sp"
@@ -47,7 +47,7 @@
         <ImageButton android:id="@+id/btn_search_next"
             android:layout_width="30dp" android:layout_height="30dp"
             android:background="?attr/selectableItemBackgroundBorderless"
-            android:src="@android:drawable/ic_menu_search" android:tint="#888888"/>
+            android:src="@drawable/ic_chevron_down" android:tint="#FF6B00"/>/>
     </LinearLayout>
 
     <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#1A1A1A"/>
@@ -60,17 +60,24 @@
             android:layout_width="0dp" android:layout_height="match_parent"
             android:visibility="gone"/>
 
+        <androidx.core.widget.NestedScrollView android:id="@+id/scroll_editor"
+        android:layout_width="match_parent" android:layout_height="0dp"
+        android:layout_weight="1"
+        android:fillViewport="true"
+        android:scrollbars="vertical"
+        android:overScrollMode="always">
         <EditText android:id="@+id/et_editor"
-            android:layout_width="match_parent" android:layout_height="match_parent"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
             android:background="@null" android:gravity="top"
             android:padding="12dp" android:textColor="#D4D4D4"
             android:textSize="12sp" android:fontFamily="@font/font_koda_mono"
-            android:scrollbars="vertical" android:verticalScrollbarPosition="right"
+            android:scrollbars="none"
             android:overScrollMode="always"
-            android:nestedScrollingEnabled="true"
+            android:nestedScrollingEnabled="false"
             android:inputType="textMultiLine|textNoSuggestions"
             android:lineSpacingMultiplier="1.2"
             android:imeOptions="flagNoExtractUi"/>
+        </androidx.core.widget.NestedScrollView>
     </LinearLayout>
 
 </LinearLayout>

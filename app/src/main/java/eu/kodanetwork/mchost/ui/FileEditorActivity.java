@@ -114,6 +114,8 @@ public class FileEditorActivity extends AppCompatActivity {
     }
 
     private void syntaxHighlight() {
+        // full-text regex over huge files freezes scrolling — skip for big content
+        if (etEditor.length() > 200_000) return;
         String content = etEditor.getText().toString();
         Spannable spannable = etEditor.getText();
         ForegroundColorSpan[] spans = spannable.getSpans(0, content.length(), ForegroundColorSpan.class);
@@ -168,7 +170,16 @@ public class FileEditorActivity extends AppCompatActivity {
         int len = etSearch.getText().toString().length();
         etEditor.requestFocus();
         etEditor.setSelection(index, index + len);
-        etEditor.bringPointIntoView(index + len); // auto-scroll to the hit
+        // auto-scroll the surrounding NestedScrollView to the hit line
+        etEditor.post(() -> {
+            if (etEditor.getLayout() == null) return;
+            int line = etEditor.getLayout().getLineForOffset(index);
+            int y = etEditor.getLayout().getLineTop(line) - etEditor.getHeight() / 3;
+            android.view.View sv = findViewById(R.id.scroll_editor);
+            if (sv instanceof androidx.core.widget.NestedScrollView) {
+                ((androidx.core.widget.NestedScrollView) sv).smoothScrollTo(0, Math.max(0, y));
+            }
+        });
         updateMatchCounter();
     }
 
