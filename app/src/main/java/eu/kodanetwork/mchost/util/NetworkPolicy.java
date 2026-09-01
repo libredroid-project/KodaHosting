@@ -32,6 +32,7 @@ public class NetworkPolicy {
         public int periodDays;          // 1 = day, 7 = week, 30 = month
         public boolean mobile, wifi;
         public String action;           // warn | stop | block
+        public boolean paused;
     }
 
     public static class Usage {
@@ -55,6 +56,7 @@ public class NetworkPolicy {
                 r.mobile = o.optBoolean("mobile", true);
                 r.wifi = o.optBoolean("wifi", true);
                 r.action = o.optString("action", ACTION_WARN);
+                r.paused = o.optBoolean("paused", false);
                 out.add(r);
             }
         } catch (Exception ignored) {}
@@ -72,6 +74,7 @@ public class NetworkPolicy {
                 o.put("mobile", r.mobile);
                 o.put("wifi", r.wifi);
                 o.put("action", r.action);
+                o.put("paused", r.paused);
                 arr.put(o);
             }
             App.getPrefs(ctx).edit().putString("net_rules_" + serverId, arr.toString()).apply();
@@ -139,6 +142,7 @@ public class NetworkPolicy {
     public static Rule violatedRule(Context ctx, String serverId, boolean onMobile) {
         Rule worst = null;
         for (Rule r : getRules(ctx, serverId)) {
+            if (r.paused) continue;
             if (!(onMobile ? r.mobile : r.wifi)) continue;
             Usage u = usageFor(ctx, r.periodDays);
             long used = onMobile ? u.mobileBytes : u.wifiBytes;
@@ -153,6 +157,8 @@ public class NetworkPolicy {
     public static int progressPercent(Context ctx, String serverId, boolean onMobile) {
         int max = 0;
         for (Rule r : getRules(ctx, serverId)) {
+            if (r.paused) continue;
+            if (r.paused) continue;
             if (!(onMobile ? r.mobile : r.wifi)) continue;
             Usage u = usageFor(ctx, r.periodDays);
             long used = onMobile ? u.mobileBytes : u.wifiBytes;

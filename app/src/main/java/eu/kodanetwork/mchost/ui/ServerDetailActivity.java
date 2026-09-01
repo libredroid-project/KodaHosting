@@ -250,14 +250,12 @@ public class ServerDetailActivity extends AppCompatActivity {
         }
 
         // Network budget rules: entry button in the settings panel (programmatic)
-        View settingsPanel = findViewById(R.id.panel_settings);
-        if (settingsPanel instanceof android.view.ViewGroup && server != null) {
+        View cardNet = findViewById(R.id.card_settings_network);
+        if (cardNet instanceof android.view.ViewGroup && server != null) {
             com.google.android.material.button.MaterialButton btnNet = eu.kodanetwork.mchost.util.KodaButtons.primary(this,
                     getResources().getConfiguration().getLocales().get(0).getLanguage().equals("de") ? "Netzwerk-Regeln" : "Network rules");
             btnNet.setOnClickListener(v -> showNetworkRulesSheet());
-            android.view.ViewGroup vg = (android.view.ViewGroup) settingsPanel;
-            android.widget.ScrollView scroller = vg instanceof android.widget.ScrollView ? (android.widget.ScrollView) vg : null;
-            (scroller != null ? (android.view.ViewGroup) scroller.getChildAt(0) : vg).addView(btnNet);
+            ((android.view.ViewGroup) cardNet).addView(btnNet);
         }
 
         TextView tvTitle = findViewById(R.id.tv_title);
@@ -5238,15 +5236,10 @@ public class ServerDetailActivity extends AppCompatActivity {
         for (eu.kodanetwork.mchost.util.NetworkPolicy.Rule r : rules) {
             TextView row = new TextView(this);
             String types = (r.mobile?"Mobile ":"") + (r.wifi?"WLAN":"");
-            row.setText("• " + eu.kodanetwork.mchost.util.NetworkPolicy.humanBytes(r.limitBytes) + " / " + r.periodDays + "d · " + types.trim() + " → " + r.action);
-            row.setTextColor(0xFFE8E2D6); row.setTextSize(13);
+            row.setText((r.paused ? "⏸ " : "• ") + eu.kodanetwork.mchost.util.NetworkPolicy.humanBytes(r.limitBytes) + " / " + r.periodDays + "d · " + types.trim() + " → " + r.action);
+            row.setTextColor(r.paused ? 0xFF8A8A9A : 0xFFE8E2D6); row.setTextSize(13);
             row.setPadding((int)(8*d),(int)(14*d),(int)(8*d),(int)(14*d));
-            row.setOnClickListener(v -> editNetworkRule(r, refresh[0]));
-            row.setOnLongClickListener(v -> {
-                rules.remove(r); eu.kodanetwork.mchost.util.NetworkPolicy.saveRules(this, server.getId(), rules);
-                android.widget.Toast.makeText(this, de ? "Regel gelöscht" : "Rule deleted", android.widget.Toast.LENGTH_SHORT).show();
-                refresh[0].run(); return true;
-            });
+            row.setOnClickListener(v -> showRuleActions(r, refresh[0]));
             root.addView(row);
         }
         com.google.android.material.button.MaterialButton add = eu.kodanetwork.mchost.util.KodaButtons.primary(this,
@@ -5258,8 +5251,16 @@ public class ServerDetailActivity extends AppCompatActivity {
         root.addView(add, addLp);
 
         sheet.setContentView(root);
-        eu.kodanetwork.mchost.util.SheetFix.apply(sheet);
-        // BottomSheet default bg is cold gray — tint to the app's warm dark
+        styleSheetFullscreen(sheet);
+        sheet.show();
+    }
+
+    /** Fullscreen slide-up sheet (Modrinth-search pattern) with app-warm background. */
+    private void styleSheetFullscreen(com.google.android.material.bottomsheet.BottomSheetDialog sheet) {
+        int screenH = getResources().getDisplayMetrics().heightPixels;
+        sheet.getBehavior().setPeekHeight(screenH);
+        sheet.getBehavior().setState(com.google.android.material.bottomsheet.BottomSheetBehavior.STATE_EXPANDED);
+        sheet.getBehavior().setSkipCollapsed(true);
         android.view.View sheetBg = sheet.findViewById(com.google.android.material.R.id.design_bottom_sheet);
         if (sheetBg != null) {
             android.graphics.drawable.GradientDrawable bg = new android.graphics.drawable.GradientDrawable();
@@ -5267,6 +5268,48 @@ public class ServerDetailActivity extends AppCompatActivity {
             bg.setCornerRadius(24f * getResources().getDisplayMetrics().density);
             sheetBg.setBackground(bg);
         }
+    }
+
+    /** Tap on a rule: fullscreen menu with edit / pause / delete. */
+    private void showRuleActions(eu.kodanetwork.mchost.util.NetworkPolicy.Rule r, Runnable done) {
+        boolean de = getResources().getConfiguration().getLocales().get(0).getLanguage().equals("de");
+        float d = getResources().getDisplayMetrics().density;
+        com.google.android.material.bottomsheet.BottomSheetDialog sheet =
+                new com.google.android.material.bottomsheet.BottomSheetDialog(this);
+        android.widget.LinearLayout root = new android.widget.LinearLayout(this);
+        root.setOrientation(android.widget.LinearLayout.VERTICAL);
+        int pad = (int)(20*d); root.setPadding(pad, pad, pad, pad);
+
+        TextView t = new TextView(this);
+        t.setText(eu.kodanetwork.mchost.util.NetworkPolicy.humanBytes(r.limitBytes) + " / " + r.periodDays + "d · " + ((r.mobile?"Mobile ":"")+(r.wifi?"WLAN":"")).trim() + (r.paused ? " · ⏸" : ""));
+        t.setTextColor(0xFFF0F0F0); t.setTextSize(18); t.setTypeface(null, android.graphics.Typeface.BOLD);
+        root.addView(t);
+
+        com.google.android.material.button.MaterialButton bEdit = eu.kodanetwork.mchost.util.KodaButtons.primary(this, de ? "Bearbeiten" : "Edit");
+        bEdit.setOnClickListener(v -> { sheet.dismiss(); editNetworkRule(r, done); });
+        com.google.android.material.button.MaterialButton bPause = eu.kodanetwork.mchost.util.KodaButtons.dark(this, r.paused ? (de?"Fortsetzen":"Resume") : (de?"Anhalten":"Pause"));
+        bPause.setOnClickListener(v -> {
+            java.util.List<eu.kodanetwork.mchost.util.NetworkPolicy.Rule> rules =
+                    eu.kodanetwork.mchost.util.NetworkPolicy.getRules(this, server.getId());
+            for (eu.kodanetwork.mchost.util.NetworkPolicy.Rule x : rules) if (x.id.equals(r.id)) x.paused = !x.paused;
+            eu.kodanetwork.mchost.util.NetworkPolicy.saveRules(this, server.getId(), rules);
+            sheet.dismiss(); done.run();
+        });
+        com.google.android.material.button.MaterialButton bDel = eu.kodanetwork.mchost.util.KodaButtons.dark(this, de ? "Löschen" : "Delete");
+        bDel.setOnClickListener(v -> {
+            java.util.List<eu.kodanetwork.mchost.util.NetworkPolicy.Rule> rules =
+                    eu.kodanetwork.mchost.util.NetworkPolicy.getRules(this, server.getId());
+            rules.removeIf(x -> x.id.equals(r.id));
+            eu.kodanetwork.mchost.util.NetworkPolicy.saveRules(this, server.getId(), rules);
+            sheet.dismiss(); done.run();
+        });
+        android.widget.LinearLayout.LayoutParams lp = new android.widget.LinearLayout.LayoutParams(
+                android.view.ViewGroup.LayoutParams.MATCH_PARENT, android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
+        lp.topMargin = (int)(12*d);
+        root.addView(bEdit, lp); root.addView(bPause, lp); root.addView(bDel, lp);
+
+        sheet.setContentView(root);
+        styleSheetFullscreen(sheet);
         sheet.show();
     }
 
