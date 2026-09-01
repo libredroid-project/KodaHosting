@@ -5221,6 +5221,7 @@ public class ServerDetailActivity extends AppCompatActivity {
                 new com.google.android.material.bottomsheet.BottomSheetDialog(this);
         android.widget.LinearLayout root = new android.widget.LinearLayout(this);
         root.setOrientation(android.widget.LinearLayout.VERTICAL);
+        root.setBackgroundColor(0xFF1D1714);
         int pad = (int)(20*d); root.setPadding(pad, pad, pad, pad);
 
         TextView title = new TextView(this);
@@ -5285,6 +5286,7 @@ public class ServerDetailActivity extends AppCompatActivity {
                 new com.google.android.material.bottomsheet.BottomSheetDialog(this);
         android.widget.LinearLayout root = new android.widget.LinearLayout(this);
         root.setOrientation(android.widget.LinearLayout.VERTICAL);
+        root.setBackgroundColor(0xFF1D1714);
         int pad = (int)(20*d); root.setPadding(pad, pad, pad, pad);
 
         TextView t = new TextView(this);
@@ -5331,12 +5333,21 @@ public class ServerDetailActivity extends AppCompatActivity {
                 new com.google.android.material.bottomsheet.BottomSheetDialog(this);
         android.widget.LinearLayout root = new android.widget.LinearLayout(this);
         root.setOrientation(android.widget.LinearLayout.VERTICAL);
+        root.setBackgroundColor(0xFF1D1714);
         int pad = (int)(20*d); root.setPadding(pad, pad, pad, pad);
 
         TextView t = new TextView(this);
         t.setText(existing == null ? (de?"Neue Regel":"New rule") : (de?"Regel bearbeiten":"Edit rule"));
         t.setTextColor(0xFFF0F0F0); t.setTextSize(20); t.setTypeface(null, android.graphics.Typeface.BOLD);
         root.addView(t);
+        final TextView preview = new TextView(this);
+        preview.setTextColor(0xFFB7AE9F); preview.setTextSize(12);
+        preview.setPadding(0, (int)(4*d), 0, (int)(8*d));
+        java.util.function.BiConsumer<Long, Integer> upd = (lim, per) -> preview.setText(
+            (de ? "Vorschau: " : "Preview: ") + eu.kodanetwork.mchost.util.NetworkPolicy.humanBytes(lim == null ? r.limitBytes : lim)
+            + " / " + (per == null ? r.periodDays : per) + "d · " + ((r.mobile?"Mobile ":"")+(r.wifi?"WLAN":"")).trim());
+        upd.accept(null, null);
+        root.addView(preview);
 
         final long[] limits = {500L*1048576, 1073741824L, 2L*1073741824, 5L*1073741824, 10L*1073741824, 20L*1073741824, -1};
         final String[] limitNames = {"500 MB","1 GB","2 GB","5 GB","10 GB","20 GB", de?"Eigenes":"Custom"};
@@ -5361,7 +5372,9 @@ public class ServerDetailActivity extends AppCompatActivity {
             final int fi = i;
             TextView chip = new TextView(this);
             chip.setText(limitNames[i]); chip.setTextSize(13);
-            chip.setPadding((int)(10*d), (int)(8*d), (int)(10*d), (int)(8*d));
+            chip.setPadding((int)(12*d), (int)(10*d), (int)(12*d), (int)(10*d));
+            chip.setBackgroundResource(eu.kodanetwork.mchost.R.drawable.pill_address_bg);
+            chip.setTag(R.id.tag_themed, "BLOCKED");
             chip.setOnClickListener(v -> { pickedLimit[0] = fi; paint.accept(fi, limitViews);
                 etCustom.setVisibility(fi == limits.length-1 ? android.view.View.VISIBLE : android.view.View.GONE); });
             limitViews[i] = chip; rowLimit.addView(chip);
@@ -5370,9 +5383,10 @@ public class ServerDetailActivity extends AppCompatActivity {
         root.addView(netLabel(de ? "Wie viel Datenvolumen?" : "How much data?", d));
         root.addView(rowLimit); root.addView(etCustom);
 
-        final int[] periods = {1, 7, 30};
-        final String[] periodNames = {de?"Tag":"Day", de?"Woche":"Week", de?"Monat":"Month"};
+        final int[] periods = {1, 7, 30, -1};
+        final String[] periodNames = {de?"Tag":"Day", de?"Woche":"Week", de?"Monat":"Month", de?"Eigenes":"Custom"};
         int pickedPeriod = r.periodDays == 1 ? 0 : (r.periodDays == 30 ? 2 : 1);
+        if (pickedPeriod == 1 && r.periodDays != 7) pickedPeriod = 3;
         final int[] selPeriod = {pickedPeriod};
         android.widget.LinearLayout rowPeriod = new android.widget.LinearLayout(this);
         TextView[] periodViews = new TextView[3];
@@ -5384,9 +5398,17 @@ public class ServerDetailActivity extends AppCompatActivity {
             chip.setOnClickListener(v -> { selPeriod[0] = fi; paint.accept(fi, periodViews); });
             periodViews[i] = chip; rowPeriod.addView(chip);
         }
+        final EditText etDays = new EditText(this);
+        etDays.setInputType(android.text.InputType.TYPE_CLASS_NUMBER);
+        etDays.setHint(de ? "Tage" : "Days");
+        etDays.setText(r.periodDays == 7 || pickedPeriod != 3 ? "" : String.valueOf(r.periodDays));
+        etDays.setVisibility(pickedPeriod == 3 ? android.view.View.VISIBLE : android.view.View.GONE);
+        final int fpp = pickedPeriod;
+        for (int i = 0; i < 3; i++) { final int fi = i; periodViews[i].setOnClickListener(v -> { selPeriod[0] = fi; paint.accept(fi, periodViews);
+            etCustom2Sel(etDays, fi == 3); }); }
         paint.accept(selPeriod[0], periodViews);
         root.addView(netLabel(de ? "Pro Zeitraum" : "Per period", d));
-        root.addView(rowPeriod);
+        root.addView(rowPeriod); root.addView(etDays);
 
         final android.widget.CheckBox cbMobile = new android.widget.CheckBox(this);
         cbMobile.setText("Mobile Data"); cbMobile.setChecked(r.mobile); root.addView(cbMobile);
@@ -5418,12 +5440,13 @@ public class ServerDetailActivity extends AppCompatActivity {
                 if (pickedLimit[0] == limits.length-1) {
                     r.limitBytes = (long)(Float.parseFloat(etCustom.getText().toString()) * 1073741824f);
                 } else r.limitBytes = limits[pickedLimit[0]];
-                r.periodDays = periods[selPeriod[0]];
+                r.periodDays = periods[selPeriod[0]] == -1 ? Math.max(1, Integer.parseInt(etDays.getText().toString().isEmpty() ? "7" : etDays.getText().toString())) : periods[selPeriod[0]];
                 r.mobile = cbMobile.isChecked(); r.wifi = cbWifi.isChecked();
                 r.action = actions[selAct[0]];
                 java.util.List<eu.kodanetwork.mchost.util.NetworkPolicy.Rule> rules =
                         eu.kodanetwork.mchost.util.NetworkPolicy.getRules(this, server.getId());
-                if (!rules.contains(r)) rules.add(r);
+                rules.removeIf(x -> x.id.equals(r.id)); // same rule = replace, never duplicate
+                rules.add(r);
                 eu.kodanetwork.mchost.util.NetworkPolicy.saveRules(this, server.getId(), rules);
                 sheet.dismiss(); done.run();
             } catch (Exception e) {
@@ -5440,6 +5463,10 @@ public class ServerDetailActivity extends AppCompatActivity {
         sheet.setContentView(sc);
         styleSheetFullscreen(sheet);
         sheet.show();
+    }
+
+    private void etCustom2Sel(View v, boolean show) {
+        v.setVisibility(show ? android.view.View.VISIBLE : android.view.View.GONE);
     }
 
     private TextView netLabel(String txt, float d) {
