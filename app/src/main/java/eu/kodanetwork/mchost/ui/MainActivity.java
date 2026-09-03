@@ -1267,18 +1267,21 @@ public class MainActivity extends AppCompatActivity {
             dialog.dismiss();
             new Thread(() -> {
                 try {
-                    java.net.URL url = new java.net.URL(baseUrl + "/rest/v1/koda_users?app_uuid=eq." + appUuid);
+                    // RLS allows updates only through the RPC (same as last_active patching)
+                    java.net.URL url = new java.net.URL(baseUrl + "/rest/v1/rpc/rpc_patch_user");
                     java.net.HttpURLConnection c = (java.net.HttpURLConnection) url.openConnection();
-                    c.setRequestMethod("PATCH");
+                    c.setRequestMethod("POST");
                     c.setDoOutput(true);
+                    c.setRequestProperty("Content-Type", "application/json");
                     c.setRequestProperty("apikey", eu.kodanetwork.mchost.security.PraetorSecurity.getSupabaseKey());
                     c.setRequestProperty("Authorization", "Bearer " + auth);
-                    c.setRequestProperty("Content-Type", "application/json");
-                    c.setRequestProperty("Prefer", "return=minimal");
-                    c.getOutputStream().write(("{\"nickname\":\"" + nick + "\"}").getBytes(java.nio.charset.StandardCharsets.UTF_8));
-                    c.getResponseCode();
+                    String body = "{\"p_app_uuid\":\"" + appUuid + "\", \"p_payload\":{\"nickname\":\"" + nick + "\"}}";
+                    c.getOutputStream().write(body.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+                    android.util.Log.d("Nickname", "rpc response " + c.getResponseCode());
                     c.disconnect();
-                } catch (Exception ignored) {}
+                } catch (Exception e) {
+                    android.util.Log.e("Nickname", "rpc failed", e);
+                }
             }).start();
         });
         dialog.show();
