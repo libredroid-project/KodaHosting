@@ -1269,7 +1269,7 @@ public class MainActivity extends AppCompatActivity {
                     java.net.URL url = new java.net.URL(baseUrl + "/rest/v1/koda_users?app_uuid=eq." + appUuid);
                     java.net.HttpURLConnection c = (java.net.HttpURLConnection) url.openConnection();
                     c.setRequestMethod("PATCH");
-                    c.setRequestDoOutput(true);
+                    c.setDoOutput(true);
                     c.setRequestProperty("apikey", eu.kodanetwork.mchost.security.PraetorSecurity.getSupabaseKey());
                     c.setRequestProperty("Authorization", "Bearer " + auth);
                     c.setRequestProperty("Content-Type", "application/json");
