@@ -1,6 +1,8 @@
 package eu.kodanetwork.mchost.util;
 
 import android.content.Context;
+import eu.kodanetwork.mchost.App;
+import eu.kodanetwork.mchost.security.PraetorSecurity;
 import android.widget.Toast;
 
 import org.json.JSONArray;
