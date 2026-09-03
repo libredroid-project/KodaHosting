@@ -560,4 +560,5 @@
     <string name="net_start_blocked">Network limit reached. Edit the rule or use WiFi to start.</string>
     <string name="nickname_question">How should we call you in KodaHosting?</string>
     <string name="nickname_save">Save</string>
+    <string name="nickname_ask_later">Ask me later</string>
 </resources>

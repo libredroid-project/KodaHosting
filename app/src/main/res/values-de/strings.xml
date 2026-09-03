@@ -568,4 +568,5 @@
     <string name="net_start_blocked">Netzwerk-Limit erreicht. Regel bearbeiten oder WLAN nutzen.</string>
     <string name="nickname_question">Wie möchten wir dich in KodaHosting nennen?</string>
     <string name="nickname_save">Speichern</string>
+    <string name="nickname_ask_later">Später fragen</string>
 </resources>

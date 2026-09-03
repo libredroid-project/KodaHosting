@@ -1201,7 +1201,6 @@ public class MainActivity extends AppCompatActivity {
      * with the session JWT and cached locally.
      */
     private void maybeAskNickname() {
-        if (repo == null) return;
         android.content.SharedPreferences prefs = eu.kodanetwork.mchost.App.getPrefs(this);
         if (!prefs.getString("nickname", "").isEmpty()) return; // already known
         String today = new java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.US).format(new java.util.Date());
@@ -1255,6 +1254,8 @@ public class MainActivity extends AppCompatActivity {
         android.widget.EditText input = dialog.findViewById(R.id.et_dialog_input);
         if (input != null) input.setHint("Koda");
 
+        android.widget.Button btnCancel = dialog.findViewById(R.id.btn_dialog_cancel);
+        if (btnCancel != null) btnCancel.setText(R.string.nickname_ask_later);
         dialog.findViewById(R.id.btn_dialog_cancel).setOnClickListener(v -> dialog.dismiss());
         dialog.findViewById(R.id.btn_dialog_confirm).setOnClickListener(v -> {
             String nick = input != null ? input.getText().toString().trim() : "";
