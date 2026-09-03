@@ -181,6 +181,15 @@ public class SettingsActivity extends Activity {
             Toast.makeText(this, "LiquidGlass Mode requires app restart.", Toast.LENGTH_SHORT).show();
         });
 
+        // Dev: Nickname-Sync erzwingen (nur wirksam wenn lokal vorhanden & DB leer)
+        com.google.android.material.button.MaterialButton btnNickSync = findViewById(R.id.btn_dev_nick_sync);
+        if (btnNickSync != null) {
+            btnNickSync.setOnClickListener(v -> {
+                eu.kodanetwork.mchost.util.HapticUtil.forceVibrate(this, 40);
+                eu.kodanetwork.mchost.util.NicknameSync.sync(this, true);
+            });
+        }
+
         // Practical Developer Tools
         Button btnExportLogs = findViewById(R.id.btn_dev_export_logs);
         Button btnClearCache = findViewById(R.id.btn_dev_clear_cache);

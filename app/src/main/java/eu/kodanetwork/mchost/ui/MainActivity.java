@@ -1213,37 +1213,7 @@ public class MainActivity extends AppCompatActivity {
             String token2 = prefs.getString("koda_session_token", null);
             String auth2 = token2 != null ? token2 : eu.kodanetwork.mchost.security.PraetorSecurity.getSupabaseKey();
             String base2 = eu.kodanetwork.mchost.security.PraetorSecurity.getSupabaseUrl();
-            final String nick = localNick;
-            new Thread(() -> {
-                boolean dbHasIt = false;
-                try {
-                    java.net.URL url = new java.net.URL(base2 + "/rest/v1/koda_users?select=nickname&app_uuid=eq." + appUuid2);
-                    java.net.HttpURLConnection c = (java.net.HttpURLConnection) url.openConnection();
-                    c.setRequestProperty("apikey", eu.kodanetwork.mchost.security.PraetorSecurity.getSupabaseKey());
-                    c.setRequestProperty("Authorization", "Bearer " + auth2);
-                    java.util.Scanner sc = new java.util.Scanner(c.getInputStream()).useDelimiter("\\A");
-                    org.json.JSONArray arr = new org.json.JSONArray(sc.hasNext() ? sc.next() : "[]");
-                    dbHasIt = arr.length() > 0 && !arr.getJSONObject(0).optString("nickname", "").isEmpty();
-                    c.disconnect();
-                } catch (Exception ignored) {}
-                if (!dbHasIt) {
-                    try {
-                        java.net.URL url = new java.net.URL(base2 + "/rest/v1/rpc/rpc_patch_user");
-                        java.net.HttpURLConnection c = (java.net.HttpURLConnection) url.openConnection();
-                        c.setRequestMethod("POST");
-                        c.setDoOutput(true);
-                        c.setRequestProperty("Content-Type", "application/json");
-                        c.setRequestProperty("apikey", eu.kodanetwork.mchost.security.PraetorSecurity.getSupabaseKey());
-                        c.setRequestProperty("Authorization", "Bearer " + auth2);
-                        String body = "{\"p_app_uuid\":\"" + appUuid2 + "\", \"p_payload\":{\"nickname\":\"" + nick + "\"}}";
-                        c.getOutputStream().write(body.getBytes(java.nio.charset.StandardCharsets.UTF_8));
-                        android.util.Log.d("Nickname", "backfill rpc " + c.getResponseCode());
-                        c.disconnect();
-                    } catch (Exception e) {
-                        android.util.Log.e("Nickname", "backfill failed", e);
-                    }
-                }
-            }).start();
+            eu.kodanetwork.mchost.util.NicknameSync.sync(this, false);
             prefs.edit().putString("nickname_sync_day", today).apply();
             return;
         }
