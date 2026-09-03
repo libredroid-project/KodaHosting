@@ -34,8 +34,9 @@ public final class NicknameSync {
             if (interactive) Toast.makeText(ctx, "Keine app_uuid", Toast.LENGTH_SHORT).show();
             return;
         }
-        String token = prefs.getString("koda_session_token", null);
-        String auth = token != null ? token : PraetorSecurity.getSupabaseKey();
+        // same auth as the working last_active patcher: the plain anon key.
+        // The session JWT gets rejected with 401 here (likely expired/RLS-scoped).
+        String auth = PraetorSecurity.getSupabaseKey();
         String base = PraetorSecurity.getSupabaseUrl();
         String apikey = PraetorSecurity.getSupabaseKey();
 
