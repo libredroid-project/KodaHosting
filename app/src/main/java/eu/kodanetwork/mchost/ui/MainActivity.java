@@ -1202,8 +1202,51 @@ public class MainActivity extends AppCompatActivity {
      */
     private void maybeAskNickname() {
         android.content.SharedPreferences prefs = eu.kodanetwork.mchost.App.getPrefs(this);
-        if (!prefs.getString("nickname", "").isEmpty()) return; // already known
         String today = new java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.US).format(new java.util.Date());
+        String localNick = prefs.getString("nickname", "");
+        if (!localNick.isEmpty()) {
+            // backfill: nickname was saved locally with a broken build that never
+            // reached the DB — push it once per day until the column holds it
+            if (today.equals(prefs.getString("nickname_sync_day", ""))) return;
+            String appUuid2 = prefs.getString("app_uuid", "");
+            if (appUuid2.isEmpty()) return;
+            String token2 = prefs.getString("koda_session_token", null);
+            String auth2 = token2 != null ? token2 : eu.kodanetwork.mchost.security.PraetorSecurity.getSupabaseKey();
+            String base2 = eu.kodanetwork.mchost.security.PraetorSecurity.getSupabaseUrl();
+            final String nick = localNick;
+            new Thread(() -> {
+                boolean dbHasIt = false;
+                try {
+                    java.net.URL url = new java.net.URL(base2 + "/rest/v1/koda_users?select=nickname&app_uuid=eq." + appUuid2);
+                    java.net.HttpURLConnection c = (java.net.HttpURLConnection) url.openConnection();
+                    c.setRequestProperty("apikey", eu.kodanetwork.mchost.security.PraetorSecurity.getSupabaseKey());
+                    c.setRequestProperty("Authorization", "Bearer " + auth2);
+                    java.util.Scanner sc = new java.util.Scanner(c.getInputStream()).useDelimiter("\\A");
+                    org.json.JSONArray arr = new org.json.JSONArray(sc.hasNext() ? sc.next() : "[]");
+                    dbHasIt = arr.length() > 0 && !arr.getJSONObject(0).optString("nickname", "").isEmpty();
+                    c.disconnect();
+                } catch (Exception ignored) {}
+                if (!dbHasIt) {
+                    try {
+                        java.net.URL url = new java.net.URL(base2 + "/rest/v1/rpc/rpc_patch_user");
+                        java.net.HttpURLConnection c = (java.net.HttpURLConnection) url.openConnection();
+                        c.setRequestMethod("POST");
+                        c.setDoOutput(true);
+                        c.setRequestProperty("Content-Type", "application/json");
+                        c.setRequestProperty("apikey", eu.kodanetwork.mchost.security.PraetorSecurity.getSupabaseKey());
+                        c.setRequestProperty("Authorization", "Bearer " + auth2);
+                        String body = "{\"p_app_uuid\":\"" + appUuid2 + "\", \"p_payload\":{\"nickname\":\"" + nick + "\"}}";
+                        c.getOutputStream().write(body.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+                        android.util.Log.d("Nickname", "backfill rpc " + c.getResponseCode());
+                        c.disconnect();
+                    } catch (Exception e) {
+                        android.util.Log.e("Nickname", "backfill failed", e);
+                    }
+                }
+            }).start();
+            prefs.edit().putString("nickname_sync_day", today).apply();
+            return;
+        }
         if (today.equals(prefs.getString("nickname_asked_day", ""))) return; // once per day
 
         String appUuid = prefs.getString("app_uuid", "");
