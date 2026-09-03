@@ -566,4 +566,6 @@
     <string name="net_offline_warning">Keine Internetverbindung. Spieler können sich nicht mit dem Server verbinden.</string>
     <string name="net_usage_label">Netzwerk: %1$s / %2$s (%3$d%%) \u00b7 %4$s</string>
     <string name="net_start_blocked">Netzwerk-Limit erreicht. Regel bearbeiten oder WLAN nutzen.</string>
+    <string name="nickname_question">Wie möchten wir dich in KodaHosting nennen?</string>
+    <string name="nickname_save">Speichern</string>
 </resources>

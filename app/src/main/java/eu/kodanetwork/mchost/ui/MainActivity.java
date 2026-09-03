@@ -185,6 +185,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         showWelcomeSplash();
+        maybeAskNickname();
 
         eu.kodanetwork.mchost.orchestration.DatabaseOrchestrator.ensureDatabasesExtracted(this);
 
@@ -1192,5 +1193,93 @@ public class MainActivity extends AppCompatActivity {
                 rv.setVisibility(hasServers ? View.VISIBLE : View.GONE);
             }
         } catch (Exception ignored) {}
+    }
+
+    /**
+     * Ask for the user's nickname: at first setup, or once per day while the
+     * koda_users.nickname column is still empty. Answer is PATCHed to Supabase
+     * with the session JWT and cached locally.
+     */
+    private void maybeAskNickname() {
+        if (repo == null) return;
+        android.content.SharedPreferences prefs = eu.kodanetwork.mchost.App.getPrefs(this);
+        if (!prefs.getString("nickname", "").isEmpty()) return; // already known
+        String today = new java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.US).format(new java.util.Date());
+        if (today.equals(prefs.getString("nickname_asked_day", ""))) return; // once per day
+
+        String appUuid = prefs.getString("app_uuid", "");
+        if (appUuid.isEmpty()) return;
+        String token = prefs.getString("koda_session_token", null);
+        String auth = token != null ? token : eu.kodanetwork.mchost.security.PraetorSecurity.getSupabaseKey();
+        String baseUrl = eu.kodanetwork.mchost.security.PraetorSecurity.getSupabaseUrl();
+
+        new Thread(() -> {
+            String rowNickname = null;
+            try {
+                java.net.URL url = new java.net.URL(baseUrl + "/rest/v1/koda_users?select=nickname&app_uuid=eq." + appUuid);
+                java.net.HttpURLConnection c = (java.net.HttpURLConnection) url.openConnection();
+                c.setRequestProperty("apikey", eu.kodanetwork.mchost.security.PraetorSecurity.getSupabaseKey());
+                c.setRequestProperty("Authorization", "Bearer " + auth);
+                java.util.Scanner sc = new java.util.Scanner(c.getInputStream()).useDelimiter("\\A");
+                String resp = sc.hasNext() ? sc.next() : "[]";
+                org.json.JSONArray arr = new org.json.JSONArray(resp);
+                if (arr.length() > 0) rowNickname = arr.getJSONObject(0).optString("nickname", "");
+                c.disconnect();
+            } catch (Exception e) { rowNickname = null; }
+
+            final String existing = rowNickname;
+            runOnUiThread(() -> {
+                if (existing != null && !existing.isEmpty()) {
+                    prefs.edit().putString("nickname", existing).apply();
+                    return; // already set in DB
+                }
+                prefs.edit().putString("nickname_asked_day", today).apply();
+                showNicknameDialog(appUuid, auth, baseUrl, prefs);
+            });
+        }).start();
+    }
+
+    private void showNicknameDialog(String appUuid, String auth, String baseUrl, android.content.SharedPreferences prefs) {
+        android.app.Dialog dialog = new android.app.Dialog(this);
+        dialog.setContentView(R.layout.dialog_praetor_input);
+        eu.kodanetwork.mchost.util.DialogLandFix.apply(dialog);
+        dialog.getWindow().setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT));
+        dialog.getWindow().setLayout(android.view.ViewGroup.LayoutParams.MATCH_PARENT, android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
+
+        TextView tvTitle = dialog.findViewById(R.id.tv_dialog_title);
+        if (tvTitle != null) tvTitle.setText(R.string.nickname_question);
+        TextView tvSub = dialog.findViewById(R.id.tv_dialog_subtitle);
+        if (tvSub != null) tvSub.setVisibility(android.view.View.GONE);
+        TextView tvMsg = dialog.findViewById(R.id.tv_dialog_message);
+        if (tvMsg != null) tvMsg.setVisibility(android.view.View.GONE);
+        android.widget.EditText input = dialog.findViewById(R.id.et_dialog_input);
+        if (input != null) input.setHint("Koda");
+
+        dialog.findViewById(R.id.btn_dialog_cancel).setOnClickListener(v -> dialog.dismiss());
+        dialog.findViewById(R.id.btn_dialog_confirm).setOnClickListener(v -> {
+            String nick = input != null ? input.getText().toString().trim() : "";
+            if (nick.isEmpty() || nick.length() > 24) {
+                android.widget.Toast.makeText(this, "1-24 Zeichen", android.widget.Toast.LENGTH_SHORT).show();
+                return;
+            }
+            prefs.edit().putString("nickname", nick).apply();
+            dialog.dismiss();
+            new Thread(() -> {
+                try {
+                    java.net.URL url = new java.net.URL(baseUrl + "/rest/v1/koda_users?app_uuid=eq." + appUuid);
+                    java.net.HttpURLConnection c = (java.net.HttpURLConnection) url.openConnection();
+                    c.setRequestMethod("PATCH");
+                    c.setRequestDoOutput(true);
+                    c.setRequestProperty("apikey", eu.kodanetwork.mchost.security.PraetorSecurity.getSupabaseKey());
+                    c.setRequestProperty("Authorization", "Bearer " + auth);
+                    c.setRequestProperty("Content-Type", "application/json");
+                    c.setRequestProperty("Prefer", "return=minimal");
+                    c.getOutputStream().write(("{\"nickname\":\"" + nick + "\"}").getBytes(java.nio.charset.StandardCharsets.UTF_8));
+                    c.getResponseCode();
+                    c.disconnect();
+                } catch (Exception ignored) {}
+            }).start();
+        });
+        dialog.show();
     }
 }

@@ -535,4 +535,6 @@
     <string name="net_offline_warning">无网络连接。玩家无法连接到服务器。</string>
     <string name="net_usage_label">网络：%1$s / %2$s（%3$d%%）\u00b7 %4$s</string>
     <string name="net_start_blocked">已达到网络限额。请修改规则或使用 WiFi。</string>
+    <string name="nickname_question">在 KodaHosting 中我们该怎么称呼你？</string>
+    <string name="nickname_save">保存</string>
 </resources>
