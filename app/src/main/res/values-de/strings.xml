@@ -569,4 +569,11 @@
     <string name="nickname_question">Wie möchten wir dich in KodaHosting nennen?</string>
     <string name="nickname_save">Speichern</string>
     <string name="nickname_ask_later">Später fragen</string>
+
+    <string name="crash_category_class_not_found">Fehlende Bibliothek</string>
+    <string name="crash_reason_class_not_found">Ein Mod oder Plugin fehlt eine Bibliothek (ClassNotFoundException/NoClassDefFoundError). Fix: installiere die über dem Fehler gelistete Abhängigkeit oder entferne den Mod, der sie benötigt.</string>
+    <string name="crash_category_plugin_config">Kaputtes Plugin/Config</string>
+    <string name="crash_reason_plugin_config">Ein Plugin ist abgestürzt oder hat eine kaputte Config. Fix: entferne das im Log genannte Plugin oder lade es neu, und korrigiere den YAML-Fehler in config.yml/plugin.yml.</string>
+    <string name="crash_category_storage">Speicherproblem</string>
+    <string name="crash_reason_storage">Der Gerätespeicher ist voll oder schreibgeschützt, der Server kann keine Dateien schreiben. Fix: schaffe Speicherplatz (alte Welten/Exports löschen) oder starte das Gerät neu, damit der Speicher neu eingebunden wird.</string>
 </resources>

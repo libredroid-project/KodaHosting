@@ -520,4 +520,10 @@
     <string name="crash_reason_unknown">Serv exited unexpectedly (exit code %1$d).</string>
     <string name="crash_reason_startup_exit">Serv exited before finishin\' startup.</string>
 
+    <string name="crash_category_class_not_found">Missing Library</string>
+    <string name="crash_reason_class_not_found">A mod or plugin is missing a library (ClassNotFoundException/NoClassDefFoundError). Fix: install the dependency mod/plugin listed above the error, or remove the mod that needs it.</string>
+    <string name="crash_category_plugin_config">Broken Plugin/Config</string>
+    <string name="crash_reason_plugin_config">A plugin crashed or has a broken config file. Fix: remove or re-download the plugin named in the log, and fix the YAML syntax error in its config.yml/plugin.yml.</string>
+    <string name="crash_category_storage">Storage Problem</string>
+    <string name="crash_reason_storage">The device storage is full or read-only, so the server cannot write files. Fix: free up storage space (delete old worlds/exports) or restart the device to remount storage.</string>
 </resources>

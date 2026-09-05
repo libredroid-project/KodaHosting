@@ -6,67 +6,199 @@ import java.util.*;
 import java.util.regex.*;
 
 /**
- * Analyzes server logs and crash-reports to determine crash cause.
+ * Analyzes server logs and crash-reports to determine the crash cause.
  * Used by KodaServerService when a server exits.
+ *
+ * Patterns live in an ORDERED list: first match across all lines wins, so
+ * specific causes (EULA, libjvm) are checked before generic ones (Permission
+ * denied). Categories are stable keys — the localized display strings live in
+ * strings.xml (crash_category_* / crash_reason_*), consumed by
+ * CrashAlertActivity and the crash banner.
  */
 public class CrashAnalyzer {
 
     public static class Result {
         public boolean isCrash = false;
-        public String  category = "UNKNOWN";    // OOM, EULA, MOD_CRASH, PORT, PERMISSION, JAVA_VERSION, STACK_OVERFLOW, WORLD_CORRUPT, CONFIG_INVALID, OS_KILLED, NATIVE_LIB, MISSING_JAR, UNKNOWN
-        public String  reason = null;            // Human-readable cause
-        public String  fixDescription = null;    // What the fix does
-        public String  fixAction = null;         // Internal key: ACCEPT_EULA, INCREASE_RAM, CHANGE_PORT, FIX_JAVA_VERSION, FIX_PERMISSIONS, REDOWNLOAD_JAR, REDOWNLOAD_JRE
-        public String  stackTrace = null;        // Relevant stack trace lines
+        public String  category = "UNKNOWN";
+        public String  reason = null;            // English detail (fallback / debug)
+        public String  fixDescription = null;    // What the automatic fix does (null = manual)
+        public String  fixAction = null;         // CrashFixer key, null = manual fix only
+        public String  stackTrace = null;
         public int     exitCode = 0;
     }
 
-    private static final Pattern[] CRASH_PATTERNS = {
-        // OOM
-        Pattern.compile("(?i)java\\.lang\\.OutOfMemoryError"),
-        Pattern.compile("(?i)insufficient memory"),
-        Pattern.compile("(?i)GC overhead limit exceeded"),
-        Pattern.compile("(?i)unable to create new native thread"),
-        // EULA
-        Pattern.compile("(?i)You need to agree to the EULA"),
-        Pattern.compile("(?i)Go to eula\\.txt"),
-        // Port
-        Pattern.compile("(?i)Address already in use"),
-        Pattern.compile("(?i)EADDRINUSE"),
-        Pattern.compile("(?i)Failed to bind to port"),
-        Pattern.compile("(?i)Cannot bind to port"),
-        // Mod crash
-        Pattern.compile("(?i)Mixin apply.*failed"),
-        Pattern.compile("(?i)LoaderExceptionModCrash"),
-        Pattern.compile("(?i)ModLoadingException"),
-        Pattern.compile("(?i)FMLCommonSetupEvent.*error"),
-        Pattern.compile("(?i)cpw\\.mods\\.fml.*crash"),
-        // Missing JAR / Main class
-        Pattern.compile("(?i)Could not find or load main class"),
-        Pattern.compile("(?i)FileNotFoundException.*\\.jar"),
-        Pattern.compile("(?i)Error: Unable to access jarfile"),
-        // Java version
-        Pattern.compile("(?i)UnsupportedClassVersionError"),
-        Pattern.compile("(?i)has been compiled by a more recent version"),
-        Pattern.compile("(?i)class file version \\d+\\.\\d+ .*this Java|(?i)requires Java \\d+.*but you are running Java|(?i)requires version \\d+.*java.*wrong version is present"),
-        // Permission
-        Pattern.compile("(?i)java\\.nio\\.file\\.AccessDeniedException"),
-        Pattern.compile("(?i)Permission denied"),
-        // Stack overflow
-        Pattern.compile("(?i)java\\.lang\\.StackOverflowError"),
-        // World corrupt
-        Pattern.compile("(?i)Region file.*has invalid"),
-        Pattern.compile("(?i)Chunk.*invalid biome"),
-        Pattern.compile("(?i)Exception reading .*\\.mca"),
-        // Config invalid
-        Pattern.compile("(?i)Invalid server\\.properties"),
-        Pattern.compile("(?i)server\\.properties.*NumberFormatException"),
-        // Native lib
-        Pattern.compile("(?i)UnsatisfiedLinkError"),
-        Pattern.compile("(?i)Could not load.*libjvm"),
-        Pattern.compile("(?i)dlopen failed:.*libjvm"),
-        Pattern.compile("(?i)libjvm\\.so"),
-    };
+    private static class CrashPattern {
+        final Pattern pattern;
+        final String category;
+        final String reason;
+        final String fixDescription; // nullable
+        final String fixAction;      // nullable
+        CrashPattern(String regex, String category, String reason, String fixDescription, String fixAction) {
+            this.pattern = Pattern.compile(regex);
+            this.category = category;
+            this.reason = reason;
+            this.fixDescription = fixDescription;
+            this.fixAction = fixAction;
+        }
+    }
+
+    private static final List<CrashPattern> PATTERNS = buildPatterns();
+
+    private static List<CrashPattern> buildPatterns() {
+        List<CrashPattern> p = new ArrayList<>();
+
+        // ── EULA (very specific, first) ─────────────────────────────
+        p.add(new CrashPattern("(?i)You need to agree to the EULA", "EULA",
+                "EULA not accepted", "Accept the Minecraft EULA automatically", "ACCEPT_EULA"));
+        p.add(new CrashPattern("(?i)Go to eula\\.txt", "EULA",
+                "EULA not accepted", "Accept the Minecraft EULA automatically", "ACCEPT_EULA"));
+
+        // ── Native library (JRE broken) ─────────────────────────────
+        p.add(new CrashPattern("(?i)UnsatisfiedLinkError", "NATIVE_LIB",
+                "Missing or incompatible native library (libjvm.so)",
+                "Re-download the Java Runtime", "REDOWNLOAD_JRE"));
+        p.add(new CrashPattern("(?i)Could not load.*libjvm", "NATIVE_LIB",
+                "Missing or incompatible native library (libjvm.so)",
+                "Re-download the Java Runtime", "REDOWNLOAD_JRE"));
+        p.add(new CrashPattern("(?i)dlopen failed:.*libjvm", "NATIVE_LIB",
+                "Missing or incompatible native library (libjvm.so)",
+                "Re-download the Java Runtime", "REDOWNLOAD_JRE"));
+        p.add(new CrashPattern("(?i)libjvm\\.so", "NATIVE_LIB",
+                "Missing or incompatible native library (libjvm.so)",
+                "Re-download the Java Runtime", "REDOWNLOAD_JRE"));
+
+        // ── Java version mismatches ─────────────────────────────────
+        p.add(new CrashPattern("(?i)UnsupportedClassVersionError", "JAVA_VERSION",
+                "Jar compiled for a newer Java than the runtime",
+                "Auto-select correct Java version", "FIX_JAVA_VERSION"));
+        p.add(new CrashPattern("(?i)has been compiled by a more recent version", "JAVA_VERSION",
+                "Jar compiled for a newer Java than the runtime",
+                "Auto-select correct Java version", "FIX_JAVA_VERSION"));
+        p.add(new CrashPattern("(?i)unsupported major\\.minor version", "JAVA_VERSION",
+                "Jar compiled for a newer Java than the runtime",
+                "Auto-select correct Java version", "FIX_JAVA_VERSION"));
+        p.add(new CrashPattern("(?i)requires Java \\d+.*(but|running)|(?i)class file version \\d+\\.\\d+.*this version", "JAVA_VERSION",
+                "Server or mod requires a different Java version",
+                "Auto-select correct Java version", "FIX_JAVA_VERSION"));
+
+        // ── Out of memory ───────────────────────────────────────────
+        p.add(new CrashPattern("(?i)java\\.lang\\.OutOfMemoryError: Metaspace", "OOM",
+                "OutOfMemoryError: Metaspace (too many classes, usually heavy mods)", null, null));
+        p.add(new CrashPattern("(?i)java\\.lang\\.OutOfMemoryError", "OOM",
+                "OutOfMemoryError — heap too small for this server/mods",
+                "Increase RAM by 512 MB", "INCREASE_RAM"));
+        p.add(new CrashPattern("(?i)insufficient memory", "OOM",
+                "Insufficient memory", "Increase RAM by 512 MB", "INCREASE_RAM"));
+        p.add(new CrashPattern("(?i)GC overhead limit exceeded", "OOM",
+                "GC overhead limit exceeded — heap too small, server thrashing in garbage collection",
+                "Increase RAM by 512 MB", "INCREASE_RAM"));
+        p.add(new CrashPattern("(?i)unable to create new native thread", "OOM",
+                "Unable to create native threads — process/system thread or memory limit reached", null, null));
+
+        // ── Class not found (missing mod/plugin library) ────────────
+        p.add(new CrashPattern("(?i)java\\.lang\\.ClassNotFoundException", "CLASS_NOT_FOUND",
+                "ClassNotFoundException — a mod or plugin references a missing library", null, null));
+        p.add(new CrashPattern("(?i)java\\.lang\\.NoClassDefFoundError", "CLASS_NOT_FOUND",
+                "NoClassDefFoundError — a mod or plugin is missing a dependency library", null, null));
+
+        // ── Mod loader crashes ──────────────────────────────────────
+        p.add(new CrashPattern("(?i)Missing or unsupported mandatory dependencies", "MOD_CRASH",
+                "Mod dependencies missing or wrong version — install/update the listed mods", null, null));
+        p.add(new CrashPattern("(?i)Missing Mods?:|(?i)missing mods.*\\[", "MOD_CRASH",
+                "Required mods missing — install the mods listed in the log", null, null));
+        p.add(new CrashPattern("(?i)Duplicate mods found", "MOD_CRASH",
+                "Duplicate mods — the same mod exists twice in the mods folder; remove one copy", null, null));
+        p.add(new CrashPattern("(?i)mods\\.toml", "MOD_CRASH",
+                "Forge/NeoForge mod file is invalid (missing or broken mods.toml) — re-download the mod", null, null));
+        p.add(new CrashPattern("(?i)MixinApplyError|(?i)Mixin apply.*failed", "MOD_CRASH",
+                "Mixin failed to apply — mod incompatible with this server version; remove/update it", null, null));
+        p.add(new CrashPattern("(?i)LoaderExceptionModCrash|(?i)ModLoadingException", "MOD_CRASH",
+                "Mod crashed during load — remove/update the mod named in the stack trace", null, null));
+        p.add(new CrashPattern("(?i)FMLCommonSetupEvent.*error|(?i)cpw\\.mods\\.fml.*crash", "MOD_CRASH",
+                "Forge mod loading crashed — remove/update the mod named in the stack trace", null, null));
+        p.add(new CrashPattern("(?i)Incompatible mod set", "MOD_CRASH",
+                "Fabric reports an incompatible mod set — check mod versions against the loader", null, null));
+        p.add(new CrashPattern("(?i)not a valid (mod|jar) file", "MOD_CRASH",
+                "A file in the mods folder is not a valid mod — remove it", null, null));
+
+        // ── Plugin configuration (Bukkit/Spigot/Paper) ──────────────
+        p.add(new CrashPattern("(?i)Error occurred while enabling", "PLUGIN_CONFIG",
+                "Plugin crashed in onEnable — remove/update the plugin named above", null, null));
+        p.add(new CrashPattern("(?i)Invalid plugin\\.yml|(?i)plugin\\.yml", "PLUGIN_CONFIG",
+                "A plugin has an invalid plugin.yml — re-download or remove that plugin", null, null));
+        p.add(new CrashPattern("(?i)duplicate plugin", "PLUGIN_CONFIG",
+                "Duplicate plugin — the same plugin is loaded twice; remove one copy", null, null));
+        p.add(new CrashPattern("(?i)YAMLException|(?i)org\\.yaml\\.snakeyaml", "PLUGIN_CONFIG",
+                "Broken YAML config (config.yml/plugin.yml) — fix the syntax error reported in the log", null, null));
+
+        // ── World corruption ────────────────────────────────────────
+        p.add(new CrashPattern("(?i)Ticking entity", "WORLD_CORRUPT",
+                "Crash while ticking an entity — a corrupted entity breaks the world; restore a backup or remove the entity", null, null));
+        p.add(new CrashPattern("(?i)Ticking block entity", "WORLD_CORRUPT",
+                "Crash while ticking a block entity (e.g. a broken tile entity); restore a backup", null, null));
+        p.add(new CrashPattern("(?i)Exception loading.*NBT|(?i)Loading NBT data", "WORLD_CORRUPT",
+                "World data corrupted (NBT) — restore the world from a backup", null, null));
+        p.add(new CrashPattern("(?i)Region file.*has invalid|(?i)Chunk.*invalid biome|(?i)Exception reading .*\\.mca", "WORLD_CORRUPT",
+                "Region/chunk file corrupted — restore the world from a backup or delete the reported region file", null, null));
+        p.add(new CrashPattern("(?i)Failed to write chunk|(?i)corrupt.*chunk|(?i)chunk.*corrupt", "WORLD_CORRUPT",
+                "Chunk read/write failed — check storage space and world backup", null, null));
+
+        // ── Storage ─────────────────────────────────────────────────
+        p.add(new CrashPattern("(?i)No space left on device", "STORAGE",
+                "Device storage full — free up space to let the server write world data", null, null));
+        p.add(new CrashPattern("(?i)Read-only file system", "STORAGE",
+                "Filesystem is read-only — the app's storage is unavailable; remount/restart the device", null, null));
+        p.add(new CrashPattern("(?i)Failed to create (directories|directory)", "STORAGE",
+                "Server directory could not be created — check storage permissions and free space", null, null));
+
+        // ── Missing / broken server JAR ─────────────────────────────
+        p.add(new CrashPattern("(?i)Invalid or corrupt jarfile|(?i)zip END header not found|(?i)error in opening zip file", "MISSING_JAR",
+                "Server JAR is corrupted — re-download it",
+                "Re-download the server JAR", "REDOWNLOAD_JAR"));
+        p.add(new CrashPattern("(?i)no main manifest attributes", "MISSING_JAR",
+                "The selected JAR is not a server jar (no Main-Class manifest) — download the correct server jar",
+                "Re-download the server JAR", "REDOWNLOAD_JAR"));
+        p.add(new CrashPattern("(?i)Could not find or load main class", "MISSING_JAR",
+                "Main class missing — JAR broken or wrong file",
+                "Re-download the server JAR", "REDOWNLOAD_JAR"));
+        p.add(new CrashPattern("(?i)FileNotFoundException.*\\.jar|(?i)Error: Unable to access jarfile", "MISSING_JAR",
+                "Server JAR missing — download it in the Settings tab",
+                "Re-download the server JAR", "REDOWNLOAD_JAR"));
+
+        // ── Port conflicts ──────────────────────────────────────────
+        p.add(new CrashPattern("(?i)Address already in use|(?i)EADDRINUSE", "PORT",
+                "Port already in use by another process or server", null, null));
+        p.add(new CrashPattern("(?i)Failed to bind to port|(?i)Cannot bind to port|(?i)Bind failed", "PORT",
+                "Could not bind the server port", null, null));
+
+        // ── Config errors ───────────────────────────────────────────
+        p.add(new CrashPattern("(?i)Invalid server\\.properties|(?i)server\\.properties.*NumberFormatException|(?i)NumberFormatException.*server\\.properties", "CONFIG_INVALID",
+                "server.properties contains an invalid value — fix or reset the reported key", null, null));
+        p.add(new CrashPattern("(?i)Failed to parse (config|configuration)", "CONFIG_INVALID",
+                "A config file could not be parsed — fix the syntax error reported in the log", null, null));
+
+        // ── Stack overflow ──────────────────────────────────────────
+        p.add(new CrashPattern("(?i)java\\.lang\\.StackOverflowError", "STACK_OVERFLOW",
+                "StackOverflowError — infinite recursion, usually a broken mod or plugin", null, null));
+
+        // ── OS / system kills ───────────────────────────────────────
+        p.add(new CrashPattern("(?i)phantom process", "OS_KILLED",
+                "Android's phantom-process limiter killed the server process — apply the RAM-limiter ADB bypass", null, null));
+        p.add(new CrashPattern("(?i)\\bSIGKILL\\b|(?i)process.*killed.*signal", "OS_KILLED",
+                "Process killed by the OS (SIGKILL) — Android terminated the server", null, null));
+        p.add(new CrashPattern("(?i)^Killed$|(?i)\\bKilled\\b", "OS_KILLED",
+                "Process killed by the OS — usually the memory limiter; apply the RAM-limiter ADB bypass", null, null));
+
+        // ── Permission (generic — intentionally last) ───────────────
+        p.add(new CrashPattern("(?i)java\\.nio\\.file\\.AccessDeniedException", "PERMISSION",
+                "File access denied — server files lack read/write permission",
+                "Fix file permissions", "FIX_PERMISSIONS"));
+        p.add(new CrashPattern("(?i)Permission denied", "PERMISSION",
+                "Permission denied — a file or port is not accessible",
+                "Fix file permissions", "FIX_PERMISSIONS"));
+
+        return p;
+    }
 
     /** Analyze a server's logs and crash-reports after it exited. */
     public static Result analyze(ServerInstance srv) {
@@ -82,122 +214,50 @@ public class CrashAnalyzer {
         List<String> logLines = readLastLines(serverDir, 200);
         String crashReportContent = readLatestCrashReport(serverDir);
 
-        // Combine log + crash report for scanning
         List<String> allLines = new ArrayList<>(logLines);
         if (crashReportContent != null) {
             allLines.addAll(Arrays.asList(crashReportContent.split("\n")));
         }
 
-        // Check each line against patterns
-        for (String line : allLines) {
-            String stripped = stripAnsi(line);
-
-            // ── EULA ──────────────────────────────────────────────
-            if (matches(stripped, 4, 5)) {
-                r.isCrash = true;
-                r.category = "EULA";
-                r.reason = "EULA not accepted";
-                r.fixDescription = "Accept the Minecraft EULA automatically";
-                r.fixAction = "ACCEPT_EULA";
-                return r;
-            }
-            // ── OOM ───────────────────────────────────────────────
-            if (matches(stripped, 0, 3)) {
-                r.isCrash = true;
-                r.category = "OOM";
-                r.reason = "OutOfMemoryError";
-                r.fixDescription = "Increase RAM by 512 MB";
-                r.fixAction = "INCREASE_RAM";
-                r.stackTrace = extractStackTrace(allLines, line);
-                return r;
-            }
-            // ── PORT ──────────────────────────────────────────────
-            if (matches(stripped, 6, 9)) {
-                r.isCrash = true;
-                r.category = "PORT";
-                r.reason = "Port already in use";
-                r.fixDescription = "Assign a different port";
-                r.fixAction = "CHANGE_PORT";
-                return r;
-            }
-            // ── MOD CRASH ─────────────────────────────────────────
-            if (matches(stripped, 10, 14)) {
-                r.isCrash = true;
-                r.category = "MOD_CRASH";
-                r.reason = "Mod compatibility error";
-                r.stackTrace = extractStackTrace(allLines, line);
-                return r;
-            }
-            // ── MISSING JAR ───────────────────────────────────────
-            if (matches(stripped, 15, 17)) {
-                r.isCrash = true;
-                r.category = "MISSING_JAR";
-                r.reason = "Server JAR missing or corrupted";
-                r.fixDescription = "Re-download the server JAR";
-                r.fixAction = "REDOWNLOAD_JAR";
-                return r;
-            }
-            // ── JAVA VERSION ──────────────────────────────────────
-            if (matches(stripped, 18, 20)) {
-                r.isCrash = true;
-                r.category = "JAVA_VERSION";
-                r.reason = "Wrong Java version";
-                r.fixDescription = "Auto-select correct Java version";
-                r.fixAction = "FIX_JAVA_VERSION";
-                r.stackTrace = extractStackTrace(allLines, line);
-                return r;
-            }
-            // ── PERMISSION ────────────────────────────────────────
-            if (matches(stripped, 21, 22)) {
-                r.isCrash = true;
-                r.category = "PERMISSION";
-                r.reason = "File permission denied";
-                r.fixDescription = "Fix file permissions";
-                r.fixAction = "FIX_PERMISSIONS";
-                return r;
-            }
-            // ── STACK OVERFLOW ─────────────────────────────────────
-            if (matches(stripped, 23, 23)) {
-                r.isCrash = true;
-                r.category = "STACK_OVERFLOW";
-                r.reason = "StackOverflowError (infinite loop in mod/plugin)";
-                r.stackTrace = extractStackTrace(allLines, line);
-                return r;
-            }
-            // ── WORLD CORRUPT ─────────────────────────────────────
-            if (matches(stripped, 24, 26)) {
-                r.isCrash = true;
-                r.category = "WORLD_CORRUPT";
-                r.reason = "World data corrupted";
-                return r;
-            }
-            // ── CONFIG INVALID ────────────────────────────────────
-            if (matches(stripped, 27, 28)) {
-                r.isCrash = true;
-                r.category = "CONFIG_INVALID";
-                r.reason = "Invalid server.properties";
-                return r;
-            }
-            // ── NATIVE LIB ────────────────────────────────────────
-            if (matches(stripped, 29, 32)) {
-                r.isCrash = true;
-                r.category = "NATIVE_LIB";
-                r.reason = "Missing native library (libjvm.so)";
-                r.fixDescription = "Re-download the Java Runtime";
-                r.fixAction = "REDOWNLOAD_JRE";
-                r.stackTrace = extractStackTrace(allLines, line);
-                return r;
+        // Priority order: pattern list order wins over line order
+        for (CrashPattern cp : PATTERNS) {
+            for (String line : allLines) {
+                String stripped = stripAnsi(line);
+                if (cp.pattern.matcher(stripped).find()) {
+                    r.isCrash = true;
+                    r.category = cp.category;
+                    r.reason = cp.reason;
+                    r.fixDescription = cp.fixDescription;
+                    r.fixAction = cp.fixAction;
+                    r.stackTrace = extractStackTrace(allLines, line);
+                    return r;
+                }
             }
         }
 
-        // If exit code is non-zero but we didn't match any pattern
+        // Exit-code heuristics (no pattern matched)
+        if (exitCode == 137) {
+            r.isCrash = true;
+            r.category = "OOM";
+            r.reason = "Killed by SIGKILL (exit 137) — the OS terminated the server, usually out of memory";
+            r.stackTrace = lastNLines(logLines, 20);
+            return r;
+        }
+        if (exitCode == 139) {
+            r.isCrash = true;
+            r.category = "NATIVE_LIB";
+            r.reason = "Native crash (SIGSEGV, exit 139) — the Java runtime or a native library crashed";
+            r.fixDescription = "Re-download the Java Runtime";
+            r.fixAction = "REDOWNLOAD_JRE";
+            r.stackTrace = lastNLines(logLines, 20);
+            return r;
+        }
         if (exitCode != 0 && exitCode != -1) {
             r.isCrash = true;
             r.category = "UNKNOWN";
             r.reason = "Process exited with code " + exitCode;
             r.stackTrace = lastNLines(logLines, 20);
         }
-        // If exit code is 0 or -1 but state was STARTING (never reached 'Done'), also a crash
         if ((exitCode == 0 || exitCode == -1) && srv.state == ServerInstance.State.STARTING) {
             r.isCrash = true;
             r.category = "UNKNOWN";
@@ -206,13 +266,6 @@ public class CrashAnalyzer {
         }
 
         return r;
-    }
-
-    private static boolean matches(String line, int fromIdx, int toIdx) {
-        for (int i = fromIdx; i <= toIdx && i < CRASH_PATTERNS.length; i++) {
-            if (CRASH_PATTERNS[i].matcher(line).find()) return true;
-        }
-        return false;
     }
 
     private static String stripAnsi(String s) {
@@ -278,10 +331,8 @@ public class CrashAnalyzer {
         if (!crashDir.isDirectory()) return null;
         File[] files = crashDir.listFiles((d, name) -> name.endsWith(".txt"));
         if (files == null || files.length == 0) return null;
-        // Sort by last modified, newest first
         Arrays.sort(files, (a, b) -> Long.compare(b.lastModified(), a.lastModified()));
         File newest = files[0];
-        // Only consider crash reports from the last 5 minutes
         if (System.currentTimeMillis() - newest.lastModified() > 5 * 60 * 1000) return null;
         StringBuilder sb = new StringBuilder();
         try (BufferedReader br = new BufferedReader(new FileReader(newest))) {

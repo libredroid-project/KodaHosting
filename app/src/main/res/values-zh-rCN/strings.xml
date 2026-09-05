@@ -538,4 +538,11 @@
     <string name="nickname_question">在 KodaHosting 中我们该怎么称呼你？</string>
     <string name="nickname_save">保存</string>
     <string name="nickname_ask_later">稍后再问</string>
+
+    <string name="crash_category_class_not_found">缺少依赖库</string>
+    <string name="crash_reason_class_not_found">某个模组或插件缺少依赖库（ClassNotFoundException/NoClassDefFoundError）。解决方法：安装错误上方列出的依赖模组/插件，或移除需要它的模组。</string>
+    <string name="crash_category_plugin_config">插件/配置损坏</string>
+    <string name="crash_reason_plugin_config">某个插件崩溃或其配置文件损坏。解决方法：移除或重新下载日志中提到的插件，并修复其 config.yml/plugin.yml 中的 YAML 语法错误。</string>
+    <string name="crash_category_storage">存储问题</string>
+    <string name="crash_reason_storage">设备存储已满或为只读，服务器无法写入文件。解决方法：释放存储空间（删除旧世界/导出文件）或重启设备以重新挂载存储。</string>
 </resources>

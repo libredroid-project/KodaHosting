@@ -385,6 +385,9 @@ public class CrashAlertActivity extends androidx.appcompat.app.AppCompatActivity
             case "CONFIG_INVALID": return getString(R.string.crash_category_config_invalid);
             case "OS_KILLED":      return getString(R.string.crash_category_os_killed);
             case "NATIVE_LIB":     return getString(R.string.crash_category_native_lib);
+            case "CLASS_NOT_FOUND": return getString(R.string.crash_category_class_not_found);
+            case "PLUGIN_CONFIG":  return getString(R.string.crash_category_plugin_config);
+            case "STORAGE":        return getString(R.string.crash_category_storage);
             default:               return getString(R.string.crash_category_unknown);
         }
     }
@@ -405,6 +408,9 @@ public class CrashAlertActivity extends androidx.appcompat.app.AppCompatActivity
             case "CONFIG_INVALID": return getString(R.string.crash_reason_config_invalid);
             case "OS_KILLED":      return getString(R.string.crash_reason_os_killed);
             case "NATIVE_LIB":     return getString(R.string.crash_reason_native_lib);
+            case "CLASS_NOT_FOUND": return getString(R.string.crash_reason_class_not_found);
+            case "PLUGIN_CONFIG":  return getString(R.string.crash_reason_plugin_config);
+            case "STORAGE":        return getString(R.string.crash_reason_storage);
             case "UNKNOWN":
                 if (exitCode != 0) return getString(R.string.crash_reason_unknown, exitCode);
                 return getString(R.string.crash_reason_startup_exit);
