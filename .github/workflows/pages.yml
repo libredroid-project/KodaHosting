@@ -3,7 +3,7 @@ name: Deploy Website to GitHub Pages
 on:
   push:
     branches: [master]
-    paths: [website/**]
+    paths: [website/**, app/src/main/assets/licenses/**]
   workflow_dispatch:
 
 permissions:
@@ -23,6 +23,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      # The website renders the app's own legal documents (single source of
+      # truth): copy them in at deploy time so site and app can never drift.
+      - name: Sync legal documents from app assets
+        run: |
+          mkdir -p website/legal
+          cp app/src/main/assets/licenses/privacy.txt website/legal/
+          cp app/src/main/assets/licenses/tos.txt website/legal/
+          cp app/src/main/assets/licenses/impressum.txt website/legal/
+          cp app/src/main/assets/licenses/gpl_v3.txt website/legal/
+          cp app/src/main/assets/licenses/gemma_ai.txt website/legal/
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:

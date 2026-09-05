@@ -25,7 +25,10 @@
 
 <div class="page">
   <h1>Licenses &amp; Credits</h1>
-  <p class="updated">KodaHosting is GPL v3 licensed. Full license texts are bundled in the app under Licenses.</p>
+  <p class="updated">The app license (GPL v3), imprint and the AI notice below are rendered from the app's own documents.</p>
+
+  <h2>AI crash assistant</h2>
+  <div id="gemma-content"><p>Loading…</p></div>
 
   <h2>Fonts</h2>
   <table>
@@ -49,8 +52,11 @@
     <tr><td>Lottie-android, Glide, Apache Commons Compress, OkHttp, Retrofit</td><td>App infrastructure</td></tr>
   </table>
 
-  <h2>AI crash assistant</h2>
-  <p>The optional "Ask AI" feature uses the <b>Google Gemma</b> model served through <b>OpenRouter</b>. Gemma is subject to Google's Gemma Terms of Use and Prohibited Use Policy; OpenRouter's own terms apply to the API gateway. The feature is user-initiated, rate limited, and described in the <a href="privacy.html">Privacy Policy</a>.</p>
+  <h2>App license (GPL v3)</h2>
+  <div id="gpl-content"><p>Loading…</p></div>
+
+  <h2>Imprint</h2>
+  <div id="impressum-content"><p>Loading…</p></div>
 
   <h2>Minecraft</h2>
   <p>KodaHosting is not an official Minecraft product and is not approved by or associated with Mojang or Microsoft.</p>
@@ -64,6 +70,31 @@
     </div>
   </div>
 </footer>
+
+<script>
+function renderLegal(file, targetId) {
+  fetch('legal/' + file)
+    .then(r => { if (!r.ok) throw new Error(r.status); return r.text(); })
+    .then(t => {
+      const el = document.getElementById(targetId);
+      el.innerHTML = '';
+      for (const line of t.split('\n').slice(0, 80)) {
+        if (!line.trim()) continue;
+        const p = document.createElement('p');
+        p.textContent = line;
+        p.style.marginBottom = '8px';
+        el.appendChild(p);
+      }
+    })
+    .catch(() => {
+      document.getElementById(targetId).innerHTML =
+        '<p>Full text in the app under Licenses, or <a href="https://github.com/libredroid-project/KodaHosting/blob/master/app/src/main/assets/licenses/' + file + '">on GitHub</a>.</p>';
+    });
+}
+renderLegal('gemma_ai.txt', 'gemma-content');
+renderLegal('gpl_v3.txt', 'gpl-content');
+renderLegal('impressum.txt', 'impressum-content');
+</script>
 
 </body>
 </html>

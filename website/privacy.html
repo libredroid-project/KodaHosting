@@ -25,59 +25,8 @@
 
 <div class="page">
   <h1>Privacy Policy</h1>
-  <p class="updated">Last updated: 2026-09-05 · Applies to the KodaHosting Android app and this website.</p>
-
-  <h2>Summary</h2>
-  <p>KodaHosting runs Minecraft servers <b>on your own device</b>. Your worlds, configs and logs stay on your phone. We store a minimum of account/status metadata so the tunnel and multi-device features work, and nothing else — unless you explicitly tap "Ask AI" (see section 4).</p>
-
-  <h2>1. Data stored on your device</h2>
-  <p>Server files, worlds, logs, plugins, configs and your settings are stored locally. They never leave your device unless you export them yourself or use the AI crash assistant (section 4).</p>
-
-  <h2>2. Account &amp; status metadata (Supabase)</h2>
-  <p>The app stores the following metadata in a Supabase (Supabase Inc.) hosted database, keyed to a random app identifier (app UUID):</p>
-  <ul>
-    <li>App installation id, account codes, and (if you link one) your Minecraft username</li>
-    <li>Server status heartbeat: online/offline state, player count, server software and version</li>
-    <li>Optional device diagnostics: device model, Android version, RAM, CPU cores, battery level, network type — used for support and capacity planning</li>
-    <li>Optional nickname you choose in the app</li>
-  </ul>
-  <p>This data is <b>not</b> world content, chat, or player data. It cannot be used to see what happens on your server. Supabase processes it on our behalf; see <a href="https://supabase.com/privacy" target="_blank" rel="noopener">supabase.com/privacy</a>.</p>
-
-  <h2>3. Tunnel</h2>
-  <p>Player connections are relayed through a frp tunnel operated for KodaHosting. The relay sees connection metadata (IP address, connection duration and volume) required to forward traffic. Game content is not inspected or stored.</p>
-
-  <h2>4. AI-assisted crash analysis (optional, user-initiated)</h2>
-  <p>When you tap <b>"Ask AI"</b> on a crash screen, the app sends:</p>
-  <ul>
-    <li>the last ~1000 lines of your server log (which may contain player names and IP addresses), and</li>
-    <li>basic device information (model, RAM, Android version) and server settings (software, version, RAM allocation).</li>
-  </ul>
-  <p>…to <b>OpenRouter</b> (OpenRouter.ai), which processes the request through the Google Gemma model. Recipients: OpenRouter and (as the underlying model provider) Google. These services are located in the United States; data may be processed there.</p>
-  <ul>
-    <li>This happens <b>only</b> when you tap "Ask AI" — never automatically. The first use asks for your explicit consent.</li>
-    <li>Usage is limited to 10 requests per day.</li>
-    <li>Requests on the free tier may be used by the model provider for training per OpenRouter's terms — do not use the feature if you are not comfortable with this.</li>
-    <li>We cannot delete data already sent to OpenRouter; their retention applies.</li>
-    <li>AI answers are automated suggestions, not professional support.</li>
-  </ul>
-
-  <h2>5. Legal basis (GDPR)</h2>
-  <p>Account/status metadata: legitimate interest (Art. 6(1)(f) GDPR) — operating the service you asked for. AI crash analysis: your explicit consent by pressing the button (Art. 6(1)(a) GDPR); you can withdraw it any time by simply not using the feature.</p>
-
-  <h2>6. Retention</h2>
-  <p>Device-local data lives until you delete the app or the server. Status metadata is kept while your account is active; deleting your account (or asking us to) removes the related rows. AI requests are retained by OpenRouter/Google per their policies — we hold no copies.</p>
-
-  <h2>7. Your rights</h2>
-  <p>You can request access, correction or deletion of your stored metadata, or object to processing, by contacting us (see imprint / repository). You also have the right to lodge a complaint with your local data protection authority.</p>
-
-  <h2>8. Children</h2>
-  <p>KodaHosting is not directed at children under 13 (or 16 where local law requires). We do not knowingly collect their data.</p>
-
-  <h2>9. Changes</h2>
-  <p>Changes to this policy are published on this page with a new "last updated" date. Material changes are also announced in the app.</p>
-
-  <h2>10. Contact</h2>
-  <p>See the imprint details in the app (Licenses → Imprint) or open an issue at <a href="https://github.com/libredroid-project/KodaHosting" target="_blank" rel="noopener">github.com/libredroid-project/KodaHosting</a>.</p>
+  <p class="updated">This is the exact policy shown inside the app — rendered from the app's own document.</p>
+  <div id="legal-content"><p>Loading…</p></div>
 </div>
 
 <footer class="footer">
@@ -88,6 +37,28 @@
     </div>
   </div>
 </footer>
+
+<script>
+// Render the app's legal text (single source of truth: app/src/main/assets/licenses/)
+fetch('legal/privacy.txt')
+  .then(r => { if (!r.ok) throw new Error(r.status); return r.text(); })
+  .then(t => {
+    const el = document.getElementById('legal-content');
+    el.innerHTML = '';
+    for (const line of t.split('\n')) {
+      if (!line.trim()) continue;
+      const p = document.createElement('p');
+      p.textContent = line;
+      p.style.marginBottom = '10px';
+      el.appendChild(p);
+    }
+  })
+  .catch(() => {
+    document.getElementById('legal-content').innerHTML =
+      '<p>Could not load the document. Read it in the app under Licenses, or ' +
+      '<a href="https://github.com/libredroid-project/KodaHosting/blob/master/app/src/main/assets/licenses/privacy.txt">on GitHub</a>.</p>';
+  });
+</script>
 
 </body>
 </html>
