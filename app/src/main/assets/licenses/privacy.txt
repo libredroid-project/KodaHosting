@@ -33,21 +33,6 @@ KodaHosting processes certain data to function correctly:
 
 - Voluntary Donations: If you choose to support development via Ko-fi, you will be redirected to ko-fi.com, which processes the donation independently. Ko-fi may collect your name, email, and payment information. We do not process or store your payment data. Ko-fi's privacy policy applies to donations. Donations are voluntary gifts and do not create a customer relationship with us.
 
-AI-Assisted Crash Analysis (Optional, User-Initiated):
-
-When you tap "Ask AI" on a crash screen, the app sends the last ~1000 lines of
-your server log (which may contain player names and IP addresses) plus basic
-device information (model, RAM, Android version) and server settings (software,
-version, RAM allocation) to OpenRouter (OpenRouter.ai), which processes the
-request through the Google Gemma model (providers located in the United
-States). This happens ONLY when you explicitly tap "Ask AI" - never
-automatically. The first use requires your explicit consent in the app. Usage
-is limited to 10 requests per day. Requests on the free tier may be used by the
-model provider for training per OpenRouter's terms - do not use this feature if
-you are not comfortable with this. We cannot delete data already sent to
-OpenRouter; their retention policies apply. AI answers are automated
-suggestions, not professional support.
-
 3. Legal Basis for Processing (Art. 6 GDPR)
 
 We process your personal data on the following legal bases:

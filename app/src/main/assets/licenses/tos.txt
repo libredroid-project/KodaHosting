@@ -53,15 +53,6 @@ Because the servers run on your own hardware, uptime depends directly on your de
 
 We reserve the right to suspend or terminate your account and access to the KodaHosting proxy infrastructure at any time, for any reason, particularly if you violate the Acceptable Use Policy. Upon termination, all data stored on your device remains yours; we do not retain server data after account deletion. We may also delete accounts that have been inactive for an extended period.
 
-5b. AI-Assisted Crash Analysis
-
-The optional "Ask AI" feature provides automated, AI-generated crash
-suggestions. These answers carry no warranty of correctness and are not
-professional support. The "Try to fix" function changes ONLY in-app settings
-(server RAM or Java runtime) after your explicit confirmation; it never modifies
-worlds, files, or the server port. You confirm every AI-suggested change
-yourself. We are not liable for damage resulting from applying AI suggestions.
-
 6. Disclaimer of Warranties
 
 THE SERVICE IS PROVIDED ON AN "AS IS" AND "AS AVAILABLE" BASIS. WE EXPRESSLY DISCLAIM ALL WARRANTIES OF ANY KIND, WHETHER EXPRESS OR IMPLIED, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NON-INFRINGEMENT. We do not guarantee that the service will be uninterrupted, secure, or error-free, nor do we guarantee the safety of your device data.
