@@ -568,4 +568,27 @@
     <string name="crash_reason_plugin_config">A plugin crashed or has a broken config file. Fix: remove or re-download the plugin named in the log, and fix the YAML syntax error in its config.yml/plugin.yml.</string>
     <string name="crash_category_storage">Storage Problem</string>
     <string name="crash_reason_storage">The device storage is full or read-only, so the server cannot write files. Fix: free up storage space (delete old worlds/exports) or restart the device to remount storage.</string>
+
+    <string name="ai_title">AI Crash Analysis</string>
+    <string name="ai_thinking">AI is analyzing the crash log…</string>
+    <string name="ai_error_prefix">AI request failed:</string>
+    <string name="ai_retry">Retry</string>
+    <string name="ai_rate_limited">Daily AI limit reached (%1$d/10). Try again tomorrow.</string>
+    <string name="ai_confidence_prefix">Confidence:</string>
+    <string name="confidence_not_confident">Not confident</string>
+    <string name="confidence_confident">Confident</string>
+    <string name="confidence_high">High confidence</string>
+    <string name="confidence_certain">Certain</string>
+    <string name="ai_cause">Why it crashed</string>
+    <string name="ai_fix">How to fix it</string>
+    <string name="ai_try_fix">Try to fix</string>
+    <string name="ai_apply">Apply</string>
+    <string name="ai_fix_confirm_ram">The AI suggests changing the server RAM from %1$d MB to %2$d MB. Apply this setting?</string>
+    <string name="ai_fix_confirm_java">The AI suggests switching to Java %1$d for this server. Apply this setting?</string>
+    <string name="ai_fix_applied">Setting applied. Start the server to test.</string>
+    <string name="ai_fix_failed">Could not apply the setting.</string>
+    <string name="ai_ask_button">Ask AI</string>
+    <string name="ai_consent_title">Send data to AI?</string>
+    <string name="ai_consent_message">To analyze this crash, the last log lines and device info (model, RAM, Android version) are sent to OpenRouter (Google Gemma model). This happens only when you tap Ask AI and is limited to 10 requests per day. Details: kodanetwork.eu/privacy</string>
+    <string name="ai_consent_agree">Agree and ask</string>
 </resources>

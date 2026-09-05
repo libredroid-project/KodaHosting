@@ -576,4 +576,27 @@
     <string name="crash_reason_plugin_config">Ein Plugin ist abgestürzt oder hat eine kaputte Config. Fix: entferne das im Log genannte Plugin oder lade es neu, und korrigiere den YAML-Fehler in config.yml/plugin.yml.</string>
     <string name="crash_category_storage">Speicherproblem</string>
     <string name="crash_reason_storage">Der Gerätespeicher ist voll oder schreibgeschützt, der Server kann keine Dateien schreiben. Fix: schaffe Speicherplatz (alte Welten/Exports löschen) oder starte das Gerät neu, damit der Speicher neu eingebunden wird.</string>
+
+    <string name="ai_title">KI-Crash-Analyse</string>
+    <string name="ai_thinking">Die KI analysiert das Crash-Log…</string>
+    <string name="ai_error_prefix">KI-Anfrage fehlgeschlagen:</string>
+    <string name="ai_retry">Erneut versuchen</string>
+    <string name="ai_rate_limited">Tägliches KI-Limit erreicht (%1$d/10). Versuche es morgen erneut.</string>
+    <string name="ai_confidence_prefix">Sicherheit:</string>
+    <string name="confidence_not_confident">Nicht sicher</string>
+    <string name="confidence_confident">Sicher</string>
+    <string name="confidence_high">Hohe Sicherheit</string>
+    <string name="confidence_certain">Gewiss</string>
+    <string name="ai_cause">Warum es gecrasht ist</string>
+    <string name="ai_fix">So wird es gefixt</string>
+    <string name="ai_try_fix">Fix versuchen</string>
+    <string name="ai_apply">Anwenden</string>
+    <string name="ai_fix_confirm_ram">Die KI schlägt vor, den Server-RAM von %1$d MB auf %2$d MB zu ändern. Einstellung übernehmen?</string>
+    <string name="ai_fix_confirm_java">Die KI schlägt vor, für diesen Server auf Java %1$d zu wechseln. Einstellung übernehmen?</string>
+    <string name="ai_fix_applied">Einstellung übernommen. Starte den Server zum Testen.</string>
+    <string name="ai_fix_failed">Einstellung konnte nicht übernommen werden.</string>
+    <string name="ai_ask_button">KI fragen</string>
+    <string name="ai_consent_title">Daten an KI senden?</string>
+    <string name="ai_consent_message">Zur Crash-Analyse werden die letzten Log-Zeilen und Geräteinfos (Modell, RAM, Android-Version) an OpenRouter (Google-Gemma-Modell) gesendet. Das passiert nur beim Tippen auf KI fragen und ist auf 10 Anfragen pro Tag begrenzt. Details: kodanetwork.eu/privacy</string>
+    <string name="ai_consent_agree">Zustimmen und fragen</string>
 </resources>

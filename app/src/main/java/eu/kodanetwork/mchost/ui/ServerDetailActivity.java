@@ -2024,6 +2024,16 @@ public class ServerDetailActivity extends AppCompatActivity {
             btnLayout.addView(btnFix);
         }
         
+        
+        // ASK AI: consent-gated start of the AI crash analysis
+        com.google.android.material.button.MaterialButton btnAskAi = eu.kodanetwork.mchost.util.KodaButtons.primary(this, getString(R.string.ai_ask_button));
+        btnAskAi.setTextSize(11f);
+        btnAskAi.setOnClickListener(v -> {
+            eu.kodanetwork.mchost.util.HapticUtil.forceVibrate(this, 40);
+            requestAiAnalysis();
+        });
+        btnLayout.addView(btnAskAi, new LinearLayout.LayoutParams(android.view.ViewGroup.LayoutParams.WRAP_CONTENT, dp(40)));
+
         banner.addView(btnLayout);
         bannerContainer.addView(banner);
         bannerContainer.setVisibility(View.VISIBLE);
@@ -5628,5 +5638,31 @@ public class ServerDetailActivity extends AppCompatActivity {
         tv.setText(txt); tv.setTextColor(0xFFB7AE9F); tv.setTextSize(11);
         tv.setPadding(0,(int)(14*d),0,(int)(4*d));
         return tv;
+    }
+
+    /** Consent-gated start of the AI crash analysis (uses live service buffer). */
+    private void requestAiAnalysis() {
+        if (!eu.kodanetwork.mchost.util.AiHelper.hasConsent(this)) {
+            new androidx.appcompat.app.AlertDialog.Builder(this)
+                    .setTitle(getString(R.string.ai_consent_title))
+                    .setMessage(getString(R.string.ai_consent_message))
+                    .setPositiveButton(getString(R.string.ai_consent_agree), (d, w) -> {
+                        eu.kodanetwork.mchost.util.AiHelper.setConsent(this, true);
+                        requestAiAnalysis();
+                    })
+                    .setNegativeButton(getString(R.string.sd_action_cancel), null)
+                    .show();
+            return;
+        }
+        new Thread(() -> {
+            java.util.List<String> buffer = (bound && svc != null) ? svc.getLog(server.getId()) : null;
+            final String tail = eu.kodanetwork.mchost.util.AiHelper.gatherLog(this, server, buffer);
+            runOnUiThread(() -> {
+                android.content.Intent ai = new android.content.Intent(this, AiAnswerActivity.class);
+                ai.putExtra("serverId", server.getId());
+                ai.putExtra("logTail", tail);
+                startActivity(ai);
+            });
+        }).start();
     }
 }

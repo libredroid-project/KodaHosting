@@ -545,4 +545,27 @@
     <string name="crash_reason_plugin_config">某个插件崩溃或其配置文件损坏。解决方法：移除或重新下载日志中提到的插件，并修复其 config.yml/plugin.yml 中的 YAML 语法错误。</string>
     <string name="crash_category_storage">存储问题</string>
     <string name="crash_reason_storage">设备存储已满或为只读，服务器无法写入文件。解决方法：释放存储空间（删除旧世界/导出文件）或重启设备以重新挂载存储。</string>
+
+    <string name="ai_title">AI 崩溃分析</string>
+    <string name="ai_thinking">AI 正在分析崩溃日志…</string>
+    <string name="ai_error_prefix">AI 请求失败：</string>
+    <string name="ai_retry">重试</string>
+    <string name="ai_rate_limited">已达每日 AI 上限（%1$d/10）。请明天再试。</string>
+    <string name="ai_confidence_prefix">可信度：</string>
+    <string name="confidence_not_confident">不确定</string>
+    <string name="confidence_confident">较有把握</string>
+    <string name="confidence_high">很有把握</string>
+    <string name="confidence_certain">确定</string>
+    <string name="ai_cause">崩溃原因</string>
+    <string name="ai_fix">修复方法</string>
+    <string name="ai_try_fix">尝试修复</string>
+    <string name="ai_apply">应用</string>
+    <string name="ai_fix_confirm_ram">AI 建议将服务器内存从 %1$d MB 更改为 %2$d MB。是否应用？</string>
+    <string name="ai_fix_confirm_java">AI 建议将此服务器切换到 Java %1$d。是否应用？</string>
+    <string name="ai_fix_applied">设置已应用。启动服务器进行测试。</string>
+    <string name="ai_fix_failed">无法应用该设置。</string>
+    <string name="ai_ask_button">询问 AI</string>
+    <string name="ai_consent_title">将数据发送给 AI？</string>
+    <string name="ai_consent_message">为了分析此次崩溃，最后的日志行和设备信息（型号、内存、Android 版本）将被发送到 OpenRouter（Google Gemma 模型）。仅在你点击“询问 AI”时发生，每天限 10 次请求。详情：kodanetwork.eu/privacy</string>
+    <string name="ai_consent_agree">同意并询问</string>
 </resources>

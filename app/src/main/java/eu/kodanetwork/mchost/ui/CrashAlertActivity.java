@@ -33,6 +33,7 @@ import java.util.LinkedList;
  * Replaces the old alarm-based CrashAlertActivity.
  */
 public class CrashAlertActivity extends androidx.appcompat.app.AppCompatActivity {
+    private ServerInstance srv;
     private ObjectAnimator anim;
 
     @Override
@@ -58,7 +59,7 @@ public class CrashAlertActivity extends androidx.appcompat.app.AppCompatActivity
         String serverVersion = getIntent().getStringExtra("serverVersion");
         int    serverRam     = getIntent().getIntExtra("serverRam", 0);
         int    serverPort    = getIntent().getIntExtra("serverPort", 0);
-        ServerInstance srv   = ServerRepo.get(this).byId(id);
+        srv = ServerRepo.get(this).byId(id);
         
         if (srv != null) {
             if (crashReason == null) crashReason = srv.crashReason;
@@ -351,6 +352,22 @@ public class CrashAlertActivity extends androidx.appcompat.app.AppCompatActivity
         });
         btnBar.addView(btnFullLogs);
 
+        // Ask AI row
+        com.google.android.material.button.MaterialButton btnAskAi = new com.google.android.material.button.MaterialButton(this);
+        btnAskAi.setText(getString(R.string.ai_ask_button));
+        btnAskAi.setTextColor(0xFF111111);
+        btnAskAi.setBackgroundTintList(android.content.res.ColorStateList.valueOf(0xFFFF6B00));
+        btnAskAi.setCornerRadius(dp(8));
+        btnAskAi.setTypeface(kodaBold != null ? kodaBold : Typeface.DEFAULT_BOLD);
+        LinearLayout.LayoutParams askAiParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, dp(48));
+        askAiParams.setMargins(0, dp(10), 0, 0);
+        btnAskAi.setLayoutParams(askAiParams);
+        btnAskAi.setOnClickListener(v -> {
+            HapticUtil.forceVibrate(this, 40);
+            requestAiAnalysis();
+        });
+        btnBar.addView(btnAskAi);
+
         card.addView(btnBar);
 
         // root.addView(card); // removed because root IS card
@@ -416,6 +433,33 @@ public class CrashAlertActivity extends androidx.appcompat.app.AppCompatActivity
                 return getString(R.string.crash_reason_startup_exit);
             default: return rawReason != null ? rawReason : "";
         }
+    }
+
+
+    /** Consent-gated start of the AI crash analysis screen. */
+    private void requestAiAnalysis() {
+        if (!eu.kodanetwork.mchost.util.AiHelper.hasConsent(this)) {
+            new androidx.appcompat.app.AlertDialog.Builder(this)
+                    .setTitle(getString(R.string.ai_consent_title))
+                    .setMessage(getString(R.string.ai_consent_message))
+                    .setPositiveButton(getString(R.string.ai_consent_agree), (d, w) -> {
+                        eu.kodanetwork.mchost.util.AiHelper.setConsent(this, true);
+                        requestAiAnalysis();
+                    })
+                    .setNegativeButton(getString(R.string.sd_action_cancel), null)
+                    .show();
+            return;
+        }
+        if (srv == null) return;
+        new Thread(() -> {
+            final String tail = eu.kodanetwork.mchost.util.AiHelper.gatherLog(this, srv, null);
+            runOnUiThread(() -> {
+                Intent ai = new Intent(this, AiAnswerActivity.class);
+                ai.putExtra("serverId", srv.getId());
+                ai.putExtra("logTail", tail);
+                startActivity(ai);
+            });
+        }).start();
     }
 
     /** Read last 50 lines from server log. */

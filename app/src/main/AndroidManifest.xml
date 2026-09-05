@@ -49,6 +49,9 @@
         <activity android:name=".ui.ScreensaverActivity" />
         <activity android:name=".ui.CrashAlertActivity" 
             android:theme="@style/Theme.Material3.DayNight.NoActionBar" />
+        <activity android:name=".ui.AiAnswerActivity"
+            android:theme="@style/Theme.Material3.DayNight.NoActionBar"
+            android:exported="false" />
 
         <activity
             android:name=".ui.design.HomePageActivity"

@@ -1,0 +1,19 @@
+AI Crash Analysis: Google Gemma via OpenRouter
+===============================================
+
+Feature: "Ask AI" crash analysis (user-initiated, max 10 requests/day).
+
+Model: Google Gemma (google/gemma-4-31b-it:free)
+- Gemma is provided by Google under the Gemma Terms of Use
+  (https://ai.google.dev/gemma/terms) and Gemma Prohibited Use Policy.
+- Inference is provided through OpenRouter (https://openrouter.ai),
+  an independent API gateway. See OpenRouter's Terms of Service and
+  Privacy Policy on their website.
+
+Data notice: when the user taps "Ask AI", the last server log lines and
+basic device information (model, RAM, Android version) are sent to
+OpenRouter for analysis. Nothing is sent automatically. See the app's
+Privacy Policy for details.
+
+The AI response is an automated suggestion, NOT guaranteed-correct
+support. The user is responsible for reviewing and applying any change.

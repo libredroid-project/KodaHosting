@@ -44,6 +44,7 @@ public class LicensesActivity extends AppCompatActivity {
         addLicense(topContainer, "Imprint (Impressum)", "impressum.txt");
         addLicense(topContainer, "Terms of Service", "tos.txt");
         addLicense(topContainer, "Privacy Policy", "privacy.txt");
+        addLicense(topContainer, "AI Crash Analysis (Google Gemma via OpenRouter)", "gemma_ai.txt");
 
         LinearLayout container = findViewById(R.id.ll_licenses_container);
         addLicense(container, "OpenJDK", "openjdk.txt");
