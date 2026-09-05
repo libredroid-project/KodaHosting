@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Docs — KodaHosting</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Golos+Text:wght@400;500;600;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-inner">
+    <a class="brand" href="index.html"><span>Koda<b>Hosting</b></span></a>
+    <div class="nav-links">
+      <a href="index.html">Home</a>
+      <a href="docs.html">Docs</a>
+      <a href="privacy.html">Privacy</a>
+      <a href="tos.html">Terms</a>
+      <a href="licenses.html">Licenses</a>
+      <a class="nav-github" href="https://github.com/libredroid-project/KodaHosting" target="_blank" rel="noopener">GitHub</a>
+    </div>
+  </div>
+</nav>
+
+<div class="page">
+  <h1>Documentation</h1>
+  <p class="updated">Everything you need to host a Minecraft server from your phone.</p>
+
+  <h2>Getting started</h2>
+  <ol>
+    <li>Download the latest APK from <a href="https://github.com/libredroid-project/KodaHosting/releases/latest" target="_blank" rel="noopener">GitHub Releases</a> and install it (allow "install unknown apps" for your browser).</li>
+    <li>Open KodaHosting and accept the Terms of Service. The first-start tutorial walks you through the basics.</li>
+    <li>Tap the <code>+</code> button, choose a name, server software and version, and create the server.</li>
+    <li>Tap <b>START</b>. On first start the app downloads the server jar and the required Java runtime — this needs internet and a few minutes.</li>
+    <li>When the server shows <b>ONLINE</b>, share the join address shown on the dashboard. Friends connect through the KodaHosting tunnel — no port forwarding needed.</li>
+  </ol>
+
+  <h2>Supported server software</h2>
+  <table>
+    <tr><th>Software</th><th>Edition</th><th>Notes</th></tr>
+    <tr><td>Paper</td><td>Java</td><td>Recommended. Best plugin support, default choice.</td></tr>
+    <tr><td>Purpur</td><td>Java</td><td>Paper fork with extra features.</td></tr>
+    <tr><td>Folia</td><td>Java</td><td>Regionised multithreaded Paper — for powerful devices.</td></tr>
+    <tr><td>Vanilla</td><td>Java</td><td>Stock Minecraft server.</td></tr>
+    <tr><td>Forge</td><td>Java</td><td>Mod loader (beta). Uses the mods folder.</td></tr>
+    <tr><td>Fabric</td><td>Java</td><td>Mod loader with one-tap Modrinth modpack support.</td></tr>
+    <tr><td>NeoForge</td><td>Java</td><td>Forge successor (alpha support).</td></tr>
+    <tr><td>PumpkinMC</td><td>Java + Bedrock</td><td>Native Rust server (alpha): boots in under a second, built-in Bedrock crossplay. No plugins.</td></tr>
+  </table>
+
+  <h2>Java runtimes</h2>
+  <p>Each server can pick its own Java version: <b>8, 17, 21 or 25</b>. Auto mode picks a sensible default per software (Fabric servers get Java 21, everything else Java 25). Runtimes download on demand on first start — no manual setup.</p>
+
+  <h2>Modpacks (Fabric)</h2>
+  <p>Open the <b>Plugins/Mods</b> tab → search Modrinth → pick a modpack → install. KodaHosting downloads the pack, resolves dependencies, verifies checksums and applies server-side overrides automatically. Player-side mods stay on the players' clients.</p>
+
+  <h2>Console &amp; files</h2>
+  <ul>
+    <li><b>Console tab:</b> live server log with colors and a command input (like a real server console).</li>
+    <li><b>Files tab:</b> full file manager — browse, edit (text files), import/export, rename, copy, delete. Binaries like jars open as downloads, not text.</li>
+    <li><b>Crash screen:</b> 40+ known crash causes are detected automatically with a suggested fix. For anything unusual, tap <b>Ask AI</b> — the AI reads the last 1000 log lines and explains the cause and fix in your language.</li>
+  </ul>
+
+  <h2>Network budgets</h2>
+  <p>Server Settings → <b>Network Rules</b>. Create rules like "1 GB mobile data per week" or "20 GB WLAN per week" and choose what happens when a limit is reached: <b>warn</b>, <b>stop the server</b>, or <b>block starts</b> until you are on a network where the rule doesn't apply. The dashboard shows live usage with a traffic-light bar and current speed. Mobile rules never affect you while on WLAN.</p>
+
+  <h2>Battery & background hosting</h2>
+  <p>Android aggressively limits background apps. KodaHosting asks once to disable battery optimization — accept it for reliable 24/7 hosting, especially on Xiaomi/MIUI devices. The tunnel uses fast heartbeats so idle connections don't drop.</p>
+
+  <h2>FAQ</h2>
+  <h3>Can my friends join from Bedrock (phone/console)?</h3>
+  <p>Yes on PumpkinMC servers (Bedrock is built in) and on Paper/Purpur servers with Bedrock support enabled at creation (installs Geyser+Floodgate automatically).</p>
+  <h3>Does hosting cost money?</h3>
+  <p>No. It runs on your own device. The optional AI crash assistant uses a free-tier AI endpoint and is rate limited.</p>
+  <h3>Why did my server suddenly go offline?</h3>
+  <p>Check the console: the app tags tunnel events with timestamps. Most common causes are Android background limits (see battery section) or device storage being full.</p>
+  <h3>Where are my worlds?</h3>
+  <p>Files tab → <code>world/</code>. Use "Export as ZIP" in server Settings for backups before big changes.</p>
+  <h3>Is my data private?</h3>
+  <p>See the <a href="privacy.html">Privacy Policy</a>. In short: server data stays on your device; Supabase stores account/status metadata; the AI assistant only sends data when you explicitly tap Ask AI.</p>
+</div>
+
+<footer class="footer">
+  <div class="footer-inner">
+    <div><span class="brand-footer">Koda<b>Hosting</b></span><p>Minecraft server hosting on Android.<br>Not affiliated with Mojang or Microsoft.</p></div>
+    <div class="footer-links">
+      <a href="docs.html">Docs</a><a href="privacy.html">Privacy Policy</a><a href="tos.html">Terms of Service</a><a href="licenses.html">Licenses</a><a href="https://github.com/libredroid-project/KodaHosting" target="_blank" rel="noopener">GitHub</a>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
