@@ -104,8 +104,15 @@ public class AiHelper {
             for (String l : serviceBuffer) sb.append(stripAnsi(l)).append('\n');
         }
         if (srv != null && srv.getServerDir() != null) {
-            appendFileTail(new File(srv.getServerDir(), "logs/latest.log"), 600, sb);
-            appendFileTail(new File(srv.getServerDir(), "server.log"), 600, sb);
+            File crashDump = new File(srv.getServerDir(), "logs/koda_console.log");
+            if (crashDump.exists()) {
+                // skip the dump when the live console buffer already covers this crash
+                boolean bufferCoversCrash = serviceBuffer != null && !serviceBuffer.isEmpty()
+                        && System.currentTimeMillis() - crashDump.lastModified() < 10 * 60 * 1000L;
+                if (!bufferCoversCrash) appendFileTail(crashDump, 400, sb);
+            }
+            appendFileTail(new File(srv.getServerDir(), "logs/latest.log"), 400, sb);
+            appendFileTail(new File(srv.getServerDir(), "server.log"), 400, sb);
         }
         String out = sb.toString();
         if (out.length() > MAX_LOG_CHARS) out = out.substring(out.length() - MAX_LOG_CHARS);
@@ -121,7 +128,14 @@ public class AiHelper {
                 tail.add(line);
                 if (tail.size() > n) tail.removeFirst();
             }
-            sb.append("=== ").append(log.getName()).append(" ===\n");
+            String age = "";
+            long ageMs = System.currentTimeMillis() - log.lastModified();
+            if (ageMs > 30 * 60 * 1000L) {
+                age = " (last written " + (ageMs / 60000) + " min ago — may be from a PREVIOUS run)";
+            } else if (ageMs > 60 * 1000L) {
+                age = " (last written " + (ageMs / 60000) + " min ago)";
+            }
+            sb.append("=== ").append(log.getName()).append(age).append(" ===\n");
             for (String l : tail) sb.append(stripAnsi(l)).append('\n');
         } catch (Exception ignored) {}
     }

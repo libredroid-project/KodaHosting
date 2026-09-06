@@ -2321,11 +2321,38 @@ public class KodaServerService extends Service {
         sendBroadcast(i);
         updateNotif();
         if (st == ServerInstance.State.CRASHED) {
+            // Persist the failed run's console (app lines + server output) — server.log
+            // and latest.log are truncated/overwritten by the NEXT successful start,
+            // which would otherwise erase the crash evidence.
+            exec.submit(() -> dumpCrashConsole(s));
             Intent alertIntent = new Intent(this, eu.kodanetwork.mchost.ui.CrashAlertActivity.class);
             alertIntent.putExtra("id", s.getId());
             alertIntent.putExtra("name", s.getName());
             alertIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_SINGLE_TOP);
             startActivity(alertIntent);
+        }
+    }
+
+    /** Writes the failed run's full console + analyzer result to logs/koda_console.log. */
+    private void dumpCrashConsole(ServerInstance s) {
+        try {
+            File dir = new File(s.getServerDir());
+            if (!dir.exists()) return;
+            new File(dir, "logs").mkdirs();
+            StringBuilder sb = new StringBuilder();
+            sb.append("# KodaHosting console dump — crash of ").append(new java.util.Date()).append("\n");
+            sb.append("# exit code: ").append(s.crashExitCode).append("\n");
+            if (s.crashCategory != null) {
+                sb.append("# analyzer: ").append(s.crashCategory).append(" - ").append(s.crashReason).append("\n");
+            }
+            sb.append("\n");
+            for (String l : getRecentLog(s.getId())) sb.append(l).append("\n");
+            try (java.io.FileOutputStream fos = new java.io.FileOutputStream(
+                    new File(dir, "logs/koda_console.log"), false)) {
+                fos.write(sb.toString().getBytes(java.nio.charset.StandardCharsets.UTF_8));
+            }
+        } catch (Exception e) {
+            Log.w(TAG, "crash console dump failed", e);
         }
     }
 
