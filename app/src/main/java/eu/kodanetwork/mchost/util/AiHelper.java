@@ -28,6 +28,8 @@ import java.util.Scanner;
 public class AiHelper {
 
     public static final String MODEL = "google/gemma-4-31b-it:free";
+    // free-tier providers are capacity-throttled (429) — fall back to the smaller free Gemma
+    private static final String[] MODELS = {MODEL, "google/gemma-4-26b-a4b-it:free"};
     private static final int MAX_LOG_CHARS = 60000;
     private static final int DAILY_LIMIT = 10;
 
@@ -174,35 +176,58 @@ public class AiHelper {
         body.put("messages", msgs);
 
         String key = eu.kodanetwork.mchost.security.PraetorSecurity.getOpenRouterKey();
-        HttpURLConnection c = (HttpURLConnection) new URL("https://openrouter.ai/api/v1/chat/completions").openConnection();
-        c.setRequestMethod("POST");
-        c.setDoOutput(true);
-        c.setConnectTimeout(15000);
-        c.setReadTimeout(90000);
-        c.setRequestProperty("Content-Type", "application/json");
-        c.setRequestProperty("Authorization", "Bearer " + key);
-        try (OutputStream os = c.getOutputStream()) {
-            os.write(body.toString().getBytes(StandardCharsets.UTF_8));
+        Exception lastErr = null;
+        for (String model : MODELS) {
+            for (int attempt = 0; attempt < 2; attempt++) {
+                try {
+                    HttpURLConnection c = (HttpURLConnection) new URL("https://openrouter.ai/api/v1/chat/completions").openConnection();
+                    c.setRequestMethod("POST");
+                    c.setDoOutput(true);
+                    c.setConnectTimeout(15000);
+                    c.setReadTimeout(90000);
+                    c.setRequestProperty("Content-Type", "application/json");
+                    c.setRequestProperty("Authorization", "Bearer " + key);
+                    body.put("model", model);
+                    try (OutputStream os = c.getOutputStream()) {
+                        os.write(body.toString().getBytes(StandardCharsets.UTF_8));
+                    }
+                    int code = c.getResponseCode();
+                    InputStream is = code >= 400 ? c.getErrorStream() : c.getInputStream();
+                    String resp = "";
+                    if (is != null) {
+                        Scanner sc = new Scanner(is).useDelimiter("\\A");
+                        resp = sc.hasNext() ? sc.next() : "";
+                    }
+                    c.disconnect();
+                    if (code >= 200 && code < 300) {
+                        JSONArray choices = new JSONObject(resp).optJSONArray("choices");
+                        String content = choices != null && choices.length() > 0
+                                ? choices.getJSONObject(0).getJSONObject("message").optString("content", "")
+                                : "";
+                        bumpCount(ctx);
+                        return parse(content);
+                    }
+                    // surface the real reason (e.g. "No allowed providers are available")
+                    String detail = extractErrorDetail(resp);
+                    if (code == 401 || code == 403) throw new Exception("AI auth failed (" + code + ")");
+                    lastErr = new Exception(detail + " (model " + model + ", " + code + ")");
+                    if (code == 429) { Thread.sleep(3000); continue; } // retry once, then next model
+                    if (code < 500) break; // non-transient for this model — try next model
+                } catch (java.io.IOException e) {
+                    lastErr = e;
+                }
+            }
         }
-        int code = c.getResponseCode();
-        InputStream is = code >= 400 ? c.getErrorStream() : c.getInputStream();
-        String resp = "";
-        if (is != null) {
-            Scanner sc = new Scanner(is).useDelimiter("\\A");
-            resp = sc.hasNext() ? sc.next() : "";
-        }
-        c.disconnect();
+        throw lastErr != null ? lastErr : new Exception("AI request failed");
+    }
 
-        if (code == 401 || code == 403) throw new Exception("AI auth failed (" + code + ")");
-        if (code == 429) throw new Exception("AI rate limited (429) — try again later");
-        if (code >= 400) throw new Exception("AI error (" + code + ")");
-
-        JSONArray choices = new JSONObject(resp).optJSONArray("choices");
-        String content = choices != null && choices.length() > 0
-                ? choices.getJSONObject(0).getJSONObject("message").optString("content", "")
-                : "";
-        bumpCount(ctx);
-        return parse(content);
+    private static String extractErrorDetail(String resp) {
+        try {
+            JSONObject o = new JSONObject(resp);
+            JSONObject err = o.optJSONObject("error");
+            if (err != null && err.optString("message") != null) return err.optString("message");
+        } catch (Exception ignored) {}
+        return resp != null && resp.length() > 200 ? resp.substring(0, 200) : (resp == null ? "unknown" : resp);
     }
 
     /** Tolerant parsing: JSON block first, plain-text fallback with keyword confidence. */

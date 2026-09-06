@@ -5658,9 +5658,10 @@ public class ServerDetailActivity extends AppCompatActivity {
             java.util.List<String> buffer = (bound && svc != null) ? svc.getLog(server.getId()) : null;
             final String tail = eu.kodanetwork.mchost.util.AiHelper.gatherLog(this, server, buffer);
             runOnUiThread(() -> {
-                android.content.Intent ai = new android.content.Intent(this, AiAnswerActivity.class);
-                ai.putExtra("serverId", server.getId());
-                ai.putExtra("logTail", tail);
+                // the crash screen renders the AI analysis inline below the log
+                android.content.Intent ai = new android.content.Intent(this, CrashAlertActivity.class);
+                ai.putExtra("id", server.getId());
+                ai.putExtra("start_ai", true);
                 startActivity(ai);
             });
         }).start();
