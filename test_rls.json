@@ -1,3 +1,0 @@
-{
-  "query": "BEGIN; SET LOCAL ROLE anon; UPDATE koda_users SET email = 'hacked@hacked.com'; COMMIT;"
-}

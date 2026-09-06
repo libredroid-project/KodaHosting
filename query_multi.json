@@ -1,3 +1,0 @@
-{
-  "query": "ALTER TABLE public.koda_users DROP CONSTRAINT IF EXISTS koda_users_app_uuid_key; ALTER TABLE public.koda_users ADD COLUMN IF NOT EXISTS auth_id UUID; ALTER TABLE public.koda_users ADD COLUMN IF NOT EXISTS is_main BOOLEAN DEFAULT false; ALTER TABLE public.koda_users ADD COLUMN IF NOT EXISTS last_active TIMESTAMP WITH TIME ZONE DEFAULT NOW();"
-}

@@ -1,9 +1,0 @@
-serverAddr = "85.215.180.87"
-serverPort = 7000
-
-[[proxies]]
-name = "test"
-type = "tcp"
-localIP = "127.0.0.1"
-localPort = 25565
-remotePort = 25565

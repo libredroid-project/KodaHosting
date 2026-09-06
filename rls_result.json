@@ -1,1 +1,0 @@
-{"message":"Failed to run sql query: ERROR:  42703: column \"email\" of relation \"koda_users\" does not exist\nLINE 1: BEGIN; SET LOCAL ROLE anon; UPDATE koda_users SET email = 'hacked@hacked.com'; COMMIT;\n                                                          ^\n"}
