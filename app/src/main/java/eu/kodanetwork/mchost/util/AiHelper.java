@@ -212,21 +212,36 @@ public class AiHelper {
 
         String analyzerContext = "";
         int analyzerJdk = 0;
+        boolean suggestJavaSwitch = false;
         if (analyzerCategory != null && !"UNKNOWN".equals(analyzerCategory)) {
             analyzerContext = "\nBUILT-IN ANALYZER SUSPICION (verify against the log; correct it if wrong): "
-                    + srv.crashCategory + " - " + (srv.crashReason != null ? srv.crashReason : "") + "\n";
+                    + analyzerCategory + " - " + (srv != null && srv.crashReason != null ? srv.crashReason : "") + "\n";
         }
         // The app's runtime database knows the CORRECT JDK — the model must not guess
         // (e.g. MC 26.x needs JDK 25, not the 17/21 that generic models tend to suggest).
-        if ("JAVA_VERSION".equals(analyzerCategory)) {
-            try {
-                analyzerJdk = eu.kodanetwork.mchost.util.RuntimeManager.resolveAutoVersion(srv);
-                if (analyzerJdk >= 8 && analyzerJdk <= 25) {
-                    analyzerContext += "The app's runtime database: the CORRECT JDK for this server ("
-                            + srv.getType().name() + " " + srv.getVersion() + ") is Java " + analyzerJdk
-                            + ". If the log proves a wrong-Java crash, auto_fix MUST be {\"action\":\"set_java\",\"value\":" + analyzerJdk + "}.\n";
-                } else analyzerJdk = 0;
-            } catch (Exception ignored) { analyzerJdk = 0; }
+        int correctJdk = 0, usedJdk = 0;
+        if (srv != null) {
+            try { correctJdk = eu.kodanetwork.mchost.util.RuntimeManager.resolveAutoVersion(srv); } catch (Exception ignored) {}
+            usedJdk = srv.getJavaRuntime() != 0 ? srv.getJavaRuntime() : correctJdk;
+        }
+        if ("JAVA_VERSION".equals(analyzerCategory) && correctJdk > 0) {
+            // class-version error: the used JDK cannot run this MC version at all
+            analyzerJdk = correctJdk;
+            suggestJavaSwitch = true;
+        } else if (srv != null && correctJdk > 0 && usedJdk != correctJdk
+                && ("NATIVE_LIB".equals(analyzerCategory) || "MISSING_JAR".equals(analyzerCategory)
+                    || "CLASS_NOT_FOUND".equals(analyzerCategory))) {
+            // the crash hit a wrong/broken OLD runtime (e.g. incomplete jre8 download) —
+            // switching to the required JDK beats reinstalling a runtime that can never work
+            analyzerJdk = correctJdk;
+            suggestJavaSwitch = true;
+        }
+        if (analyzerJdk > 0 && srv != null) {
+            analyzerContext += "RUNTIME DATABASE: the server ran on Java " + usedJdk + ", but "
+                    + srv.getType().name() + " " + srv.getVersion() + " requires Java " + analyzerJdk
+                    + ". Even if the log shows a broken/incomplete runtime installation, the BEST fix is "
+                    + "SWITCHING to Java " + analyzerJdk + ": auto_fix MUST be {\"action\":\"set_java\",\"value\":"
+                    + analyzerJdk + "} — do NOT suggest reinstalling the old runtime.\n";
         }
 
         JSONObject body = new JSONObject();
@@ -276,10 +291,12 @@ public class AiHelper {
                                 : "";
                         bumpCount(ctx);
                         AiResult res = parse(content);
-                        if ("JAVA_VERSION".equals(analyzerCategory) && analyzerJdk > 0) {
+                        if (suggestJavaSwitch && analyzerJdk > 0) {
+                            // the APP knows the required JDK (runtime database) — the button
+                            // must not depend on the model's confidence, and a guessed
+                            // version in the prose is corrected to the real one
                             res.autoFixAction = "set_java";
                             res.autoFixValue = analyzerJdk;
-                            // the model tends to guess 17/21 — correct the prose too
                             res.cause = res.cause == null ? null :
                                     res.cause.replaceAll("(?i)(JDK|Java)\\s*(8|11|16|17|18|19|20|21|22|23|24)",
                                             "$1 " + analyzerJdk);
