@@ -356,58 +356,27 @@ crashStack = getIntent().getStringExtra("crashStackTrace");
 
         card.addView(btnBar);
 
-        // ══════════════════════════════════════════════════════════════════
-        //  AI ANALYSIS (collapsible panel, like the crash log above)
-        // ══════════════════════════════════════════════════════════════════
-        TextView tvAiLabel = new TextView(this);
-        tvAiLabel.setText(getString(R.string.ai_ask_button).toUpperCase() + " (TAP TO TOGGLE)");
-        tvAiLabel.setTextColor(0xFF777788);
-        tvAiLabel.setTextSize(10f);
-        tvAiLabel.setTypeface(kodaFont, Typeface.BOLD);
-        tvAiLabel.setLetterSpacing(0.08f);
-        tvAiLabel.setPadding(0, dp(20), 0, dp(8));
-        card.addView(tvAiLabel);
-
-        aiPanel = new LinearLayout(this);
-        aiPanel.setOrientation(LinearLayout.VERTICAL);
-        aiPanel.setPadding(dp(10), dp(10), dp(10), dp(10));
-        GradientDrawable aiBg = new GradientDrawable();
-        aiBg.setCornerRadius(dp(8));
-        aiBg.setColor(0xFF06060C);
-        aiPanel.setBackground(aiBg);
-        aiPanel.setVisibility(View.GONE);
-        aiContent = new LinearLayout(this);
-        aiContent.setOrientation(LinearLayout.VERTICAL);
-        aiPanel.addView(aiContent, new LinearLayout.LayoutParams(
-                android.view.ViewGroup.LayoutParams.MATCH_PARENT, android.view.ViewGroup.LayoutParams.WRAP_CONTENT));
-        card.addView(aiPanel);
-
-        tvAiLabel.setOnClickListener(v -> {
-            HapticUtil.forceVibrate(this, 30);
-            if (aiPanel.getVisibility() == View.VISIBLE) {
-                aiPanel.setVisibility(View.GONE);
-            } else {
-                aiPanel.setVisibility(View.VISIBLE);
-                if (aiStarted && aiContent.getChildCount() == 0) {
-                    showAiThinking();
-                    requestAiAnalysis();
-                }
-            }
+        // Ask AI — opens a content-sized window with a 3-dot loading animation
+        com.google.android.material.button.MaterialButton btnAskAi = new com.google.android.material.button.MaterialButton(this);
+        btnAskAi.setText(getString(R.string.ai_ask_button));
+        btnAskAi.setTextColor(0xFF111111);
+        btnAskAi.setBackgroundTintList(android.content.res.ColorStateList.valueOf(0xFFFF6B00));
+        btnAskAi.setCornerRadius(dp(8));
+        btnAskAi.setTypeface(kodaBold != null ? kodaBold : Typeface.DEFAULT_BOLD);
+        btnAskAi.setAllCaps(true);
+        LinearLayout.LayoutParams askAiParams = new LinearLayout.LayoutParams(
+                android.view.ViewGroup.LayoutParams.MATCH_PARENT, dp(48));
+        askAiParams.setMargins(0, dp(10), 0, 0);
+        btnAskAi.setLayoutParams(askAiParams);
+        btnAskAi.setOnClickListener(v -> {
+            HapticUtil.forceVibrate(this, 40);
+            showAiDialog();
         });
+        card.addView(btnAskAi);
 
-        // open straight into the AI flow when launched via the banner button
         if (getIntent() != null && getIntent().getBooleanExtra("start_ai", false)) {
-            aiPanel.post(() -> {
-                aiPanel.setVisibility(View.VISIBLE);
-                aiStarted = true;
-                showAiThinking();
-                requestAiAnalysis();
-            });
+            new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(this::showAiDialog, 400);
         }
-
-        // root.addView(card); // removed because root IS card
-        scroll.addView(root);
-        setContentView(scroll);
 
         // ── Subtle pulse on the background ──────────────────────────────────
         anim = ObjectAnimator.ofInt(getWindow().getDecorView(), "backgroundColor", 0xFF0F0808, 0xFF1A0A0A);
@@ -471,36 +440,43 @@ crashStack = getIntent().getStringExtra("crashStackTrace");
     }
 
 
-    private LinearLayout aiPanel;
-    private LinearLayout aiContent;
-    private boolean aiStarted = false;
+    private android.app.Dialog aiDialog;
+    private LinearLayout aiDialogBody;
     private eu.kodanetwork.mchost.util.AiHelper.AiResult aiResult;
 
-    /** Consent-gated start of the AI crash analysis, rendered INLINE below the log. */
-    private void requestAiAnalysis() {
+    /** Content-sized window: 3-dot loading animation, then the AI answer. */
+    private void showAiDialog() {
         if (!eu.kodanetwork.mchost.util.AiHelper.hasConsent(this)) {
             new androidx.appcompat.app.AlertDialog.Builder(this)
                     .setTitle(getString(R.string.ai_consent_title))
                     .setMessage(getString(R.string.ai_consent_message))
                     .setPositiveButton(getString(R.string.ai_consent_agree), (d, w) -> {
                         eu.kodanetwork.mchost.util.AiHelper.setConsent(this, true);
-                        requestAiAnalysis();
+                        showAiDialog();
                     })
                     .setNegativeButton(getString(R.string.sd_action_cancel), null)
                     .show();
             return;
         }
-        final String tail;
-        if (crashStack != null && !crashStack.isEmpty()) {
-            tail = crashStack;
-        } else {
-            tail = getLastLogs(srv);
+        if (aiDialog != null && aiDialog.isShowing()) return;
+
+        aiDialog = new android.app.Dialog(this);
+        aiDialog.setContentView(buildAiDialogContent());
+        eu.kodanetwork.mchost.util.DialogLandFix.apply(aiDialog);
+        if (aiDialog.getWindow() != null) {
+            aiDialog.getWindow().setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT));
+            aiDialog.getWindow().setLayout(
+                    android.view.ViewGroup.LayoutParams.MATCH_PARENT,
+                    android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
         }
-        final android.content.Context ctx = this;
+        aiDialog.show();
+        showAiThinking();
+
+        final String tail = (crashStack != null && !crashStack.isEmpty()) ? crashStack : getLastLogs(srv);
         new Thread(() -> {
             try {
                 eu.kodanetwork.mchost.util.AiHelper.AiResult res =
-                        eu.kodanetwork.mchost.util.AiHelper.askAiSync(ctx, srv, tail);
+                        eu.kodanetwork.mchost.util.AiHelper.askAiSync(this, srv, tail);
                 runOnUiThread(() -> showAiResult(res));
             } catch (eu.kodanetwork.mchost.util.AiHelper.RateLimitException e) {
                 runOnUiThread(() -> showAiError(getString(R.string.ai_rate_limited, e.used)));
@@ -510,24 +486,68 @@ crashStack = getIntent().getStringExtra("crashStackTrace");
         }).start();
     }
 
+    private View buildAiDialogContent() {
+        android.widget.ScrollView sc = new android.widget.ScrollView(this);
+        aiDialogBody = new LinearLayout(this);
+        aiDialogBody.setOrientation(LinearLayout.VERTICAL);
+        aiDialogBody.setBackgroundColor(0xFF1D1714);
+        int pad = dp(18);
+        aiDialogBody.setPadding(pad, pad, pad, pad);
+        sc.addView(aiDialogBody);
+
+        TextView tvTitle = new TextView(this);
+        tvTitle.setText(getString(R.string.ai_title).toUpperCase());
+        tvTitle.setTextColor(0xFFFF3333);
+        tvTitle.setTextSize(15f);
+        tvTitle.setTypeface(kodaBold != null ? kodaBold : Typeface.DEFAULT_BOLD);
+        tvTitle.setLetterSpacing(0.05f);
+        aiDialogBody.addView(tvTitle);
+
+        View divider = new View(this);
+        LinearLayout.LayoutParams dLp = new LinearLayout.LayoutParams(dp(40), dp(2));
+        dLp.topMargin = dp(6);
+        dLp.bottomMargin = dp(12);
+        divider.setBackgroundColor(0xFFFF6B00);
+        aiDialogBody.addView(divider, dLp);
+        return sc;
+    }
+
+    private void clearDialogBody() {
+        aiDialogBody.removeViews(2, Math.max(0, aiDialogBody.getChildCount() - 2));
+    }
+
     private void showAiThinking() {
-        aiContent.removeAllViews();
+        clearDialogBody();
+        com.airbnb.lottie.LottieAnimationView dots = new com.airbnb.lottie.LottieAnimationView(this);
+        dots.setAnimation(R.raw.koda_boot);
+        dots.loop(true);
+        dots.playAnimation();
+        int size = dp(56);
+        LinearLayout.LayoutParams lLp = new LinearLayout.LayoutParams(size, size);
+        lLp.gravity = Gravity.CENTER_HORIZONTAL;
+        lLp.topMargin = dp(8);
+        aiDialogBody.addView(dots, lLp);
         TextView t = new TextView(this);
         t.setText(getString(R.string.ai_thinking));
         t.setTextColor(0xFF8A8A9A);
         t.setTextSize(12f);
         t.setTypeface(kodaFont);
-        aiContent.addView(t);
+        t.setGravity(Gravity.CENTER);
+        LinearLayout.LayoutParams tLp = new LinearLayout.LayoutParams(
+                android.view.ViewGroup.LayoutParams.MATCH_PARENT, android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
+        tLp.topMargin = dp(4);
+        aiDialogBody.addView(t, tLp);
     }
 
     private void showAiError(String msg) {
-        aiContent.removeAllViews();
+        clearDialogBody();
         TextView t = new TextView(this);
         t.setText(getString(R.string.ai_error_prefix) + " " + msg);
         t.setTextColor(0xFFFF5555);
         t.setTextSize(11.5f);
         t.setTypeface(Typeface.MONOSPACE);
-        aiContent.addView(t);
+        aiDialogBody.addView(t, new LinearLayout.LayoutParams(
+                android.view.ViewGroup.LayoutParams.MATCH_PARENT, android.view.ViewGroup.LayoutParams.WRAP_CONTENT));
         com.google.android.material.button.MaterialButton btnRetry = new com.google.android.material.button.MaterialButton(this);
         btnRetry.setText(getString(R.string.ai_retry));
         btnRetry.setTextColor(0xFFF0F0F0);
@@ -535,22 +555,37 @@ crashStack = getIntent().getStringExtra("crashStackTrace");
         btnRetry.setCornerRadius(dp(8));
         btnRetry.setTypeface(kodaBold != null ? kodaBold : Typeface.DEFAULT_BOLD);
         btnRetry.setAllCaps(true);
-        LinearLayout.LayoutParams rLp = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, dp(40));
-        rLp.topMargin = dp(10);
+        LinearLayout.LayoutParams rLp = new LinearLayout.LayoutParams(
+                android.view.ViewGroup.LayoutParams.MATCH_PARENT, dp(42));
+        rLp.topMargin = dp(12);
         btnRetry.setLayoutParams(rLp);
         btnRetry.setOnClickListener(v -> {
             HapticUtil.forceVibrate(this, 40);
             showAiThinking();
-            requestAiAnalysis();
+            runAiRequest();
         });
-        aiContent.addView(btnRetry);
+        aiDialogBody.addView(btnRetry, rLp);
+    }
+
+    private void runAiRequest() {
+        new Thread(() -> {
+            final String tail = (crashStack != null && !crashStack.isEmpty()) ? crashStack : getLastLogs(srv);
+            try {
+                eu.kodanetwork.mchost.util.AiHelper.AiResult res =
+                        eu.kodanetwork.mchost.util.AiHelper.askAiSync(this, srv, tail);
+                runOnUiThread(() -> showAiResult(res));
+            } catch (eu.kodanetwork.mchost.util.AiHelper.RateLimitException e) {
+                runOnUiThread(() -> showAiError(getString(R.string.ai_rate_limited, e.used)));
+            } catch (Exception e) {
+                runOnUiThread(() -> showAiError(e.getMessage() != null ? e.getMessage() : "unknown"));
+            }
+        }).start();
     }
 
     private void showAiResult(eu.kodanetwork.mchost.util.AiHelper.AiResult res) {
         aiResult = res;
-        aiContent.removeAllViews();
+        clearDialogBody();
 
-        // confidence chip
         int col; String label;
         switch (res.confidence) {
             case "CERTAIN":         col = 0xFF4FC3F7; label = getString(R.string.confidence_certain); break;
@@ -568,7 +603,7 @@ crashStack = getIntent().getStringExtra("crashStackTrace");
         chip.setColor(0x22FFFFFF);
         tvConf.setBackground(chip);
         tvConf.setPadding(dp(8), dp(3), dp(8), dp(3));
-        aiContent.addView(tvConf, new LinearLayout.LayoutParams(
+        aiDialogBody.addView(tvConf, new LinearLayout.LayoutParams(
                 android.view.ViewGroup.LayoutParams.WRAP_CONTENT, android.view.ViewGroup.LayoutParams.WRAP_CONTENT));
 
         addAiSection(getString(R.string.ai_cause), res.cause, 0xFFF0F0F0);
@@ -582,12 +617,27 @@ crashStack = getIntent().getStringExtra("crashStackTrace");
             btnFix.setCornerRadius(dp(8));
             btnFix.setTypeface(kodaBold != null ? kodaBold : Typeface.DEFAULT_BOLD);
             btnFix.setAllCaps(true);
-            LinearLayout.LayoutParams fLp = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, dp(44));
-            fLp.topMargin = dp(12);
+            LinearLayout.LayoutParams fLp = new LinearLayout.LayoutParams(
+                    android.view.ViewGroup.LayoutParams.MATCH_PARENT, dp(44));
+            fLp.topMargin = dp(14);
             btnFix.setLayoutParams(fLp);
             btnFix.setOnClickListener(v -> confirmAutoFix());
-            aiContent.addView(btnFix);
+            aiDialogBody.addView(btnFix, fLp);
         }
+
+        com.google.android.material.button.MaterialButton btnClose = new com.google.android.material.button.MaterialButton(this);
+        btnClose.setText(getString(R.string.crash_btn_dismiss));
+        btnClose.setTextColor(0xFFBBBBBB);
+        btnClose.setBackgroundTintList(android.content.res.ColorStateList.valueOf(0xFF2A2A33));
+        btnClose.setCornerRadius(dp(8));
+        btnClose.setTypeface(kodaBold != null ? kodaBold : Typeface.DEFAULT_BOLD);
+        btnClose.setAllCaps(true);
+        LinearLayout.LayoutParams cLp = new LinearLayout.LayoutParams(
+                android.view.ViewGroup.LayoutParams.MATCH_PARENT, dp(42));
+        cLp.topMargin = dp(10);
+        btnClose.setLayoutParams(cLp);
+        btnClose.setOnClickListener(v -> { if (aiDialog != null) aiDialog.dismiss(); });
+        aiDialogBody.addView(btnClose, cLp);
     }
 
     private void addAiSection(String title, String body, int color) {
@@ -601,13 +651,13 @@ crashStack = getIntent().getStringExtra("crashStackTrace");
         LinearLayout.LayoutParams tLp = new LinearLayout.LayoutParams(
                 android.view.ViewGroup.LayoutParams.WRAP_CONTENT, android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
         tLp.topMargin = dp(12);
-        aiContent.addView(tvT, tLp);
+        aiDialogBody.addView(tvT, tLp);
         TextView tvB = new TextView(this);
         tvB.setText(body);
         tvB.setTextColor(color);
         tvB.setTextSize(11.5f);
         tvB.setLineSpacing(2f, 1f);
-        aiContent.addView(tvB, new LinearLayout.LayoutParams(
+        aiDialogBody.addView(tvB, new LinearLayout.LayoutParams(
                 android.view.ViewGroup.LayoutParams.MATCH_PARENT, android.view.ViewGroup.LayoutParams.WRAP_CONTENT));
     }
 
@@ -634,6 +684,7 @@ crashStack = getIntent().getStringExtra("crashStackTrace");
             ServerRepo.get(this).update(srv);
             Toast.makeText(this, getString(R.string.ai_fix_applied), Toast.LENGTH_LONG).show();
             HapticUtil.forceVibrate(this, 60);
+            if (aiDialog != null) aiDialog.dismiss();
         } catch (Exception e) {
             Toast.makeText(this, getString(R.string.ai_fix_failed), Toast.LENGTH_LONG).show();
         }
