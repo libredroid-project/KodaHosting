@@ -378,6 +378,9 @@ crashStack = getIntent().getStringExtra("crashStackTrace");
             new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(this::showAiDialog, 400);
         }
 
+        scroll.addView(root);
+        setContentView(scroll);
+
         // ── Subtle pulse on the background ──────────────────────────────────
         anim = ObjectAnimator.ofInt(getWindow().getDecorView(), "backgroundColor", 0xFF0F0808, 0xFF1A0A0A);
         anim.setDuration(1200);
