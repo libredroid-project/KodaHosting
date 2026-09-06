@@ -627,12 +627,33 @@ crashStack = getIntent().getStringExtra("crashStackTrace");
         if (res.autoFixAction != null && srv != null) {
             btnPraetorAction.setText(getString(R.string.ai_try_fix));
             btnPraetorAction.setOnClickListener(v -> confirmAutoFix());
+        } else if (srv != null && srv.crashFixAction != null) {
+            // the analyzer knows a one-tap fix (e.g. re-download JRE for missing libjvm)
+            btnPraetorAction.setText(getString(R.string.ai_try_fix));
+            btnPraetorAction.setOnClickListener(v -> confirmCrashFixerFix());
         } else {
             btnPraetorAction.setText(getString(R.string.crash_btn_dismiss));
             btnPraetorAction.setOnClickListener(v -> { if (aiDialog != null) aiDialog.dismiss(); });
         }
     }
 
+
+    /** One-tap fix straight from the analyzer (CrashFixer), used when the AI has no app-setting fix. */
+    private void confirmCrashFixerFix() {
+        HapticUtil.forceVibrate(this, 50);
+        new androidx.appcompat.app.AlertDialog.Builder(this)
+                .setTitle(getString(R.string.ai_try_fix))
+                .setMessage(srv.crashFix != null ? srv.crashFix : getString(R.string.ai_try_fix))
+                .setPositiveButton(getString(R.string.ai_apply), (d, w) -> {
+                    eu.kodanetwork.mchost.util.CrashFixer.FixResult r =
+                            eu.kodanetwork.mchost.util.CrashFixer.executeFix(this, srv, srv.crashFixAction);
+                    Toast.makeText(this, r.success ? getString(R.string.ai_fix_applied) : getString(R.string.ai_fix_failed),
+                            Toast.LENGTH_LONG).show();
+                    if (r.success && aiDialog != null) aiDialog.dismiss();
+                })
+                .setNegativeButton(getString(R.string.sd_action_cancel), null)
+                .show();
+    }
 
     private void confirmAutoFix() {
         HapticUtil.forceVibrate(this, 50);
