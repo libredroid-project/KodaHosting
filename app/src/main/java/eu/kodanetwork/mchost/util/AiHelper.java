@@ -231,6 +231,9 @@ public class AiHelper {
 
         JSONObject body = new JSONObject();
         body.put("model", MODEL);
+        // reasoning models (nemotron/minimax) otherwise burn 30s+ thinking before answering
+        body.put("reasoning", new JSONObject().put("enabled", false));
+        body.put("max_tokens", 700);
         JSONArray msgs = new JSONArray();
         msgs.put(new JSONObject().put("role", "system").put("content", system));
         msgs.put(new JSONObject().put("role", "user").put("content",
@@ -239,7 +242,7 @@ public class AiHelper {
         body.put("messages", msgs);
 
         String key = eu.kodanetwork.mchost.security.PraetorSecurity.getOpenRouterKey();
-        long deadline = System.currentTimeMillis() + 90_000L; // hard overall budget
+        long deadline = System.currentTimeMillis() + 150_000L; // hard overall budget
         java.util.List<String> failures = new java.util.ArrayList<>();
         for (String model : MODELS) {
             if (System.currentTimeMillis() > deadline) {
@@ -253,7 +256,7 @@ public class AiHelper {
                             .readTimeout(30, java.util.concurrent.TimeUnit.SECONDS)
                             // HARD cap per model: a dripping throttled upstream cannot
                             // stretch the call (readTimeout only bounds packet gaps)
-                            .callTimeout(35, java.util.concurrent.TimeUnit.SECONDS)
+                            .callTimeout(45, java.util.concurrent.TimeUnit.SECONDS)
                             .build();
                 }
                 okhttp3.Request req = new okhttp3.Request.Builder()
@@ -295,7 +298,9 @@ public class AiHelper {
             }
         }
         // every model failed — list ALL reasons so the cause is visible at a glance
-        throw new Exception("All AI models failed: " + String.join(" | ", failures));
+        String msg = "All AI models failed: " + String.join(" | ", failures);
+        android.util.Log.e("AiHelper", msg);
+        throw new Exception(msg);
     }
 
     private static String extractErrorDetail(String resp) {
