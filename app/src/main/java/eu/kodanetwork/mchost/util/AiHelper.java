@@ -259,6 +259,7 @@ public class AiHelper {
                             .callTimeout(45, java.util.concurrent.TimeUnit.SECONDS)
                             .build();
                 }
+                body.put("model", model); // THE model of this chain step — was missing, so every request sent gemma!
                 okhttp3.Request req = new okhttp3.Request.Builder()
                         .url("https://openrouter.ai/api/v1/chat/completions")
                         .post(okhttp3.RequestBody.create(body.toString(),
