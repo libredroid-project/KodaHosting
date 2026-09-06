@@ -499,11 +499,16 @@ crashStack = getIntent().getStringExtra("crashStackTrace");
         sc.addView(aiDialogBody);
 
         TextView tvTitle = new TextView(this);
-        tvTitle.setText(getString(R.string.ai_title).toUpperCase());
-        tvTitle.setTextColor(0xFFFF3333);
-        tvTitle.setTextSize(15f);
+        // P.R.A.E.T.O.R. letter styling (same as PraetorMemoryLimitActivity)
+        String praetorHtml = "<font color=\"#555555\">P.R.</font><font color=\"#AAAAAA\">A</font>"
+                + "<font color=\"#555555\">.</font><font color=\"#AAAAAA\">E</font>"
+                + "<font color=\"#555555\">.</font><font color=\"#FFFFFF\">T</font>"
+                + "<font color=\"#555555\">.</font><font color=\"#FFFFFF\">O</font>"
+                + "<font color=\"#555555\">.</font><font color=\"#FFFFFF\">R.</font>  "
+                + "<font color=\"#FF6B00\">AI</font>";
+        tvTitle.setText(android.text.Html.fromHtml(praetorHtml, android.text.Html.FROM_HTML_MODE_LEGACY));
+        tvTitle.setTextSize(20f);
         tvTitle.setTypeface(kodaBold != null ? kodaBold : Typeface.DEFAULT_BOLD);
-        tvTitle.setLetterSpacing(0.05f);
         aiDialogBody.addView(tvTitle);
 
         View divider = new View(this);

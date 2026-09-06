@@ -28,8 +28,16 @@ import java.util.Scanner;
 public class AiHelper {
 
     public static final String MODEL = "google/gemma-4-31b-it:free";
-    // free-tier providers are capacity-throttled (429) — fall back to the smaller free Gemma
-    private static final String[] MODELS = {MODEL, "google/gemma-4-26b-a4b-it:free"};
+    // Free-tier pools are capacity-throttled UPSTREAM (429 "upstream_provider_shared_pool",
+    // verified live: both Google Gemma free variants + several others saturate regularly).
+    // Chain: preferred model first, then live-tested alternatives from DIFFERENT provider pools.
+    private static final String[] MODELS = {
+            MODEL,
+            "nvidia/nemotron-3.5-lightning:free",
+            "inclusionai/ling-3.0-flash-sante:free",
+            "liquid/lfm-2.5-2.6b:free",
+            "google/gemma-4-26b-a4b-it:free",
+    };
     private static final int MAX_LOG_CHARS = 60000;
     private static final int DAILY_LIMIT = 10;
 
@@ -178,7 +186,7 @@ public class AiHelper {
         String key = eu.kodanetwork.mchost.security.PraetorSecurity.getOpenRouterKey();
         Exception lastErr = null;
         for (String model : MODELS) {
-            for (int attempt = 0; attempt < 2; attempt++) {
+            for (int attempt = 0; attempt < 1; attempt++) {
                 try {
                     HttpURLConnection c = (HttpURLConnection) new URL("https://openrouter.ai/api/v1/chat/completions").openConnection();
                     c.setRequestMethod("POST");
@@ -211,7 +219,7 @@ public class AiHelper {
                     String detail = extractErrorDetail(resp);
                     if (code == 401 || code == 403) throw new Exception("AI auth failed (" + code + ")");
                     lastErr = new Exception(detail + " (model " + model + ", " + code + ")");
-                    if (code == 429) { Thread.sleep(3000); continue; } // retry once, then next model
+                    if (code == 429) continue; // upstream pool saturated — next model in chain
                     if (code < 500) break; // non-transient for this model — try next model
                 } catch (java.io.IOException e) {
                     lastErr = e;
