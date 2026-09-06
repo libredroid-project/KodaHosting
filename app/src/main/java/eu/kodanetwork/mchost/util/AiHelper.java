@@ -91,31 +91,39 @@ public class AiHelper {
 
     // ── input gathering ─────────────────────────────────────────────
 
-    /** Last 1000 lines from the service buffer (caller) or latest.log fallback. */
+    /**
+     * Consolidated log for the AI: console buffer (contains app lines like
+     * "Using JDK 8 for ARM64" AND the crash, even when latest.log has not been
+     * flushed yet) FIRST, then server.log and logs/latest.log tails as history.
+     */
     public static String gatherLog(Context ctx, eu.kodanetwork.mchost.model.ServerInstance srv,
                                    List<String> serviceBuffer) {
         StringBuilder sb = new StringBuilder();
-        if (serviceBuffer != null) {
+        if (serviceBuffer != null && !serviceBuffer.isEmpty()) {
+            sb.append("=== CONSOLE (app + server, most recent) ===\n");
             for (String l : serviceBuffer) sb.append(stripAnsi(l)).append('\n');
         }
-        if (sb.length() < 2000 && srv != null && srv.getServerDir() != null) {
-            File log = new File(srv.getServerDir(), "logs/latest.log");
-            if (!log.exists()) log = new File(srv.getServerDir(), "server.log");
-            if (log.exists()) {
-                try (java.io.BufferedReader br = new java.io.BufferedReader(new java.io.FileReader(log))) {
-                    LinkedList<String> tail = new LinkedList<>();
-                    String line;
-                    while ((line = br.readLine()) != null) {
-                        tail.add(line);
-                        if (tail.size() > 1000) tail.removeFirst();
-                    }
-                    for (String l : tail) sb.append(stripAnsi(l)).append('\n');
-                } catch (Exception ignored) {}
-            }
+        if (srv != null && srv.getServerDir() != null) {
+            appendFileTail(new File(srv.getServerDir(), "logs/latest.log"), 600, sb);
+            appendFileTail(new File(srv.getServerDir(), "server.log"), 600, sb);
         }
         String out = sb.toString();
         if (out.length() > MAX_LOG_CHARS) out = out.substring(out.length() - MAX_LOG_CHARS);
         return out;
+    }
+
+    private static void appendFileTail(File log, int n, StringBuilder sb) {
+        if (!log.exists() || log.length() == 0) return;
+        try (java.io.BufferedReader br = new java.io.BufferedReader(new java.io.FileReader(log))) {
+            LinkedList<String> tail = new LinkedList<>();
+            String line;
+            while ((line = br.readLine()) != null) {
+                tail.add(line);
+                if (tail.size() > n) tail.removeFirst();
+            }
+            sb.append("=== ").append(log.getName()).append(" ===\n");
+            for (String l : tail) sb.append(stripAnsi(l)).append('\n');
+        } catch (Exception ignored) {}
     }
 
     private static String stripAnsi(String s) {

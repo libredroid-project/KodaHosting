@@ -475,7 +475,7 @@ crashStack = getIntent().getStringExtra("crashStackTrace");
         aiDialog.show();
         showAiThinking();
 
-        final String tail = (crashStack != null && !crashStack.isEmpty()) ? crashStack : getLastLogs(srv);
+        final String tail = buildAiLogTail();
         new Thread(() -> {
             try {
                 eu.kodanetwork.mchost.util.AiHelper.AiResult res =
@@ -509,7 +509,7 @@ crashStack = getIntent().getStringExtra("crashStackTrace");
                 + "<font color=\"#555555\">.</font><font color=\"#FFFFFF\">O</font>"
                 + "<font color=\"#555555\">.</font><font color=\"#FFFFFF\">R.</font>";
         tvTitle.setText(android.text.Html.fromHtml(praetorHtml, android.text.Html.FROM_HTML_MODE_LEGACY));
-        tvPraetorIcon.setText("\uD83E\uDD16"); // AI logo replaces the praetor warning sign
+        tvPraetorIcon.setText("\u2728"); // AI sparkle logo replaces the praetor warning sign
 
         btnPraetorAction.setOnClickListener(v -> {
             if (aiResult != null && aiResult.autoFixAction != null) {
@@ -565,9 +565,17 @@ crashStack = getIntent().getStringExtra("crashStackTrace");
         });
     }
 
+    /** Console buffer (app lines + crash) + log files, so the AI sees everything. */
+    private String buildAiLogTail() {
+        String base = srv != null ? srv.getId() : "";
+        java.util.List<String> buffer = eu.kodanetwork.mchost.service.KodaServerService.getRecentLog(base);
+        String crashPart = (crashStack != null && !crashStack.isEmpty()) ? crashStack + "\n" : "";
+        return crashPart + eu.kodanetwork.mchost.util.AiHelper.gatherLog(this, srv, buffer);
+    }
+
     private void runAiRequest() {
         new Thread(() -> {
-            final String tail = (crashStack != null && !crashStack.isEmpty()) ? crashStack : getLastLogs(srv);
+            final String tail = buildAiLogTail();
             try {
                 eu.kodanetwork.mchost.util.AiHelper.AiResult res =
                         eu.kodanetwork.mchost.util.AiHelper.askAiSync(this, srv, tail);

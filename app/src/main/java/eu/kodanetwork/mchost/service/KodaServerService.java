@@ -2252,7 +2252,23 @@ public class KodaServerService extends Service {
         }
     }
 
+    // Process-wide console history (incl. app lines like "Using JDK 8 for ARM64") so
+    // non-bound screens (CrashAlertActivity / AI analysis) can read the full log.
+    private static final java.util.Map<String, java.util.ArrayDeque<String>> STATIC_LOGS =
+            new java.util.concurrent.ConcurrentHashMap<>();
+
+    /** Recent console lines for a server (oldest first, last ~1200 lines). */
+    public static java.util.List<String> getRecentLog(String id) {
+        java.util.ArrayDeque<String> q = STATIC_LOGS.get(id);
+        return q != null ? new java.util.ArrayList<>(q) : new java.util.ArrayList<>();
+    }
+
     private void log(String id, String msg) {
+        java.util.ArrayDeque<String> sq = STATIC_LOGS.computeIfAbsent(id, k -> new java.util.ArrayDeque<>());
+        synchronized (sq) {
+            sq.addLast(msg);
+            while (sq.size() > 1200) sq.pollFirst();
+        }
         RT rt = runtimes.get(id);
         if (rt != null) {
             rt.logs.add(msg);
