@@ -203,9 +203,22 @@ public class AiHelper {
                 + "If the cause is a broken mod/plugin/world file, auto_fix must be null and fix must explain which file to remove and where.";
 
         String analyzerContext = "";
+        int analyzerJdk = 0;
         if (srv != null && srv.crashCategory != null && !"UNKNOWN".equals(srv.crashCategory)) {
             analyzerContext = "\nBUILT-IN ANALYZER SUSPICION (verify against the log; correct it if wrong): "
                     + srv.crashCategory + " - " + (srv.crashReason != null ? srv.crashReason : "") + "\n";
+        }
+        // The app's runtime database knows the CORRECT JDK — the model must not guess
+        // (e.g. MC 26.x needs JDK 25, not the 17/21 that generic models tend to suggest).
+        if (srv != null && "JAVA_VERSION".equals(srv.crashCategory)) {
+            try {
+                analyzerJdk = eu.kodanetwork.mchost.util.RuntimeManager.resolveAutoVersion(srv);
+                if (analyzerJdk >= 8 && analyzerJdk <= 25) {
+                    analyzerContext += "The app's runtime database: the CORRECT JDK for this server ("
+                            + srv.getType().name() + " " + srv.getVersion() + ") is Java " + analyzerJdk
+                            + ". If the log proves a wrong-Java crash, auto_fix MUST be {\"action\":\"set_java\",\"value\":" + analyzerJdk + "}.\n";
+                } else analyzerJdk = 0;
+            } catch (Exception ignored) { analyzerJdk = 0; }
         }
 
         JSONObject body = new JSONObject();
@@ -219,14 +232,16 @@ public class AiHelper {
 
         String key = eu.kodanetwork.mchost.security.PraetorSecurity.getOpenRouterKey();
         Exception lastErr = null;
+        long deadline = System.currentTimeMillis() + 90_000L; // hard overall budget
         for (String model : MODELS) {
+            if (System.currentTimeMillis() > deadline) break;
             for (int attempt = 0; attempt < 1; attempt++) {
                 try {
                     HttpURLConnection c = (HttpURLConnection) new URL("https://openrouter.ai/api/v1/chat/completions").openConnection();
                     c.setRequestMethod("POST");
                     c.setDoOutput(true);
-                    c.setConnectTimeout(15000);
-                    c.setReadTimeout(90000);
+                    c.setConnectTimeout(10000);
+                    c.setReadTimeout(30000);
                     c.setRequestProperty("Content-Type", "application/json");
                     c.setRequestProperty("Authorization", "Bearer " + key);
                     body.put("model", model);
@@ -247,7 +262,15 @@ public class AiHelper {
                                 ? choices.getJSONObject(0).getJSONObject("message").optString("content", "")
                                 : "";
                         bumpCount(ctx);
-                        return parse(content);
+                        AiResult res = parse(content);
+                        // Analyzer-anchored auto-fix: for a wrong-Java crash the APP knows the
+                        // correct JDK (runtime database) — the button must not depend on the
+                        // model's confidence, and the model's guessed version is overridden.
+                        if (srv != null && "JAVA_VERSION".equals(srv.crashCategory) && analyzerJdk > 0) {
+                            res.autoFixAction = "set_java";
+                            res.autoFixValue = analyzerJdk;
+                        }
+                        return res;
                     }
                     // surface the real reason (e.g. "No allowed providers are available")
                     String detail = extractErrorDetail(resp);
