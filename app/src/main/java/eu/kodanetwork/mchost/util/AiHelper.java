@@ -33,12 +33,15 @@ public class AiHelper {
     // Chain: preferred model first, then live-tested alternatives from DIFFERENT provider pools.
     private static okhttp3.OkHttpClient httpClient;
 
+    // Free pools saturate independently — chain ordered by strength, ALL entries
+    // live-tested 2026-09-06 (Gemma 431b/26b currently 429-throttled upstream).
     private static final String[] MODELS = {
-            MODEL,
-            "nvidia/nemotron-3.5-lightning:free",
+            "nvidia/nemotron-3-super-120b-a12b:free",   // 120B, strongest working
+            "minimax/minimax-m3:free",                   // strong, 1M ctx
+            "nvidia/nemotron-3.5-lightning:free",        // fast
+            "dots-studio/dots-3-note-preview:free",
             "inclusionai/ling-3.0-flash-sante:free",
-            "liquid/lfm-2.5-2.6b:free",
-            "google/gemma-4-26b-a4b-it:free",
+            "google/gemma-4-31b-it:free",                // user's pick — kept for when the pool recovers
     };
     private static final int MAX_LOG_CHARS = 60000;
     private static final int DAILY_LIMIT = 10;
