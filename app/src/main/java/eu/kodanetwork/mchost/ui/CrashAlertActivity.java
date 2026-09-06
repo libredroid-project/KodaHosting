@@ -613,7 +613,12 @@ crashStack = getIntent().getStringExtra("crashStackTrace");
             default:                col = "#FF4444"; label = getString(R.string.confidence_not_confident); break;
         }
         StringBuilder sb = new StringBuilder();
-        sb.append("<font color=\"").append(col).append("\"><b>CONFIDENCE: ").append(label).append("</b></font><br><br>");
+        sb.append("<font color=\"").append(col).append("\"><b>CONFIDENCE: ").append(label).append("</b></font><br>");
+        if (res.appRecommendation != null) {
+            sb.append("<br><font color=\"#00E676\"><b>APP RECOMMENDATION: ").append(res.appRecommendation)
+              .append("</b></font> <font color=\"#8A8A9A\">(authoritative, from the runtime database)</font><br>");
+        }
+        sb.append("<br>");
         sb.append("<font color=\"#FF6B00\"><b>WHY IT CRASHED</b></font><br>").append(esc(res.cause));
         if (res.fix != null && !res.fix.isEmpty()) {
             sb.append("<br><br><font color=\"#FF6B00\"><b>HOW TO FIX IT</b></font><br>").append(esc(res.fix));

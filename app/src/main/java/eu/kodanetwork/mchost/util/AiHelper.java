@@ -57,6 +57,7 @@ public class AiHelper {
         public String confidence;   // NOT_CONFIDENT | CONFIDENT | HIGH_CONFIDENCE | CERTAIN
         public String autoFixAction;  // set_ram | set_java | null
         public long autoFixValue;     // MB for set_ram, java version for set_java
+        public String appRecommendation; // authoritative app line shown ABOVE the AI text
         public String raw;            // full model text fallback
     }
 
@@ -217,31 +218,35 @@ public class AiHelper {
             analyzerContext = "\nBUILT-IN ANALYZER SUSPICION (verify against the log; correct it if wrong): "
                     + analyzerCategory + " - " + (srv != null && srv.crashReason != null ? srv.crashReason : "") + "\n";
         }
-        // The app's runtime database knows the CORRECT JDK — the model must not guess
-        // (e.g. MC 26.x needs JDK 25, not the 17/21 that generic models tend to suggest).
+        // Authoritative runtime facts from the app's database. Stated plainly for the
+        // model to use; the model's prose is NEVER rewritten afterwards — the app shows
+        // its own recommendation line in the UI instead (no falsified LOG quotes).
         int correctJdk = 0, usedJdk = 0;
         if (srv != null) {
             try { correctJdk = eu.kodanetwork.mchost.util.RuntimeManager.resolveAutoVersion(srv); } catch (Exception ignored) {}
             usedJdk = srv.getJavaRuntime() != 0 ? srv.getJavaRuntime() : correctJdk;
         }
-        if ("JAVA_VERSION".equals(analyzerCategory) && correctJdk > 0) {
-            // class-version error: the used JDK cannot run this MC version at all
-            analyzerJdk = correctJdk;
-            suggestJavaSwitch = true;
-        } else if (srv != null && correctJdk > 0 && usedJdk != correctJdk
-                && ("NATIVE_LIB".equals(analyzerCategory) || "MISSING_JAR".equals(analyzerCategory)
-                    || "CLASS_NOT_FOUND".equals(analyzerCategory))) {
-            // the crash hit a wrong/broken OLD runtime (e.g. incomplete jre8 download) —
-            // switching to the required JDK beats reinstalling a runtime that can never work
-            analyzerJdk = correctJdk;
-            suggestJavaSwitch = true;
-        }
-        if (analyzerJdk > 0 && srv != null) {
-            analyzerContext += "RUNTIME DATABASE: the server ran on Java " + usedJdk + ", but "
-                    + srv.getType().name() + " " + srv.getVersion() + " requires Java " + analyzerJdk
-                    + ". Even if the log shows a broken/incomplete runtime installation, the BEST fix is "
-                    + "SWITCHING to Java " + analyzerJdk + ": auto_fix MUST be {\"action\":\"set_java\",\"value\":"
-                    + analyzerJdk + "} — do NOT suggest reinstalling the old runtime.\n";
+        boolean runtimeCategory = "JAVA_VERSION".equals(analyzerCategory)
+                || "NATIVE_LIB".equals(analyzerCategory)
+                || "MISSING_JAR".equals(analyzerCategory)
+                || "CLASS_NOT_FOUND".equals(analyzerCategory);
+        if (srv != null && correctJdk > 0 && runtimeCategory) {
+            if (usedJdk != correctJdk) {
+                // wrong JDK configured (e.g. Java 8 for MC 26.x) — switching is THE fix
+                analyzerJdk = correctJdk;
+                suggestJavaSwitch = true;
+                analyzerContext += "RUNTIME FACTS (authoritative, verified): " + srv.getType().name() + " "
+                        + srv.getVersion() + " REQUIRES Java " + correctJdk + ". This server was configured with Java "
+                        + usedJdk + " (the log line 'Using JDK " + usedJdk + "' confirms). Java " + usedJdk
+                        + " can NEVER run this server version. The only correct fix is switching to Java "
+                        + correctJdk + " — never reinstall Java " + usedJdk + ", never suggest any other version.\n";
+            } else {
+                // correct JDK configured but its installation is broken — re-download, not switch
+                analyzerContext += "RUNTIME FACTS (authoritative, verified): the correct Java for "
+                        + srv.getType().name() + " " + srv.getVersion() + " is Java " + correctJdk
+                        + ", and the server is ALREADY configured with it. The installation files are broken — "
+                        + "the correct fix is RE-DOWNLOADING Java " + correctJdk + ", not switching versions.\n";
+            }
         }
 
         JSONObject body = new JSONObject();
@@ -292,17 +297,13 @@ public class AiHelper {
                         bumpCount(ctx);
                         AiResult res = parse(content);
                         if (suggestJavaSwitch && analyzerJdk > 0) {
-                            // the APP knows the required JDK (runtime database) — the button
-                            // must not depend on the model's confidence, and a guessed
-                            // version in the prose is corrected to the real one
+                            // The APP's runtime database is authoritative: the button and the
+                            // recommendation line come from the app. The model's prose is left
+                            // UNTOUCHED — rewriting it falsified LOG quotes and produced
+                            // contradictory Java-version soup.
                             res.autoFixAction = "set_java";
                             res.autoFixValue = analyzerJdk;
-                            res.cause = res.cause == null ? null :
-                                    res.cause.replaceAll("(?i)(JDK|Java)\\s*(8|11|16|17|18|19|20|21|22|23|24)",
-                                            "$1 " + analyzerJdk);
-                            res.fix = res.fix == null ? null :
-                                    res.fix.replaceAll("(?i)(JDK|Java)\\s*(8|11|16|17|18|19|20|21|22|23|24)",
-                                            "$1 " + analyzerJdk);
+                            res.appRecommendation = "→ Java " + analyzerJdk;
                         }
                         return res;
                     }
