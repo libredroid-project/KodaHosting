@@ -388,9 +388,7 @@ crashStack = getIntent().getStringExtra("crashStackTrace");
         anim.setRepeatMode(ValueAnimator.REVERSE);
         anim.setRepeatCount(ValueAnimator.INFINITE);
         anim.start();
-
-        // Auto-dismiss after 2 minutes
-        new Handler(Looper.getMainLooper()).postDelayed(this::finish, 120000);
+        // no auto-dismiss: the AI analysis can take a while; the screen stays until dismissed
     }
 
     /** Resolve crash category key to localized display name. */
@@ -509,9 +507,9 @@ crashStack = getIntent().getStringExtra("crashStackTrace");
                 + "<font color=\"#555555\">.</font><font color=\"#AAAAAA\">E</font>"
                 + "<font color=\"#555555\">.</font><font color=\"#FFFFFF\">T</font>"
                 + "<font color=\"#555555\">.</font><font color=\"#FFFFFF\">O</font>"
-                + "<font color=\"#555555\">.</font><font color=\"#FFFFFF\">R.</font> "
-                + "<font color=\"#FF6B00\">AI</font>";
+                + "<font color=\"#555555\">.</font><font color=\"#FFFFFF\">R.</font>";
         tvTitle.setText(android.text.Html.fromHtml(praetorHtml, android.text.Html.FROM_HTML_MODE_LEGACY));
+        tvPraetorIcon.setText("\uD83E\uDD16"); // AI logo replaces the praetor warning sign
 
         btnPraetorAction.setOnClickListener(v -> {
             if (aiResult != null && aiResult.autoFixAction != null) {
