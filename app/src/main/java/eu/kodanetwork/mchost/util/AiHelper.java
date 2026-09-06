@@ -307,7 +307,15 @@ public class AiHelper {
         try {
             JSONObject o = new JSONObject(resp);
             JSONObject err = o.optJSONObject("error");
-            if (err != null && err.optString("message") != null) return err.optString("message");
+            if (err != null) {
+                String msg = err.optString("message", "");
+                // the REAL reason lives in metadata.raw (e.g. "temporarily rate-limited
+                // upstream" vs "free-model cap reached" vs per-IP limits)
+                JSONObject meta = err.optJSONObject("metadata");
+                String raw = meta != null ? meta.optString("raw", "") : "";
+                if (!raw.isEmpty()) return msg + " [" + raw + "]";
+                if (!msg.isEmpty()) return msg;
+            }
         } catch (Exception ignored) {}
         return resp != null && resp.length() > 200 ? resp.substring(0, 200) : (resp == null ? "unknown" : resp);
     }
