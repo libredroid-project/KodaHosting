@@ -5662,6 +5662,8 @@ public class ServerDetailActivity extends AppCompatActivity {
                 android.content.Intent ai = new android.content.Intent(this, CrashAlertActivity.class);
                 ai.putExtra("id", server.getId());
                 ai.putExtra("start_ai", true);
+                ai.putExtra("crashCategory", server.crashCategory);
+                ai.putExtra("crashReason", server.crashReason);
                 startActivity(ai);
             });
         }).start();

@@ -31,6 +31,8 @@ public class AiHelper {
     // Free-tier pools are capacity-throttled UPSTREAM (429 "upstream_provider_shared_pool",
     // verified live: both Google Gemma free variants + several others saturate regularly).
     // Chain: preferred model first, then live-tested alternatives from DIFFERENT provider pools.
+    private static okhttp3.OkHttpClient httpClient;
+
     private static final String[] MODELS = {
             MODEL,
             "nvidia/nemotron-3.5-lightning:free",
@@ -176,7 +178,10 @@ public class AiHelper {
 
     /** Blocking — call off the main thread. Throws Consent/RateLimit guards first. */
     public static AiResult askAiSync(Context ctx, eu.kodanetwork.mchost.model.ServerInstance srv,
-                                     String logTail) throws Exception {
+                                     String logTail, String analyzerCategory) throws Exception {
+        if ((analyzerCategory == null || analyzerCategory.isEmpty()) && srv != null) {
+            analyzerCategory = srv.crashCategory; // fall back to the in-memory field
+        }
         if (!hasConsent(ctx)) throw new ConsentException();
         int used = todayCount(ctx);
         if (used >= DAILY_LIMIT) throw new RateLimitException(used);
@@ -204,13 +209,13 @@ public class AiHelper {
 
         String analyzerContext = "";
         int analyzerJdk = 0;
-        if (srv != null && srv.crashCategory != null && !"UNKNOWN".equals(srv.crashCategory)) {
+        if (analyzerCategory != null && !"UNKNOWN".equals(analyzerCategory)) {
             analyzerContext = "\nBUILT-IN ANALYZER SUSPICION (verify against the log; correct it if wrong): "
                     + srv.crashCategory + " - " + (srv.crashReason != null ? srv.crashReason : "") + "\n";
         }
         // The app's runtime database knows the CORRECT JDK — the model must not guess
         // (e.g. MC 26.x needs JDK 25, not the 17/21 that generic models tend to suggest).
-        if (srv != null && "JAVA_VERSION".equals(srv.crashCategory)) {
+        if ("JAVA_VERSION".equals(analyzerCategory)) {
             try {
                 analyzerJdk = eu.kodanetwork.mchost.util.RuntimeManager.resolveAutoVersion(srv);
                 if (analyzerJdk >= 8 && analyzerJdk <= 25) {
@@ -235,27 +240,25 @@ public class AiHelper {
         long deadline = System.currentTimeMillis() + 90_000L; // hard overall budget
         for (String model : MODELS) {
             if (System.currentTimeMillis() > deadline) break;
-            for (int attempt = 0; attempt < 1; attempt++) {
-                try {
-                    HttpURLConnection c = (HttpURLConnection) new URL("https://openrouter.ai/api/v1/chat/completions").openConnection();
-                    c.setRequestMethod("POST");
-                    c.setDoOutput(true);
-                    c.setConnectTimeout(10000);
-                    c.setReadTimeout(30000);
-                    c.setRequestProperty("Content-Type", "application/json");
-                    c.setRequestProperty("Authorization", "Bearer " + key);
-                    body.put("model", model);
-                    try (OutputStream os = c.getOutputStream()) {
-                        os.write(body.toString().getBytes(StandardCharsets.UTF_8));
-                    }
-                    int code = c.getResponseCode();
-                    InputStream is = code >= 400 ? c.getErrorStream() : c.getInputStream();
-                    String resp = "";
-                    if (is != null) {
-                        Scanner sc = new Scanner(is).useDelimiter("\\A");
-                        resp = sc.hasNext() ? sc.next() : "";
-                    }
-                    c.disconnect();
+            try {
+                if (httpClient == null) {
+                    httpClient = new okhttp3.OkHttpClient.Builder()
+                            .connectTimeout(10, java.util.concurrent.TimeUnit.SECONDS)
+                            .readTimeout(30, java.util.concurrent.TimeUnit.SECONDS)
+                            // HARD cap per model: a dripping throttled upstream cannot
+                            // stretch the call (readTimeout only bounds packet gaps)
+                            .callTimeout(35, java.util.concurrent.TimeUnit.SECONDS)
+                            .build();
+                }
+                okhttp3.Request req = new okhttp3.Request.Builder()
+                        .url("https://openrouter.ai/api/v1/chat/completions")
+                        .post(okhttp3.RequestBody.create(body.toString(),
+                                okhttp3.MediaType.parse("application/json; charset=utf-8")))
+                        .header("Authorization", "Bearer " + key)
+                        .build();
+                try (okhttp3.Response r = httpClient.newCall(req).execute()) {
+                    int code = r.code();
+                    String resp = r.body() != null ? r.body().string() : "";
                     if (code >= 200 && code < 300) {
                         JSONArray choices = new JSONObject(resp).optJSONArray("choices");
                         String content = choices != null && choices.length() > 0
@@ -263,12 +266,16 @@ public class AiHelper {
                                 : "";
                         bumpCount(ctx);
                         AiResult res = parse(content);
-                        // Analyzer-anchored auto-fix: for a wrong-Java crash the APP knows the
-                        // correct JDK (runtime database) — the button must not depend on the
-                        // model's confidence, and the model's guessed version is overridden.
-                        if (srv != null && "JAVA_VERSION".equals(srv.crashCategory) && analyzerJdk > 0) {
+                        if ("JAVA_VERSION".equals(analyzerCategory) && analyzerJdk > 0) {
                             res.autoFixAction = "set_java";
                             res.autoFixValue = analyzerJdk;
+                            // the model tends to guess 17/21 — correct the prose too
+                            res.cause = res.cause == null ? null :
+                                    res.cause.replaceAll("(?i)(JDK|Java)\\s*(8|11|16|17|18|19|20|21|22|23|24)",
+                                            "$1 " + analyzerJdk);
+                            res.fix = res.fix == null ? null :
+                                    res.fix.replaceAll("(?i)(JDK|Java)\\s*(8|11|16|17|18|19|20|21|22|23|24)",
+                                            "$1 " + analyzerJdk);
                         }
                         return res;
                     }
@@ -276,11 +283,10 @@ public class AiHelper {
                     String detail = extractErrorDetail(resp);
                     if (code == 401 || code == 403) throw new Exception("AI auth failed (" + code + ")");
                     lastErr = new Exception(detail + " (model " + model + ", " + code + ")");
-                    if (code == 429) continue; // upstream pool saturated — next model in chain
-                    if (code < 500) break; // non-transient for this model — try next model
-                } catch (java.io.IOException e) {
-                    lastErr = e;
+                    if (code == 401 || code == 403) break; // do not burn the chain on auth errors
                 }
+            } catch (Exception e) {
+                lastErr = e;
             }
         }
         throw lastErr != null ? lastErr : new Exception("AI request failed");

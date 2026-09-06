@@ -34,6 +34,7 @@ import java.util.LinkedList;
  */
 public class CrashAlertActivity extends androidx.appcompat.app.AppCompatActivity {
     private ServerInstance srv;
+    private String name, crashReason, crashCategory;
     private String crashStack;
     private Typeface kodaFont, kodaBold;
     private ObjectAnimator anim;
@@ -50,9 +51,9 @@ public class CrashAlertActivity extends androidx.appcompat.app.AppCompatActivity
 
         // ── Extract intent data ──────────────────────────────────────────────
         String id            = getIntent().getStringExtra("id");
-        String name          = getIntent().getStringExtra("name");
-        String crashReason   = getIntent().getStringExtra("crashReason");
-        String crashCategory = getIntent().getStringExtra("crashCategory");
+        name          = getIntent().getStringExtra("name");
+        crashReason   = getIntent().getStringExtra("crashReason");
+        crashCategory = getIntent().getStringExtra("crashCategory");
         String crashFix      = getIntent().getStringExtra("crashFix");
         String crashFixAction= getIntent().getStringExtra("crashFixAction");
 crashStack = getIntent().getStringExtra("crashStackTrace");
@@ -479,7 +480,7 @@ crashStack = getIntent().getStringExtra("crashStackTrace");
         new Thread(() -> {
             try {
                 eu.kodanetwork.mchost.util.AiHelper.AiResult res =
-                        eu.kodanetwork.mchost.util.AiHelper.askAiSync(this, srv, tail);
+                        eu.kodanetwork.mchost.util.AiHelper.askAiSync(this, srv, tail, crashCategory);
                 runOnUiThread(() -> showAiResult(res));
             } catch (eu.kodanetwork.mchost.util.AiHelper.RateLimitException e) {
                 runOnUiThread(() -> showAiError(getString(R.string.ai_rate_limited, e.used)));
@@ -578,7 +579,7 @@ crashStack = getIntent().getStringExtra("crashStackTrace");
             final String tail = buildAiLogTail();
             try {
                 eu.kodanetwork.mchost.util.AiHelper.AiResult res =
-                        eu.kodanetwork.mchost.util.AiHelper.askAiSync(this, srv, tail);
+                        eu.kodanetwork.mchost.util.AiHelper.askAiSync(this, srv, tail, crashCategory);
                 runOnUiThread(() -> showAiResult(res));
             } catch (eu.kodanetwork.mchost.util.AiHelper.RateLimitException e) {
                 runOnUiThread(() -> showAiError(getString(R.string.ai_rate_limited, e.used)));

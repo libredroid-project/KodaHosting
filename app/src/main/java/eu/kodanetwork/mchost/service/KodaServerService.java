@@ -2328,6 +2328,8 @@ public class KodaServerService extends Service {
             Intent alertIntent = new Intent(this, eu.kodanetwork.mchost.ui.CrashAlertActivity.class);
             alertIntent.putExtra("id", s.getId());
             alertIntent.putExtra("name", s.getName());
+            alertIntent.putExtra("crashCategory", s.crashCategory);
+            alertIntent.putExtra("crashReason", s.crashReason);
             alertIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_SINGLE_TOP);
             startActivity(alertIntent);
         }
