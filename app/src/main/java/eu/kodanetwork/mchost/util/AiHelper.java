@@ -309,7 +309,8 @@ public class AiHelper {
         AiResult r = new AiResult();
         r.raw = content == null ? "" : content;
         String text = r.raw.trim();
-        // strip markdown fences
+        // strip reasoning-model think blocks + markdown fences
+        text = text.replaceAll("(?s)<think>.*?</think>", "").trim();
         text = text.replaceAll("(?s)^```(json)?", "").replaceAll("(?s)```$", "").trim();
 
         // find first { ... last }
