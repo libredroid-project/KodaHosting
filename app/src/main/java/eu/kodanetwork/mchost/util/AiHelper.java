@@ -239,10 +239,13 @@ public class AiHelper {
         body.put("messages", msgs);
 
         String key = eu.kodanetwork.mchost.security.PraetorSecurity.getOpenRouterKey();
-        Exception lastErr = null;
         long deadline = System.currentTimeMillis() + 90_000L; // hard overall budget
+        java.util.List<String> failures = new java.util.ArrayList<>();
         for (String model : MODELS) {
-            if (System.currentTimeMillis() > deadline) break;
+            if (System.currentTimeMillis() > deadline) {
+                failures.add("overall time budget reached");
+                break;
+            }
             try {
                 if (httpClient == null) {
                     httpClient = new okhttp3.OkHttpClient.Builder()
@@ -285,14 +288,14 @@ public class AiHelper {
                     // surface the real reason (e.g. "No allowed providers are available")
                     String detail = extractErrorDetail(resp);
                     if (code == 401 || code == 403) throw new Exception("AI auth failed (" + code + ")");
-                    lastErr = new Exception(detail + " (model " + model + ", " + code + ")");
-                    if (code == 401 || code == 403) break; // do not burn the chain on auth errors
+                    failures.add(model.substring(model.indexOf('/') + 1) + ": " + detail + " (" + code + ")");
                 }
             } catch (Exception e) {
-                lastErr = e;
+                failures.add(e.getMessage() != null ? e.getMessage() : e.getClass().getSimpleName());
             }
         }
-        throw lastErr != null ? lastErr : new Exception("AI request failed");
+        // every model failed — list ALL reasons so the cause is visible at a glance
+        throw new Exception("All AI models failed: " + String.join(" | ", failures));
     }
 
     private static String extractErrorDetail(String resp) {
