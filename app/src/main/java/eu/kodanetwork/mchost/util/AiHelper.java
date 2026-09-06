@@ -162,24 +162,36 @@ public class AiHelper {
         String lang = ctx.getResources().getConfiguration().getLocales().get(0).getLanguage();
         String replyLang = lang.startsWith("de") ? "German" : (lang.startsWith("zh") ? "Simplified Chinese" : "English");
 
-        String system = "You are a Minecraft server hosting crash assistant inside the KodaHosting Android app. "
-                + "The user's server crashed. Reply AT MOST 100 words, in " + replyLang + ". "
-                + "Respond ONLY with a JSON object (no markdown fences) with keys: "
-                + "\"cause\" (why it crashed, 1-2 sentences), "
-                + "\"fix\" (ALWAYS include concrete manual fix steps the user can do in the app, even if you also provide auto_fix), "
+        String system = "You are the crash-diagnosis unit of the KodaHosting Android app (P.R.A.E.T.O.R. system). "
+                + "The user's Minecraft server crashed. Reply AT MOST 100 words, in " + replyLang + ". "
+                + "STRICT RULES: "
+                + "(1) Base EVERY claim ONLY on what is actually visible in the log excerpt - never invent or assume "
+                + "problems the log does not show (e.g. do NOT mention RAM, memory or storage unless the log "
+                + "explicitly contains an OutOfMemoryError or memory error). "
+                + "(2) In cause, QUOTE the exact log line that proves the cause, prefixed LOG:, then one sentence explaining it. "
+                + "(3) In fix, give concrete steps the user can do inside this app. "
+                + "(4) Respond ONLY with a JSON object (no markdown fences) with keys: "
+                + "\"cause\" (LOG-quoted line + short explanation), "
+                + "\"fix\" (concrete manual steps), "
                 + "\"confidence\" (one of NOT_CONFIDENT, CONFIDENT, HIGH_CONFIDENCE, CERTAIN), "
-                + "\"auto_fix\" (ONLY if you are CERTAIN the crash is caused by an app setting; null otherwise; "
+                + "\"auto_fix\" (ONLY if CERTAIN the crash is caused by that app setting; null otherwise; "
                 + "allowed actions ONLY: {\"action\":\"set_ram\",\"value_mb\":<1024-8192>} or "
                 + "{\"action\":\"set_java\",\"value\":<8|17|21|25>}. "
                 + "NEVER suggest port changes - the port is managed by the app. "
                 + "If the cause is a broken mod/plugin/world file, auto_fix must be null and fix must explain which file to remove and where.";
+
+        String analyzerContext = "";
+        if (srv != null && srv.crashCategory != null && !"UNKNOWN".equals(srv.crashCategory)) {
+            analyzerContext = "\nBUILT-IN ANALYZER SUSPICION (verify against the log; correct it if wrong): "
+                    + srv.crashCategory + " - " + (srv.crashReason != null ? srv.crashReason : "") + "\n";
+        }
 
         JSONObject body = new JSONObject();
         body.put("model", MODEL);
         JSONArray msgs = new JSONArray();
         msgs.put(new JSONObject().put("role", "system").put("content", system));
         msgs.put(new JSONObject().put("role", "user").put("content",
-                "DEVICE + SERVER INFO:\n" + collectSpecs(ctx, srv)
+                "DEVICE + SERVER INFO:\n" + collectSpecs(ctx, srv) + analyzerContext
                         + "\nLAST LOG LINES:\n" + logTail));
         body.put("messages", msgs);
 

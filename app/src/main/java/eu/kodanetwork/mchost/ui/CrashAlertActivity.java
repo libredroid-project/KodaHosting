@@ -444,7 +444,9 @@ crashStack = getIntent().getStringExtra("crashStackTrace");
 
 
     private android.app.Dialog aiDialog;
-    private LinearLayout aiDialogBody;
+    private TextView tvPraetorReason;
+    private TextView tvPraetorIcon;
+    private com.google.android.material.button.MaterialButton btnPraetorAction;
     private eu.kodanetwork.mchost.util.AiHelper.AiResult aiResult;
 
     /** Content-sized window: 3-dot loading animation, then the AI answer. */
@@ -490,89 +492,79 @@ crashStack = getIntent().getStringExtra("crashStackTrace");
     }
 
     private View buildAiDialogContent() {
-        android.widget.ScrollView sc = new android.widget.ScrollView(this);
-        aiDialogBody = new LinearLayout(this);
-        aiDialogBody.setOrientation(LinearLayout.VERTICAL);
-        aiDialogBody.setBackgroundColor(0xFF1D1714);
-        int pad = dp(18);
-        aiDialogBody.setPadding(pad, pad, pad, pad);
-        sc.addView(aiDialogBody);
+        View root = getLayoutInflater().inflate(R.layout.activity_praetor_warning, null);
+        TextView tvTitle = root.findViewById(R.id.tv_praetor_title);
+        tvPraetorReason = root.findViewById(R.id.tv_praetor_reason);
+        tvPraetorIcon = root.findViewById(R.id.tv_warning_icon);
+        btnPraetorAction = root.findViewById(R.id.btn_praetor_action);
+        View mathInput = root.findViewById(R.id.et_math_answer);
+        View countdown = root.findViewById(R.id.tv_praetor_countdown);
+        View ramButtons = root.findViewById(R.id.layout_ram_buttons);
+        if (mathInput != null) mathInput.setVisibility(View.GONE);
+        if (countdown != null) countdown.setVisibility(View.GONE);
+        if (ramButtons != null) ramButtons.setVisibility(View.GONE);
 
-        TextView tvTitle = new TextView(this);
-        // P.R.A.E.T.O.R. letter styling (same as PraetorMemoryLimitActivity)
+        // P.R.A.E.T.O.R. letter styling (same pattern as PraetorMemoryLimitActivity) + AI tag
         String praetorHtml = "<font color=\"#555555\">P.R.</font><font color=\"#AAAAAA\">A</font>"
                 + "<font color=\"#555555\">.</font><font color=\"#AAAAAA\">E</font>"
                 + "<font color=\"#555555\">.</font><font color=\"#FFFFFF\">T</font>"
                 + "<font color=\"#555555\">.</font><font color=\"#FFFFFF\">O</font>"
-                + "<font color=\"#555555\">.</font><font color=\"#FFFFFF\">R.</font>  "
+                + "<font color=\"#555555\">.</font><font color=\"#FFFFFF\">R.</font> "
                 + "<font color=\"#FF6B00\">AI</font>";
         tvTitle.setText(android.text.Html.fromHtml(praetorHtml, android.text.Html.FROM_HTML_MODE_LEGACY));
-        tvTitle.setTextSize(20f);
-        tvTitle.setTypeface(kodaBold != null ? kodaBold : Typeface.DEFAULT_BOLD);
-        aiDialogBody.addView(tvTitle);
 
-        View divider = new View(this);
-        LinearLayout.LayoutParams dLp = new LinearLayout.LayoutParams(dp(40), dp(2));
-        dLp.topMargin = dp(6);
-        dLp.bottomMargin = dp(12);
-        divider.setBackgroundColor(0xFFFF6B00);
-        aiDialogBody.addView(divider, dLp);
-        return sc;
-    }
-
-    private void clearDialogBody() {
-        aiDialogBody.removeViews(2, Math.max(0, aiDialogBody.getChildCount() - 2));
+        btnPraetorAction.setOnClickListener(v -> {
+            if (aiResult != null && aiResult.autoFixAction != null) {
+                confirmAutoFix();
+            } else if (aiDialog != null) {
+                aiDialog.dismiss();
+            }
+        });
+        return root;
     }
 
     private void showAiThinking() {
-        clearDialogBody();
-        com.airbnb.lottie.LottieAnimationView dots = new com.airbnb.lottie.LottieAnimationView(this);
-        dots.setAnimation(R.raw.koda_boot);
-        dots.loop(true);
-        dots.playAnimation();
-        int size = dp(56);
-        LinearLayout.LayoutParams lLp = new LinearLayout.LayoutParams(size, size);
-        lLp.gravity = Gravity.CENTER_HORIZONTAL;
-        lLp.topMargin = dp(8);
-        aiDialogBody.addView(dots, lLp);
-        TextView t = new TextView(this);
-        t.setText(getString(R.string.ai_thinking));
-        t.setTextColor(0xFF8A8A9A);
-        t.setTextSize(12f);
-        t.setTypeface(kodaFont);
-        t.setGravity(Gravity.CENTER);
-        LinearLayout.LayoutParams tLp = new LinearLayout.LayoutParams(
-                android.view.ViewGroup.LayoutParams.MATCH_PARENT, android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
-        tLp.topMargin = dp(4);
-        aiDialogBody.addView(t, tLp);
+        tvPraetorIcon.setVisibility(View.VISIBLE);
+        tvPraetorReason.setText(getString(R.string.ai_thinking));
+        tvPraetorReason.setTextColor(0xFF8A8A9A);
+        btnPraetorAction.setEnabled(false);
+        btnPraetorAction.setAlpha(0.5f);
+        btnPraetorAction.setText(getString(R.string.ai_thinking));
+        // keep the layout's own warning icon; swap it for the 3-dot lottie feel via pulse
+        com.airbnb.lottie.LottieAnimationView dots = (com.airbnb.lottie.LottieAnimationView) tvPraetorReason.getTag();
+        if (dots == null) {
+            // insert the koda_boot 3-dot lottie above the reason text (like the praetor icon slot)
+            android.view.ViewGroup card = (android.view.ViewGroup) tvPraetorReason.getParent();
+            dots = new com.airbnb.lottie.LottieAnimationView(this);
+            dots.setAnimation(R.raw.koda_boot);
+            dots.loop(true);
+            dots.playAnimation();
+            int size = dp(48);
+            LinearLayout.LayoutParams lLp = new LinearLayout.LayoutParams(size, size);
+            lLp.gravity = Gravity.CENTER_HORIZONTAL;
+            lLp.topMargin = dp(4);
+            lLp.bottomMargin = dp(8);
+            card.addView(dots, card.indexOfChild(tvPraetorReason), lLp);
+            dots.setTag(tvPraetorReason);
+            tvPraetorReason.setTag(dots);
+        }
+        dots.setVisibility(View.VISIBLE);
+        if (!dots.isAnimating()) dots.playAnimation();
     }
 
     private void showAiError(String msg) {
-        clearDialogBody();
-        TextView t = new TextView(this);
-        t.setText(getString(R.string.ai_error_prefix) + " " + msg);
-        t.setTextColor(0xFFFF5555);
-        t.setTextSize(11.5f);
-        t.setTypeface(Typeface.MONOSPACE);
-        aiDialogBody.addView(t, new LinearLayout.LayoutParams(
-                android.view.ViewGroup.LayoutParams.MATCH_PARENT, android.view.ViewGroup.LayoutParams.WRAP_CONTENT));
-        com.google.android.material.button.MaterialButton btnRetry = new com.google.android.material.button.MaterialButton(this);
-        btnRetry.setText(getString(R.string.ai_retry));
-        btnRetry.setTextColor(0xFFF0F0F0);
-        btnRetry.setBackgroundTintList(android.content.res.ColorStateList.valueOf(0xFF2A2A33));
-        btnRetry.setCornerRadius(dp(8));
-        btnRetry.setTypeface(kodaBold != null ? kodaBold : Typeface.DEFAULT_BOLD);
-        btnRetry.setAllCaps(true);
-        LinearLayout.LayoutParams rLp = new LinearLayout.LayoutParams(
-                android.view.ViewGroup.LayoutParams.MATCH_PARENT, dp(42));
-        rLp.topMargin = dp(12);
-        btnRetry.setLayoutParams(rLp);
-        btnRetry.setOnClickListener(v -> {
+        stopAiDots();
+        tvPraetorIcon.setVisibility(View.VISIBLE);
+        tvPraetorReason.setText(getString(R.string.ai_error_prefix) + " " + msg);
+        tvPraetorReason.setTextColor(0xFFFF5555);
+        btnPraetorAction.setEnabled(true);
+        btnPraetorAction.setAlpha(1f);
+        btnPraetorAction.setText(getString(R.string.ai_retry));
+        btnPraetorAction.setOnClickListener(v -> {
             HapticUtil.forceVibrate(this, 40);
             showAiThinking();
             runAiRequest();
         });
-        aiDialogBody.addView(btnRetry, rLp);
     }
 
     private void runAiRequest() {
@@ -590,84 +582,50 @@ crashStack = getIntent().getStringExtra("crashStackTrace");
         }).start();
     }
 
+    private void stopAiDots() {
+        Object tag = tvPraetorReason != null ? tvPraetorReason.getTag() : null;
+        if (tag instanceof com.airbnb.lottie.LottieAnimationView) {
+            ((com.airbnb.lottie.LottieAnimationView) tag).setVisibility(View.GONE);
+            ((com.airbnb.lottie.LottieAnimationView) tag).pauseAnimation();
+        }
+    }
+
+    private String esc(String t) {
+        return t == null ? "" : t.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;");
+    }
+
     private void showAiResult(eu.kodanetwork.mchost.util.AiHelper.AiResult res) {
         aiResult = res;
-        clearDialogBody();
+        stopAiDots();
 
-        int col; String label;
+        String col; String label;
         switch (res.confidence) {
-            case "CERTAIN":         col = 0xFF4FC3F7; label = getString(R.string.confidence_certain); break;
-            case "HIGH_CONFIDENCE": col = 0xFF00E676; label = getString(R.string.confidence_high); break;
-            case "CONFIDENT":       col = 0xFFFFCC00; label = getString(R.string.confidence_confident); break;
-            default:                col = 0xFFFF4444; label = getString(R.string.confidence_not_confident); break;
+            case "CERTAIN":         col = "#4FC3F7"; label = getString(R.string.confidence_certain); break;
+            case "HIGH_CONFIDENCE": col = "#00E676"; label = getString(R.string.confidence_high); break;
+            case "CONFIDENT":       col = "#FFCC00"; label = getString(R.string.confidence_confident); break;
+            default:                col = "#FF4444"; label = getString(R.string.confidence_not_confident); break;
         }
-        TextView tvConf = new TextView(this);
-        tvConf.setText(getString(R.string.ai_confidence_prefix) + " " + label);
-        tvConf.setTextColor(col);
-        tvConf.setTextSize(11f);
-        tvConf.setTypeface(kodaBold != null ? kodaBold : Typeface.DEFAULT_BOLD);
-        GradientDrawable chip = new GradientDrawable();
-        chip.setCornerRadius(dp(10));
-        chip.setColor(0x22FFFFFF);
-        tvConf.setBackground(chip);
-        tvConf.setPadding(dp(8), dp(3), dp(8), dp(3));
-        aiDialogBody.addView(tvConf, new LinearLayout.LayoutParams(
-                android.view.ViewGroup.LayoutParams.WRAP_CONTENT, android.view.ViewGroup.LayoutParams.WRAP_CONTENT));
+        StringBuilder sb = new StringBuilder();
+        sb.append("<font color=\"").append(col).append("\"><b>CONFIDENCE: ").append(label).append("</b></font><br><br>");
+        sb.append("<font color=\"#FF6B00\"><b>WHY IT CRASHED</b></font><br>").append(esc(res.cause));
+        if (res.fix != null && !res.fix.isEmpty()) {
+            sb.append("<br><br><font color=\"#FF6B00\"><b>HOW TO FIX IT</b></font><br>").append(esc(res.fix));
+        }
+        tvPraetorReason.setText(android.text.Html.fromHtml(sb.toString(), android.text.Html.FROM_HTML_MODE_LEGACY));
+        tvPraetorReason.setTextColor(0xFFF0F0F0);
+        tvPraetorReason.setTextSize(13f);
 
-        addAiSection(getString(R.string.ai_cause), res.cause, 0xFFF0F0F0);
-        if (res.fix != null && !res.fix.isEmpty()) addAiSection(getString(R.string.ai_fix), res.fix, 0xFFAAAAAA);
-
+        btnPraetorAction.setEnabled(true);
+        btnPraetorAction.setAlpha(1f);
         if (res.autoFixAction != null && srv != null) {
-            com.google.android.material.button.MaterialButton btnFix = new com.google.android.material.button.MaterialButton(this);
-            btnFix.setText(getString(R.string.ai_try_fix));
-            btnFix.setTextColor(0xFF111111);
-            btnFix.setBackgroundTintList(android.content.res.ColorStateList.valueOf(0xFFFF6B00));
-            btnFix.setCornerRadius(dp(8));
-            btnFix.setTypeface(kodaBold != null ? kodaBold : Typeface.DEFAULT_BOLD);
-            btnFix.setAllCaps(true);
-            LinearLayout.LayoutParams fLp = new LinearLayout.LayoutParams(
-                    android.view.ViewGroup.LayoutParams.MATCH_PARENT, dp(44));
-            fLp.topMargin = dp(14);
-            btnFix.setLayoutParams(fLp);
-            btnFix.setOnClickListener(v -> confirmAutoFix());
-            aiDialogBody.addView(btnFix, fLp);
+            btnPraetorAction.setText(getString(R.string.ai_try_fix));
+            btnPraetorAction.setOnClickListener(v -> confirmAutoFix());
+        } else {
+            btnPraetorAction.setText(getString(R.string.crash_btn_dismiss));
+            btnPraetorAction.setOnClickListener(v -> { if (aiDialog != null) aiDialog.dismiss(); });
         }
-
-        com.google.android.material.button.MaterialButton btnClose = new com.google.android.material.button.MaterialButton(this);
-        btnClose.setText(getString(R.string.crash_btn_dismiss));
-        btnClose.setTextColor(0xFFBBBBBB);
-        btnClose.setBackgroundTintList(android.content.res.ColorStateList.valueOf(0xFF2A2A33));
-        btnClose.setCornerRadius(dp(8));
-        btnClose.setTypeface(kodaBold != null ? kodaBold : Typeface.DEFAULT_BOLD);
-        btnClose.setAllCaps(true);
-        LinearLayout.LayoutParams cLp = new LinearLayout.LayoutParams(
-                android.view.ViewGroup.LayoutParams.MATCH_PARENT, dp(42));
-        cLp.topMargin = dp(10);
-        btnClose.setLayoutParams(cLp);
-        btnClose.setOnClickListener(v -> { if (aiDialog != null) aiDialog.dismiss(); });
-        aiDialogBody.addView(btnClose, cLp);
     }
 
-    private void addAiSection(String title, String body, int color) {
-        if (body == null || body.isEmpty()) return;
-        TextView tvT = new TextView(this);
-        tvT.setText(title.toUpperCase());
-        tvT.setTextColor(0xFFFF6B00);
-        tvT.setTextSize(9.5f);
-        tvT.setLetterSpacing(0.08f);
-        tvT.setTypeface(kodaBold != null ? kodaBold : Typeface.DEFAULT_BOLD);
-        LinearLayout.LayoutParams tLp = new LinearLayout.LayoutParams(
-                android.view.ViewGroup.LayoutParams.WRAP_CONTENT, android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
-        tLp.topMargin = dp(12);
-        aiDialogBody.addView(tvT, tLp);
-        TextView tvB = new TextView(this);
-        tvB.setText(body);
-        tvB.setTextColor(color);
-        tvB.setTextSize(11.5f);
-        tvB.setLineSpacing(2f, 1f);
-        aiDialogBody.addView(tvB, new LinearLayout.LayoutParams(
-                android.view.ViewGroup.LayoutParams.MATCH_PARENT, android.view.ViewGroup.LayoutParams.WRAP_CONTENT));
-    }
 
     private void confirmAutoFix() {
         HapticUtil.forceVibrate(this, 50);
