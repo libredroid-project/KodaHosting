@@ -45,7 +45,10 @@ public class ClusterSlave {
     private ParcelFileDescriptor pfd;
     private PrintStream out;
     private Thread reader, hbTimer;
-    private BroadcastReceiver attachReceiver, detachReceiver;
+    private static final String ACTION_ACC_PERM = "eu.kodanetwork.mchost.CLUSTER_ACC_PERM";
+    private BroadcastReceiver attachReceiver, detachReceiver, permReceiver;
+    private Thread pollTimer;
+    private volatile boolean permPending = false;
     private volatile boolean linkUp = false;
 
     private ClusterSlave(Context ctx) {
@@ -72,8 +75,24 @@ public class ClusterSlave {
         int flags = Context.RECEIVER_EXPORTED;
         androidx.core.content.ContextCompat.registerReceiver(ctx, attachReceiver, new IntentFilter(UsbManager.ACTION_USB_ACCESSORY_ATTACHED), flags);
         androidx.core.content.ContextCompat.registerReceiver(ctx, detachReceiver, new IntentFilter(UsbManager.ACTION_USB_ACCESSORY_DETACHED), flags);
-        // maybe already plugged in
-        openLink();
+        permReceiver = new BroadcastReceiver() {
+            @Override public void onReceive(Context c, Intent i) {
+                boolean granted = i.getBooleanExtra(UsbManager.EXTRA_PERMISSION_GRANTED, false);
+                Log.i(ClusterProtocol.TAG, "slave: permission result " + granted);
+                permPending = false;
+                if (granted) openLink();
+            }
+        };
+        androidx.core.content.ContextCompat.registerReceiver(ctx, permReceiver, new IntentFilter(ACTION_ACC_PERM), flags);
+        // robust poll: attach events runtime receivers never see are covered this way
+        pollTimer = new Thread(() -> {
+            while (running.get()) {
+                openLink();
+                try { Thread.sleep(2000); } catch (InterruptedException e) { return; }
+            }
+        }, "cluster-slave-poll");
+        pollTimer.setDaemon(true);
+        pollTimer.start();
         Log.i(ClusterProtocol.TAG, "slave role started");
     }
 
@@ -83,6 +102,8 @@ public class ClusterSlave {
         closeLink();
         try { ctx.unregisterReceiver(attachReceiver); } catch (Exception ignored) {}
         try { ctx.unregisterReceiver(detachReceiver); } catch (Exception ignored) {}
+        try { ctx.unregisterReceiver(permReceiver); } catch (Exception ignored) {}
+        if (pollTimer != null) pollTimer.interrupt();
         ClusterBus.get().setSlaveRole(false);
         Log.i(ClusterProtocol.TAG, "slave role stopped");
     }
@@ -95,12 +116,24 @@ public class ClusterSlave {
         if (list == null || list.length == 0) return;
         UsbAccessory acc = list[0];
         if (!usb.hasPermission(acc)) {
-            // permission via dialog; ATTACHED broadcast re-fires the open after grant
-            PendingIntent pi = PendingIntent.getBroadcast(ctx, 0,
-                    new Intent(UsbManager.ACTION_USB_ACCESSORY_ATTACHED), PendingIntent.FLAG_IMMUTABLE);
-            try { usb.requestPermission(acc, pi); } catch (Exception e) { Log.w(ClusterProtocol.TAG, "slave: perm request failed", e); }
+            // custom action: runtime receivers never receive ACTION_USB_ACCESSORY_ATTACHED
+            // (that launch intent only goes to manifest activities), so the grant result
+            // must come back through our own broadcast action
+            if (permPending) return;
+            permPending = true;
+            Intent fire = new Intent(ACTION_ACC_PERM).setPackage(ctx.getPackageName());
+            PendingIntent pi = PendingIntent.getBroadcast(ctx, 2, fire,
+                    PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
+            try {
+                usb.requestPermission(acc, pi);
+                Log.i(ClusterProtocol.TAG, "slave: permission dialog requested");
+            } catch (Exception e) {
+                permPending = false;
+                Log.w(ClusterProtocol.TAG, "slave: perm request failed", e);
+            }
             return;
         }
+        permPending = false;
         pfd = usb.openAccessory(acc);
         if (pfd == null) {
             Log.w(ClusterProtocol.TAG, "slave: openAccessory returned null");
