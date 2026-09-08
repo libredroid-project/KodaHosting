@@ -2,7 +2,7 @@
 <resources>
     <string name="default_web_client_id" translatable="false">558083145632-fbhjb8j1k4m8r14ui97shd9dnng0rlum.apps.googleusercontent.com</string>
     <string name="app_name">KodaHosting</string>
-    <string name="settings">Tweaks</string>
+    <string name="settings">Settings</string>
     <string name="language">Language</string>
     <string name="system_default">System Def</string>
     <string name="danger_zone">DANGER ZONE</string>
@@ -68,7 +68,7 @@
     <string name="type_header">TYPE</string>
     <string name="ram_header">RAM</string>
     <string name="status_header">STATUS</string>
-    <string name="no_servers_yet">Nah Servs Yet</string>
+    <string name="no_servers_yet">No Servs yet</string>
     <string name="create_first_server_desc">Tap the button below to make ur first serv :)</string>
     <string name="new_server_btn">＋ NEW SERVER</string>
     <string name="server_singular">\u0020SERVER</string>
@@ -112,7 +112,7 @@
     <string name="tab_dashboard">Dashboard</string>
     <string name="tab_console">Console</string>
     <string name="tab_files">Files</string>
-    <string name="tab_settings">Tweaks</string>
+    <string name="tab_settings">Settings</string>
 
     <string name="players_manage_title">MANAGE PLAYERS</string>
     <string name="players_online">ONLINE</string>
@@ -152,7 +152,7 @@
     <string name="message_hint">Describe the problem in detail bro...</string>
     <string name="create_and_open_chat">CREATE &amp; OPEN CHAT</string>
 
-    <string name="praetor_update_title">App Refresh Available :)</string>
+    <string name="praetor_update_title">App update available :)</string>
     <string name="praetor_update_message">Ur KodaHosting app is outdated. Highly recommend grabbin\' the security &amp; stability update to keep goin\'.</string>
     <string name="praetor_update_button">Refresh via Game Time Store</string>
     <string name="praetor_update_skip">Skip</string>
@@ -165,7 +165,7 @@
     <string name="praetor_action_cancel">Nah</string>
 
     <string name="email_verification">EMAIL VERIFICATION</string>
-    <string name="enter_code">Pls drop the 6-digit code in</string>
+    <string name="enter_code">Pls enter the 6 digit code in</string>
     <string name="verify">VERIFY</string>
 
     <string name="praetor_hibernate_warning">WARNING: Serv hibernation incoming. DNS records gonna be deleted &amp; serv gets compressed.</string>
@@ -173,7 +173,7 @@
     <string name="praetor_hibernate_confirm">HIBERNATE</string>
     <string name="praetor_hibernate_cancel">CANCEL</string>
     <string name="praetor_reason_ram_conflict">Serv got too much RAM assigned (%1$d MB). Ur device only got %2$d MB RAM total. This is prolly gonna crash ur phone or the serv xD</string>
-    <string name="praetor_reason_console_offline">Can\'t open the console while the serv is offline. Start the serv first bro.</string>
+    <string name="praetor_reason_console_offline">Can\'t open the console while the serv is offline. Start the serv first</string>
     <string name="praetor_action_back">BACK</string>
     <string name="praetor_subtitle_account">ACCOUNT MANAGEMENT</string>
     <string name="praetor_action_change_password">Change Password</string>
@@ -184,12 +184,12 @@
     <string name="register_code_accepted">Code accepted! Makin\' account... :)</string>
     <string name="change_join_address">Change Join Address</string>
     <string name="praetor_message_change_domain">Drop a new Join Address (only letters, numbers &amp; hyphens).</string>
-    <string name="praetor_hint_change_domain">New name (e.g. myserver)</string>
+    <string name="praetor_hint_change_domain">New name (e.g. menschensmp)</string>
     <string name="praetor_subtitle_change_name">CHANGE SERVER NAME</string>
     <string name="praetor_message_change_name">Drop a new display name for ur serv.</string>
     <string name="praetor_hint_change_name">Serv Name</string>
-    <string name="praetor_change_name_success">Serv name updated! gg</string>
-    <string name="praetor_change_name_error">Name can\'t be empty bro</string>
+    <string name="praetor_change_name_success">serv name updated! gg</string>
+    <string name="praetor_change_name_error">Name can\'t be empty</string>
 
     <string name="praetor_subtitle_dns_conflict">DNS CONFLICT</string>
     <string name="praetor_message_dns_conflict">Ur join address got snatched by another serv. Pls enter a new one to keep goin\'.</string>
@@ -227,7 +227,7 @@
     <string name="modpack_search_hint">Search modpacks…</string>
     <string name="modpack_load_more">Load more</string>
     <string name="modpack_loading_page">Loadin...…</string>
-    <string name="modpack_none_found">Nah modpacks found :/</string>
+    <string name="modpack_none_found">No modpacks found :/</string>
     <string name="modpack_selected">Selected: %1$s</string>
     <string name="modpack_cancel">Nah</string>
     <string name="modpack_downloading">Downloadin\' modpack %1$s…</string>
@@ -290,7 +290,7 @@
     <string name="cdns_open_settings">%1$s Tweaks</string>
     <string name="praetor_delete_account_explanation">Ur about to permanently yeet ur KodaHosting account. No take-backs.\n\n• All ur servs, worlds &amp; plugin data = gone for good.\n• KodaHosting support can\'t restore deleted accounts, sry.\n• Any subdomains under ur account go back to the public pool.\n• Ur personal data gets purged, GDPR-compliant.</string>
 
-    
+
     <string name="dev_options">DEVELOPER OPTIONS</string>
     <string name="dev_liquid_glass">LiquidGlass Overdrive Mode</string>
     <string name="new_database">New DB</string>
@@ -322,12 +322,12 @@
     <string name="ai_chat_label">AI SERV BUILDER CHAT</string>
     <string name="ai_chat_hint">Talk to Gemini... :)</string>
     <string name="ai_approve_btn">Approve Plan &amp; Make Serv</string>
-    <string name="ai_chat_desc">Chat about ur serv idea. When u\'re happy w/ Gemini\'s plugin picks, smash Approve.</string>
+    <string name="ai_chat_desc">Chat about ur serv idea. When u\'re happy w/ Gemini\'s plugin picks, click Approve.</string>
     <string name="theme_color_label">THEME COLOR</string>
     <string name="tap_to_change">Tap to change</string>
-    <string name="btn_create_server">Make Serv</string>
+    <string name="btn_create_server">create serv</string>
     <string name="preparing_java">Preparin\' Java...</string>
-<string name="pm_heal">Heal</string><string name="pm_feed">Feed</string><string name="pm_starve">Starve</string><string name="pm_kill">Kill</string><string name="pm_wipe">Wipe</string><string name="pm_wipe_title">Wipe Player Data</string><string name="pm_wipe_desc">U sure? This\'ll kick the player &amp; wipe their inventory and stats.</string><string name="pm_whitelisted">Whitelisted</string><string name="pm_inventory">Inventory</string><string name="pm_deaths">Deaths:</string><string name="pm_blocks_mined">Blocks Mined:</string><string name="pm_hours_played">Hours Played:</string><string name="pm_mobs_killed">Mobs Killed:</string><string name="pm_damage_taken">Damage Taken:</string><string name="pm_online">(Online)</string><string name="pm_offline">(Offline)</string><string name="pm_wiped_toast">Player data wiped :)</string><string name="pm_action_toast">Done it! gg</string><string name="pm_stats">Statistics</string><string name="pm_offline_hint">Nah internet connection, actions disabled rn</string><string name="pm_empty_players">Nah players yet, join the serv! :)</string><string name="sd_files_empty">This directory is empty :/</string><string name="sd_close_loading">Close loadin\' screen</string>
+<string name="pm_heal">Heal</string><string name="pm_feed">Feed</string><string name="pm_starve">Starve</string><string name="pm_kill">Kill</string><string name="pm_wipe">Wipe</string><string name="pm_wipe_title">Wipe Player Data</string><string name="pm_wipe_desc">U sure? This\'ll kick the player &amp; wipe their inventory and stats.</string><string name="pm_whitelisted">Whitelisted</string><string name="pm_inventory">Inventory</string><string name="pm_deaths">Deaths:</string><string name="pm_blocks_mined">Blocks Mined:</string><string name="pm_hours_played">Hours Played:</string><string name="pm_mobs_killed">Mobs Killed:</string><string name="pm_damage_taken">Damage Taken:</string><string name="pm_online">(Online)</string><string name="pm_offline">(Offline)</string><string name="pm_wiped_toast">Player data wiped :)</string><string name="pm_action_toast">Done it! gg</string><string name="pm_stats">Statistics</string><string name="pm_offline_hint">Nah internet connection, actions disabled rn</string><string name="pm_empty_players">No players yet, join the serv! :)</string><string name="sd_files_empty">This directory is empty :/</string><string name="sd_close_loading">Close loadin\' screen</string>
     <string name="err_server_create_cooldown">Pls wait %1$d secs before makin\' a new serv.</string>
     <string name="err_server_limit_reached">U hit the limit of %1$d active servs.</string>
     <string name="err_wakeup_limit_reached">Serv limit reached. U can run max %1$d active servs at once. Pls hibernate another serv first.</string>

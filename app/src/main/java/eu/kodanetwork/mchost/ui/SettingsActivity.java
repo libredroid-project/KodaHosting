@@ -165,6 +165,30 @@ public class SettingsActivity extends Activity {
             });
         }
 
+        // KodaCluster roles (USB device cluster)
+        com.google.android.material.switchmaterial.SwitchMaterial swClusterMaster = findViewById(R.id.switch_dev_cluster_master);
+        if (swClusterMaster != null) {
+            swClusterMaster.setChecked(prefs.getBoolean("dev_cluster_master", false));
+            swClusterMaster.setOnCheckedChangeListener((btn, checked) -> {
+                prefs.edit().putBoolean("dev_cluster_master", checked).apply();
+                if (checked) eu.kodanetwork.mchost.cluster.ClusterMaster.get(this).start();
+                else eu.kodanetwork.mchost.cluster.ClusterMaster.get(this).stop();
+                Toast.makeText(this, checked ? "Cluster master aktiv" : "Cluster master aus", Toast.LENGTH_SHORT).show();
+            });
+            if (swClusterMaster.isChecked()) eu.kodanetwork.mchost.cluster.ClusterMaster.get(this).start();
+        }
+        com.google.android.material.switchmaterial.SwitchMaterial swClusterSlave = findViewById(R.id.switch_dev_cluster_slave);
+        if (swClusterSlave != null) {
+            swClusterSlave.setChecked(prefs.getBoolean("dev_cluster_slave", false));
+            swClusterSlave.setOnCheckedChangeListener((btn, checked) -> {
+                prefs.edit().putBoolean("dev_cluster_slave", checked).apply();
+                if (checked) eu.kodanetwork.mchost.cluster.ClusterSlave.get(this).start();
+                else eu.kodanetwork.mchost.cluster.ClusterSlave.get(this).stop();
+                Toast.makeText(this, checked ? "Cluster slave aktiv — Kabel verbinden" : "Cluster slave aus", Toast.LENGTH_SHORT).show();
+            });
+            if (swClusterSlave.isChecked()) eu.kodanetwork.mchost.cluster.ClusterSlave.get(this).start();
+        }
+
         // Redesigned server cards in DARK mode too (light mode uses them by default)
         com.google.android.material.switchmaterial.SwitchMaterial swV2Cards = findViewById(R.id.switch_dev_v2_cards);
         if (swV2Cards != null) {
