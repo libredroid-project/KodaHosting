@@ -177,6 +177,11 @@ public class SettingsActivity extends Activity {
             });
             if (swClusterMaster.isChecked()) eu.kodanetwork.mchost.cluster.ClusterMaster.get(this).start();
         }
+        com.google.android.material.button.MaterialButton btnClusterDash = findViewById(R.id.btn_cluster_dashboard);
+        if (btnClusterDash != null) {
+            btnClusterDash.setOnClickListener(v ->
+                    startActivity(new android.content.Intent(this, eu.kodanetwork.mchost.cluster.ClusterActivity.class)));
+        }
         com.google.android.material.switchmaterial.SwitchMaterial swClusterSlave = findViewById(R.id.switch_dev_cluster_slave);
         if (swClusterSlave != null) {
             swClusterSlave.setChecked(prefs.getBoolean("dev_cluster_slave", false));

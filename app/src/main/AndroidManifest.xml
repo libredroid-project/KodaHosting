@@ -49,6 +49,7 @@
             android:theme="@style/Theme.KodaNetwork.Translucent"
             />
         <activity android:name=".ui.ScreensaverActivity" />
+        <activity android:name="eu.kodanetwork.mchost.cluster.ClusterActivity" android:exported="false"/>
         <activity android:name=".ui.CrashAlertActivity" 
             android:theme="@style/Theme.Material3.DayNight.NoActionBar" />
 

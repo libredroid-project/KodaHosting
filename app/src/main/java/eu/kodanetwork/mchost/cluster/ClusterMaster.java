@@ -311,9 +311,14 @@ public class ClusterMaster {
 
     /** Send a command to a slave (found by deviceId). Returns false if not connected. */
     public boolean sendCmd(String deviceId, String action, String serverId) {
+        return sendCmd(deviceId, action, serverId, ++pingCounter);
+    }
+
+    /** Same with a caller-chosen ref (e.g. for console ack correlation). */
+    public boolean sendCmd(String deviceId, String action, String serverId, int ref) {
         for (Link l : links.values()) {
             if (l.up && deviceId != null && deviceId.equals(l.deviceId)) {
-                l.send(ClusterProtocol.cmd(++pingCounter, action, serverId));
+                l.send(ClusterProtocol.cmd(ref, action, serverId));
                 return true;
             }
         }
