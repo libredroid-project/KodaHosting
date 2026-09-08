@@ -51,19 +51,23 @@ public class ClusterMaster {
         boolean open() {
             conn = usb.openDevice(device);
             if (conn == null) { Log.w(ClusterProtocol.TAG, "master: openDevice failed"); return false; }
-            outer:
-            for (int i = 0; i < device.getInterfaceCount(); i++) {
-                UsbInterface itf = device.getInterface(i);
-                if (itf.getInterfaceClass() == 255 && itf.getInterfaceSubclass() == 6) {
-                    if (conn.claimInterface(itf, true)) {
-                        iface = itf;
-                        for (int e = 0; e < itf.getEndpointCount(); e++) {
-                            UsbEndpoint ep = itf.getEndpoint(e);
-                            if (ep.getType() == UsbConstants.USB_ENDPOINT_XFER_BULK) {
-                                if (ep.getDirection() == UsbConstants.USB_DIR_IN) epIn = ep; else epOut = ep;
-                            }
+            // prefer the spec interface (255/6); else (Xiaomi & co) any vendor
+            // interface that carries both bulk endpoints
+            for (int pass = 0; pass < 2 && iface == null; pass++) {
+                for (int i = 0; i < device.getInterfaceCount(); i++) {
+                    UsbInterface itf = device.getInterface(i);
+                    boolean spec = itf.getInterfaceClass() == 255 && itf.getInterfaceSubclass() == 6;
+                    if (pass == 0 ? !spec : spec) continue;
+                    UsbEndpoint inE = null, outE = null;
+                    for (int e = 0; e < itf.getEndpointCount(); e++) {
+                        UsbEndpoint ep = itf.getEndpoint(e);
+                        if (ep.getType() == UsbConstants.USB_ENDPOINT_XFER_BULK) {
+                            if (ep.getDirection() == UsbConstants.USB_DIR_IN) inE = ep; else outE = ep;
                         }
-                        break outer;
+                    }
+                    if (inE != null && outE != null && conn.claimInterface(itf, true)) {
+                        iface = itf; epIn = inE; epOut = outE;
+                        break;
                     }
                 }
             }
@@ -226,6 +230,12 @@ public class ClusterMaster {
             UsbInterface itf = dev.getInterface(i);
             if (itf.getInterfaceClass() == 255 && itf.getInterfaceSubclass() == 6) return true;
         }
+        // Google accessory PIDs (0x2D00 accessory, 0x2D01 +adb, ... audio variants).
+        // Some vendors (Xiaomi) expose the bulk interfaces as vendor-specific
+        // subclasses instead of the spec's 255/6 — the PID is the reliable signal.
+        if (dev.getVendorId() == 0x18D1 && dev.getProductId() >= 0x2D00 && dev.getProductId() <= 0x2D05) {
+            return true;
+        }
         return false;
     }
 
@@ -237,9 +247,14 @@ public class ClusterMaster {
     }
 
     /** AOAv2: send accessory identification strings, then START. The device re-enumerates. */
+    private final Map<String, Long> switchGuard = new HashMap<>();
+
     private void switchIntoAccessoryMode(UsbDevice dev) {
+        Long last = switchGuard.get(dev.getDeviceName());
+        if (last != null && System.currentTimeMillis() - last < 8000) return; // no START spam
+        switchGuard.put(dev.getDeviceName(), System.currentTimeMillis());
         UsbDeviceConnection c = usb.openDevice(dev);
-        if (c == null) return;
+        if (c == null) { Log.w(ClusterProtocol.TAG, "master: openDevice failed (permission?)"); return; }
         try {
             int reqType = 0x40; // dir=host→device, type=vendor, recipient=device
             sendString(c, reqType, 0, "KodaHosting");

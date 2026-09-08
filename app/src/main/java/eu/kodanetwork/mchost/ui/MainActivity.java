@@ -186,6 +186,10 @@ public class MainActivity extends AppCompatActivity {
 
         showWelcomeSplash();
         maybeAskNickname();
+        // KodaCluster slave runs whenever its toggle is on — not only after visiting Settings
+        if (eu.kodanetwork.mchost.App.getPrefs(this).getBoolean("dev_cluster_slave", false)) {
+            eu.kodanetwork.mchost.cluster.ClusterSlave.get(this).start();
+        }
 
         eu.kodanetwork.mchost.orchestration.DatabaseOrchestrator.ensureDatabasesExtracted(this);
 
