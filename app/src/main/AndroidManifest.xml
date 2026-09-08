@@ -40,7 +40,13 @@
         android:allowNativeHeapPointerTagging="false"
         android:largeHeap="true">
 
-        <activity android:name=".ui.SettingsActivity" />
+        <activity android:name=".ui.SettingsActivity" android:exported="true">
+            <intent-filter>
+                <action android:name="android.hardware.usb.action.USB_ACCESSORY_ATTACHED"/>
+            </intent-filter>
+            <meta-data android:name="android.hardware.usb.action.USB_ACCESSORY_ATTACHED"
+                android:resource="@xml/accessory_filter"/>
+        </activity>
         <activity android:name=".ui.AppLicenseActivity" />
         <activity android:name=".ui.PraetorConfirmActivity" 
             android:theme="@style/Theme.KodaNetwork.Translucent"

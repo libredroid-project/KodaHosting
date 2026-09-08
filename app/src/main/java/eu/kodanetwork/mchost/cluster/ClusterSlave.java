@@ -89,7 +89,7 @@ public class ClusterSlave {
 
     // ── link ─────────────────────────────────────────────────────────
 
-    private synchronized void openLink() {
+    public synchronized void openLink() {
         if (!running.get() || linkUp) return;
         UsbAccessory[] list = usb.getAccessoryList();
         if (list == null || list.length == 0) return;

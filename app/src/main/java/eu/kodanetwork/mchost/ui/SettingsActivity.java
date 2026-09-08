@@ -149,6 +149,11 @@ public class SettingsActivity extends Activity {
 
         if (cardAppInfo == null || cardDevOptions == null || switchLiquidGlass == null) return;
 
+        // KodaCluster: launched by the USB accessory attach dialog → open the slave link
+        if (android.hardware.usb.UsbManager.ACTION_USB_ACCESSORY_ATTACHED.equals(getIntent() != null ? getIntent().getAction() : null)) {
+            eu.kodanetwork.mchost.cluster.ClusterSlave.get(this).start();
+        }
+
         boolean isDevModeUnlocked = prefs.getBoolean("dev_mode_unlocked", false);
         if (isDevModeUnlocked) {
             cardDevOptions.setVisibility(View.VISIBLE);

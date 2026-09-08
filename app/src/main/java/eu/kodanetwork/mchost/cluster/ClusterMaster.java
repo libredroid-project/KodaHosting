@@ -177,9 +177,24 @@ public class ClusterMaster {
     public void scan() {
         if (!running.get()) return;
         for (UsbDevice dev : usb.getDeviceList().values()) {
+            Log.d(ClusterProtocol.TAG, "usb device: " + dev.getDeviceName()
+                    + " vid=" + String.format("0x%04x", dev.getVendorId())
+                    + " pid=" + String.format("0x%04x", dev.getProductId())
+                    + " cls=" + dev.getDeviceClass()
+                    + " ifaces=" + ifaceSummary(dev));
             if (links.containsKey(dev.getDeviceName())) continue;
             openOrSwitch(dev);
         }
+    }
+
+    private String ifaceSummary(UsbDevice dev) {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < dev.getInterfaceCount(); i++) {
+            if (i > 0) sb.append(',');
+            sb.append(dev.getInterface(i).getInterfaceClass())
+              .append('/').append(dev.getInterface(i).getInterfaceSubclass());
+        }
+        return sb.toString();
     }
 
     private void openOrSwitch(UsbDevice dev) {

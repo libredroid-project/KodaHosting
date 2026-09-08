@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Only KodaCluster masters (our own accessory identification) may pair this device -->
+<resources>
+    <usb-accessory manufacturer="KodaHosting" model="KodaCluster" version="1.0"/>
+</resources>
