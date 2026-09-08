@@ -69,8 +69,9 @@ public class ClusterSlave {
                 closeLink();
             }
         };
-        ctx.registerReceiver(attachReceiver, new IntentFilter(UsbManager.ACTION_USB_ACCESSORY_ATTACHED));
-        ctx.registerReceiver(detachReceiver, new IntentFilter(UsbManager.ACTION_USB_ACCESSORY_DETACHED));
+        int flags = android.content.pm.PackageManager.RECEIVER_EXPORTED;
+        android.content.ContextCompat.registerReceiver(ctx, attachReceiver, new IntentFilter(UsbManager.ACTION_USB_ACCESSORY_ATTACHED), flags);
+        android.content.ContextCompat.registerReceiver(ctx, detachReceiver, new IntentFilter(UsbManager.ACTION_USB_ACCESSORY_DETACHED), flags);
         // maybe already plugged in
         openLink();
         Log.i(ClusterProtocol.TAG, "slave role started");
