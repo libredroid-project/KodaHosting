@@ -208,7 +208,16 @@ public class ClusterMaster {
                 usb.requestPermission(dev, pi);
             }
         } else if (looksLikeAndroid(dev)) {
-            switchIntoAccessoryMode(dev);
+            // control transfers need USB permission FIRST — openDevice silently
+            // returns null otherwise and the accessory switch never happens
+            if (!usb.hasPermission(dev)) {
+                PendingIntent pi = PendingIntent.getBroadcast(ctx, 1,
+                        new Intent(ACTION_USB_PERMISSION), PendingIntent.FLAG_IMMUTABLE);
+                usb.requestPermission(dev, pi);
+                Log.i(ClusterProtocol.TAG, "master: requesting USB permission for " + dev.getDeviceName());
+            } else {
+                switchIntoAccessoryMode(dev);
+            }
         }
     }
 
