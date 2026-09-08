@@ -141,10 +141,10 @@ public class ClusterMaster {
                 }
             }
         };
-        int flags = android.content.pm.PackageManager.RECEIVER_EXPORTED;
-        android.content.ContextCompat.registerReceiver(ctx, permReceiver, new IntentFilter(ACTION_USB_PERMISSION), flags);
-        android.content.ContextCompat.registerReceiver(ctx, attachReceiver, new IntentFilter(UsbManager.ACTION_USB_DEVICE_ATTACHED), flags);
-        android.content.ContextCompat.registerReceiver(ctx, detachReceiver, new IntentFilter(UsbManager.ACTION_USB_DEVICE_DETACHED), flags);
+        int flags = Context.RECEIVER_EXPORTED;
+        androidx.core.content.ContextCompat.registerReceiver(ctx, permReceiver, new IntentFilter(ACTION_USB_PERMISSION), flags);
+        androidx.core.content.ContextCompat.registerReceiver(ctx, attachReceiver, new IntentFilter(UsbManager.ACTION_USB_DEVICE_ATTACHED), flags);
+        androidx.core.content.ContextCompat.registerReceiver(ctx, detachReceiver, new IntentFilter(UsbManager.ACTION_USB_DEVICE_DETACHED), flags);
         scan();
         Log.i(ClusterProtocol.TAG, "master role started");
         // periodic ping for RTT
